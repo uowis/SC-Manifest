@@ -205,6 +205,41 @@ body.overlay .barre-sauve span { font-size: 11px; }
 .barre-sauve .b-q { background: #2a645f; }
 .barre-sauve .b-scu { background: #4b4a1c; color: #f3eecb; margin-left: auto; }
 .barre-sauve.deja { opacity: .75; }
+/* Filtre des minerais : blocs à allumer, sur 3 colonnes */
+dialog.filtre-mineraux { width: min(560px, 94vw); }
+.dm-tete { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+.dm-tete h2 { margin: 0; }
+.dm-tete input { flex: 1; padding: 7px 10px; background: var(--rouille); color: var(--os); border: 1px solid var(--bord); border-radius: 4px; }
+.dm-tete input:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 1px var(--accent); }
+.dm-aide { margin: 0 0 10px; font-size: 13px; color: var(--os-doux); }
+.dm-grille { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.bloc { display: flex; justify-content: space-between; align-items: center; gap: 6px; padding: 7px 9px; min-height: 34px;
+  border: 1px solid var(--trait); border-radius: 4px; background: var(--rouille); color: var(--os); cursor: pointer;
+  font: inherit; font-size: 14px; text-align: left; transition: background-color .06s, border-color .06s; }
+.bloc:hover { border-color: var(--bord); background: var(--panneau-2); }
+.bloc small { font-size: 11px; color: var(--os-doux); }
+.bloc.absent { color: #56707a; }
+.bloc[aria-pressed="true"] { background: #1f6f4a; border-color: var(--accent); color: #fff; }
+.bloc[aria-pressed="true"] small { color: #d6f5e4; }
+.bloc[hidden] { display: none; }
+/* Filtre de qualité : un seul curseur à deux poignées + saisie */
+dialog.filtre-qualite { width: min(420px, 92vw); }
+.double-curseur { position: relative; height: 34px; margin: 6px 4px 4px; }
+.double-curseur .piste { position: absolute; left: 0; right: 0; top: 50%; height: 6px; margin-top: -3px; border-radius: 3px; background: var(--trait); }
+.double-curseur .plage { position: absolute; top: 0; bottom: 0; border-radius: 3px; background: var(--accent); }
+.double-curseur input[type=range] { position: absolute; left: 0; width: 100%; top: 0; height: 34px; margin: 0; background: none;
+  pointer-events: none; -webkit-appearance: none; appearance: none; }
+.double-curseur input[type=range]::-webkit-slider-runnable-track { background: none; }
+.double-curseur input[type=range]::-webkit-slider-thumb { pointer-events: auto; -webkit-appearance: none; width: 20px; height: 20px;
+  border-radius: 50%; background: #e3f4f7; border: 3px solid var(--accent); cursor: grab; margin-top: 0; }
+.double-curseur input[type=range]::-moz-range-thumb { pointer-events: auto; width: 16px; height: 16px; border-radius: 50%;
+  background: #e3f4f7; border: 3px solid var(--accent); cursor: grab; }
+.double-curseur input[type=range]:focus-visible::-webkit-slider-thumb { outline: 2px solid var(--os); outline-offset: 2px; }
+.dq-saisie { display: flex; gap: 14px; justify-content: space-between; }
+.dq-saisie label { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--os-doux); }
+.dq-saisie input { width: 90px; font-size: 16px; font-weight: 600; text-align: center; background: var(--rouille); color: var(--os); border: 1px solid var(--bord); border-radius: 4px; padding: 6px; }
+.btn[data-filtre-mineraux][aria-pressed="true"], .btn[data-filtre-qualite][aria-pressed="true"] { background: #1f6f4a; border-color: var(--accent); color: #fff; }
+.filtre-actif { display: none; }   /* l'état des filtres est affiché sur leurs boutons */
 /* Compte et corporations */
 .compte-btn { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
 .compte-btn img { width: 22px; height: 22px; border-radius: 50%; }
@@ -278,7 +313,8 @@ body.overlay .f-etat { font-size: 11px; display: -webkit-box; -webkit-line-clamp
       <div class="outils">
         <span class="filtre-actif" id="a-filtre-etat"></span>
         <button class="btn" type="button" data-regrouper aria-pressed="false">Regrouper</button>
-        <button class="btn" type="button" data-filtrer>Filtrer</button>
+        <button class="btn" type="button" data-filtre-mineraux aria-pressed="false">Minerais</button>
+        <button class="btn" type="button" data-filtre-qualite aria-pressed="false">Qualité</button>
         <button class="btn petit" type="button" data-discord>Discord</button>
         <button class="btn petit" type="button" id="b-exporter">Sauvegarder</button>
         <button class="btn petit" type="button" id="b-importer">Restaurer</button>
@@ -305,7 +341,8 @@ body.overlay .f-etat { font-size: 11px; display: -webkit-box; -webkit-line-clamp
             </label>
             <span class="filtre-actif" id="s-filtre-etat"></span>
             <button class="btn" type="button" data-regrouper aria-pressed="false">Regrouper</button>
-            <button class="btn" type="button" data-filtrer>Filtrer</button>
+            <button class="btn" type="button" data-filtre-mineraux aria-pressed="false">Minerais</button>
+        <button class="btn" type="button" data-filtre-qualite aria-pressed="false">Qualité</button>
             <button class="btn petit" type="button" data-discord>Discord</button>
           </div>
         </div>
@@ -343,7 +380,8 @@ body.overlay .f-etat { font-size: 11px; display: -webkit-box; -webkit-line-clamp
         <label class="visib">Voir <select id="c-groupe"></select></label>
         <span class="filtre-actif" id="c-filtre-etat"></span>
         <button class="btn" type="button" data-regrouper aria-pressed="false">Regrouper</button>
-        <button class="btn" type="button" data-filtrer>Filtrer</button>
+        <button class="btn" type="button" data-filtre-mineraux aria-pressed="false">Minerais</button>
+        <button class="btn" type="button" data-filtre-qualite aria-pressed="false">Qualité</button>
         <button class="btn petit" type="button" data-discord>Discord</button>
         <button class="btn petit" type="button" id="b-actualiser">Actualiser</button>
       </div>
@@ -397,22 +435,34 @@ body.overlay .f-etat { font-size: 11px; display: -webkit-box; -webkit-line-clamp
   <p class="f-etat" id="f-etat" aria-live="polite"></p>
 </form>
 
-<dialog id="d-filtre">
-  <form method="dialog" id="f-filtre">
-    <h2>Filtrer les minerais</h2>
-    <div class="liens"><button type="button" id="ff-tout">Tout cocher</button><button type="button" id="ff-rien">Tout décocher</button></div>
-    <div class="liste-mineraux" id="ff-mineraux"></div>
-    <h2 style="margin-top:18px">Qualité</h2>
-    <div class="plage">
-      <div class="valeurs"><span id="ff-min-v"></span><span id="ff-max-v"></span></div>
-      <label>Minimum <input type="range" id="ff-min" min="0" max="1000" step="1"></label>
-      <label>Maximum <input type="range" id="ff-max" min="0" max="1000" step="1"></label>
-    </div>
-    <div class="pied">
-      <button class="btn" type="button" id="ff-reset">Réinitialiser</button>
-      <button class="btn principal" type="submit" value="ok">Appliquer</button>
-    </div>
-  </form>
+<dialog id="d-mineraux" class="filtre-mineraux" aria-labelledby="dm-titre">
+  <div class="dm-tete">
+    <h2 id="dm-titre">Minerais</h2>
+    <input type="search" id="dm-recherche" placeholder="Rechercher…" aria-label="Rechercher un minerai" autocomplete="off">
+  </div>
+  <p class="dm-aide" id="dm-aide"></p>
+  <div class="dm-grille" id="dm-grille" role="group" aria-label="Minerais affichés"></div>
+  <div class="pied">
+    <button class="btn" type="button" id="dm-aucun">Tout afficher</button>
+    <button class="btn principal" type="button" id="dm-fermer">Fermer</button>
+  </div>
+</dialog>
+
+<dialog id="d-qualite" class="filtre-qualite" aria-labelledby="dq-titre">
+  <h2 id="dq-titre">Qualité</h2>
+  <div class="double-curseur">
+    <div class="piste"><div class="plage" id="dq-plage"></div></div>
+    <input type="range" id="dq-min" min="0" max="1000" step="1" aria-label="Qualité minimum">
+    <input type="range" id="dq-max" min="0" max="1000" step="1" aria-label="Qualité maximum">
+  </div>
+  <div class="dq-saisie">
+    <label>De <input type="number" id="dq-min-n" min="0" max="1000" step="1" inputmode="numeric"></label>
+    <label>à <input type="number" id="dq-max-n" min="0" max="1000" step="1" inputmode="numeric"></label>
+  </div>
+  <div class="pied">
+    <button class="btn" type="button" id="dq-reset">Toutes les qualités</button>
+    <button class="btn principal" type="button" id="dq-fermer">Fermer</button>
+  </div>
 </dialog>
 
 <dialog id="d-deplacer">
@@ -1113,6 +1163,7 @@ function renderTable(table, lignes, { station, cocher, joueur = false, t }) {
 }
 function render() {
   renderNav();
+  majBoutonsFiltre();
   renderCompteBouton();
   if (vue === "compte") renderCompte();
   if (vue === "corpo") {
@@ -1201,29 +1252,92 @@ $("d-deplacer").addEventListener("close", () => {
 });
 
 /* ---------- filtre */
-function majPlage() {
-  let a = Number($("ff-min").value), b = Number($("ff-max").value);
-  if (a > b) { if (document.activeElement === $("ff-min")) $("ff-max").value = b = a; else $("ff-min").value = a = b; }
-  $("ff-min-v").textContent = a; $("ff-max-v").textContent = b;
+/* Liste affichée dans la vue courante, avant filtre (pour compter les caisses par minerai) */
+function listeVue() {
+  if (vue === "corpo") return typeof caissesCorpo === "function" && compte ? caissesCorpo() : [];
+  if (vue === "station") return items.filter((it) => it.station === stationCourante);
+  return items;
+}
+function majBoutonsFiltre() {
+  const nm = filtre.mineraux?.size || 0, q = filtre.qmin > 0 || filtre.qmax < 1000;
+  for (const b of document.querySelectorAll("[data-filtre-mineraux]")) {
+    b.textContent = nm ? `Minerais : ${nm === 1 ? [...filtre.mineraux][0] : nm}` : "Minerais";
+    b.setAttribute("aria-pressed", String(!!nm));
+  }
+  for (const b of document.querySelectorAll("[data-filtre-qualite]")) {
+    b.textContent = q ? `Qualité : ${filtre.qmin} à ${filtre.qmax}` : "Qualité";
+    b.setAttribute("aria-pressed", String(q));
+  }
+}
+
+/* ---------- filtre des minerais : blocs à allumer */
+function renderBlocs() {
+  const compteurs = new Map();
+  for (const it of listeVue()) compteurs.set(it.nom, (compteurs.get(it.nom) || 0) + 1);
+  const noms = [...new Set([...Object.keys(valeurs), ...compteurs.keys()])].filter(Boolean).sort((a, b) => a.localeCompare(b, "fr"));
+  $("dm-grille").innerHTML = noms.map((m) => {
+    const n = compteurs.get(m) || 0, actif = !!filtre.mineraux?.has(m);
+    return `<button type="button" class="bloc ${n ? "" : "absent"}" data-mineral="${esc(m)}" aria-pressed="${actif}">${esc(m)}<small>${n || ""}</small></button>`;
+  }).join("");
+  filtrerBlocs();
+  majAideMineraux();
+}
+function majAideMineraux() {
+  const n = filtre.mineraux?.size || 0;
+  $("dm-aide").textContent = n ? `${n} minerai${n > 1 ? "s" : ""} affiché${n > 1 ? "s" : ""}. Clique sur un bloc pour l'ajouter ou le retirer.`
+    : "Tous les minerais sont affichés. Allume un ou plusieurs blocs pour ne garder qu'eux.";
+}
+function filtrerBlocs() {
+  const t = $("dm-recherche").value.trim().toLowerCase();
+  for (const b of $("dm-grille").children) b.hidden = !!t && !b.dataset.mineral.toLowerCase().includes(t);
+}
+function basculerMineral(m) {
+  const sel = new Set(filtre.mineraux || []);
+  sel.has(m) ? sel.delete(m) : sel.add(m);
+  filtre.mineraux = sel.size ? sel : null;
+  for (const b of $("dm-grille").querySelectorAll("[data-mineral]")) b.setAttribute("aria-pressed", String(!!filtre.mineraux?.has(b.dataset.mineral)));
+  majAideMineraux(); render();
 }
 document.addEventListener("click", (e) => {
-  if (!e.target.closest("[data-filtrer]")) return;
-  const noms = [...new Set([...Object.keys(valeurs), ...items.map((it) => it.nom)])].filter(Boolean).sort((a, b) => a.localeCompare(b, "fr"));
-  $("ff-mineraux").innerHTML = noms.map((m) => `<label><input type="checkbox" value="${esc(m)}" ${!filtre.mineraux || filtre.mineraux.has(m) ? "checked" : ""}>${esc(m)}</label>`).join("");
-  $("ff-min").value = filtre.qmin; $("ff-max").value = filtre.qmax; majPlage();
-  $("d-filtre").showModal();
+  if (e.target.closest("[data-filtre-mineraux]")) { $("dm-recherche").value = ""; renderBlocs(); $("d-mineraux").showModal(); $("dm-recherche").focus(); }
+  if (e.target.closest("[data-filtre-qualite]")) { afficherQualite(filtre.qmin, filtre.qmax); $("d-qualite").showModal(); }
 });
-for (const id of ["ff-min", "ff-max"]) $(id).addEventListener("input", majPlage);
-$("ff-tout").addEventListener("click", () => $("ff-mineraux").querySelectorAll("input").forEach((c) => (c.checked = true)));
-$("ff-rien").addEventListener("click", () => $("ff-mineraux").querySelectorAll("input").forEach((c) => (c.checked = false)));
-$("ff-reset").addEventListener("click", () => { $("ff-mineraux").querySelectorAll("input").forEach((c) => (c.checked = true)); $("ff-min").value = 0; $("ff-max").value = 1000; majPlage(); });
-$("d-filtre").addEventListener("close", () => {
-  if ($("d-filtre").returnValue !== "ok") return;
-  const coches = [...$("ff-mineraux").querySelectorAll("input")], choisis = coches.filter((c) => c.checked).map((c) => c.value);
-  filtre.mineraux = choisis.length === coches.length ? null : new Set(choisis);
-  filtre.qmin = Number($("ff-min").value); filtre.qmax = Number($("ff-max").value);
-  render();
+// cliquer un bloc ne retire pas le focus de la recherche (la grille ne bouge pas sous la souris)
+$("dm-grille").addEventListener("mousedown", (e) => { if (e.target.closest("[data-mineral]") && document.activeElement === $("dm-recherche")) e.preventDefault(); });
+$("dm-grille").addEventListener("click", (e) => { const b = e.target.closest("[data-mineral]"); if (b) basculerMineral(b.dataset.mineral); });
+$("dm-recherche").addEventListener("input", filtrerBlocs);
+$("dm-recherche").addEventListener("blur", () => { $("dm-recherche").value = ""; filtrerBlocs(); });   // se vide dès qu'il perd le focus
+$("dm-recherche").addEventListener("keydown", (e) => {
+  if (e.key !== "Enter") return;
+  e.preventDefault();
+  const premier = [...$("dm-grille").children].find((b) => !b.hidden);   // Entrée : allume le premier bloc trouvé
+  if (premier) { basculerMineral(premier.dataset.mineral); $("dm-recherche").value = ""; filtrerBlocs(); }
 });
+$("dm-aucun").addEventListener("click", () => { filtre.mineraux = null; renderBlocs(); render(); });
+$("dm-fermer").addEventListener("click", () => $("d-mineraux").close());
+
+/* ---------- filtre de qualité : un curseur à deux poignées + saisie */
+function afficherQualite(a, b) {
+  $("dq-min").value = a; $("dq-max").value = b;
+  $("dq-min-n").value = a; $("dq-max-n").value = b;
+  $("dq-plage").style.left = `${a / 10}%`; $("dq-plage").style.right = `${100 - b / 10}%`;
+  // la poignée du minimum passe devant quand les deux se rejoignent en haut de l'échelle
+  $("dq-min").style.zIndex = a > 900 ? 3 : 1; $("dq-max").style.zIndex = 2;
+}
+function appliquerQualite(a, b, depuis) {
+  a = Math.max(0, Math.min(1000, Math.round(Number(a) || 0)));
+  b = Math.max(0, Math.min(1000, Math.round(Number.isFinite(Number(b)) && b !== "" ? Number(b) : 1000)));
+  if (a > b) { if (depuis === "min") b = a; else a = b; }
+  filtre.qmin = a; filtre.qmax = b;
+  afficherQualite(a, b); render();
+}
+$("dq-min").addEventListener("input", () => appliquerQualite($("dq-min").value, $("dq-max").value, "min"));
+$("dq-max").addEventListener("input", () => appliquerQualite($("dq-min").value, $("dq-max").value, "max"));
+$("dq-min-n").addEventListener("change", () => appliquerQualite($("dq-min-n").value, filtre.qmax, "min"));
+$("dq-max-n").addEventListener("change", () => appliquerQualite(filtre.qmin, $("dq-max-n").value, "max"));
+for (const id of ["dq-min-n", "dq-max-n"]) $(id).addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); $(id).dispatchEvent(new Event("change")); } });
+$("dq-reset").addEventListener("click", () => appliquerQualite(0, 1000));
+$("dq-fermer").addEventListener("click", () => $("d-qualite").close());
 
 /* ---------- export texte pour Discord */
 const LIMITE_DISCORD = 1990;   // un message Discord : 2000 caractères maximum
@@ -2039,7 +2153,14 @@ new MutationObserver(() => {
    ===================================================================== */
 const CLOUD_DEFAUT = { url: "https://sqvacxforthdfpkczjnd.supabase.co", cle: "sb_publishable_v9pYEdkKPrBgUavPopFZXw_-kEHYzS3" };   // à remplir pour une version hébergée (voir le guide)
 const CLE_CLOUD = "manifeste-minerai.cloud";
-let cloud = (() => { try { return { ...CLOUD_DEFAUT, ...JSON.parse(localStorage.getItem(CLE_CLOUD) || "{}") }; } catch { return { ...CLOUD_DEFAUT }; } })();
+/* URL du projet seule : on retire un éventuel /rest/v1, /auth/v1 ou / final collé par erreur */
+const urlProjet = (u) => String(u || "").trim().replace(/\/(rest|auth)\/v1(\/.*)?$/i, "").replace(/\/+$/, "");
+let cloud = (() => {
+  let c;
+  try { c = { ...CLOUD_DEFAUT, ...JSON.parse(localStorage.getItem(CLE_CLOUD) || "{}") }; } catch { c = { ...CLOUD_DEFAUT }; }
+  if (!c.url) c = { ...CLOUD_DEFAUT };   // configuration enregistrée vide : on reprend celle de la page
+  return { url: urlProjet(c.url), cle: String(c.cle || "").trim() };
+})();
 let sb = null, compte = null, sessionId = null, syncEnCours = false, minuterieSync = null, etatCloud = "";
 let partage = { caisses: [], maj: 0 };
 let apprisPartages = { chiffres: [], signatures: [], qualites: {} };
@@ -2069,12 +2190,28 @@ async function initCloud() {
   if (!cloud.url || !cloud.cle) return;
   try {
     if (!window.supabase) await chargerScript("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js");
-    sb = window.supabase.createClient(cloud.url, cloud.cle, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
+    sb = window.supabase.createClient(cloud.url, cloud.cle, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: "pkce" } });
     sb.auth.onAuthStateChange((_evt, s) => setTimeout(() => surSession(s), 0));   // jamais d'appel Supabase dans le rappel lui-même
     surSession((await sb.auth.getSession()).data.session);
   } catch (e) {
     etat("Service en ligne injoignable", "erreur"); etatCloud = messageErreur(e);
   }
+}
+
+/* Connexion depuis n'importe quelle page : on mémorise la page en cours, puis Discord
+   ramène à l'adresse racine (la seule à autoriser dans Supabase) et on rouvre cette page. */
+const CLE_RETOUR = "manifeste-minerai.retour";
+async function seConnecter() {
+  try { localStorage.setItem(CLE_RETOUR, JSON.stringify({ hash: location.hash || "", t: Date.now() })); } catch {}
+  await sb.auth.signInWithOAuth({ provider: "discord", options: { redirectTo: location.origin + location.pathname } });
+}
+function pageApresConnexion() {
+  // retire le ?code=… laissé par Supabase dans la barre d'adresse
+  if (/[?&](code|error)=/.test(location.search)) history.replaceState(null, "", location.pathname + location.hash);
+  let r = null;
+  try { r = JSON.parse(localStorage.getItem(CLE_RETOUR) || "null"); localStorage.removeItem(CLE_RETOUR); } catch {}
+  if (r && Date.now() - r.t < 15 * 60 * 1000) { if (r.hash && r.hash !== location.hash) location.hash = r.hash; return true; }
+  return false;
 }
 
 async function surSession(s) {
@@ -2091,7 +2228,8 @@ async function surSession(s) {
   // Après une connexion Discord, arriver systématiquement sur la page Compte.
   // Le callback OAuth revient à la racine du site, puis l'application positionne
   // son propre routage #/compte.
-  if (!location.hash || location.hash === "#/") location.hash = "#/compte";
+  // retour sur la page d'où l'on s'est connecté ; à défaut, la page Compte
+  if (!pageApresConnexion() && (!location.hash || location.hash === "#/")) location.hash = "#/compte";
   render();
   try {
     await chargerCompte();
@@ -2370,7 +2508,7 @@ function renderCompte() {
 
 async function action(nom, d, form) {
   try {
-    if (nom === "connexion") { await sb.auth.signInWithOAuth({ provider: "discord", options: { redirectTo: location.origin + location.pathname + (location.hash || "") + (location.hash || "") } }); return; }
+    if (nom === "connexion") { await seConnecter(); return; }
     if (nom === "deconnexion") { await sb.auth.signOut(); surSession(null); return; }
     if (nom === "config") { localStorage.removeItem(CLE_CLOUD); cloud = { ...CLOUD_DEFAUT }; sb = null; render(); return; }
     if (nom === "sync") { await synchroniser(); await chargerPartage(); toast(etatCloud || "Synchronisé."); return; }
@@ -2430,7 +2568,7 @@ $("cp").addEventListener("submit", (e) => {
   e.preventDefault();
   const f = e.target;
   if (f.dataset.form === "config") {
-    cloud = { url: f.url.value.trim().replace(/\/+$/, ""), cle: f.cle.value.trim() };
+    cloud = { url: urlProjet(f.url.value), cle: f.cle.value.trim() };
     localStorage.setItem(CLE_CLOUD, JSON.stringify(cloud));
     initCloud().then(render);
     return;
