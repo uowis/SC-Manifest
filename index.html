@@ -2486,10 +2486,18 @@ function renderChoixGroupe() {
 }
 function caissesCorpo() {
   const g = $("c-groupe").value || "tous";
+  const mesCaisses = items.map((it) => ({ ...it, joueur: compte.pseudo, groupe: "moi" }));
   let l = partage.caisses;
-  if (g.startsWith("tag:")) l = l.filter((it) => (compte.membreDe[it.user_id] || []).includes(g.slice(4)));
+  if (g.startsWith("tag:")) {
+    const tag = g.slice(4);
+    // Une sélection de corporation inclut aussi les propres caisses du joueur
+    // lorsqu'il appartient à cette corporation.
+    const moiDansLaCorpo = (compte?.corpos || []).some((c) => c.tag === tag);
+    l = l.filter((it) => (compte.membreDe[it.user_id] || []).includes(tag));
+    if (moiDansLaCorpo) l = l.concat(mesCaisses);
+  }
   if (g === "allies") l = l.filter((it) => it.groupe === "Allié");
-  if (g === "tous+moi") l = l.concat(items.map((it) => ({ ...it, joueur: compte.pseudo, groupe: "moi" })));
+  if (g === "tous+moi") l = l.concat(mesCaisses);
   return l;
 }
 $("c-groupe").addEventListener("change", render);
