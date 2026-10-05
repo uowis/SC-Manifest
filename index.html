@@ -1133,25 +1133,27 @@ function visibiliteCellule(v) { return `<span class="visib-cell">${esc(libelleVi
 function ligneItem(it, { station, cocher, joueur, enfant = false, visibilite = false }) {
   return `<tr class="${enfant ? "enfant" : ""} ${it.id === dernierAjout ? "nouveau" : ""} ${selection.has(it.id) ? "selectionne" : ""}">` +
     (cocher ? `<td class="coche"><input type="checkbox" data-id="${it.id}" aria-label="Sélectionner ${esc(it.nom)} ${it.qualite ?? ""}" ${selection.has(it.id) ? "checked" : ""}></td>` : "") +
-    (joueur ? `<td class="joueur">${esc(it.joueur)}${it.groupe ? `<small>${esc(it.groupe)}</small>` : ""}</td>` : "") +
     `<td class="nom-cell">${esc(it.nom)}</td>` +
     `<td class="num"><span class="q">${it.qualite ?? "?"}</span>${it.bande ? `<span class="bande">B${it.bande}</span>` : ""}</td>` +
     `<td class="num"><span class="scu">${it.quantite_scu != null ? fmtScu(it.quantite_scu) : "?"}</span> SCU</td>` +
     (station ? `<td><a href="#/station/${encodeURIComponent(it.station)}">${esc(it.station)}</a></td>` : "") +
     (visibilite ? `<td>${visibiliteCellule(it.visibilite || "corporation")}</td>` : "") +
-    `<td class="date" title="${esc(it.heure || "")}">${ilYa(it.ts)}</td></tr>`;
+    `<td class="date" title="${esc(it.heure || "")}">${ilYa(it.ts)}</td>` +
+    (joueur ? `<td class="joueur">${esc(it.joueur)}${it.groupe ? `<small>${esc(it.groupe)}</small>` : ""}</td>` : "") +
+    `</tr>`;
 }
 function ligneGroupe(g, { station, cocher, joueur, visibilite = false }) {
   const ids = g.items.map((it) => it.id), nbSel = ids.filter((id) => selection.has(id)).length, ouvert = ouverts.has(g.cle);
   return `<tr class="groupe ${nbSel ? "selectionne" : ""}">` +
     (cocher ? `<td class="coche"><input type="checkbox" data-groupe="${esc(g.cle)}" aria-label="Sélectionner les ${g.items.length} ${esc(g.nom)} ${g.qualite ?? ""}" ${nbSel === ids.length ? "checked" : ""}></td>` : "") +
-    (joueur ? `<td class="joueur">${esc(g.joueur)}</td>` : "") +
     `<td class="nom-cell"><button type="button" class="ouvrir" data-ouvrir="${esc(g.cle)}" aria-expanded="${ouvert}"><span class="chevron" aria-hidden="true">▸</span>${esc(g.nom)} <span class="compte">${g.items.length} caisses</span></button></td>` +
     `<td class="num"><span class="q">${g.qualite ?? "?"}</span>${g.bande ? `<span class="bande">B${g.bande}</span>` : ""}</td>` +
     `<td class="num"><span class="scu">${fmtScu(g.quantite_scu)}</span> SCU</td>` +
     (station ? `<td>${g.stations.size === 1 ? `<a href="#/station/${encodeURIComponent(g.station)}">${esc(g.station)}</a>` : esc(g.station)}</td>` : "") +
     (visibilite ? `<td>${visibiliteCellule(g.visibilite)}</td>` : "") +
-    `<td class="date">${ilYa(g.ts)}</td></tr>` +
+    `<td class="date">${ilYa(g.ts)}</td>` +
+    (joueur ? `<td class="joueur">${esc(g.joueur)}</td>` : "") +
+    `</tr>` +
     (ouvert ? g.items.map((it) => ligneItem(it, { station, cocher, joueur, visibilite, enfant: true })).join("") : "");
 }
 function renderTable(table, lignes, { station, cocher, joueur = false, visibilite = false, t }) {
