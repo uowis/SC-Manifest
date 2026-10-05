@@ -2009,7 +2009,10 @@ new MutationObserver(() => {
    son inventaire, corporations, alliances et visibilité par station.
    Chacun ne modifie que SES caisses : la base l'impose (règles d'accès).
    ===================================================================== */
-const CLOUD_DEFAUT = { url: "https://sqvacxforthdfpkczjnd.supabase.co/rest/v1/", cle: "sb_publishable_v9pYEdkKPrBgUavPopFZXw_-kEHYzS3" };   // à remplir pour une version hébergée (voir le guide)
+const CLOUD_DEFAUT = {
+  url: "https://sqvacxforthdfpkczjnd.supabase.co",
+  cle: "sb_publishable_v9pYEdkKPrBgUavPopFZXw_-kEHYzS3"
+};
 const CLE_CLOUD = "manifeste-minerai.cloud";
 let cloud = (() => { try { return { ...CLOUD_DEFAUT, ...JSON.parse(localStorage.getItem(CLE_CLOUD) || "{}") }; } catch { return { ...CLOUD_DEFAUT }; } })();
 let sb = null, compte = null, sessionId = null, syncEnCours = false, minuterieSync = null, etatCloud = "";
