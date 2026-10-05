@@ -208,6 +208,17 @@ body.overlay .barre-sauve span { font-size: 11px; }
 /* Compte et corporations */
 .compte-btn { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
 .compte-btn img { width: 22px; height: 22px; border-radius: 50%; }
+.lien-deconnexion {
+  border: 0;
+  background: none;
+  padding: 0 4px;
+  color: var(--os-doux);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.lien-deconnexion:hover { color: var(--os); }
 .visib { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--os-doux); }
 .visib select { padding: 5px 8px; }
 .compte-grille { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; align-items: start; }
@@ -257,6 +268,7 @@ body.overlay .f-etat { font-size: 11px; display: -webkit-box; -webkit-line-clamp
   <label class="nav"><span class="sr">Lieu</span><select id="nav"></select></label>
   <span class="etat" id="etat">Données enregistrées dans ce navigateur</span>
   <a class="btn petit compte-btn" id="b-compte" href="#/compte"><img id="b-compte-avatar" alt="" hidden><span id="b-compte-txt">Compte</span></a>
+  <button class="lien-deconnexion" id="b-deconnexion" type="button" hidden>Déconnexion</button>
 </header>
 
 <main>
@@ -2009,10 +2021,7 @@ new MutationObserver(() => {
    son inventaire, corporations, alliances et visibilité par station.
    Chacun ne modifie que SES caisses : la base l'impose (règles d'accès).
    ===================================================================== */
-const CLOUD_DEFAUT = {
-  url: "https://sqvacxforthdfpkczjnd.supabase.co",
-  cle: "sb_publishable_v9pYEdkKPrBgUavPopFZXw_-kEHYzS3"
-};
+const CLOUD_DEFAUT = { url: "https://sqvacxforthdfpkczjnd.supabase.co", cle: "sb_publishable_v9pYEdkKPrBgUavPopFZXw_-kEHYzS3" };   // à remplir pour une version hébergée (voir le guide)
 const CLE_CLOUD = "manifeste-minerai.cloud";
 let cloud = (() => { try { return { ...CLOUD_DEFAUT, ...JSON.parse(localStorage.getItem(CLE_CLOUD) || "{}") }; } catch { return { ...CLOUD_DEFAUT }; } })();
 let sb = null, compte = null, sessionId = null, syncEnCours = false, minuterieSync = null, etatCloud = "";
@@ -2215,6 +2224,7 @@ function renderCompteBouton() {
   $("b-compte-txt").textContent = compte ? compte.pseudo : (cloud.url ? "Se connecter" : "Compte");
   $("b-compte-avatar").hidden = !compte?.avatar;
   if (compte?.avatar) $("b-compte-avatar").src = compte.avatar;
+  $("b-deconnexion").hidden = !compte;
 }
 
 function renderCompte() {
@@ -2285,7 +2295,7 @@ function renderCompte() {
 
 async function action(nom, d, form) {
   try {
-    if (nom === "connexion") { await sb.auth.signInWithOAuth({ provider: "discord", options: { redirectTo: location.origin + location.pathname + "#/compte" } }); return; }
+    if (nom === "connexion") { await sb.auth.signInWithOAuth({ provider: "discord", options: { redirectTo: location.origin + location.pathname } }); return; }
     if (nom === "deconnexion") { await sb.auth.signOut(); surSession(null); return; }
     if (nom === "config") { localStorage.removeItem(CLE_CLOUD); cloud = { ...CLOUD_DEFAUT }; sb = null; render(); return; }
     if (nom === "sync") { await synchroniser(); await chargerPartage(); toast(etatCloud || "Synchronisé."); return; }
@@ -2303,6 +2313,7 @@ async function action(nom, d, form) {
   render();
 }
 $("cp").addEventListener("click", (e) => { const b = e.target.closest("[data-action]"); if (b) action(b.dataset.action, b.dataset); });
+$("b-deconnexion").addEventListener("click", () => action("deconnexion", {}));
 $("cp").addEventListener("submit", (e) => {
   e.preventDefault();
   const f = e.target;
