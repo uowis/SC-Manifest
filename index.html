@@ -361,7 +361,8 @@ body.overlay .f-etat { font-size: 11px; display: -webkit-box; -webkit-line-clamp
           <div style="display:flex;gap:8px;flex-wrap:wrap">
             <button class="btn petit" type="button" id="b-recadrer">Recadrer le panneau</button>
             <button class="btn petit" type="button" id="b-grille">Cadrer la grille</button>
-            <button class="btn petit" type="button" id="b-pagination">Choisir la zone pagination / ascenseur</button>
+            <button class="btn petit" type="button" id="b-ascenseur">Cadrer l’ascenseur</button>
+            <button class="btn petit" type="button" id="b-pagination">Cadrer la pagination</button>
             <button class="btn petit" type="button" id="b-capture" disabled>Télécharger la capture</button>
           </div>
           <div id="emplacement-fiche"></div>
@@ -958,6 +959,7 @@ function chargerBase() {
   return { items: [], chiffres: [], signatures: [], zone: null, grille: null, pagination: null, regroupe: false, qualites: {} };
 }
 let base = chargerBase();
+if (!("ascenseur" in base)) base.ascenseur = null;
 function sauver() {
   try { localStorage.setItem(CLE, JSON.stringify(base)); }
   catch { toast("Le stockage du navigateur est plein : fais une sauvegarde puis supprime d'anciens minerais."); }
@@ -1953,8 +1955,8 @@ $("b-scanner").addEventListener("click", () => scanner());   // sans argument : 
 
 /* ---------- mode automatique : surveillance du panneau, de la sélection et de la page */
 let surveillance = null;
-const suivi = { panneau: null, sel: null, grille: null, ascenseur: null, aLire: false, stable: 0, cle: null, pages: [], registre: new Map() };
-function reinitialiserSurveillance() { Object.assign(suivi, { panneau: null, sel: null, grille: null, ascenseur: null, aLire: false, stable: 0, attente: 0, cle: null }); }
+const suivi = { panneau: null, sel: null, grille: null, ascenseur: null, pagination: null, aLire: false, stable: 0, cle: null, pages: [], registre: new Map() };
+function reinitialiserSurveillance() { Object.assign(suivi, { panneau: null, sel: null, grille: null, ascenseur: null, pagination: null, aLire: false, stable: 0, attente: 0, cle: null }); }
 
 /* Détection de l'ascenseur vert à droite de la grille. Sa position verticale
    permet de distinguer deux pages dont la grille est visuellement identique. */
@@ -2010,16 +2012,17 @@ function ecartPanneau(a, b) {
 }
 
 /* Emplacement d'une caisse : page de l'inventaire (reconnue à l'aspect de la grille) + case. */
-function cleCaisse(sel, grille, ascenseur) {
+function cleCaisse(sel, grille, ascenseur, pagination) {
   if (!sel || !grille) return null;
   let page = -1;
-  if (ascenseur) page = suivi.pages.findIndex((p) => p.ascenseur && ecartAscenseur(p.ascenseur, ascenseur) < 8);
-  if (page < 0) page = suivi.pages.findIndex((p) => OCR.ecart(p.grille || p, grille) <= 20);
+  if (pagination) page = suivi.pages.findIndex((p) => p.pagination && OCR.ecart(p.pagination, pagination) <= 20);
+  if (page < 0) page = suivi.pages.findIndex((p) => p.grille && OCR.ecart(p.grille, grille) <= 20);
   if (page < 0) {
-    suivi.pages.push({ grille, ascenseur: ascenseur || null });
+    suivi.pages.push({ grille, pagination: pagination || null, ascenseur: ascenseur || null });
     page = suivi.pages.length - 1;
-  } else if (ascenseur && !suivi.pages[page].ascenseur) {
-    suivi.pages[page].ascenseur = ascenseur;
+  } else {
+    if (pagination && !suivi.pages[page].pagination) suivi.pages[page].pagination = pagination;
+    if (ascenseur && !suivi.pages[page].ascenseur) suivi.pages[page].ascenseur = ascenseur;
   }
   return `${page}:${Math.round(sel[0] / Math.max(1, sel[2]))}:${Math.round(sel[1] / Math.max(1, sel[3]))}`;
 }
@@ -2040,32 +2043,29 @@ async function surveiller() {
   const src = await imageCourante(), [W, H] = tailleSource(src);
   if (!W) return;
   const panneau = empreintePanneau(imageZone(src, W, H, base.zone));
-  let sel = null, grille = null, ascenseur = null;
+  let sel = null, grille = null, ascenseur = null, pagination = null;
   if (base.grille) {
     const g = imageZone(src, W, H, base.grille);
     sel = OCR.trouverSelection(g);
     grille = OCR.empreinte(g, 24, 32);
-    ascenseur = empreinteAscenseur(g);
-    if (base.pagination) {
-      const pg = imageZone(src, W, H, base.pagination);
-      const a2 = empreinteAscenseur(pg);
-      if (a2) ascenseur = a2;
-    }
   }
+  if (base.ascenseur) ascenseur = empreinteAscenseur(imageZone(src, W, H, base.ascenseur));
+  if (base.pagination) pagination = OCR.empreinte(imageZone(src, W, H, base.pagination), 24, 12);
   const chPanneau = !suivi.panneau || ecartPanneau(panneau, suivi.panneau) > 10;
   const chSel = !!(sel && suivi.sel && (Math.abs(sel[0] - suivi.sel[0]) > sel[2] * 0.4 || Math.abs(sel[1] - suivi.sel[1]) > sel[3] * 0.4));
   const chAscenseur = !!(ascenseur && suivi.ascenseur && ecartAscenseur(ascenseur, suivi.ascenseur) >= 8);
-  const chPage = !!(grille && suivi.grille && !chSel && (OCR.ecart(grille, suivi.grille) > 20 || chAscenseur));
-  suivi.panneau = panneau; suivi.sel = sel || suivi.sel; suivi.grille = grille; suivi.ascenseur = ascenseur || suivi.ascenseur;
-  if (chPanneau || chSel || chPage) {
+  const chPagination = !!(pagination && suivi.pagination && OCR.ecart(pagination, suivi.pagination) > 20);
+  const chPage = !!(grille && suivi.grille && !chSel && (OCR.ecart(grille, suivi.grille) > 20 || chPagination));
+  suivi.panneau = panneau; suivi.sel = sel || suivi.sel; suivi.grille = grille; suivi.ascenseur = ascenseur || suivi.ascenseur; suivi.pagination = pagination || suivi.pagination;
+  if (chPanneau || chSel || chPage || chAscenseur) {
     if (!suivi.aLire) suivi.attente = 0;
     suivi.aLire = true; suivi.stable = 0; pictoSauve(null);
-    if (++suivi.attente < 6) return;     // l'affichage bouge encore ; au bout de 2,4 s on lit quand même
+    if (++suivi.attente < 6) return;
   }
   // l'affichage doit être stable deux fois de suite avant la lecture (animations du jeu)
   if (suivi.aLire && (++suivi.stable >= 2 || suivi.attente >= 6)) {
     suivi.aLire = false; suivi.attente = 0;
-    suivi.cle = cleCaisse(sel, grille, ascenseur);
+    suivi.cle = cleCaisse(sel, grille, ascenseur, pagination);
     if (dejaEnregistree(suivi.cle)) {
       const it = items.find((i) => i.id === suivi.registre.get(suivi.cle));
       $("scan-etat").className = "";
@@ -2123,8 +2123,9 @@ document.addEventListener("keydown", touches);
 /* ---------- recadrage de la zone lue */
 const CADRAGES = {
   zone: { titre: "Panneau d'information", texte: "Trace un rectangle autour du panneau d'information de l'objet sélectionné (nom, qualité, quantité). Garde une petite marge autour des badges." },
-  grille: { titre: "Grille de l'inventaire", texte: "Trace un rectangle autour de la grille des caisses. L'ascenseur vert à droite doit être inclus : il sert à distinguer les pages même lorsque leur contenu se ressemble." },
-  pagination: { titre: "Choisir la pagination / l'ascenseur", texte: "Sur l'image du jeu ci-dessous, clique puis fais glisser autour de l'ascenseur ou de la pagination située à droite de la grille. La zone doit être suffisamment petite pour ne contenir que cet élément." },
+  grille: { titre: "Grille de l'inventaire", texte: "Trace un rectangle autour de la grille des caisses." },
+  ascenseur: { titre: "Ascenseur de l'inventaire", texte: "Trace un rectangle autour de l'ascenseur vertical. Cette zone sert uniquement à suivre le défilement dans la grille ; elle ne sert pas à identifier la pagination." },
+  pagination: { titre: "Pagination de l'inventaire", texte: "Trace un rectangle autour des boutons ou numéros de page. Cette zone sert à identifier le changement de page ; elle est indépendante de l'ascenseur." },
 };
 async function recadrer(cle = "zone") {
   if (!fluxTrack) return;
@@ -2183,6 +2184,7 @@ async function recadrer(cle = "zone") {
 }
 $("b-recadrer").addEventListener("click", () => recadrer("zone"));
 $("b-grille").addEventListener("click", () => recadrer("grille"));
+$("b-ascenseur").addEventListener("click", () => recadrer("ascenseur"));
 $("b-pagination").addEventListener("click", () => recadrer("pagination"));
 
 /* ---------- session : Ajouter / Terminer */
