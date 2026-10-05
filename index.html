@@ -256,6 +256,8 @@ dialog.filtre-qualite { width: min(420px, 92vw); }
 .lien-deconnexion:hover { color: var(--os); }
 .visib { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--os-doux); }
 .visib select { padding: 5px 8px; }
+.visib-cell { color: var(--os-doux); }
+.visib-cell::before { content: "•"; margin-right: 6px; color: var(--accent); }
 .compte-grille { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; align-items: start; }
 .compte-grille .carte { gap: 12px; }
 .compte-grille form { display: grid; gap: 8px; }
@@ -332,13 +334,6 @@ body.overlay .f-etat { font-size: 11px; display: -webkit-box; -webkit-line-clamp
         <div class="entete">
           <div><h1 id="s-titre"></h1><p class="sous-titre" id="s-compte"></p></div>
           <div class="outils">
-            <label class="visib" id="s-visib-zone" hidden>Visible par
-              <select id="s-visib">
-                <option value="prive">moi seul</option>
-                <option value="corporation">ma corporation</option>
-                <option value="allies">corporation et alliés</option>
-              </select>
-            </label>
             <span class="filtre-actif" id="s-filtre-etat"></span>
             <button class="btn" type="button" data-regrouper aria-pressed="false">Regrouper</button>
             <button class="btn" type="button" data-filtre-mineraux aria-pressed="false">Minerais</button>
@@ -349,6 +344,7 @@ body.overlay .f-etat { font-size: 11px; display: -webkit-box; -webkit-line-clamp
         <div class="actions-groupe">
           <span id="s-selection">Aucun minerai sélectionné</span>
           <button class="btn" type="button" id="b-deplacer" disabled>Déplacer</button>
+          <button class="btn" type="button" id="b-visibilite" disabled>Visibilité</button>
           <button class="btn danger" type="button" id="b-supprimer" disabled>Supprimer</button>
         </div>
         <div class="tableau-wrap"><table id="t-station"></table></div>
@@ -463,6 +459,22 @@ body.overlay .f-etat { font-size: 11px; display: -webkit-box; -webkit-line-clamp
     <button class="btn" type="button" id="dq-reset">Toutes les qualités</button>
     <button class="btn principal" type="button" id="dq-fermer">Fermer</button>
   </div>
+</dialog>
+
+<dialog id="d-visibilite">
+  <form method="dialog">
+    <h2>Modifier la visibilité</h2>
+    <p id="dv-info"></p>
+    <select id="dv-visibilite" style="width:100%">
+      <option value="prive">moi seul</option>
+      <option value="corporation">ma corporation</option>
+      <option value="allies">corporation et alliés</option>
+    </select>
+    <div class="pied">
+      <button class="btn" type="submit" value="annuler">Annuler</button>
+      <button class="btn principal" type="submit" value="ok">Appliquer</button>
+    </div>
+  </form>
 </dialog>
 
 <dialog id="d-deplacer">
@@ -1082,7 +1094,7 @@ $("f-nouvelle").addEventListener("submit", (e) => {
 const COLONNES = [
   { col: "joueur", titre: "Joueur", seulementJoueur: true },
   { col: "nom", titre: "Minerai" }, { col: "qualite", titre: "Qualité", num: true },
-  { col: "quantite_scu", titre: "Quantité", num: true }, { col: "station", titre: "Station" }, { col: "ts", titre: "Date" },
+  { col: "quantite_scu", titre: "Quantité", num: true }, { col: "station", titre: "Station" }, { col: "visibilite", titre: "Visibilité" }, { col: "ts", titre: "Date" },
 ];
 const filtrer = (l) => l.filter((it) => (!filtre.mineraux || filtre.mineraux.has(it.nom)) && (it.qualite ?? 0) >= filtre.qmin && (it.qualite ?? 0) <= filtre.qmax);
 function trier(liste, t) {
@@ -1115,7 +1127,9 @@ function grouper(lignes) {
   }
   return [...m.values()];
 }
-function ligneItem(it, { station, cocher, joueur, enfant = false }) {
+function libelleVisibilite(v) { return v === "multiple" ? "plusieurs" : (VISIBILITES[v] || VISIBILITES.corporation); }
+function visibiliteCellule(v) { return `<span class="visib-cell">${esc(libelleVisibilite(v))}</span>`; }
+function ligneItem(it, { station, cocher, joueur, enfant = false, visibilite = false }) {
   return `<tr class="${enfant ? "enfant" : ""} ${it.id === dernierAjout ? "nouveau" : ""} ${selection.has(it.id) ? "selectionne" : ""}">` +
     (cocher ? `<td class="coche"><input type="checkbox" data-id="${it.id}" aria-label="Sélectionner ${esc(it.nom)} ${it.qualite ?? ""}" ${selection.has(it.id) ? "checked" : ""}></td>` : "") +
     (joueur ? `<td class="joueur">${esc(it.joueur)}${it.groupe ? `<small>${esc(it.groupe)}</small>` : ""}</td>` : "") +
@@ -1123,9 +1137,10 @@ function ligneItem(it, { station, cocher, joueur, enfant = false }) {
     `<td class="num"><span class="q">${it.qualite ?? "?"}</span>${it.bande ? `<span class="bande">B${it.bande}</span>` : ""}</td>` +
     `<td class="num"><span class="scu">${it.quantite_scu != null ? fmtScu(it.quantite_scu) : "?"}</span> SCU</td>` +
     (station ? `<td><a href="#/station/${encodeURIComponent(it.station)}">${esc(it.station)}</a></td>` : "") +
+    (visibilite ? `<td>${visibiliteCellule(it.visibilite || "corporation")}</td>` : "") +
     `<td class="date" title="${esc(it.heure || "")}">${ilYa(it.ts)}</td></tr>`;
 }
-function ligneGroupe(g, { station, cocher, joueur }) {
+function ligneGroupe(g, { station, cocher, joueur, visibilite = false }) {
   const ids = g.items.map((it) => it.id), nbSel = ids.filter((id) => selection.has(id)).length, ouvert = ouverts.has(g.cle);
   return `<tr class="groupe ${nbSel ? "selectionne" : ""}">` +
     (cocher ? `<td class="coche"><input type="checkbox" data-groupe="${esc(g.cle)}" aria-label="Sélectionner les ${g.items.length} ${esc(g.nom)} ${g.qualite ?? ""}" ${nbSel === ids.length ? "checked" : ""}></td>` : "") +
@@ -1134,19 +1149,26 @@ function ligneGroupe(g, { station, cocher, joueur }) {
     `<td class="num"><span class="q">${g.qualite ?? "?"}</span>${g.bande ? `<span class="bande">B${g.bande}</span>` : ""}</td>` +
     `<td class="num"><span class="scu">${fmtScu(g.quantite_scu)}</span> SCU</td>` +
     (station ? `<td>${g.stations.size === 1 ? `<a href="#/station/${encodeURIComponent(g.station)}">${esc(g.station)}</a>` : esc(g.station)}</td>` : "") +
+    (visibilite ? `<td>${visibiliteCellule(g.visibilite)}</td>` : "") +
     `<td class="date">${ilYa(g.ts)}</td></tr>` +
-    (ouvert ? g.items.map((it) => ligneItem(it, { station, cocher, joueur, enfant: true })).join("") : "");
+    (ouvert ? g.items.map((it) => ligneItem(it, { station, cocher, joueur, visibilite, enfant: true })).join("") : "");
 }
-function renderTable(table, lignes, { station, cocher, joueur = false, t }) {
-  const cols = COLONNES.filter((c) => (station || c.col !== "station") && (joueur || !c.seulementJoueur));
+function renderTable(table, lignes, { station, cocher, joueur = false, visibilite = false, t }) {
+  const cols = COLONNES.filter((c) => (station || c.col !== "station") && (visibilite || c.col !== "visibilite") && (joueur || !c.seulementJoueur));
   const visibles = lignes.map((it) => it.id), nbSel = visibles.filter((id) => selection.has(id)).length;
   groupesRendus = new Map();
   let corps;
   if (regroupe) {
     const groupes = trier(grouper(lignes), t);
-    for (const g of groupes) groupesRendus.set(g.cle, g.items.map((it) => it.id));
-    corps = groupes.map((g) => g.items.length > 1 ? ligneGroupe(g, { station, cocher, joueur }) : ligneItem(g.items[0], { station, cocher, joueur })).join("");
-  } else corps = lignes.map((it) => ligneItem(it, { station, cocher, joueur })).join("");
+    for (const g of groupes) {
+      if (visibilite) {
+        const vs = new Set(g.items.map((it) => it.visibilite || "corporation"));
+        g.visibilite = vs.size === 1 ? [...vs][0] : "multiple";
+      }
+      groupesRendus.set(g.cle, g.items.map((it) => it.id));
+    }
+    corps = groupes.map((g) => g.items.length > 1 ? ligneGroupe(g, { station, cocher, joueur, visibilite }) : ligneItem(g.items[0], { station, cocher, joueur, visibilite })).join("");
+  } else corps = lignes.map((it) => ligneItem(it, { station, cocher, joueur, visibilite })).join("");
   table.innerHTML = `<thead><tr>` +
     (cocher ? `<th class="coche"><input type="checkbox" id="tout" aria-label="Tout sélectionner" ${nbSel && nbSel === visibles.length ? "checked" : ""}></th>` : "") +
     cols.map((c) => {
@@ -1176,7 +1198,7 @@ function render() {
     $("t-corpo").hidden = !lignes.length; $("c-vide").hidden = !!lignes.length;
     $("c-vide").textContent = !compte?.corpos?.length
       ? "Tu n'es dans aucune corporation : crée-en une ou rejoins-en une depuis la page Compte."
-      : "Aucune caisse partagée pour l'instant. Chaque joueur choisit, station par station, ce qu'il partage.";
+      : "Aucune caisse partagée pour l'instant. Chaque joueur choisit, caisse par caisse, ce qu'il partage.";
   }
   for (const b of document.querySelectorAll("[data-regrouper]")) b.setAttribute("aria-pressed", String(regroupe));
   const ft = texteFiltre();
@@ -1194,14 +1216,12 @@ function render() {
     $("s-titre").textContent = stationCourante;
     $("s-compte").textContent = `${systemeDe(stationCourante)}, ${tous.length} caisse${tous.length > 1 ? "s" : ""}, ${total(tous)} SCU`;
     $("s-filtre-etat").textContent = ft;
-    renderTable($("t-station"), lignes, { station: false, cocher: true, t: tri.station });
+    renderTable($("t-station"), lignes, { station: false, cocher: true, visibilite: true, t: tri.station });
     $("t-station").hidden = !lignes.length; $("s-vide").hidden = !!lignes.length;
     $("s-vide").textContent = tous.length ? "Aucun minerai ne correspond au filtre." : "Aucun minerai dans cette station. Clique sur « Ajouter » pour scanner tes caisses.";
-    $("s-visib-zone").hidden = !compte;
-    if (compte) $("s-visib").value = compte.visibilites?.[stationCourante] || "corporation";
     const n = selection.size;
     $("s-selection").textContent = n ? `${n} minerai${n > 1 ? "s" : ""} sélectionné${n > 1 ? "s" : ""}` : "Aucun minerai sélectionné";
-    $("b-deplacer").disabled = $("b-supprimer").disabled = !n;
+    $("b-deplacer").disabled = $("b-supprimer").disabled = $("b-visibilite").disabled = !n;
   }
 }
 setInterval(() => { if (vue !== "nouvelle") render(); }, 60000);
@@ -1229,6 +1249,28 @@ $("t-station").addEventListener("change", (e) => {
 });
 
 /* ---------- actions groupées */
+async function appliquerVisibiliteSelection(v) {
+  const ids = [...selection];
+  if (!ids.length || !compte) return;
+  try {
+    for (const it of items) {
+      if (selection.has(it.id)) { it.visibilite = v; delete it.sync; }
+    }
+    sauver(); render(); planifierSync();
+    toast(`${ids.length} caisse${ids.length > 1 ? "s" : ""} : visible par ${VISIBILITES[v]}.`);
+  } catch (e) { toast(messageErreur(e)); }
+}
+$("b-visibilite").addEventListener("click", () => {
+  if (!selection.size) return;
+  $("dv-info").textContent = `${selection.size} caisse${selection.size > 1 ? "s" : ""} sélectionnée${selection.size > 1 ? "s" : ""}.`;
+  const premier = items.find((it) => selection.has(it.id));
+  $("dv-visibilite").value = premier?.visibilite || "corporation";
+  $("d-visibilite").showModal();
+});
+$("d-visibilite").addEventListener("close", () => {
+  if ($("d-visibilite").returnValue !== "ok" || !selection.size) return;
+  appliquerVisibiliteSelection($("dv-visibilite").value);
+});
 $("b-supprimer").addEventListener("click", () => {
   const n = selection.size;
   if (!n || !confirm(`Supprimer ${n} minerai${n > 1 ? "s" : ""} de ${stationCourante} ?`)) return;
@@ -1875,7 +1917,7 @@ function enregistrer(auto = false) {
   const scuTxt = OCR.fixScu($("f-scu").value);
   const it = {
     id: uid(), nom, qualite: q, bande: bandeDe(nom, q), quantite_scu: parseFloat(scuTxt),
-    station: session?.station || stationCourante || SANS_STATION, ts: Date.now() / 1000,
+    station: session?.station || stationCourante || SANS_STATION, visibilite: "corporation", ts: Date.now() / 1000,
     heure: new Date().toLocaleString("fr-FR"),
   };
   items.push(it);
@@ -2149,7 +2191,7 @@ new MutationObserver(() => {
 /* =====================================================================
    Comptes et partage (Supabase) : connexion Discord, synchronisation de
    son inventaire, corporations, alliances et visibilité par station.
-   Chacun ne modifie que SES caisses : la base l'impose (règles d'accès).
+   Chacun ne modifie que SES caisses : la base l'impose (règles d'accès). La visibilité est définie caisse par caisse.
    ===================================================================== */
 const CLOUD_DEFAUT = { url: "https://sqvacxforthdfpkczjnd.supabase.co", cle: "sb_publishable_v9pYEdkKPrBgUavPopFZXw_-kEHYzS3" };   // à remplir pour une version hébergée (voir le guide)
 const CLE_CLOUD = "manifeste-minerai.cloud";
@@ -2167,9 +2209,11 @@ let apprisPartages = { chiffres: [], signatures: [], qualites: {} };
 const VISIBILITES = { prive: "moi seul", corporation: "ma corporation", allies: "corporation et alliés" };
 
 const versCloud = (it) => ({ id: it.id, nom: it.nom, qualite: it.qualite ?? null, bande: it.bande ?? null,
-  quantite_scu: it.quantite_scu ?? null, station: it.station, ts: it.ts, heure: it.heure || null });
+  quantite_scu: it.quantite_scu ?? null, station: it.station, ts: it.ts, heure: it.heure || null,
+  visibilite: it.visibilite || "corporation" });
 const depuisCloud = (c) => ({ id: c.id, nom: c.nom, qualite: c.qualite, bande: c.bande,
-  quantite_scu: c.quantite_scu == null ? null : Number(c.quantite_scu), station: c.station, ts: c.ts, heure: c.heure || "", sync: 1 });
+  quantite_scu: c.quantite_scu == null ? null : Number(c.quantite_scu), station: c.station, ts: c.ts, heure: c.heure || "",
+  visibilite: c.visibilite || "corporation", sync: 1 });
 
 function messageErreur(e) {
   const m = String(e?.message || e || "");
@@ -2224,7 +2268,7 @@ async function surSession(s) {
   }
   const md = s.user.user_metadata || {};
   compte = { id, pseudo: md.custom_claims?.global_name || md.full_name || md.name || "Joueur", avatar: md.avatar_url || null,
-             corpos: [], visibilites: {}, pseudos: {}, membreDe: {} };
+             corpos: [], pseudos: {}, membreDe: {} };
   // Après une connexion Discord, arriver systématiquement sur la page Compte.
   // Le callback OAuth revient à la racine du site, puis l'application positionne
   // son propre routage #/compte.
@@ -2241,14 +2285,12 @@ async function surSession(s) {
 
 async function chargerCompte() {
   const me = compte.id;
-  const [p, m, v] = await Promise.all([
+  const [p, m] = await Promise.all([
     sb.from("profils").select("pseudo, avatar").eq("id", me).maybeSingle(),
     sb.from("membres").select("corporation_id, role, corporations(id, nom, tag)").eq("user_id", me),
-    sb.from("visibilites").select("station, visibilite"),
   ]);
   const profil = verifier(p);
   if (profil) { compte.pseudo = profil.pseudo || compte.pseudo; compte.avatar = profil.avatar || compte.avatar; }
-  compte.visibilites = Object.fromEntries(verifier(v).map((x) => [x.station, x.visibilite]));
   compte.corpos = verifier(m).map((x) => ({ id: x.corporation_id, role: x.role, nom: x.corporations?.nom || "?", tag: x.corporations?.tag || "?" }));
   compte.membreDe = {}; compte.pseudos = { [me]: compte.pseudo };
   const ids = compte.corpos.map((c) => c.id);
@@ -2366,17 +2408,6 @@ $("b-actualiser").addEventListener("click", async () => {
   $("b-actualiser").disabled = false; render();
 });
 
-/* Visibilité d'une station (page Station et page Compte) */
-async function changerVisibilite(station, v) {
-  try {
-    verifier(await sb.from("visibilites").upsert({ user_id: compte.id, station, visibilite: v }));
-    compte.visibilites[station] = v;
-    toast(`${station} : visible par ${VISIBILITES[v]}.`);
-  } catch (e) { toast(messageErreur(e)); }
-  render();
-}
-$("s-visib").addEventListener("change", () => changerVisibilite(stationCourante, $("s-visib").value));
-
 /* ---------- page Compte */
 function renderCompteBouton() {
   $("b-compte-txt").textContent = compte ? compte.pseudo : (cloud.url ? "Se connecter" : "Compte");
@@ -2464,7 +2495,6 @@ function renderCompte() {
     return;
   }
   const attente = items.filter((it) => !it.sync).length + (base.suppressions || []).length;
-  const stations = [...new Set(items.map((it) => it.station))].sort((a, b) => a.localeCompare(b, "fr"));
   let html = `<div class="carte">
     <div class="profil">${compte.avatar ? `<img src="${esc(compte.avatar)}" alt="">` : ""}<div><strong>${esc(compte.pseudo)}</strong>
       <p class="note">${items.length} caisse${items.length > 1 ? "s" : ""}${attente ? `, ${attente} modification${attente > 1 ? "s" : ""} en attente d'envoi` : ", tout est synchronisé"}</p></div></div>
@@ -2498,11 +2528,8 @@ function renderCompte() {
       <h2>Créer une corporation</h2>
       <form data-form="creer"><label>Nom<input name="nom" required minlength="2" maxlength="60"></label>
         <label>Tag (2 à 10 lettres ou chiffres)<input name="tag" required pattern="[A-Za-z0-9]{2,10}"></label>
-        <div><button class="btn" type="submit">Créer</button></div></form></div>
-    <div class="carte"><h2>Visibilité de mes stations</h2>
-      <p class="note">Tu restes seul à pouvoir modifier tes caisses. Tu choisis seulement qui peut les voir.</p>
-      <ul class="liste-cp">${stations.map((st) => `<li><span class="grand">${esc(st)}</span>
-        <select data-visib="${esc(st)}">${Object.entries(VISIBILITES).map(([k, t]) => `<option value="${k}" ${(compte.visibilites[st] || "corporation") === k ? "selected" : ""}>${t}</option>`).join("")}</select></li>`).join("") || `<li class="note">Aucune station pour l'instant.</li>`}</ul></div>`;
+        <div><button class="btn" type="submit">Créer</button></div></form></div>`;
+
   cp.innerHTML = html;
 }
 
@@ -2575,7 +2602,6 @@ $("cp").addEventListener("submit", (e) => {
   }
   action(f.dataset.form, f.dataset, f);
 });
-$("cp").addEventListener("change", (e) => { const s = e.target.closest("[data-visib]"); if (s) changerVisibilite(s.dataset.visib, s.value); });
 
 
 /* ---------- démarrage */
