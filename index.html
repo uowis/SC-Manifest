@@ -1681,6 +1681,8 @@ function choisirQualiteListe(r, vals) {
 }
 const qualitePlausible = (q) => Number.isInteger(q) && q >= 200 && q <= 1000;
 function verifierChamps() {
+  const bEnr = $("b-enregistrer");
+  if (bEnr?.firstChild) bEnr.firstChild.nodeValue = (pending?.pile > 1 ? `Enregistrer ×${pending.pile}` : "Enregistrer") + " ";
   const nom = $("f-nom").value, q = parseInt(qualiteCourante(), 10);
   const connue = valeursDe(nom).includes(q);
   const nouvelle = !!pending && nomExiste(nom) && !connue && qualitePlausible(q) &&
@@ -1890,6 +1892,10 @@ async function scanner(auto = null) {
     if (auto) {
       const pret = !$("b-enregistrer").disabled && !pending.quantiteDouteuse && statut !== "nouvelle";
       pending.cle = auto.cle;
+      pending.pile = auto.pile || 1;
+      verifierChamps();   // met à jour « Enregistrer ×N »
+      if (auto.emplacement) $("scan-etat").textContent += ` (${libelleEmplacement(auto.emplacement)})`;
+      if (pending.pile > 1) $("scan-etat").textContent += ` Pile de ${pending.pile} caisses identiques : les ${pending.pile} seront enregistrées.`;
       if (auto.remplace) $("scan-etat").textContent += " La caisse précédente n'avait pas été enregistrée.";
       if (pret) {
         enregistrer(true);
@@ -1922,15 +1928,19 @@ function enregistrer(auto = false) {
   const nom = Object.keys(valeurs).find((n) => n.toLowerCase() === $("f-nom").value.trim().toLowerCase());
   const q = parseInt(qualiteCourante(), 10);
   const scuTxt = OCR.fixScu($("f-scu").value);
-  const it = {
-    id: uid(), nom, qualite: q, bande: bandeDe(nom, q), quantite_scu: parseFloat(scuTxt),
-    station: session?.station || stationCourante || SANS_STATION, visibilite: "corporation", ts: Date.now() / 1000,
-    heure: new Date().toLocaleString("fr-FR"),
-  };
-  items.push(it);
+  const nPile = Math.max(1, pending.pile || 1), crees = [];
+  for (let k = 0; k < nPile; k++) {   // une pile « Nx » contient N caisses identiques
+    const c = {
+      id: uid(), nom, qualite: q, bande: bandeDe(nom, q), quantite_scu: parseFloat(scuTxt),
+      station: session?.station || stationCourante || SANS_STATION, visibilite: "corporation", ts: Date.now() / 1000,
+      heure: new Date().toLocaleString("fr-FR"),
+    };
+    items.push(c); crees.push(c);
+  }
+  const it = crees[0];
   base.apprisModifie = true;
   planifierSync();
-  if (pending.cle) suivi.registre.set(pending.cle, it.id);
+  if (pending.cle) suivi.registre.set(pending.cle, crees.map((c) => c.id));
   if (!valeursDe(nom).includes(q)) {     // qualité absente du tableau : apprise pour ce minerai
     base.qualites = base.qualites || {};
     (base.qualites[nom] = base.qualites[nom] || []).push(q);
@@ -1945,9 +1955,9 @@ function enregistrer(auto = false) {
   sauver(); construireModele();
   dernierAjout = it.id;
   viderChamps(); render();
-  pictoSauve("Enregistré", false, it);
+  pictoSauve(nPile > 1 ? `Enregistré ×${nPile}` : "Enregistré", false, it);
   $("scan-etat").className = "";
-  $("scan-etat").textContent = `${auto ? "Enregistré automatiquement" : "Enregistré"} : ${fmtScu(it.quantite_scu)} SCU de ${it.nom} (${it.qualite}). ` +
+  $("scan-etat").textContent = `${auto ? "Enregistré automatiquement" : "Enregistré"} : ${nPile > 1 ? `${nPile} caisses de ` : ""}${fmtScu(it.quantite_scu)} SCU de ${it.nom} (${it.qualite}). ` +
     ($("c-auto").checked ? "Sélectionne la caisse suivante." : "Sélectionne la caisse suivante et appuie sur F8.");
 }
 fiche.addEventListener("submit", (e) => { e.preventDefault(); enregistrer(); });
@@ -2012,36 +2022,72 @@ function ecartPanneau(a, b) {
 }
 
 /* Emplacement d'une caisse : page de l'inventaire (reconnue à l'aspect de la grille) + case. */
-function cleCaisse(sel, grille, ascenseur, pagination) {
-  if (!sel || !grille) return null;
-  let page = -1;
-  if (pagination) page = suivi.pages.findIndex((p) => p.pagination && OCR.ecart(p.pagination, pagination) <= 20);
-  if (page < 0) page = suivi.pages.findIndex((p) => p.grille && OCR.ecart(p.grille, grille) <= 20);
-  if (page < 0) {
-    suivi.pages.push({ grille, pagination: pagination || null, ascenseur: ascenseur || null });
-    page = suivi.pages.length - 1;
-  } else {
-    if (pagination && !suivi.pages[page].pagination) suivi.pages[page].pagination = pagination;
-    if (ascenseur && !suivi.pages[page].ascenseur) suivi.pages[page].ascenseur = ascenseur;
-  }
-  // L'ascenseur ET la pagination font partie de l'emplacement.
-  // La pagination ne doit surtout pas être remplacée par la grille : deux
-  // pages peuvent avoir exactement la même apparence de grille.
-  const scroll = ascenseur
-    ? `${Math.round(ascenseur.x * 1000)}.${Math.round(ascenseur.y * 1000)}.${Math.round(ascenseur.h * 1000)}`
-    : "na";
+/* ---------- emplacement réel d'une caisse dans l'inventaire ----------
+   Clé = page + ligne réelle + colonne, en nombres entiers (plus d'empreinte de pixels) :
+   - colonne et ligne à l'écran : position du coin haut-gauche du cadre de sélection
+     divisée par le pas d'une case, arrondie (fiable malgré la courbure du panneau) ;
+   - ligne réelle = ligne à l'écran + décalage de l'ascenseur, en lignes ; le jeu défile
+     ligne par ligne et le curseur de l'ascenseur représente exactement les lignes
+     visibles : décalage = haut du curseur ÷ hauteur du curseur × lignes visibles ;
+   - page : le numéro « 1/3 » lu par OCR ; à défaut, l'aspect de la pagination.
+   Une case peut contenir une PILE de caisses identiques (« 2x » en haut à droite) :
+   le nombre est lu sur la case sélectionnée. */
+const GRILLE_COLONNES = 4, GRILLE_LIGNES = 6;   // cases visibles dans la zone « grille »
 
-  // Empreinte courte et stable de la zone de pagination. Elle est incluse
-  // directement dans la clé de la caisse, donc un changement de page rend
-  // nécessairement la clé différente, même si la caisse occupe la même case.
-  const pageVisuelle = pagination
-    ? pagination.map((v, i) => (i % 8 === 0 ? Math.round(v / 4) : null)).filter((v) => v !== null).join(".")
-    : "na";
-
-  return `${page}:${pageVisuelle}:${scroll}:${Math.round(sel[0] / Math.max(1, sel[2]))}:${Math.round(sel[1] / Math.max(1, sel[3]))}`;
+async function lireTexte(img, liste, ms = 3000) {
+  try {
+    const w = await avecDelai(chargerTesseract(), 15000);
+    const f = 6, c = document.createElement("canvas");
+    c.width = img.w * f + 40; c.height = img.h * f + 40;
+    const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height);
+    const d = new Uint8ClampedArray(img.d);    // gris inversé : texte foncé sur fond blanc
+    for (let i = 0; i < d.length; i += 4) d[i] = d[i + 1] = d[i + 2] = 255 - (0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2]);
+    const t = document.createElement("canvas"); t.width = img.w; t.height = img.h;
+    t.getContext("2d").putImageData(new ImageData(d, img.w, img.h), 0, 0);
+    x.imageSmoothingQuality = "high"; x.drawImage(t, 20, 20, img.w * f, img.h * f);
+    await avecDelai(w.setParameters({ tessedit_char_whitelist: liste, tessedit_pageseg_mode: "7" }), 3000);
+    const texte = (await avecDelai(w.recognize(c), ms)).data.text.trim();
+    await avecDelai(w.setParameters({ tessedit_char_whitelist: "" }), 3000);
+    return texte;
+  } catch { return ""; }
 }
-/* Caisse déjà enregistrée pendant cette session (et toujours dans la liste) ? */
-const dejaEnregistree = (cle) => !!cle && suivi.registre.has(cle) && items.some((it) => it.id === suivi.registre.get(cle));
+async function lireNumeroPage(src, W, H) {
+  if (!base.pagination) return null;
+  const m = (await lireTexte(imageZone(src, W, H, base.pagination), "0123456789/")).replace(/\s/g, "").match(/(\d{1,3})\/(\d{1,3})/);
+  return m && +m[1] >= 1 && +m[1] <= +m[2] ? +m[1] : null;
+}
+/* Nombre de caisses de la pile, lu en haut à droite de la case sélectionnée (1 si pas de pile) */
+async function lirePile(src, W, H, sel) {
+  const p = zonePixels(W, H, base.grille), [sx, sy, sw, sh] = sel;
+  const zone = { x: (p.x + sx + sw * 0.55) / W, y: (p.y + sy + sh * 0.02) / H, w: (sw * 0.45) / W, h: (sh * 0.28) / H };
+  const m = (await lireTexte(imageZone(src, W, H, zone), "0123456789x")).replace(/\s/g, "").match(/(\d{1,3})x$/);
+  const n = m ? +m[1] : 1;
+  return n >= 2 && n <= 999 ? n : 1;
+}
+/* Repli si le numéro de page est illisible : page reconnue à l'aspect de la pagination */
+function pageVisuelle(pagination, grille) {
+  const empreinte = pagination || grille;
+  if (!empreinte) return "?";
+  let i = suivi.pages.findIndex((p) => OCR.ecart(p, empreinte) <= 20);
+  if (i < 0) { suivi.pages.push(empreinte); i = suivi.pages.length - 1; }
+  return "v" + (i + 1);
+}
+async function emplacementCaisse(src, W, H, sel, grille, ascenseur, pagination) {
+  if (!sel || !base.grille) return null;
+  const p = zonePixels(W, H, base.grille);
+  // coin haut-gauche du cadre ÷ pas d'une case, arrondi : tombe à moins de 0,1 d'un entier
+  const colonne = Math.min(GRILLE_COLONNES - 1, Math.max(0, Math.round(sel[0] / (p.w / GRILLE_COLONNES))));
+  const ligneVue = Math.min(GRILLE_LIGNES - 1, Math.max(0, Math.round(sel[1] / (p.h / GRILLE_LIGNES))));
+  const decalage = ascenseur && ascenseur.h > 0.02 ? Math.max(0, Math.round((ascenseur.y - ascenseur.h / 2) / ascenseur.h * GRILLE_LIGNES)) : 0;
+  const page = (await lireNumeroPage(src, W, H)) ?? pageVisuelle(pagination, grille);
+  const pile = await lirePile(src, W, H, sel);
+  const ligne = ligneVue + decalage;
+  return { cle: `p${page}:l${ligne}:c${colonne}`, page, ligne: ligne + 1, colonne: colonne + 1, pile };
+}
+const libelleEmplacement = (e) => e ? `page ${String(e.page).replace(/^v/, "≈")}, ligne ${e.ligne}, colonne ${e.colonne}` : "";
+/* Caisse(s) déjà enregistrée(s) à cet emplacement pendant cette session, et toujours dans la liste ? */
+const idsRegistre = (cle) => [].concat(suivi.registre.get(cle) || []);
+const dejaEnregistree = (cle) => !!cle && idsRegistre(cle).some((id) => items.some((it) => it.id === id));
 
 function imageZone(src, W, H, z, l = null, h = null) {
   const p = zonePixels(W, H, z), c = document.createElement("canvas");
@@ -2079,15 +2125,17 @@ async function surveiller() {
   // l'affichage doit être stable deux fois de suite avant la lecture (animations du jeu)
   if (suivi.aLire && (++suivi.stable >= 2 || suivi.attente >= 6)) {
     suivi.aLire = false; suivi.attente = 0;
-    suivi.cle = cleCaisse(sel, grille, ascenseur, pagination);
+    const empl = await emplacementCaisse(src, W, H, sel, grille, ascenseur, pagination);
+    suivi.cle = empl?.cle || null;
     if (dejaEnregistree(suivi.cle)) {
-      const it = items.find((i) => i.id === suivi.registre.get(suivi.cle));
+      const ids = idsRegistre(suivi.cle), it = items.find((i) => ids.includes(i.id));
+      const n = ids.filter((id) => items.some((i) => i.id === id)).length;
       $("scan-etat").className = "";
-      $("scan-etat").textContent = `Caisse déjà enregistrée : ${it.nom} ${it.qualite}, ${fmtScu(it.quantite_scu)} SCU. Sélectionne la suivante.`;
+      $("scan-etat").textContent = `${n > 1 ? `Pile déjà enregistrée (${n} caisses)` : "Caisse déjà enregistrée"} : ${it.nom} ${it.qualite}, ${fmtScu(it.quantite_scu)} SCU (${libelleEmplacement(empl)}). Sélectionne la suivante.`;
       pictoSauve("Déjà enregistrée", true, it);
       return;
     }
-    await scanner({ cle: suivi.cle, remplace: !!pending });
+    await scanner({ cle: suivi.cle, pile: empl?.pile || 1, emplacement: empl, remplace: !!pending });
   }
 }
 /* Chrome ralentit fortement les minuteries d'un onglet en arrière-plan (jusqu'à une
@@ -2139,7 +2187,7 @@ const CADRAGES = {
   zone: { titre: "Panneau d'information", texte: "Trace un rectangle autour du panneau d'information de l'objet sélectionné (nom, qualité, quantité). Garde une petite marge autour des badges." },
   grille: { titre: "Grille de l'inventaire", texte: "Trace un rectangle autour de la grille des caisses." },
   ascenseur: { titre: "Ascenseur de l'inventaire", texte: "Trace un rectangle autour de l'ascenseur vertical. Cette zone sert uniquement à suivre le défilement dans la grille ; elle ne sert pas à identifier la pagination." },
-  pagination: { titre: "Pagination de l'inventaire", texte: "Trace un rectangle autour des boutons ou numéros de page. Cette zone sert à identifier le changement de page ; elle est indépendante de l'ascenseur." },
+  pagination: { titre: "Pagination de l'inventaire", texte: "Trace un rectangle serré autour du numéro de page (par exemple « 1/3 »), sans les flèches. Le numéro y est lu pour savoir sur quelle page se trouve chaque caisse." },
 };
 async function recadrer(cle = "zone") {
   if (!fluxTrack) return;
