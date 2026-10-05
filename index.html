@@ -361,7 +361,7 @@ body.overlay .f-etat { font-size: 11px; display: -webkit-box; -webkit-line-clamp
           <div style="display:flex;gap:8px;flex-wrap:wrap">
             <button class="btn petit" type="button" id="b-recadrer">Recadrer le panneau</button>
             <button class="btn petit" type="button" id="b-grille">Cadrer la grille</button>
-            <button class="btn petit" type="button" id="b-pagination">Cadrer la pagination / ascenseur</button>
+            <button class="btn petit" type="button" id="b-pagination">Choisir la zone pagination / ascenseur</button>
             <button class="btn petit" type="button" id="b-capture" disabled>Télécharger la capture</button>
           </div>
           <div id="emplacement-fiche"></div>
@@ -503,7 +503,9 @@ body.overlay .f-etat { font-size: 11px; display: -webkit-box; -webkit-line-clamp
     <h2 id="zc-titre">Zone à lire</h2>
     <p id="zc-texte"></p>
     <div class="zone-cadre"><canvas id="zc"></canvas></div>
+    <p id="zc-aide" class="note">Clique et fais glisser sur l’image pour sélectionner la zone. Tu peux recommencer autant de fois que nécessaire.</p>
     <div class="pied">
+      <button class="btn" type="button" id="zc-effacer">Effacer la sélection</button>
       <button class="btn" type="submit" value="annuler">Annuler</button>
       <button class="btn principal" type="submit" value="ok" id="zc-ok" disabled>Enregistrer la zone</button>
     </div>
@@ -953,7 +955,7 @@ const CLE = "manifeste-minerai.v1";
 const SANS_STATION = "Non assignée";
 function chargerBase() {
   try { const b = JSON.parse(localStorage.getItem(CLE)); if (b && Array.isArray(b.items)) return b; } catch {}
-  return { items: [], chiffres: [], signatures: [], zone: null, regroupe: false, qualites: {} };
+  return { items: [], chiffres: [], signatures: [], zone: null, grille: null, pagination: null, regroupe: false, qualites: {} };
 }
 let base = chargerBase();
 function sauver() {
@@ -2122,7 +2124,7 @@ document.addEventListener("keydown", touches);
 const CADRAGES = {
   zone: { titre: "Panneau d'information", texte: "Trace un rectangle autour du panneau d'information de l'objet sélectionné (nom, qualité, quantité). Garde une petite marge autour des badges." },
   grille: { titre: "Grille de l'inventaire", texte: "Trace un rectangle autour de la grille des caisses. L'ascenseur vert à droite doit être inclus : il sert à distinguer les pages même lorsque leur contenu se ressemble." },
-  pagination: { titre: "Pagination / ascenseur", texte: "Optionnel : trace une petite zone autour de l'ascenseur vert à droite de la grille." },
+  pagination: { titre: "Choisir la pagination / l'ascenseur", texte: "Sur l'image du jeu ci-dessous, clique puis fais glisser autour de l'ascenseur ou de la pagination située à droite de la grille. La zone doit être suffisamment petite pour ne contenir que cet élément." },
 };
 async function recadrer(cle = "zone") {
   if (!fluxTrack) return;
@@ -2150,9 +2152,25 @@ async function recadrer(cle = "zone") {
     rect = { x: Math.round(Math.min(a, debut[0])), y: Math.round(Math.min(b, debut[1])), w: Math.round(Math.abs(a - debut[0])), h: Math.round(Math.abs(b - debut[1])) };
     dessiner();
   };
-  cv.onpointerup = () => { debut = null; $("zc-ok").disabled = !(rect && rect.w > 20 && rect.h > 10); };
+  cv.onpointerup = () => {
+    debut = null;
+    if (rect && rect.w > 20 && rect.h > 10) {
+      $("zc-ok").disabled = false;
+      dessiner();
+    } else {
+      rect = null;
+      $("zc-ok").disabled = true;
+      dessiner();
+    }
+  };
+  $("zc-effacer").onclick = (e) => {
+    e.preventDefault();
+    rect = null;
+    $("zc-ok").disabled = true;
+    dessiner();
+  };
   dessiner();
-  $("zc-ok").disabled = !rect;
+  $("zc-ok").disabled = !(rect && rect.w > 20 && rect.h > 10);
   $("d-zone").showModal();
   await new Promise((ok) => $("d-zone").addEventListener("close", ok, { once: true }));
   if ($("d-zone").returnValue === "ok" && rect) {
