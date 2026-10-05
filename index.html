@@ -2024,7 +2024,21 @@ function cleCaisse(sel, grille, ascenseur, pagination) {
     if (pagination && !suivi.pages[page].pagination) suivi.pages[page].pagination = pagination;
     if (ascenseur && !suivi.pages[page].ascenseur) suivi.pages[page].ascenseur = ascenseur;
   }
-  return `${page}:${Math.round(sel[0] / Math.max(1, sel[2]))}:${Math.round(sel[1] / Math.max(1, sel[3]))}`;
+  // L'ascenseur ET la pagination font partie de l'emplacement.
+  // La pagination ne doit surtout pas être remplacée par la grille : deux
+  // pages peuvent avoir exactement la même apparence de grille.
+  const scroll = ascenseur
+    ? `${Math.round(ascenseur.x * 1000)}.${Math.round(ascenseur.y * 1000)}.${Math.round(ascenseur.h * 1000)}`
+    : "na";
+
+  // Empreinte courte et stable de la zone de pagination. Elle est incluse
+  // directement dans la clé de la caisse, donc un changement de page rend
+  // nécessairement la clé différente, même si la caisse occupe la même case.
+  const pageVisuelle = pagination
+    ? pagination.map((v, i) => (i % 8 === 0 ? Math.round(v / 4) : null)).filter((v) => v !== null).join(".")
+    : "na";
+
+  return `${page}:${pageVisuelle}:${scroll}:${Math.round(sel[0] / Math.max(1, sel[2]))}:${Math.round(sel[1] / Math.max(1, sel[3]))}`;
 }
 /* Caisse déjà enregistrée pendant cette session (et toujours dans la liste) ? */
 const dejaEnregistree = (cle) => !!cle && suivi.registre.has(cle) && items.some((it) => it.id === suivi.registre.get(cle));
