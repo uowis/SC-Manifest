@@ -2417,15 +2417,14 @@ async function action(nom, d, form) {
   render();
 }
 $("cp").addEventListener("click", (e) => { const b = e.target.closest("[data-action]"); if (b) action(b.dataset.action, b.dataset); });
-
+$("b-deconnexion").addEventListener("click", () => action("deconnexion", {}));
 $("b-compte").addEventListener("click", (e) => {
   if (!compte) {
     e.preventDefault();
     action("connexion", {});
   }
 });
-$("b-deconnexion").addEventListener("click", () => action("deconnexion", {}));
-$("b-deconnexion").addEventListener("click", () => action("deconnexion", {}));
+
 $("cp").addEventListener("submit", (e) => {
   e.preventDefault();
   const f = e.target;
