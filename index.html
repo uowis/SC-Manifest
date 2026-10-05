@@ -1093,9 +1093,9 @@ $("f-nouvelle").addEventListener("submit", (e) => {
 
 /* ---------- liste : filtre, tri, regroupement */
 const COLONNES = [
-  { col: "joueur", titre: "Joueur", seulementJoueur: true },
   { col: "nom", titre: "Minerai" }, { col: "qualite", titre: "Qualité", num: true },
   { col: "quantite_scu", titre: "Quantité", num: true }, { col: "station", titre: "Station" }, { col: "visibilite", titre: "Visibilité" }, { col: "ts", titre: "Date" },
+  { col: "joueur", titre: "Propriétaire", seulementJoueur: true },
 ];
 const filtrer = (l) => l.filter((it) => (!filtre.mineraux || filtre.mineraux.has(it.nom)) && (it.qualite ?? 0) >= filtre.qmin && (it.qualite ?? 0) <= filtre.qmax);
 function trier(liste, t) {
@@ -1205,8 +1205,8 @@ function render() {
   const ft = texteFiltre();
   const total = (l) => fmtScu(l.reduce((s, it) => s + (Number(it.quantite_scu) || 0), 0));
   if (vue === "accueil") {
-    const lignes = trier(filtrer(items), tri.accueil);
-    renderTable($("t-accueil"), lignes, { station: true, cocher: false, t: tri.accueil });
+    const lignes = trier(filtrer(items), tri.accueil).map((it) => ({ ...it, joueur: it.joueur || compte?.pseudo || "Moi" }));
+    renderTable($("t-accueil"), lignes, { station: true, cocher: false, joueur: true, t: tri.accueil });
     $("a-compte").textContent = `${lignes.length} caisse${lignes.length > 1 ? "s" : ""}, ${total(lignes)} SCU`;
     $("a-filtre-etat").textContent = ft;
     $("t-accueil").hidden = !lignes.length; $("a-vide").hidden = !!lignes.length;
@@ -2446,7 +2446,7 @@ function renderChoixGroupe() {
   sel.innerHTML = `<option value="tous">tous les joueurs</option><option value="tous+moi">tous, moi compris</option>` +
     tags.map((t) => `<option value="tag:${esc(t)}">corporation ${esc(t)}</option>`).join("") +
     `<option value="allies">alliés seulement</option>`;
-  sel.value = [...sel.options].some((o) => o.value === avant) ? avant : "tous";
+  sel.value = [...sel.options].some((o) => o.value === avant) ? avant : "tous+moi";
 }
 function caissesCorpo() {
   const g = $("c-groupe").value || "tous";
