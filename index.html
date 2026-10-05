@@ -991,12 +991,28 @@ function renderNav() {
 }
 $("nav").addEventListener("change", () => { location.hash = $("nav").value; });
 
+
+function invitationCodeFromUrl() {
+  const m = location.hash.match(/^#\/invitation\/([^/?#]+)/i);
+  return m ? decodeURIComponent(m[1]).trim().toUpperCase() : "";
+}
+function invitationUrl(code) {
+  return location.origin + location.pathname + "#/invitation/" + encodeURIComponent(code);
+}
+function nouveauCodeInvitation() {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let code = "";
+  for (let i = 0; i < 8; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return code;
+}
+
 function route() {
   const h = decodeURIComponent(location.hash.replace(/^#/, "")) || "/";
   const ancienne = stationCourante;
   if (h.startsWith("/station/")) { vue = "station"; stationCourante = h.slice(9); }
   else if (h === "/nouvelle") { vue = "nouvelle"; stationCourante = null; }
   else if (h === "/compte") { vue = "compte"; stationCourante = null; }
+  else if (h.startsWith("/invitation/")) { vue = "compte"; stationCourante = null; }
   else if (h === "/corpo") { vue = compte ? "corpo" : "compte"; stationCourante = null; }
   else { vue = "accueil"; stationCourante = null; }
   if (session && session.station !== stationCourante) arreterSession();
@@ -2231,8 +2247,63 @@ function renderCompteBouton() {
   $("b-deconnexion").hidden = !compte;
 }
 
+
+async function renderInvitation(code) {
+  const cp = $("cp");
+  if (!cp) return;
+
+  if (!compte) {
+    cp.innerHTML = `<div class="carte">
+      <h2>Invitation</h2>
+      <p>Connecte-toi avec Discord pour accepter cette invitation.</p>
+      <button class="btn principal" type="button" data-action="connexion">Se connecter avec Discord</button>
+    </div>`;
+    return;
+  }
+
+  try {
+    const { data, error } = await sb.from("corporations")
+      .select("id,nom,tag,code")
+      .eq("code", code)
+      .maybeSingle();
+
+    if (error) throw error;
+
+    if (!data) {
+      cp.innerHTML = `<div class="carte">
+        <h2>Invitation invalide</h2>
+        <p>Ce lien n'est plus valide. L'administrateur a peut-être généré un nouveau code.</p>
+        <a class="btn" href="#/compte">Retour au compte</a>
+      </div>`;
+      return;
+    }
+
+    cp.innerHTML = `<div class="carte">
+      <h2>Invitation à rejoindre une corporation</h2>
+      <p>Tu es invité à rejoindre :</p>
+      <p class="grand"><strong>${esc(data.nom)}</strong> <span class="tag">[${esc(data.tag)}]</span></p>
+      <div class="ligne">
+        <button class="btn principal" type="button" data-action="rejoindre-invitation" data-code="${esc(code)}">Rejoindre</button>
+        <a class="btn" href="#/compte">Annuler</a>
+      </div>
+    </div>`;
+  } catch (e) {
+    console.error(e);
+    cp.innerHTML = `<div class="carte">
+      <h2>Invitation</h2>
+      <p class="note">Impossible de vérifier cette invitation.</p>
+      <a class="btn" href="#/compte">Retour au compte</a>
+    </div>`;
+  }
+}
+
 function renderCompte() {
   const cp = $("cp");
+  const invitationCode = invitationCodeFromUrl();
+  if (invitationCode) {
+    renderInvitation(invitationCode);
+    return;
+  }
   if (!cloud.url || !cloud.cle) {
     cp.innerHTML = `<div class="carte"><h2>Relier l'appli à ta base en ligne</h2>
       <p class="note">Pour créer des comptes et partager vos inventaires, l'appli s'appuie sur une base Supabase (gratuite). Le guide fourni explique comment la créer. Colle ici les deux informations de ton projet (Supabase : Project Settings, puis API).</p>
@@ -2272,9 +2343,9 @@ function renderCompte() {
         ${admin && m.id !== compte.id ? `<button class="btn petit" type="button" data-action="role" data-corpo="${c.id}" data-user="${m.id}" data-role="${m.role === "admin" ? "membre" : "admin"}">${m.role === "admin" ? "Retirer admin" : "Nommer admin"}</button>
         <button class="btn petit danger" type="button" data-action="exclure" data-corpo="${c.id}" data-user="${m.id}" data-nom="${esc(m.pseudo)}">Exclure</button>` : ""}</li>`).join("") +
       `</ul><h3>Inviter</h3><div class="ligne"><span class="code">${esc(c.code)}</span>
-        <button class="btn petit" type="button" data-action="copier" data-texte="${esc(c.code)}">Copier</button>
-        ${admin ? `<button class="btn petit" type="button" data-action="code" data-corpo="${c.id}">Nouveau code</button>` : ""}</div>
-      <p class="note">Donne ce code aux joueurs à inviter : ils le saisissent dans « Rejoindre une corporation ».</p>
+        <button class="btn petit" type="button" data-action="copier" data-texte="${esc(c.code)}">Copier</button><button class="btn petit" type="button" data-action="copier" data-texte="${esc(invitationUrl(c.code))}">Copier le lien</button>
+        ${admin ? `<button class="btn petit" type="button" data-action="code" data-corpo="${c.id}">Nouveau code</button><button class="btn petit" type="button" data-action="invitation" data-corpo="${c.id}">Nouveau lien</button>` : ""}</div>
+      <p class="note">Partage le lien d'invitation. Générer un nouveau code invalide automatiquement l'ancien lien.</p>
       <h3>Partage avec d'autres corporations</h3>
       <ul class="liste-cp">${(c.partageAvec || []).map((a) => `<li><span class="grand">${esc(a.nom)} <span class="tag">[${esc(a.tag)}]</span></span>
         ${admin ? `<button class="btn petit danger" type="button" data-action="retirer-allie" data-corpo="${c.id}" data-allie="${a.id}">Retirer</button>` : ""}</li>`).join("") || `<li class="note">Aucune : vos stations « corporation et alliés » ne sont vues que par vous.</li>`}</ul>
@@ -2299,12 +2370,41 @@ function renderCompte() {
 
 async function action(nom, d, form) {
   try {
-    if (nom === "connexion") { await sb.auth.signInWithOAuth({ provider: "discord", options: { redirectTo: location.origin + location.pathname } }); return; }
+    if (nom === "connexion") { await sb.auth.signInWithOAuth({ provider: "discord", options: { redirectTo: location.origin + location.pathname + (location.hash || "") } }); return; }
     if (nom === "deconnexion") { await sb.auth.signOut(); surSession(null); return; }
     if (nom === "config") { localStorage.removeItem(CLE_CLOUD); cloud = { ...CLOUD_DEFAUT }; sb = null; render(); return; }
     if (nom === "sync") { await synchroniser(); await chargerPartage(); toast(etatCloud || "Synchronisé."); return; }
     if (nom === "copier") { await navigator.clipboard.writeText(d.texte).catch(() => {}); toast("Code copié."); return; }
     if (nom === "code") verifier(await sb.rpc("changer_code", { p_corp: d.corpo }));
+    if (nom === "invitation") {
+      if (!compte) return;
+      const c = (compte.corpos || []).find(x => x.id === d.corpo);
+      if (!c) return;
+      const code = nouveauCodeInvitation();
+      const r = await sb.from("corporations").update({ code }).eq("id", c.id);
+      verifier(r);
+      c.code = code;
+      render();
+      const url = invitationUrl(code);
+      try {
+        await navigator.clipboard.writeText(url);
+        toast("Nouveau lien d'invitation créé et copié.");
+      } catch {
+        prompt("Lien d'invitation :", url);
+      }
+      return;
+    }
+    if (nom === "rejoindre-invitation") {
+      if (!compte) return;
+      const code = String(d.code || "").trim().toUpperCase();
+      if (!code) return;
+      const r = await sb.rpc("rejoindre_corporation", { p_code: code });
+      verifier(r);
+      toast("Bienvenue dans la corporation !");
+      location.hash = "#/compte";
+      await chargerCompte();
+      return;
+    }
     if (nom === "role") verifier(await sb.from("membres").update({ role: d.role }).eq("corporation_id", d.corpo).eq("user_id", d.user));
     if (nom === "exclure") { if (!confirm(`Exclure ${d.nom} de la corporation ?`)) return; verifier(await sb.from("membres").delete().eq("corporation_id", d.corpo).eq("user_id", d.user)); }
     if (nom === "retirer-allie") verifier(await sb.from("alliances").delete().eq("corporation_id", d.corpo).eq("allie_id", d.allie));
