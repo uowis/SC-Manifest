@@ -268,7 +268,7 @@ body.overlay .f-etat { font-size: 11px; display: -webkit-box; -webkit-line-clamp
   <label class="nav"><span class="sr">Lieu</span><select id="nav"></select></label>
   <span class="etat" id="etat">Données enregistrées dans ce navigateur</span>
   <a class="btn petit compte-btn" id="b-compte" href="#/compte"><img id="b-compte-avatar" alt="" hidden><span id="b-compte-txt">Compte</span></a>
-  <button class="lien-deconnexion" id="b-deconnexion" type="button" data-action="deconnexion" hidden>Déconnexion</button>
+  <button class="lien-deconnexion" id="b-deconnexion" type="button" hidden>Déconnexion</button>
 </header>
 
 <main>
@@ -2092,8 +2092,7 @@ async function surSession(s) {
   // Le callback OAuth revient à la racine du site, puis l'application positionne
   // son propre routage #/compte.
   if (!location.hash || location.hash === "#/") location.hash = "#/compte";
-  renderCompteBouton();
-    render();
+  render();
   try {
     await chargerCompte();
     await synchroniser();
@@ -2418,6 +2417,15 @@ async function action(nom, d, form) {
   render();
 }
 $("cp").addEventListener("click", (e) => { const b = e.target.closest("[data-action]"); if (b) action(b.dataset.action, b.dataset); });
+
+$("b-compte").addEventListener("click", (e) => {
+  if (!compte) {
+    e.preventDefault();
+    action("connexion", {});
+  }
+});
+$("b-deconnexion").addEventListener("click", () => action("deconnexion", {}));
+$("b-deconnexion").addEventListener("click", () => action("deconnexion", {}));
 $("cp").addEventListener("submit", (e) => {
   e.preventDefault();
   const f = e.target;
