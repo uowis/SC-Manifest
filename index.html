@@ -2553,11 +2553,8 @@ async function surSession(s) {
   const md = s.user.user_metadata || {};
   compte = { id, pseudo: md.custom_claims?.global_name || md.full_name || md.name || "Joueur", avatar: md.avatar_url || null,
              corpos: [], pseudos: {}, membreDe: {} };
-  // Après une connexion Discord, arriver systématiquement sur la page Compte.
-  // Le callback OAuth revient à la racine du site, puis l'application positionne
-  // son propre routage #/compte.
-  // retour sur la page d'où l'on s'est connecté ; à défaut, la page Compte
-  if (!pageApresConnexion() && (!location.hash || location.hash === "#/")) location.hash = "#/compte";
+  // retour sur la page d'où l'on s'est connecté ; à défaut, on reste sur la page ouverte (l'accueil pour l'adresse racine)
+  pageApresConnexion();
   render();
   try {
     await chargerCompte();
