@@ -63,7 +63,25 @@ th button { all: unset; cursor: pointer; display: inline-flex; gap: 6px; align-i
 th button:focus-visible { outline: 2px solid var(--os); outline-offset: 2px; }
 th[aria-sort] button { color: var(--os); }
 th .fleche { font-size: 11px; width: 10px; }
-td.coche, th.coche { width: 34px; }
+td.coche, th.coche { width: 44px; text-align: center; }
+/* Lignes sélectionnables : toute la ligne est cliquable et s'éclaire au survol */
+#t-station tbody tr { cursor: pointer; transition: background-color .08s; }
+#t-station tbody tr:hover td { background: rgba(183,224,231,.09); }
+#t-station tbody tr.selectionne td { background: rgba(54,204,127,.10); }
+#t-station tbody tr.selectionne:hover td { background: rgba(54,204,127,.16); }
+#t-station tbody tr.selectionne td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
+/* Case à cocher harmonisée avec l'interface */
+#t-station input[type=checkbox] { appearance: none; -webkit-appearance: none; margin: 0; width: 18px; height: 18px; vertical-align: middle;
+  border: 1.5px solid var(--bord); border-radius: 4px; background: var(--rouille); display: inline-grid; place-content: center;
+  transition: background-color .1s, border-color .1s; }
+#t-station input[type=checkbox]::before { content: ""; width: 10px; height: 10px; transform: scale(0); transition: transform .1s;
+  background: #04130b; clip-path: polygon(14% 52%, 0 66%, 38% 100%, 100% 22%, 86% 8%, 38% 72%); }
+#t-station input[type=checkbox]:checked { background: var(--accent); border-color: var(--accent); }
+#t-station input[type=checkbox]:checked::before { transform: scale(1); }
+#t-station input[type=checkbox]:indeterminate { background: var(--accent); border-color: var(--accent); }
+#t-station input[type=checkbox]:indeterminate::before { transform: scale(1); clip-path: inset(40% 10%); }
+#t-station tr:hover input[type=checkbox]:not(:checked) { border-color: var(--os-doux); }
+#t-station input[type=checkbox]:focus-visible { outline: 2px solid var(--os); outline-offset: 2px; }
 td a { color: var(--os); text-decoration-color: var(--trait); text-underline-offset: 3px; }
 td a:hover { text-decoration-color: var(--os); }
 td .bande { color: var(--os-doux); font-size: 12px; margin-left: 6px; }
@@ -71,6 +89,8 @@ td .q { color: #6fd0c4; font-weight: 600; }
 td .scu { color: #d8c86a; }
 .date { color: var(--os-doux); }
 tr.nouveau td { background: rgba(54,204,127,.12); }
+#t-station input[data-id] { cursor: pointer; }
+#t-station tbody { user-select: none; }
 tr.selectionne td { background: rgba(183,224,231,.07); }
 .btn[aria-pressed="true"] { background: var(--os); color: var(--rouille); border-color: var(--os); }
 tr.groupe td { font-weight: 600; }
@@ -84,7 +104,8 @@ tr.enfant td.nom-cell { padding-left: 38px; }
 .vide { color: var(--os-doux); border: 1px dashed var(--trait); border-radius: 6px; padding: 26px; text-align: center; }
 
 .actions-groupe { display: flex; align-items: center; gap: 8px; padding: 8px 10px; margin-bottom: 8px; background: var(--panneau); border-radius: 4px; }
-.actions-groupe span { margin-right: auto; color: var(--os-doux); font-size: 14px; }
+.actions-groupe span { margin-right: auto; margin-left: 6px; color: var(--os-doux); font-size: 14px; }
+.actions-groupe { flex-wrap: wrap; }
 
 .colonne { display: grid; gap: 12px; position: sticky; top: 16px; }
 .carte { background: var(--panneau); border: 1px solid var(--trait); border-radius: 6px; padding: 14px; display: grid; gap: 10px; }
@@ -315,6 +336,10 @@ body.overlay .f-etat { font-size: 11px; display: -webkit-box; -webkit-line-clamp
 .home-lead { font-size: 15px !important; color: var(--os) !important; line-height: 1.5; }
 .video { position: relative; aspect-ratio: 16 / 9; border-radius: 4px; overflow: hidden; border: 1px solid var(--trait); background: #02060b; }
 .video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.video-lien { position: absolute; inset: 0; display: grid; place-items: center; color: #fff; text-decoration: none; font-weight: 600; }
+.video-lien img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .7; }
+.video-lien span { position: relative; background: rgba(0,0,0,.65); padding: 10px 16px; border-radius: 4px; }
+#home-video-lien { color: var(--os-doux); }
 .etapes { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
 .etapes li { display: flex; gap: 12px; align-items: flex-start; font-size: 14px; line-height: 1.45; }
 .etapes .num { flex: none; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 13px;
@@ -367,7 +392,8 @@ dialog.plein { --marge-param: 200px; }
         <div class="carte home-intro">
           <h1>Scanner d'inventaire semi-automatique</h1>
           <p class="home-lead">Gérez le stock de vos minerais : leur quantité, leur qualité et leur localisation. Et partagez-le avec votre corporation.</p>
-          <div class="video"><iframe id="home-video" title="Présentation de SC Manifest" loading="lazy" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+          <div class="video"><iframe id="home-video" width="560" height="315" src="https://www.youtube.com/embed/63nSYMTkZwY?si=duC0unAr77PiTItq" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
+          <p class="note"><a id="home-video-lien" href="https://www.youtube.com/watch?v=63nSYMTkZwY" target="_blank" rel="noopener">Voir la vidéo sur YouTube</a></p>
         </div>
         <div class="carte">
           <h2>Comment ça marche ?</h2>
@@ -429,6 +455,8 @@ dialog.plein { --marge-param: 200px; }
           </div>
         </div>
         <div class="actions-groupe">
+          <button class="btn" type="button" id="b-tout" disabled>Tout sélectionner</button>
+          <button class="btn" type="button" id="b-rien" disabled>Tout désélectionner</button>
           <span id="s-selection">Aucun minerai sélectionné</span>
           <button class="btn" type="button" id="b-deplacer" disabled>Déplacer</button>
           <button class="btn" type="button" id="b-visibilite" disabled>Visibilité</button>
@@ -1287,7 +1315,7 @@ function renderTable(table, lignes, { station, cocher, joueur = false, visibilit
     corps = groupes.map((g) => g.items.length > 1 ? ligneGroupe(g, { station, cocher, joueur, visibilite }) : ligneItem(g.items[0], { station, cocher, joueur, visibilite })).join("");
   } else corps = lignes.map((it) => ligneItem(it, { station, cocher, joueur, visibilite })).join("");
   table.innerHTML = `<thead><tr>` +
-    (cocher ? `<th class="coche"><input type="checkbox" id="tout" aria-label="Tout sélectionner" ${nbSel && nbSel === visibles.length ? "checked" : ""}></th>` : "") +
+    (cocher ? `<th class="coche"><span class="sr">Sélection</span></th>` : "") +
     cols.map((c) => {
       const actif = t.col === c.col;
       return `<th class="${c.num ? "num" : ""}" ${actif ? `aria-sort="${t.dir === "asc" ? "ascending" : "descending"}"` : ""}>` +
@@ -1339,8 +1367,13 @@ function render() {
     $("t-station").hidden = !lignes.length; $("s-vide").hidden = !!lignes.length;
     $("s-vide").textContent = tous.length ? "Aucun minerai ne correspond au filtre." : "Aucun minerai dans cette station. Clique sur « Ajouter » pour scanner tes caisses.";
     const n = selection.size;
-    $("s-selection").textContent = n ? `${n} minerai${n > 1 ? "s" : ""} sélectionné${n > 1 ? "s" : ""}` : "Aucun minerai sélectionné";
+    const scuSel = items.reduce((t, it) => t + (selection.has(it.id) ? Number(it.quantite_scu) || 0 : 0), 0);
+    $("s-selection").textContent = n ? `${n} minerai${n > 1 ? "s" : ""} sélectionné${n > 1 ? "s" : ""} · ${fmtScu(scuSel)} SCU` : "Aucun minerai sélectionné";
     $("b-deplacer").disabled = $("b-supprimer").disabled = $("b-visibilite").disabled = !n;
+    // tout sélectionner : lignes affichées (filtres compris) pas encore cochées ; tout désélectionner : lignes cochées
+    const aCocher = lignes.filter((it) => !selection.has(it.id)).length;
+    $("b-tout").disabled = !aCocher;
+    $("b-rien").disabled = !n;
   }
 }
 setInterval(() => { if (vue !== "nouvelle") render(); }, 60000);
@@ -1357,8 +1390,36 @@ document.addEventListener("click", (e) => {
     render();
   }
 });
+$("b-tout").addEventListener("click", () => {
+  for (const it of trier(filtrer(items.filter((it) => it.station === stationCourante)), tri.station)) selection.add(it.id);
+  render();
+});
+$("b-rien").addEventListener("click", () => { selection.clear(); render(); });
+/* Maj + clic sur une case : coche (ou décoche) toutes les lignes entre la précédente case cliquée et celle-ci */
+let derniereCase = null, majEnfoncee = false;
+$("t-station").addEventListener("click", (e) => { if (e.target.matches?.("input[data-id]")) majEnfoncee = e.shiftKey; }, true);
+/* Clic n'importe où sur la ligne (hors liens et boutons) : coche ou décoche sa case, Maj compris */
+$("t-station").addEventListener("click", (e) => {
+  if (e.target.closest("input, a, button, select, label")) return;
+  const cb = e.target.closest("tbody tr")?.querySelector("input[type=checkbox]");
+  if (!cb) return;
+  cb.checked = !cb.checked;
+  majEnfoncee = e.shiftKey && !!cb.dataset.id;
+  cb.dispatchEvent(new Event("change", { bubbles: true }));
+});
 $("t-station").addEventListener("change", (e) => {
   const cb = e.target;
+  if (cb.dataset.id && majEnfoncee && derniereCase && derniereCase !== cb.dataset.id) {
+    const ids = [...$("t-station").querySelectorAll("input[data-id]")].map((c) => c.dataset.id);
+    const a = ids.indexOf(derniereCase), b = ids.indexOf(cb.dataset.id);
+    if (a >= 0 && b >= 0) {
+      for (const id of ids.slice(Math.min(a, b), Math.max(a, b) + 1)) cb.checked ? selection.add(id) : selection.delete(id);
+      derniereCase = cb.dataset.id; majEnfoncee = false;
+      render(); return;
+    }
+  }
+  if (cb.dataset.id) derniereCase = cb.dataset.id;
+  majEnfoncee = false;
   if (cb.id === "tout") {
     for (const it of trier(filtrer(items.filter((it) => it.station === stationCourante)), tri.station)) cb.checked ? selection.add(it.id) : selection.delete(it.id);
   } else if (cb.dataset.groupe) {
@@ -2902,7 +2963,11 @@ $("cp").addEventListener("submit", (e) => {
    Page d'accueil : activité de la corporation et paramétrage de l'écran
    ===================================================================== */
 const VIDEO_YOUTUBE = "63nSYMTkZwY";   // à remplacer par l'identifiant de la vidéo de présentation
-$("home-video").src = `https://www.youtube-nocookie.com/embed/${VIDEO_YOUTUBE}`;
+/* Page ouverte comme fichier (sans adresse web) : YouTube refuse la lecture intégrée,
+   on affiche la miniature, qui ouvre la vidéo sur YouTube. */
+if (!/^https?:$/.test(location.protocol)) {
+  $("home-video").outerHTML = `<a class="video-lien" href="https://www.youtube.com/watch?v=${VIDEO_YOUTUBE}" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/${VIDEO_YOUTUBE}/hqdefault.jpg" alt="Vidéo de présentation"><span>▶ Voir la vidéo sur YouTube</span></a>`;
+}
 
 /* Zones lues à l'écran : couleur, rôle et position par défaut (inventaire en 16:9) */
 const ZONES = {
