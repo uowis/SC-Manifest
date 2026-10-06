@@ -295,7 +295,11 @@ body.overlay .champ input, body.overlay .champ select { font-size: 15px; padding
 body.overlay .champ.qualite input { margin-top: 4px; }
 body.overlay .deux { gap: 6px; }
 body.overlay .fiche .boutons { gap: 6px; }
-.fiche .terminer { width: 100%; padding: 5px 8px; font-size: 13px; }
+.f-part { display: grid; gap: 6px; }
+.f-part + .f-part { padding-top: 8px; border-top: 1px solid var(--trait); }
+.f-titre { margin: 0; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--os-doux); }
+.fiche .boutons { grid-template-columns: 1fr 1fr auto; }
+body.overlay .f-part { gap: 4px; }
 body.overlay .fiche .boutons .btn { padding: 5px 6px; font-size: 13px; gap: 6px; }
 body.overlay kbd { font-size: 10px; padding: 2px 4px; }
 body.overlay .f-etat { font-size: 11px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
@@ -438,8 +442,8 @@ dialog.plein { --marge-param: 200px; }
         <button class="btn principal grand" type="button" id="b-session">Ajouter</button>
         <button class="btn grand" type="button" id="b-overlay" hidden>Afficher l'overlay</button>
         <div class="carte" id="c-scan" hidden>
-          <h2>Dernier scan</h2>
-          <p id="scan-etat"></p>
+          <h2>Scan en cours</h2>
+          <p id="scan-etat" hidden></p>
           <label class="interrupteur"><input type="checkbox" id="c-auto" checked> Mode automatique</label>
           <div><button class="btn petit" type="button" id="b-capture" disabled>Télécharger la capture</button></div>
           <div id="emplacement-fiche"></div>
@@ -487,35 +491,40 @@ dialog.plein { --marge-param: 200px; }
 </main>
 
 <form class="fiche" id="fiche" autocomplete="off" hidden>
-<div class="barre-sauve" id="f-barre" hidden aria-label="Valeurs enregistrées">
-    <span class="b-nom" id="f-barre-nom"></span>
-    <span class="b-q" id="f-barre-q"></span>
-    <span class="b-scu" id="f-barre-scu"></span>
-  </div>
-  <div class="miniature">
-    <img id="f-capture" alt="Zone lue au dernier scan, badges détectés encadrés">
-    <span class="sauve" id="f-sauve" role="status" hidden>
-      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      <span id="f-sauve-txt">Enregistré</span>
-    </span>
-  </div>
-
-  <label class="champ nom"><span>Minerai</span><input id="f-nom" list="liste-materiaux" spellcheck="false"></label>
-  <datalist id="liste-materiaux"></datalist>
-  <div class="deux">
-    <label class="champ qualite"><span>Qualité</span>
-      <select id="f-q"></select>
-      <input id="f-q-autre" inputmode="numeric" placeholder="Nouvelle valeur" aria-label="Nouvelle valeur de qualité" hidden>
-    </label>
-    <label class="champ scu"><span>Quantité (SCU)</span><input id="f-scu" inputmode="decimal"></label>
-  </div>
-  <div class="boutons">
-    <button class="btn" type="button" id="b-scanner">Scanner <kbd>F8</kbd></button>
-    <button class="btn" type="submit" id="b-enregistrer" disabled>Enregistrer <kbd>F9</kbd></button>
-  </div>
-  <button class="btn danger terminer" type="button" id="b-terminer">Terminer</button>
-  <p class="f-position" id="f-position"></p>
-  <p class="f-etat" id="f-etat" aria-live="polite"></p>
+  <section class="f-part" aria-label="Dernier scan">
+    <h3 class="f-titre">Dernier scan</h3>
+    <div class="barre-sauve" id="f-barre" hidden aria-label="Valeurs lues">
+      <span class="b-nom" id="f-barre-nom"></span>
+      <span class="b-q" id="f-barre-q"></span>
+      <span class="b-scu" id="f-barre-scu"></span>
+    </div>
+    <div class="miniature">
+      <img id="f-capture" alt="Zone lue au dernier scan, badges détectés encadrés">
+      <span class="sauve" id="f-sauve" role="status" hidden>
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span id="f-sauve-txt">Enregistré</span>
+      </span>
+    </div>
+    <p class="f-position" id="f-position"></p>
+  </section>
+  <section class="f-part" aria-label="Scan">
+    <h3 class="f-titre">Scan</h3>
+    <p class="f-etat" id="f-etat" aria-live="polite"></p>
+    <label class="champ nom"><span>Minerai</span><input id="f-nom" list="liste-materiaux" spellcheck="false"></label>
+    <datalist id="liste-materiaux"></datalist>
+    <div class="deux">
+      <label class="champ qualite"><span>Qualité</span>
+        <select id="f-q"></select>
+        <input id="f-q-autre" inputmode="numeric" placeholder="Nouvelle valeur" aria-label="Nouvelle valeur de qualité" hidden>
+      </label>
+      <label class="champ scu"><span>Quantité (SCU)</span><input id="f-scu" inputmode="decimal"></label>
+    </div>
+    <div class="boutons">
+      <button class="btn" type="button" id="b-scanner">Scanner <kbd>F8</kbd></button>
+      <button class="btn" type="submit" id="b-enregistrer" disabled>Enregistrer <kbd>F9</kbd></button>
+      <button class="btn danger" type="button" id="b-terminer">Terminer</button>
+    </div>
+  </section>
 </form>
 
 <dialog id="d-mineraux" class="filtre-mineraux" aria-labelledby="dm-titre">
@@ -1837,9 +1846,9 @@ function flash(bouton, classe, ms = 220) {
 function pictoSauve(texte = null, deja = false, it = null) {
   $("f-sauve").hidden = !texte;
   if (texte) { $("f-sauve-txt").textContent = texte; $("f-sauve").classList.toggle("deja", deja); }
-  // barre des valeurs enregistrées sous la miniature (disparaît à la capture suivante)
-  $("f-barre").hidden = !(texte && it);
-  if (texte && it) {
+  // barre « tool-tip » du dernier scan : changée seulement quand des valeurs sont fournies
+  if (it) {
+    $("f-barre").hidden = false;
     $("f-barre-nom").textContent = it.nom;
     $("f-barre-q").textContent = it.qualite;
     $("f-barre-scu").textContent = `${it.quantite_scu} SCU`;
@@ -1848,7 +1857,7 @@ function pictoSauve(texte = null, deja = false, it = null) {
 }
 function afficherScan(scan) {
   pending = scan;
-  pictoSauve(null);
+  pictoSauve(null, false, { nom: scan.nom || "?", qualite: scan.qualite ?? "?", quantite_scu: OCR.fixScu(scan.quantite_txt || "") || "?" });
   $("f-nom").value = scan.nom || "";
   $("f-q-autre").value = "";
   renderQualite(scan.qualite);
@@ -1942,9 +1951,8 @@ async function scanner(auto = null) {
   if (!base.zone) { await recadrer("zone"); if (!base.zone) return; }
   scanEnCours = true; debutScan = Date.now();
   const ceScan = debutScan;
-  pictoSauve(null);
   flash($("b-scanner"), "appuye"); $("b-scanner").classList.add("en-cours");
-  $("scan-etat").className = ""; $("scan-etat").textContent = "Lecture en cours…";
+  $("scan-etat").className = ""; $("scan-etat").textContent = "Lecture…";
   try {
     const src = await imageCourante(), [W, H] = tailleSource(src);
     if (!W) throw new Error("pas encore d'image du jeu");
@@ -1956,24 +1964,21 @@ async function scanner(auto = null) {
     derniereCapture = c.toDataURL("image/png");     // zone brute, sans les cadres (pour analyse)
     $("b-capture").disabled = false;
     if (luminosite(src, z) <= 2) {
-      viderChamps();
       $("scan-etat").className = "echec";
-      $("scan-etat").textContent = luminosite(src) <= 2
-        ? "L'image reçue du jeu est entièrement noire. Partage l'écran entier plutôt que la fenêtre (Terminer, puis Ajouter), et vérifie que le jeu n'est pas réduit ni en plein écran exclusif."
-        : "La zone lue est noire alors que le reste de l'image ne l'est pas : clique sur « Recadrer le panneau ».";
+      $("scan-etat").textContent = luminosite(src) <= 2 ? "Image du jeu noire : partage l'écran entier." : "Zone tool-tip noire : vérifie le paramétrage.";
       return;
     }
     const r = OCR.lire(img, MODELE);
     // miniature : zone lue, badges détectés encadrés
     x.strokeStyle = "#36cc7f"; x.lineWidth = 1;
     for (const [bx, by, bw, bh] of r ? r.boites : []) x.strokeRect(bx + 0.5, by + 0.5, bw, bh);
-    $("f-capture").src = c.toDataURL("image/jpeg", 0.85);
     if (!r) {
-      viderChamps();
       $("scan-etat").className = "echec";
-      $("scan-etat").textContent = "Aucun badge trouvé dans la zone. Vérifie qu'un objet est sélectionné et que la zone est bien cadrée.";
+      $("scan-etat").textContent = "Aucune case survolée.";
       return;
     }
+    $("f-capture").src = c.toDataURL("image/jpeg", 0.85);
+    afficherPosition(auto?.emplacement ?? null);
     const nom = await lireNom(r.nomImg, r.signature);
     if (scanAbandonne === ceScan) return;   // abandonnée entre-temps par le garde-fou
     const [q, statut] = choisirQualite(nom.nom, r.qualite.valeur, r.qualite.autres.map(Number), r.qualite.confiance);
@@ -1986,37 +1991,36 @@ async function scanner(auto = null) {
       qImg: r.qImg, sImg: r.sImg, signature: r.signature,
     });
     const notes = [];
-    if (qte.relue && qte.texte !== r.quantite.texte) notes.push(`quantité relue : ${r.quantite.texte || "?"} → ${qte.texte}`);
-    if (qte.doute) notes.push("quantité à vérifier");
+    if (qte.relue && qte.texte !== r.quantite.texte) notes.push(`quantité relue ${r.quantite.texte || "?"} → ${qte.texte}`);
+    if (qte.doute) notes.push("quantité douteuse");
     if (nom.source === "ocr" && nom.brut && nom.brut !== nom.nom) notes.push(`nom lu « ${nom.brut} »`);
-    if (q !== r.qualite.valeur && r.qualite.valeur != null) notes.push(`badge lu ${r.qualite.valeur}, valeur existante la plus proche ${q}`);
-    if (statut === "nouvelle") notes.push(`${q} n'est pas dans la liste connue de ${nom.nom} : vérifie-la, elle sera ajoutée à l'enregistrement`);
-    $("scan-etat").textContent = `Lu : ${nom.nom || "?"}, qualité ${q ?? "?"}, ${r.quantite.texte || "?"} SCU.` + (notes.length ? ` (${notes.join(" ; ")})` : "");
+    if (q !== r.qualite.valeur && r.qualite.valeur != null) notes.push(`qualité ${r.qualite.valeur} → ${q}`);
+    if (statut === "nouvelle") notes.push("qualité nouvelle");
+    $("scan-etat").textContent = "Lu." + (notes.length ? ` ${notes.join(" · ")}.` : "");
     if (auto) {
       const pret = !$("b-enregistrer").disabled && !pending.quantiteDouteuse && statut !== "nouvelle";
       pending.cle = auto.cle;
       pending.pile = auto.pile || 1;
       pending.emplacement = auto.emplacement || null;
       verifierChamps();   // met à jour « Enregistrer ×N »
-      if (auto.emplacement) $("scan-etat").textContent += ` (${libelleEmplacement(auto.emplacement)})`;
-      if (pending.pile > 1) $("scan-etat").textContent += ` Pile de ${pending.pile} caisses identiques : les ${pending.pile} seront enregistrées.`;
-      if (auto.remplace) $("scan-etat").textContent += " La caisse précédente n'avait pas été enregistrée.";
+      if (pending.pile > 1) $("scan-etat").textContent += ` Pile ×${pending.pile}.`;
+      if (auto.remplace) $("scan-etat").textContent += " Précédente non enregistrée.";
       const memeCaisse = !!suivi.dernier && suivi.dernier === contenuCaisse(nom.nom, q, qte.texte) && !suivi.autreCase;
       if (pret && memeCaisse) {
         // relecture de la caisse qu'on vient d'enregistrer (aucune autre case sélectionnée) : pas de doublon
         $("scan-etat").className = "";
-        $("scan-etat").textContent = "Même caisse que celle qui vient d'être enregistrée. Si c'est une autre caisse identique, clique sur Enregistrer.";
+        $("scan-etat").textContent = "Déjà enregistrée. Caisse identique ? Clique Enregistrer.";
         pictoSauve("Déjà enregistrée", true, { nom: nom.nom, qualite: q, quantite_scu: OCR.fixScu(qte.texte) });
       } else if (pret) {
         enregistrer(true);
       } else {
         $("scan-etat").className = "echec";
-        $("scan-etat").textContent += " À vérifier : corrige dans l'overlay, puis Enregistrer.";
+        $("scan-etat").textContent += " À vérifier, puis Enregistrer.";
       }
     }
   } catch (e) {
     $("scan-etat").className = "echec";
-    $("scan-etat").textContent = `Lecture impossible : ${e.message}`;
+    $("scan-etat").textContent = `Erreur : ${e.message}`;
   } finally {
     if (scanAbandonne !== ceScan) { scanEnCours = false; $("b-scanner").classList.remove("en-cours"); }
   }
@@ -2069,8 +2073,7 @@ function enregistrer(auto = false) {
   viderChamps(); render();
   pictoSauve(nPile > 1 ? `Enregistré ×${nPile}` : "Enregistré", false, it);
   $("scan-etat").className = "";
-  $("scan-etat").textContent = `${auto ? "Enregistré automatiquement" : "Enregistré"} : ${nPile > 1 ? `${nPile} caisses de ` : ""}${fmtScu(it.quantite_scu)} SCU de ${it.nom} (${it.qualite})${emplSauve ? `, ${libelleEmplacement(emplSauve)}` : ""}. ` +
-    ($("c-auto").checked ? "Sélectionne la caisse suivante." : "Sélectionne la caisse suivante et appuie sur F8.");
+  $("scan-etat").textContent = nPile > 1 ? `${nPile} caisses enregistrées.` : "Enregistré.";
 }
 fiche.addEventListener("submit", (e) => { e.preventDefault(); enregistrer(); });
 $("b-scanner").addEventListener("click", () => scanner());   // sans argument : lecture manuelle, pas d'enregistrement automatique
@@ -2225,11 +2228,11 @@ function afficherPosition(e) {
   const p = $("f-position");
   if (!p) return;
   p.classList.toggle("inconnue", !e && !!base.grille);
-  p.textContent = e ? `Case : ${libelleEmplacement(e)}${e.pile > 1 ? `, pile de ${e.pile}` : ""}`
-    : base.grille ? "Case : introuvable (cadre de sélection non détecté)" : "";
+  p.classList.remove("inconnue");
+  p.textContent = e ? `Case : ${libelleEmplacement(e)}${e.pile > 1 ? ` · pile ×${e.pile}` : ""}` : "";
 }
 const contenuCaisse = (nom, q, scu) => `${String(nom || "").toLowerCase()}|${q}|${OCR.fixScu(String(scu ?? ""))}`;
-const libelleEmplacement = (e) => e ? `page ${String(e.page).replace(/^v/, "≈")}, ligne ${e.ligne}, colonne ${e.colonne}` : "";
+const libelleEmplacement = (e) => e ? `page ${String(e.page).replace(/^v/, "≈")} · ligne ${e.ligne} · colonne ${e.colonne}` : "";
 /* Caisse(s) déjà enregistrée(s) à cet emplacement pendant cette session, et toujours dans la liste ? */
 const idsRegistre = (cle) => [].concat(suivi.registre.get(cle) || []);
 const dejaEnregistree = (cle) => !!cle && idsRegistre(cle).some((id) => items.some((it) => it.id === id));
@@ -2266,20 +2269,23 @@ async function surveiller() {
   if (chSel || chPage || chAscenseur) suivi.autreCase = true;
   if (chPanneau || chSel || chPage || chAscenseur) {
     if (!suivi.aLire) suivi.attente = 0;
-    suivi.aLire = true; suivi.stable = 0; pictoSauve(null);
-    if (++suivi.attente < 6) return;
+    suivi.aLire = true; suivi.stable = 0;
+    if (++suivi.attente < 8) return;
   }
   // l'affichage doit être stable deux fois de suite avant la lecture (animations du jeu)
-  if (suivi.aLire && (++suivi.stable >= 2 || suivi.attente >= 6)) {
+  if (suivi.aLire && (++suivi.stable >= 2 || suivi.attente >= 8)) {
     suivi.aLire = false; suivi.attente = 0;
     const empl = await emplacementCaisse(src, W, H, sel, grille, ascenseur, pagination);
     suivi.cle = empl?.cle || null;
-    afficherPosition(empl);
     if (dejaEnregistree(suivi.cle)) {
       const ids = idsRegistre(suivi.cle), it = items.find((i) => ids.includes(i.id));
       const n = ids.filter((id) => items.some((i) => i.id === id)).length;
       $("scan-etat").className = "";
-      $("scan-etat").textContent = `${n > 1 ? `Pile déjà enregistrée (${n} caisses)` : "Caisse déjà enregistrée"} : ${it.nom} ${it.qualite}, ${fmtScu(it.quantite_scu)} SCU (${libelleEmplacement(empl)}). Sélectionne la suivante.`;
+      $("scan-etat").textContent = n > 1 ? `Pile déjà enregistrée (${n}).` : "Déjà enregistrée.";
+      const p = zonePixels(W, H), c = document.createElement("canvas"); c.width = p.w; c.height = p.h;   // miniature de cette caisse
+      c.getContext("2d").drawImage(src, p.x, p.y, p.w, p.h, 0, 0, p.w, p.h);
+      $("f-capture").src = c.toDataURL("image/jpeg", 0.85);
+      afficherPosition(empl);
       pictoSauve("Déjà enregistrée", true, it);
       return;
     }
@@ -2294,7 +2300,7 @@ function battement() {
     scanEnCours = false; scanAbandonne = debutScan;
     $("b-scanner").classList.remove("en-cours");
     $("scan-etat").className = "echec";
-    $("scan-etat").textContent = "Lecture abandonnée : le jeu n'a pas envoyé d'image à temps. Sélectionne à nouveau la caisse.";
+    $("scan-etat").textContent = "Pas d'image du jeu : resurvole la caisse.";
     reinitialiserSurveillance();
   }
   if (enSurveillance && Date.now() - debutSurveillance < 5000) return;
@@ -2307,9 +2313,9 @@ function demarrerSurveillance() {
     const code = "let t = null; onmessage = (e) => { clearInterval(t); if (e.data > 0) t = setInterval(() => postMessage(0), e.data); };";
     surveillance = new Worker(URL.createObjectURL(new Blob([code], { type: "text/javascript" })));
     surveillance.onmessage = battement;
-    surveillance.postMessage(400);
+    surveillance.postMessage(250);
   } catch {
-    surveillance = setInterval(battement, 400);   // repli si le worker est indisponible
+    surveillance = setInterval(battement, 250);   // repli si le worker est indisponible
   }
 }
 function arreterSurveillance() {
@@ -2318,7 +2324,7 @@ function arreterSurveillance() {
 }
 $("c-auto").addEventListener("change", () => {
   reinitialiserSurveillance();
-  $("scan-etat").textContent = $("c-auto").checked ? "Mode automatique : sélectionne une caisse dans l'inventaire." : "Mode manuel : F8 pour lire, F9 pour enregistrer (l'overlay doit avoir le focus).";
+  $("scan-etat").textContent = $("c-auto").checked ? "Survole une caisse." : "F8 : lire · F9 : enregistrer.";
 });
 
 /* Touches : captées par la page et par l'overlay (le jeu affiche ses infos même sans le focus) */
@@ -2399,7 +2405,7 @@ async function ouvrirOverlay() {
   // hauteur : contenu fixe + miniature à la largeur de la fenêtre, au ratio de la zone lue
   let ratio = 0.5;
   try { const [W, H] = tailleSource(await imageCourante()); if (W && base.zone) ratio = (base.zone.h * H) / (base.zone.w * W); } catch {}
-  const LARGEUR = 290, hauteur = Math.round(266 + (LARGEUR - 12) * Math.min(1, Math.max(0.2, ratio)));
+  const LARGEUR = 300, hauteur = Math.round(315 + (LARGEUR - 12) * Math.min(1, Math.max(0.2, ratio)));
   try { pip = await documentPictureInPicture.requestWindow({ width: LARGEUR, height: hauteur }); }
   catch { pip = null; $("b-overlay").hidden = !session; return false; }
   for (const n of document.querySelectorAll("style, link[rel=stylesheet]")) pip.document.head.append(n.cloneNode(true));
@@ -2433,15 +2439,14 @@ async function demarrerSession() {
   viderChamps();
   pictoSauve(null);
   $("f-capture").removeAttribute("src");
+  $("f-barre").hidden = true; afficherPosition(null);
   fiche.hidden = false;
   $("emplacement-fiche").append(fiche);
   $("c-scan").hidden = false;
   $("b-session").textContent = "Terminer";
   $("b-session").classList.remove("principal");
   $("scan-etat").className = "";
-  $("scan-etat").textContent = $("c-auto").checked
-    ? "Mode automatique : sélectionne une caisse dans l'inventaire, elle est lue et enregistrée toute seule."
-    : "Sélectionne une caisse dans l'inventaire et appuie sur F8 (l'overlay ou cette page doit avoir le focus).";
+  $("scan-etat").textContent = $("c-auto").checked ? "Survole une caisse." : "F8 : lire · F9 : enregistrer.";
   chargerTesseract().catch(() => {});      // préchargement, pour un premier scan rapide
   if (!base.zone) await ouvrirParametrage("zone");   // première fois : vérifier les zones lues
   if (!pip && !(await ouvrirOverlay())) $("b-overlay").hidden = false;
@@ -2896,7 +2901,7 @@ $("cp").addEventListener("submit", (e) => {
 /* =====================================================================
    Page d'accueil : activité de la corporation et paramétrage de l'écran
    ===================================================================== */
-const VIDEO_YOUTUBE = "ZyWzY8Z3qOk";   // à remplacer par l'identifiant de la vidéo de présentation
+const VIDEO_YOUTUBE = "63nSYMTkZwY";   // à remplacer par l'identifiant de la vidéo de présentation
 $("home-video").src = `https://www.youtube-nocookie.com/embed/${VIDEO_YOUTUBE}`;
 
 /* Zones lues à l'écran : couleur, rôle et position par défaut (inventaire en 16:9) */
