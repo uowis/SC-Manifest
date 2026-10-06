@@ -295,6 +295,7 @@ body.overlay .champ input, body.overlay .champ select { font-size: 15px; padding
 body.overlay .champ.qualite input { margin-top: 4px; }
 body.overlay .deux { gap: 6px; }
 body.overlay .fiche .boutons { gap: 6px; }
+.fiche .terminer { width: 100%; padding: 5px 8px; font-size: 13px; }
 body.overlay .fiche .boutons .btn { padding: 5px 6px; font-size: 13px; gap: 6px; }
 body.overlay kbd { font-size: 10px; padding: 2px 4px; }
 body.overlay .f-etat { font-size: 11px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
@@ -302,6 +303,48 @@ body.overlay .f-etat { font-size: 11px; display: -webkit-box; -webkit-line-clamp
 .interrupteur input { width: 18px; height: 18px; accent-color: var(--ok); }
 .champ.douteux input { border-color: #ff9a3c !important; }
 .champ.douteux span { color: #ffb36b; }
+/* ---------- page d'accueil */
+.home-grille { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 900px) { .home-grille { grid-template-columns: 1fr; } }
+.home-col { display: grid; gap: 20px; }
+.home-intro h1 { font-size: 24px; }
+.home-lead { font-size: 15px !important; color: var(--os) !important; line-height: 1.5; }
+.video { position: relative; aspect-ratio: 16 / 9; border-radius: 4px; overflow: hidden; border: 1px solid var(--trait); background: #02060b; }
+.video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.etapes { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.etapes li { display: flex; gap: 12px; align-items: flex-start; font-size: 14px; line-height: 1.45; }
+.etapes .num { flex: none; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 13px;
+  background: var(--rouille); border: 1px solid var(--accent); color: var(--accent); }
+a.btn { text-decoration: none; display: inline-block; }
+.etapes a, .activite a { color: var(--os); text-underline-offset: 3px; }
+.activite { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.activite li { padding: 9px 11px; background: var(--rouille); border: 1px solid var(--trait); border-radius: 4px; display: grid; gap: 3px; font-size: 14px; }
+.activite .qui { display: flex; justify-content: space-between; gap: 8px; }
+.activite .qui strong { color: var(--os); }
+.activite .quand { color: var(--os-doux); font-size: 12px; white-space: nowrap; }
+.activite .quoi { color: #d8c86a; }
+.activite .ou { color: var(--os-doux); font-size: 13px; }
+.zones-etat { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.zones-etat li { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--os-doux); }
+.pastille { width: 12px; height: 12px; border-radius: 2px; flex: none; }
+/* ---------- fenêtre de paramétrage (pleine largeur) */
+dialog.plein { width: calc(100vw - 32px); max-width: none; height: calc(100vh - 32px); max-height: none; padding: 14px 16px; display: none; }
+dialog.plein[open] { display: flex; flex-direction: column; gap: 8px; }
+.dp-tete { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+.dp-tete h2 { margin: 0; font-size: 17px; }
+.dp-zones { display: flex; flex-wrap: wrap; gap: 6px; }
+.dp-zone { display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 4px; border: 1px solid var(--trait);
+  background: var(--rouille); color: var(--os); cursor: pointer; font: inherit; font-size: 14px; }
+.dp-zone small { font-size: 11px; color: var(--os-doux); }
+.dp-zone small.ok { color: var(--accent); }
+.dp-zone small.ko { color: var(--alerte); }
+.dp-zone[aria-pressed="true"] { border-color: var(--c); box-shadow: inset 0 0 0 1px var(--c); background: color-mix(in srgb, var(--c) 18%, var(--rouille)); }
+.dp-actions { margin-left: auto; display: flex; gap: 8px; }
+.dp-aide { margin: 0; font-size: 13px; color: var(--os-doux); }
+.dp-cadre { flex: 1; min-height: 0; position: relative; padding: 24px var(--marge-param); }
+.dp-cadre canvas { position: absolute; display: block; touch-action: none; cursor: crosshair; border: 1px solid var(--trait); border-radius: 4px; background: #000; }
+dialog.plein { --marge-param: 200px; }
+@media (max-width: 1100px) { dialog.plein { --marge-param: 24px; } }
 </style>
 </head>
 <body>
@@ -314,6 +357,41 @@ body.overlay .f-etat { font-size: 11px; display: -webkit-box; -webkit-line-clamp
 </header>
 
 <main>
+  <section id="v-home" hidden>
+    <div class="home-grille">
+      <div class="home-col">
+        <div class="carte home-intro">
+          <h1>Scanner d'inventaire semi-automatique</h1>
+          <p class="home-lead">Gérez le stock de vos minerais : leur quantité, leur qualité et leur localisation. Et partagez-le avec votre corporation.</p>
+          <div class="video"><iframe id="home-video" title="Présentation de SC Manifest" loading="lazy" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+        </div>
+        <div class="carte">
+          <h2>Comment ça marche ?</h2>
+          <ol class="etapes">
+            <li><span class="num">1</span><div>Dans <strong>Star Citizen</strong>, ouvrez votre inventaire.</div></li>
+            <li><span class="num">2</span><div>Dans <strong>SC Manifest</strong>, <a href="#/nouvelle">créez</a> ou ouvrez l'inventaire d'une station.</div></li>
+            <li><span class="num">3</span><div>Cliquez sur <strong>« Ajouter »</strong> et choisissez la fenêtre du jeu.</div></li>
+            <li><span class="num">4</span><div>Survolez chaque minerai, un par un : l'enregistrement se fait automatiquement.</div></li>
+          </ol>
+          <div class="ligne"><a class="btn principal" href="#/nouvelle">Ouvrir une station</a><a class="btn" href="#/minerais">Voir tous mes minerais</a></div>
+        </div>
+      </div>
+      <div class="home-col">
+        <div class="carte">
+          <h2 id="act-titre">Activité de la corporation</h2>
+          <ul class="activite" id="act-liste"></ul>
+          <p class="note" id="act-vide" hidden></p>
+        </div>
+        <div class="carte">
+          <h2>Paramétrage de l'écran</h2>
+          <p>Ouvrez un inventaire dans Star Citizen, puis cliquez sur « Paramétrer » pour vérifier les zones que SC Manifest lit à l'écran.</p>
+          <ul class="zones-etat" id="home-zones"></ul>
+          <div><button class="btn principal" type="button" id="b-parametrer">Paramétrer</button></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section id="v-accueil" hidden>
     <div class="entete">
       <div><h1>Tous les minerais</h1><p class="sous-titre" id="a-compte"></p></div>
@@ -363,14 +441,14 @@ body.overlay .f-etat { font-size: 11px; display: -webkit-box; -webkit-line-clamp
           <h2>Dernier scan</h2>
           <p id="scan-etat"></p>
           <label class="interrupteur"><input type="checkbox" id="c-auto" checked> Mode automatique</label>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="btn petit" type="button" id="b-recadrer">Recadrer le panneau</button>
-            <button class="btn petit" type="button" id="b-grille">Cadrer la grille</button>
-            <button class="btn petit" type="button" id="b-ascenseur">Cadrer l’ascenseur</button>
-            <button class="btn petit" type="button" id="b-pagination">Cadrer la pagination</button>
-            <button class="btn petit" type="button" id="b-capture" disabled>Télécharger la capture</button>
-          </div>
+          <div><button class="btn petit" type="button" id="b-capture" disabled>Télécharger la capture</button></div>
           <div id="emplacement-fiche"></div>
+        </div>
+        <div class="carte">
+          <h2>Paramétrage de l'écran</h2>
+          <p>Ouvrez un inventaire dans Star Citizen, puis cliquez sur « Paramétrer » pour vérifier les zones que SC Manifest lit à l'écran.</p>
+          <ul class="zones-etat" id="s-zones"></ul>
+          <div><button class="btn" type="button" id="b-parametrer-s">Paramétrer</button></div>
         </div>
       </aside>
     </div>
@@ -435,6 +513,7 @@ body.overlay .f-etat { font-size: 11px; display: -webkit-box; -webkit-line-clamp
     <button class="btn" type="button" id="b-scanner">Scanner <kbd>F8</kbd></button>
     <button class="btn" type="submit" id="b-enregistrer" disabled>Enregistrer <kbd>F9</kbd></button>
   </div>
+  <button class="btn danger terminer" type="button" id="b-terminer">Terminer</button>
   <p class="f-position" id="f-position"></p>
   <p class="f-etat" id="f-etat" aria-live="polite"></p>
 </form>
@@ -503,6 +582,20 @@ body.overlay .f-etat { font-size: 11px; display: -webkit-box; -webkit-line-clamp
     <div id="dc-blocs" class="dc-blocs"></div>
     <div class="pied"><button class="btn principal" type="submit">Fermer</button></div>
   </form>
+</dialog>
+
+<dialog id="d-param" class="plein" aria-labelledby="dp-titre">
+  <div class="dp-tete">
+    <h2 id="dp-titre">Paramétrage de l'écran</h2>
+    <div class="dp-zones" id="dp-zones" role="group" aria-label="Zone à modifier"></div>
+    <div class="dp-actions">
+      <button class="btn petit" type="button" id="dp-defaut">Zones par défaut</button>
+      <button class="btn" type="button" id="dp-annuler">Annuler</button>
+      <button class="btn principal" type="button" id="dp-ok">Enregistrer</button>
+    </div>
+  </div>
+  <p class="dp-aide" id="dp-aide"></p>
+  <div class="dp-cadre"><canvas id="dp-canvas"></canvas></div>
 </dialog>
 
 <dialog id="d-zone" class="large">
@@ -975,7 +1068,7 @@ window.addEventListener("storage", (e) => { if (e.key === CLE) { base = chargerB
 let items = base.items;
 const catalogue = STATIONS;
 const valeurs = MATERIAUX;
-let vue = "accueil", stationCourante = null;
+let vue = "home", stationCourante = null;
 const tri = { accueil: { col: "ts", dir: "desc" }, station: { col: "ts", dir: "desc" }, corpo: { col: "ts", dir: "desc" } };
 const filtre = { mineraux: null, qmin: 0, qmax: 1000 };
 const selection = new Set();
@@ -1050,7 +1143,7 @@ function renderNav() {
   const groupes = new Map();
   for (const sys of Object.keys(catalogue)) groupes.set(sys, []);
   for (const st of stations) { const sys = systemeDe(st); if (!groupes.has(sys)) groupes.set(sys, []); groupes.get(sys).push(st); }
-  let html = `<option value="#/">Accueil</option>`;
+  let html = `<option value="#/">Accueil</option><option value="#/minerais">Tous mes minerais</option>`;
   for (const [sys, liste] of groupes) {
     if (!liste.length) continue;
     html += `<optgroup label="${esc(sys)}">` + liste.map((st) =>
@@ -1060,7 +1153,7 @@ function renderNav() {
   html += `<option value="#/nouvelle">+ Nouvelle station</option>`;
   if (vue === "compte") html += `<option value="#/compte">Compte</option>`;
   $("nav").innerHTML = html;
-  $("nav").value = vue === "station" ? `#/station/${encodeURIComponent(stationCourante)}` : ["nouvelle", "corpo", "compte"].includes(vue) ? `#/${vue}` : "#/";
+  $("nav").value = vue === "station" ? `#/station/${encodeURIComponent(stationCourante)}` : ["nouvelle", "corpo", "compte"].includes(vue) ? `#/${vue}` : vue === "accueil" ? "#/minerais" : "#/";
 }
 $("nav").addEventListener("change", () => { location.hash = $("nav").value; });
 
@@ -1087,10 +1180,12 @@ function route() {
   else if (h === "/compte") { vue = "compte"; stationCourante = null; }
   else if (h.startsWith("/invitation/")) { vue = "compte"; stationCourante = null; }
   else if (h === "/corpo") { vue = compte ? "corpo" : "compte"; stationCourante = null; }
-  else { vue = "accueil"; stationCourante = null; }
+  else if (h === "/minerais") { vue = "accueil"; stationCourante = null; }
+  else { vue = "home"; stationCourante = null; }
   if (session && session.station !== stationCourante) arreterSession();
   if (ancienne !== stationCourante) selection.clear();
-  for (const v of ["accueil", "station", "nouvelle", "corpo", "compte"]) $(`v-${v}`).hidden = v !== vue;
+  for (const v of ["home", "accueil", "station", "nouvelle", "corpo", "compte"]) $(`v-${v}`).hidden = v !== vue;
+  if (vue === "home" && compte && Date.now() - partage.maj > 30000) chargerPartage().then(render).catch(() => {});
   if (vue === "corpo" && compte && Date.now() - partage.maj > 30000) chargerPartage().then(render).catch(() => {});
   if (vue === "nouvelle") $("n-station").innerHTML = optionsStations(Object.values(catalogue).flat().sort((a, b) => a.localeCompare(b, "fr")), { avecVide: true });
   render();
@@ -1198,6 +1293,8 @@ function renderTable(table, lignes, { station, cocher, joueur = false, visibilit
 }
 function render() {
   renderNav();
+  if (vue === "home") renderHome();
+  if (vue === "station" && typeof renderEtatZones === "function") renderEtatZones($("s-zones"));
   majBoutonsFiltre();
   renderCompteBouton();
   if (vue === "compte") renderCompte();
@@ -1986,71 +2083,52 @@ function reinitialiserSurveillance() { Object.assign(suivi, { dernier: null, aut
 /* Détection de l'ascenseur vert à droite de la grille. Sa position verticale
    permet de distinguer deux pages dont la grille est visuellement identique. */
 function empreinteAscenseur(img) {
+  /* Le curseur (vert) glisse sur une fine piste (grise). On mesure TOUT sur l'image elle-même :
+     haut de la piste, haut et hauteur du curseur. Le cadrage de la zone n'a donc pas besoin
+     d'être exact : seul compte qu'il contienne l'ascenseur entier.
+     Le jeu défile ligne par ligne et le curseur représente exactement les lignes visibles :
+       décalage (lignes) = (haut du curseur − haut de la piste) ÷ hauteur du curseur × lignes visibles */
   const W = img.w, H = img.h, d = img.d;
   if (!W || !H) return null;
-
-  // Le cadrage est celui de l'ascenseur. On détecte le curseur par sa
-  // dominante verte, mais on mesure sa position dans TOUT le cadrage.
-  const x0 = Math.floor(W * 0.55);
-  const lignes = [];
-  for (let y = 0; y < H; y++) {
-    let score = 0, sx = 0;
-    for (let x = x0; x < W; x++) {
-      const i = (y * W + x) * 4;
-      const r = d[i], g = d[i + 1], b = d[i + 2], a = d[i + 3];
-      if (a < 40) continue;
-      const v = g - Math.max(r, b);
-      if (g > 50 && v > 8 && g > r * 1.06 && g > b * 1.02) {
-        score += 1 + Math.max(0, v) / 80;
-        sx += x;
-      }
+  const px = (x, y) => { const i = (y * W + x) * 4; return [d[i], d[i + 1], d[i + 2]]; };
+  const vert = (x, y) => { const [r, g, b] = px(x, y); return g > 90 && g - Math.max(r, b) > 25; };
+  const gris = (x, y) => { const [r, g, b] = px(x, y); return r + g + b > 110 && g - Math.max(r, b) < 15 && Math.max(r, g, b) - Math.min(r, g, b) < 45; };
+  // la piste peut être plus fine que le curseur : on la cherche à ±2 px de la colonne
+  const piste = (x, y) => { for (let k = Math.max(0, x - 2); k <= Math.min(W - 1, x + 2); k++) if (gris(k, y)) return true; return false; };
+  // longueur de piste collée au curseur (2 px de transition tolérés), vers le haut (pas = -1) ou le bas (+1)
+  const longueur = (x, depart, pas) => {
+    let y = depart, saut = 0;
+    while (saut < 3 && y >= 0 && y < H && !piste(x, y)) { y += pas; saut++; }
+    let n = 0; while (y >= 0 && y < H && piste(x, y)) { y += pas; n++; }
+    return n ? n + saut : 0;
+  };
+  let best = null;
+  for (let x = 0; x < W; x++) {
+    // plus longue suite verticale de pixels verts (petits trous de 2 px tolérés)
+    let debut = -1, fin = -1, trou = 0, run = [0, -1];
+    for (let y = 0; y <= H; y++) {
+      if (y < H && vert(x, y)) { if (debut < 0) debut = y; fin = y; trou = 0; continue; }
+      if (debut >= 0 && (++trou > 2 || y === H)) { if (fin - debut > run[1] - run[0]) run = [debut, fin]; debut = -1; trou = 0; }
     }
-    if (score >= Math.max(1.5, (W - x0) * 0.035)) {
-      lignes.push({ y, score, x: sx / Math.max(1, Math.round(score)) });
-    }
+    const [hautC, basC] = run, taille = basC - hautC + 1;
+    if (taille < Math.max(6, H * 0.05)) continue;
+    const dessus = longueur(x, hautC - 1, -1), dessous = longueur(x, basC + 1, 1);
+    // une colonne verte SANS piste grise (bordure du cadre du jeu) n'est pas l'ascenseur
+    if (dessus + dessous < 8) continue;
+    if (!best || taille > best.taille) best = { x, hautC, taille, dessus, dessous };
   }
-  if (lignes.length < 2) return null;
-
-  // Regrouper les lignes contiguës : le plus grand groupe correspond au curseur.
-  const groupes = [];
-  let g = [lignes[0]];
-  for (let i = 1; i < lignes.length; i++) {
-    if (lignes[i].y <= lignes[i - 1].y + 2) g.push(lignes[i]);
-    else { groupes.push(g); g = [lignes[i]]; }
-  }
-  groupes.push(g);
-  groupes.sort((a, b) => b.reduce((n, q) => n + q.score, 0) - a.reduce((n, q) => n + q.score, 0));
-  const best = groupes[0];
-  if (!best || best.length < 2) return null;
-
-  const yMin = best[0].y;
-  const yMax = best[best.length - 1].y;
-  const poids = best.reduce((n, q) => n + q.score, 0);
-  const centre = best.reduce((n, q) => n + q.y * q.score, 0) / poids;
-  const hauteur = Math.max(1, yMax - yMin + 1);
-
-  // Position du curseur dans sa course. Le haut du curseur est utilisé,
-  // car le centre ajoute une demi-hauteur indépendante du scroll.
-  const course = Math.max(1, H - hauteur);
-  const progress = Math.max(0, Math.min(1, yMin / course));
-
-  // La hauteur du curseur donne le rapport visible/total si le cadrage
-  // contient bien toute la course. On borne pour éviter les valeurs absurdes.
-  const ratioVisible = Math.max(0.03, Math.min(1, hauteur / H));
-  const totalLignes = Math.max(GRILLE_LIGNES, Math.round(GRILLE_LIGNES / ratioVisible));
-  const maxDecalage = Math.max(0, totalLignes - GRILLE_LIGNES);
-  const decalage = Math.max(0, Math.min(maxDecalage, Math.round(progress * maxDecalage)));
-
+  if (!best) return null;
+  const { x, hautC, taille, dessus, dessous } = best;
+  const longueurPiste = dessus + taille + dessous;
+  const totalLignes = Math.max(GRILLE_LIGNES, Math.round(GRILLE_LIGNES * longueurPiste / taille));
+  const maxDecalage = totalLignes - GRILLE_LIGNES;
+  const decalage = Math.max(0, Math.min(maxDecalage, Math.round(dessus / taille * GRILLE_LIGNES)));
   return {
-    y: centre / H,
-    h: hauteur / H,
-    top: yMin / H,
-    progress,
-    totalLignes,
-    maxDecalage,
-    decalage,
-    x: best.reduce((n, q) => n + q.x * q.score, 0) / poids / W,
-    n: best.length
+    y: (hautC + taille / 2) / H, h: taille / H, top: hautC / H, x: x / W,
+    progress: maxDecalage ? decalage / maxDecalage : 0, totalLignes, maxDecalage, decalage,
+    depuisHaut: dessus, taille, piste: longueurPiste, n: taille,
+    // la piste touche le bord de la zone : elle est peut-être coupée (zone trop petite)
+    tronque: hautC - dessus <= 0 || hautC + taille + dessous >= H,
   };
 }
 function ecartAscenseur(a, b) {
@@ -2314,10 +2392,6 @@ async function recadrer(cle = "zone") {
     if (session && !pip) ouvrirOverlay();   // le clic sur « Enregistrer » autorise l'ouverture
   }
 }
-$("b-recadrer").addEventListener("click", () => recadrer("zone"));
-$("b-grille").addEventListener("click", () => recadrer("grille"));
-$("b-ascenseur").addEventListener("click", () => recadrer("ascenseur"));
-$("b-pagination").addEventListener("click", () => recadrer("pagination"));
 
 /* ---------- session : Ajouter / Terminer */
 async function ouvrirOverlay() {
@@ -2325,7 +2399,7 @@ async function ouvrirOverlay() {
   // hauteur : contenu fixe + miniature à la largeur de la fenêtre, au ratio de la zone lue
   let ratio = 0.5;
   try { const [W, H] = tailleSource(await imageCourante()); if (W && base.zone) ratio = (base.zone.h * H) / (base.zone.w * W); } catch {}
-  const LARGEUR = 290, hauteur = Math.round(230 + (LARGEUR - 12) * Math.min(1, Math.max(0.2, ratio)));
+  const LARGEUR = 290, hauteur = Math.round(266 + (LARGEUR - 12) * Math.min(1, Math.max(0.2, ratio)));
   try { pip = await documentPictureInPicture.requestWindow({ width: LARGEUR, height: hauteur }); }
   catch { pip = null; $("b-overlay").hidden = !session; return false; }
   for (const n of document.querySelectorAll("style, link[rel=stylesheet]")) pip.document.head.append(n.cloneNode(true));
@@ -2369,7 +2443,7 @@ async function demarrerSession() {
     ? "Mode automatique : sélectionne une caisse dans l'inventaire, elle est lue et enregistrée toute seule."
     : "Sélectionne une caisse dans l'inventaire et appuie sur F8 (l'overlay ou cette page doit avoir le focus).";
   chargerTesseract().catch(() => {});      // préchargement, pour un premier scan rapide
-  if (!base.zone) await recadrer("zone");    // première fois : choisir la zone à lire
+  if (!base.zone) await ouvrirParametrage("zone");   // première fois : vérifier les zones lues
   if (!pip && !(await ouvrirOverlay())) $("b-overlay").hidden = false;
   demarrerSurveillance();
   render();
@@ -2389,6 +2463,7 @@ function arreterSession() {
   $("b-session").textContent = "Ajouter"; $("b-session").classList.add("principal");
 }
 $("b-session").addEventListener("click", () => (session ? arreterSession() : demarrerSession()));
+$("b-terminer").addEventListener("click", () => arreterSession());
 $("b-overlay").addEventListener("click", ouvrirOverlay);
 
 /* Le message de « Dernier scan » est recopié sous les boutons de l'overlay */
@@ -2820,6 +2895,249 @@ $("cp").addEventListener("submit", (e) => {
   action(f.dataset.form, f.dataset, f);
 });
 
+
+/* =====================================================================
+   Page d'accueil : activité de la corporation et paramétrage de l'écran
+   ===================================================================== */
+const VIDEO_YOUTUBE = "ZyWzY8Z3qOk";   // à remplacer par l'identifiant de la vidéo de présentation
+$("home-video").src = `https://www.youtube-nocookie.com/embed/${VIDEO_YOUTUBE}`;
+
+/* Zones lues à l'écran : couleur, rôle et position par défaut (inventaire en 16:9) */
+const ZONES = {
+  zone:       { nom: "Tool-tip",   couleur: "#b56cff", aide: "Le panneau d'information de l'objet sélectionné (nom, qualité, quantité).",
+                defaut: { x: 1085, y: 255, w: 280, h: 140 } },
+  grille:     { nom: "Grille",     couleur: "#2fc7d6", aide: "La grille des caisses, du bord haut-gauche de la première case jusqu'à la dernière case visible (4 colonnes, 6 lignes).",
+                defaut: { x: 1405, y: 245, w: 457, h: 660 } },
+  ascenseur:  { nom: "Ascenseur",  couleur: "#f2b134", aide: "L'ascenseur à droite de la grille, piste entière, avec une petite marge au-dessus et au-dessous.",
+                defaut: { x: 1845, y: 222, w: 30, h: 692 } },
+  pagination: { nom: "Pagination", couleur: "#ff6b8b", aide: "Le numéro de page (par exemple « 1/3 »), sans les flèches. Il n'apparaît que dans la vue sans filtre.",
+                defaut: { x: 1590, y: 912, w: 90, h: 30 } },
+};
+const zoneDefaut = (k) => { const d = ZONES[k].defaut; return { x: d.x / 1920, y: d.y / 1080, w: d.w / 1920, h: d.h / 1080 }; };
+
+/* ---------- activité : 5 dernières mises à jour (joueur + station, ajouts rapprochés regroupés) */
+function activites() {
+  if (!compte?.corpos?.length) return [];
+  const membres = (c) => (compte.membreDe[c.user_id] || []).filter(Boolean).length > 0;   // membres de mes corporations (pas les alliés)
+  const toutes = items.map((it) => ({ ...it, joueur: compte.pseudo, moi: true }))
+    .concat(partage.caisses.filter(membres).map((c) => ({ ...c, moi: false })))
+    .filter((c) => c.ts).sort((a, b) => b.ts - a.ts);
+  const groupes = [];
+  for (const c of toutes) {
+    const g = groupes.find((x) => x.joueur === c.joueur && x.station === c.station && x.plusAncien - c.ts <= 1800);
+    if (g) { g.caisses.push(c); g.plusAncien = c.ts; }
+    else { if (groupes.length >= 5) continue; groupes.push({ joueur: c.joueur, station: c.station, moi: c.moi, ts: c.ts, plusAncien: c.ts, caisses: [c] }); }
+  }
+  return groupes;
+}
+function renderEtatZones(ul) {
+  ul.innerHTML = Object.entries(ZONES).map(([k, z]) =>
+    `<li><span class="pastille" style="background:${z.couleur}"></span>${z.nom} : ${base[k] ? "réglée" : "par défaut"}</li>`).join("");
+}
+function renderHome() {
+  // activité
+  const groupes = activites();
+  $("act-titre").textContent = "Activité de la corporation";
+  $("act-liste").innerHTML = groupes.map((g) => {
+    const noms = [...new Set(g.caisses.map((c) => c.nom))];
+    const scu = g.caisses.reduce((s, c) => s + (Number(c.quantite_scu) || 0), 0);
+    const station = g.moi ? `<a href="#/station/${encodeURIComponent(g.station)}">${esc(g.station)}</a>` : esc(g.station);
+    return `<li><div class="qui"><strong>${esc(g.joueur)}</strong><span class="quand">${ilYa(g.ts)}</span></div>
+      <div class="quoi">${noms.map(esc).join(", ")}</div>
+      <div class="ou">à ${station} · ${g.caisses.length} caisse${g.caisses.length > 1 ? "s" : ""}, ${fmtScu(scu)} SCU</div></li>`;
+  }).join("");
+  $("act-vide").hidden = !!groupes.length;
+  $("act-vide").textContent = compte
+    ? (compte.corpos?.length ? "Aucune activité pour l'instant." : "Rejoins ou crée une corporation (page Compte) pour suivre l'activité de tes coéquipiers.")
+    : "Connecte-toi (bouton en haut à droite) pour suivre l'activité de ta corporation.";
+  // état des zones
+  renderEtatZones($("home-zones"));
+}
+
+/* ---------- fenêtre de paramétrage : toutes les zones sur le même flux */
+let param = null;   // { zones, active, fluxPropre, minuterie, rect écran… }
+async function obtenirFlux() {
+  if (fluxTrack) return false;   // flux déjà partagé (session de scan en cours)
+  if (!navigator.mediaDevices?.getDisplayMedia) { toast("Ce navigateur ne permet pas de partager une fenêtre : utilise Chrome ou Edge."); return null; }
+  let stream;
+  try {
+    stream = await navigator.mediaDevices.getDisplayMedia({ video: { displaySurface: "window", frameRate: 15, cursor: "never" }, audio: false, selfBrowserSurface: "exclude", surfaceSwitching: "include" });
+  } catch { return null; }
+  const piste = stream.getVideoTracks()[0];
+  if (piste.getSettings().displaySurface === "browser") { piste.stop(); toast("Choisis la fenêtre du jeu ou l'écran entier, pas un onglet."); return null; }
+  fluxTrack = piste; methodeImage = "flux";
+  $("flux-video").srcObject = stream;
+  await new Promise((ok) => { if ($("flux-video").readyState >= 2) ok(); else $("flux-video").addEventListener("loadeddata", ok, { once: true }); setTimeout(ok, 1500); });
+  demarrerLecteurFlux();
+  piste.addEventListener("ended", () => { if (param) fermerParametrage(false); });
+  return true;
+}
+function libererFlux() {
+  if (!param?.fluxPropre || session) return;
+  arreterLecteurFlux();
+  if (fluxTrack) fluxTrack.stop();
+  fluxTrack = null; $("flux-video").srcObject = null;
+}
+
+async function ouvrirParametrage(active = "zone") {
+  if (param) return;
+  const propre = await obtenirFlux();
+  if (propre === null) return;
+  param = { fluxPropre: propre, active, zones: {}, image: null, W: 0, H: 0, geste: null, etat: {} };
+  for (const k of Object.keys(ZONES)) param.zones[k] = { ...(base[k] || zoneDefaut(k)) };
+  $("dp-zones").innerHTML = Object.entries(ZONES).map(([k, z]) =>
+    `<button type="button" class="dp-zone" data-zone="${k}" style="--c:${z.couleur}" aria-pressed="false"><span class="pastille" style="background:${z.couleur}"></span>${z.nom}<small data-etat="${k}"></small></button>`).join("");
+  choisirZone(active);
+  $("d-param").showModal();
+  await rafraichirParam();
+  param.minuterie = setInterval(() => rafraichirParam().catch(() => {}), 500);
+  return new Promise((ok) => { if (param) param.resoudre = ok; else ok(); });   // résolue à la fermeture
+}
+function choisirZone(k) {
+  param.active = k;
+  for (const b of $("dp-zones").children) b.setAttribute("aria-pressed", String(b.dataset.zone === k));
+  $("dp-aide").textContent = `${ZONES[k].nom} : ${ZONES[k].aide} Fais glisser sur l'image pour tracer la zone, déplace-la en la faisant glisser, ou étire-la par un coin.`;
+  dessinerParam();
+}
+async function rafraichirParam() {
+  if (!param) return;
+  const src = await imageCourante(), [W, H] = tailleSource(src);
+  if (!W) return;
+  if (!param.image) param.image = document.createElement("canvas");
+  if (param.image.width !== W || param.image.height !== H) { param.image.width = W; param.image.height = H; }
+  param.image.getContext("2d").drawImage(src, 0, 0, W, H);
+  param.W = W; param.H = H;
+  const cv = $("dp-canvas");
+  if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
+  ajusterCanvas();
+  // détection en direct, pour vérifier chaque zone
+  const e = param.etat, img = (k) => imageZone(param.image, W, H, param.zones[k]);
+  try { e.zone = OCR.findBadges(img("zone")) ? [true, "badges lus"] : [false, "aucun badge"]; } catch { e.zone = [false, "?"]; }
+  try {
+    const sel = OCR.trouverSelection(img("grille")), p = zonePixels(W, H, param.zones.grille);
+    e.grille = sel ? [true, `case L${Math.round(sel[1] / (p.h / GRILLE_LIGNES)) + 1} C${Math.round(sel[0] / (p.w / GRILLE_COLONNES)) + 1}`] : [false, "aucune case sélectionnée"];
+  } catch { e.grille = [false, "?"]; }
+  try { const a = empreinteAscenseur(img("ascenseur")); e.ascenseur = !a ? [false, "non détecté"] : a.tronque ? [false, "piste coupée : agrandis la zone"] : [true, `défilement ${a.decalage} ligne${a.decalage > 1 ? "s" : ""}`]; } catch { e.ascenseur = [false, "?"]; }
+  if (!param.pageEnCours && Date.now() - (param.pageLue || 0) > 2500) {   // OCR du numéro de page, de temps en temps
+    param.pageEnCours = true;
+    lireTexte(img("pagination"), "0123456789/").then((t) => {
+      const m = t.replace(/\s/g, "").match(/(\d{1,3})\/(\d{1,3})/);
+      if (param) param.etat.pagination = m ? [true, `page ${m[1]}/${m[2]}`] : [null, "non visible"];
+    }).finally(() => { if (param) { param.pageEnCours = false; param.pageLue = Date.now(); } });
+  }
+  for (const [k, v] of Object.entries(e)) {
+    const s = $("dp-zones").querySelector(`[data-etat="${k}"]`);
+    if (s && v) { s.textContent = v[1]; s.className = v[0] ? "ok" : v[0] === false ? "ko" : ""; }
+  }
+  dessinerParam();
+}
+/* Taille affichée : la plus grande qui tient dans la zone (marge comprise), au ratio de l'image */
+function ajusterCanvas() {
+  if (!param?.W) return;
+  const boite = $("d-param").querySelector(".dp-cadre"), st = getComputedStyle(boite);
+  const pl = parseFloat(st.paddingLeft) || 0, pr = parseFloat(st.paddingRight) || 0;
+  const pt = parseFloat(st.paddingTop) || 0, pb = parseFloat(st.paddingBottom) || 0;
+  const lw = boite.clientWidth - pl - pr, lh = boite.clientHeight - pt - pb;
+  if (lw <= 0 || lh <= 0) return;
+  const k = Math.min(lw / param.W, lh / param.H), w = Math.floor(param.W * k), h = Math.floor(param.H * k);
+  const cv = $("dp-canvas");
+  cv.style.width = w + "px"; cv.style.height = h + "px";
+  cv.style.left = Math.round(pl + (lw - w) / 2) + "px"; cv.style.top = Math.round(pt + (lh - h) / 2) + "px";
+}
+window.addEventListener("resize", ajusterCanvas);
+function dessinerParam() {
+  if (!param?.image) return;
+  const cv = $("dp-canvas"), x = cv.getContext("2d"), W = param.W, H = param.H, lw = Math.max(2, W / 700);
+  x.drawImage(param.image, 0, 0);
+  const a = zonePixels(W, H, param.zones[param.active]);
+  // assombrit tout sauf la zone active
+  x.fillStyle = "rgba(0,0,0,.45)";
+  x.fillRect(0, 0, W, a.y); x.fillRect(0, a.y + a.h, W, H - a.y - a.h); x.fillRect(0, a.y, a.x, a.h); x.fillRect(a.x + a.w, a.y, W - a.x - a.w, a.h);
+  x.font = `600 ${Math.round(W / 90)}px "Chakra Petch", system-ui, sans-serif`; x.textBaseline = "bottom";
+  for (const [k, z] of Object.entries(ZONES)) {
+    const r = zonePixels(W, H, param.zones[k]), actif = k === param.active;
+    x.strokeStyle = z.couleur; x.lineWidth = actif ? lw * 1.8 : lw; x.setLineDash(actif ? [] : [lw * 4, lw * 3]);
+    x.strokeRect(r.x, r.y, r.w, r.h); x.setLineDash([]);
+    const t = z.nom, tw = x.measureText(t).width + lw * 6, th = W / 70;
+    const ty = r.y - th < 0 ? r.y + r.h + th : r.y;
+    const lx = Math.max(0, Math.min(r.x, W - tw));   // étiquette toujours entière, même au bord de l'image
+    x.fillStyle = z.couleur; x.fillRect(lx, ty - th, tw, th);
+    x.fillStyle = "#0b0f14"; x.fillText(t, lx + lw * 3, ty - lw);
+    if (actif) for (const [cx, cy] of [[r.x, r.y], [r.x + r.w, r.y], [r.x, r.y + r.h], [r.x + r.w, r.y + r.h]]) {
+      x.fillStyle = "#fff"; x.fillRect(cx - lw * 3, cy - lw * 3, lw * 6, lw * 6);
+      x.strokeStyle = z.couleur; x.lineWidth = lw; x.strokeRect(cx - lw * 3, cy - lw * 3, lw * 6, lw * 6);
+    }
+  }
+}
+/* Gestes : coin -> étirer ; dans une zone -> la sélectionner et la déplacer ; ailleurs -> tracer la zone active */
+function pointParam(e) { const b = $("dp-canvas").getBoundingClientRect(); return [(e.clientX - b.left) * param.W / b.width, (e.clientY - b.top) * param.H / b.height, param.W / b.width]; }
+$("dp-canvas").addEventListener("pointerdown", (e) => {
+  if (!param?.W) return;
+  const [px, py, echelle] = pointParam(e), tol = 12 * echelle;
+  const r = zonePixels(param.W, param.H, param.zones[param.active]);
+  const coins = [[r.x, r.y, "nw"], [r.x + r.w, r.y, "ne"], [r.x, r.y + r.h, "sw"], [r.x + r.w, r.y + r.h, "se"]];
+  const coin = coins.find(([cx, cy]) => Math.abs(px - cx) <= tol && Math.abs(py - cy) <= tol);
+  const dans = (k) => { const q = zonePixels(param.W, param.H, param.zones[k]); return px >= q.x && px <= q.x + q.w && py >= q.y && py <= q.y + q.h; };
+  if (coin) param.geste = { type: "etirer", coin: coin[2], depart: r };
+  else {
+    const cible = dans(param.active) ? param.active : Object.keys(ZONES).find(dans);
+    if (cible) { if (cible !== param.active) choisirZone(cible); param.geste = { type: "deplacer", dx: px, dy: py, depart: zonePixels(param.W, param.H, param.zones[cible]) }; }
+    else param.geste = { type: "tracer", x0: px, y0: py };
+  }
+  $("dp-canvas").setPointerCapture(e.pointerId);
+});
+$("dp-canvas").addEventListener("pointermove", (e) => {
+  if (!param?.W) return;
+  const [px, py, echelle] = pointParam(e), g = param.geste, W = param.W, H = param.H;
+  if (!g) {   // curseur adapté au geste possible
+    const r = zonePixels(W, H, param.zones[param.active]), tol = 12 * echelle;
+    const coin = [[r.x, r.y, "nwse"], [r.x + r.w, r.y + r.h, "nwse"], [r.x + r.w, r.y, "nesw"], [r.x, r.y + r.h, "nesw"]].find(([cx, cy]) => Math.abs(px - cx) <= tol && Math.abs(py - cy) <= tol);
+    const dans = Object.keys(ZONES).some((k) => { const q = zonePixels(W, H, param.zones[k]); return px >= q.x && px <= q.x + q.w && py >= q.y && py <= q.y + q.h; });
+    $("dp-canvas").style.cursor = coin ? `${coin[2]}-resize` : dans ? "move" : "crosshair";
+    return;
+  }
+  let r;
+  if (g.type === "tracer") r = { x: Math.min(px, g.x0), y: Math.min(py, g.y0), w: Math.abs(px - g.x0), h: Math.abs(py - g.y0) };
+  else if (g.type === "deplacer") r = { ...g.depart, x: Math.min(W - g.depart.w, Math.max(0, g.depart.x + px - g.dx)), y: Math.min(H - g.depart.h, Math.max(0, g.depart.y + py - g.dy)) };
+  else {
+    const d = g.depart; let x0 = d.x, y0 = d.y, x1 = d.x + d.w, y1 = d.y + d.h;
+    if (g.coin.includes("w")) x0 = px; else x1 = px;
+    if (g.coin.includes("n")) y0 = py; else y1 = py;
+    r = { x: Math.min(x0, x1), y: Math.min(y0, y1), w: Math.abs(x1 - x0), h: Math.abs(y1 - y0) };
+  }
+  if (r.w < 6 || r.h < 6) return;
+  param.zones[param.active] = { x: r.x / W, y: r.y / H, w: r.w / W, h: r.h / H };
+  dessinerParam();
+});
+$("dp-canvas").addEventListener("pointerup", () => { if (param) { param.geste = null; rafraichirParam().catch(() => {}); } });
+$("dp-zones").addEventListener("click", (e) => { const b = e.target.closest("[data-zone]"); if (b) choisirZone(b.dataset.zone); });
+$("dp-defaut").addEventListener("click", () => {
+  if (!confirm("Remettre toutes les zones à leur position par défaut ?")) return;
+  for (const k of Object.keys(ZONES)) param.zones[k] = zoneDefaut(k);
+  rafraichirParam().catch(() => {});
+});
+function fermerParametrage(enregistrer) {
+  if (!param) return;
+  clearInterval(param.minuterie);
+  if (enregistrer) {
+    for (const k of Object.keys(ZONES)) base[k] = { ...param.zones[k] };
+    sauver();
+    if (typeof reinitialiserSurveillance === "function") reinitialiserSurveillance();
+    toast("Zones enregistrées.");
+  }
+  libererFlux();
+  const resoudre = param.resoudre;
+  param = null;
+  resoudre?.();
+  if ($("d-param").open) $("d-param").close();
+  render();
+  if (enregistrer && session && !pip) ouvrirOverlay();   // le clic sur « Enregistrer » autorise l'ouverture
+}
+$("dp-ok").addEventListener("click", () => fermerParametrage(true));
+$("dp-annuler").addEventListener("click", () => fermerParametrage(false));
+$("d-param").addEventListener("cancel", (e) => { e.preventDefault(); fermerParametrage(false); });
+$("b-parametrer").addEventListener("click", () => ouvrirParametrage("zone"));
+$("b-parametrer-s").addEventListener("click", () => ouvrirParametrage("zone"));
 
 /* ---------- démarrage */
 $("liste-materiaux").innerHTML = Object.keys(valeurs).sort().map((n) => `<option value="${esc(n)}">`).join("");
