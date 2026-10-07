@@ -507,6 +507,12 @@ dialog.nav-pop.ouvert .dn-contenu { transform: none; }
 .home-param .hp-cta p { margin: 0; }
 @media (max-width: 1000px) { .home-param { grid-template-columns: 1fr 1fr; } .home-param .hp-texte { grid-column: 1 / -1; } }
 @media (max-width: 640px) { .home-param { grid-template-columns: 1fr; } }
+/* ---------- v17 : compte à droite */
+.barre-droite .compte-btn img { border-radius: 50%; object-fit: cover; }
+.compte-ico { flex: none; color: var(--os-doux); }
+.barre-droite .compte-btn { padding: 7px 12px; border: 1px solid var(--trait); border-radius: 4px; color: var(--os); font-size: 14px; font-weight: 600; text-decoration: none; }
+.barre-droite .compte-btn:hover { border-color: var(--bord); background: var(--panneau-2); }
+.barre-droite .compte-btn img { width: 20px; height: 20px; }
 </style>
 </head>
 <body>
@@ -516,11 +522,11 @@ dialog.nav-pop.ouvert .dn-contenu { transform: none; }
   </button>
   <div class="marque-bloc">
     <a class="marque" href="#/">Star Manifest</a>
-    <a class="compte-btn" id="b-compte" href="#/compte"><img id="b-compte-avatar" alt="" hidden><span id="b-compte-txt">Compte</span></a>
   </div>
   <div class="barre-droite">
     <span class="etat" id="etat" hidden></span>
     <a class="btn principal cta-connexion" id="b-connexion" href="#/compte">Se connecter</a>
+    <a class="compte-btn" id="b-compte" href="#/compte"><img id="b-compte-avatar" alt="" hidden><svg class="compte-ico" id="b-compte-ico" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span id="b-compte-txt">Compte</span></a>
   </div>
 </header>
 
@@ -2926,6 +2932,7 @@ function renderCompteBouton() {
   $("b-connexion").hidden = !!compte;
   $("b-connexion").textContent = cloud.url ? "Se connecter" : "Compte";
   $("b-compte-avatar").hidden = !compte?.avatar;
+  $("b-compte-ico").style.display = compte?.avatar ? "none" : "";
   if (compte?.avatar) $("b-compte-avatar").src = compte.avatar;
 }
 
