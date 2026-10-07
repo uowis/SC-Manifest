@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Manifeste de minerai</title>
+<title>Star Manifest</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap">
 <style>
@@ -374,49 +374,191 @@ dialog.plein[open] { display: flex; flex-direction: column; gap: 8px; }
 .dp-cadre canvas { position: absolute; display: block; touch-action: none; cursor: crosshair; border: 1px solid var(--trait); border-radius: 4px; background: #000; }
 dialog.plein { --marge-param: 200px; }
 @media (max-width: 1100px) { dialog.plein { --marge-param: 24px; } }
+/* ---------- en-tête */
+.barre { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; padding: 10px 24px; }
+.marque-bloc { display: grid; justify-items: center; gap: 2px; line-height: 1.1; text-align: center; }
+.marque-bloc .marque { font-size: 20px; }
+.marque-bloc .compte-btn { font-size: 12px; color: var(--os-doux); gap: 5px; }
+.marque-bloc .compte-btn:hover { color: var(--os); }
+.marque-bloc .compte-btn img { width: 16px; height: 16px; }
+.barre .etat { justify-self: end; margin-left: 0; }
+.burger { justify-self: start; width: 40px; height: 36px; display: grid; align-content: center; justify-items: center; gap: 4px; padding: 0;
+  background: var(--panneau); border: 1px solid var(--trait); border-radius: 4px; cursor: pointer; }
+.burger:hover { border-color: var(--bord); background: var(--panneau-2); }
+.burger span { display: block; width: 18px; height: 2px; border-radius: 1px; background: var(--os); }
+button.lien { all: unset; cursor: pointer; color: var(--os); text-decoration: underline; text-underline-offset: 3px; }
+button.lien:focus-visible { outline: 2px solid var(--os); outline-offset: 2px; }
+/* ---------- accueil */
+#v-home { display: grid; gap: 20px; }
+#v-home[hidden] { display: none; }
+.home-activite .activite { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.home-trois { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; align-items: start; }
+@media (max-width: 1100px) { .home-activite .activite { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 1000px) { .home-trois { grid-template-columns: 1fr 1fr; } .home-trois > .home-intro { grid-column: 1 / -1; } }
+@media (max-width: 640px) { .home-activite .activite, .home-trois { grid-template-columns: 1fr; } .barre { padding: 10px 16px; } }
+.activite .groupe { font-size: 11px; font-weight: 600; margin-left: 6px; color: var(--accent); }
+.activite .groupe.allie { color: #f2b134; }
+/* ---------- popin de navigation */
+dialog.nav-pop { width: min(860px, 94vw); max-height: 88vh; padding: 16px 18px; display: none; }
+dialog.nav-pop[open] { display: flex; flex-direction: column; gap: 12px; }
+.dn-tete { display: flex; align-items: center; justify-content: space-between; }
+.dn-tete h2 { margin: 0; }
+.dn-fermer { background: none; border: 0; color: var(--os-doux); font-size: 18px; cursor: pointer; padding: 4px 8px; }
+.dn-fermer:hover { color: var(--os); }
+.dn-cta { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
+.dn-cta .btn { text-align: center; text-decoration: none; padding: 12px 10px; font-weight: 600; }
+.dn-cta .btn[aria-current="page"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.dn-cta .btn[aria-disabled="true"] { opacity: .45; pointer-events: none; }
+.dn-cta .btn small { display: block; font-size: 11px; font-weight: 400; color: var(--os-doux); margin-top: 2px; }
+.dn-outils { display: flex; gap: 8px; padding-top: 12px; border-top: 1px solid var(--trait); }
+.dn-outils input { flex: 1; padding: 8px 10px; background: var(--rouille); color: var(--os); border: 1px solid var(--bord); border-radius: 4px; }
+.dn-outils input:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 1px var(--accent); }
+#dn-vides[aria-pressed="true"] { background: #1f6f4a; border-color: var(--accent); color: #fff; }
+.dn-lieux { overflow-y: auto; display: grid; gap: 10px; padding-right: 4px; }
+.dn-sys > summary { cursor: pointer; list-style: none; display: flex; align-items: baseline; gap: 10px; padding: 4px 0;
+  font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--os-doux); }
+.dn-sys > summary::-webkit-details-marker { display: none; }
+.dn-sys > summary::before { content: "▸"; display: inline-block; transition: transform .12s; }
+.dn-sys[open] > summary::before { transform: rotate(90deg); }
+.dn-sys > summary small { font-size: 11px; font-weight: 400; letter-spacing: 0; text-transform: none; }
+.dn-grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 6px; padding: 4px 0 2px; }
+.dn-lieu { display: grid; gap: 2px; padding: 8px 10px; text-align: left; border: 1px solid var(--trait); border-radius: 4px;
+  background: var(--rouille); color: var(--os); cursor: pointer; font: inherit; font-size: 14px; }
+.dn-lieu:hover { border-color: var(--bord); background: var(--panneau-2); }
+.dn-lieu small { font-size: 12px; color: var(--os-doux); }
+.dn-lieu.plein small { color: #d8c86a; }
+.dn-lieu.vide { color: #8aa0a8; }
+.dn-lieu[aria-current="page"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.dn-rien { margin: 0; color: var(--os-doux); font-size: 14px; }
+/* ---------- v11 : accueil, en-tête, menu plein écran */
+.home-trois { grid-template-columns: minmax(0, 1fr) minmax(0, 1.55fr) minmax(0, .75fr); }
+@media (max-width: 1000px) { .home-trois { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); } }
+@media (max-width: 640px) { .home-trois { grid-template-columns: 1fr; } }
+.home-intro { padding: 36px 44px; background: none; border: 0; box-shadow: none; display: grid; gap: 18px; align-content: start; }
+.home-intro h1 { margin: 0; }
+.home-intro .home-lead { margin: 0; }
+@media (max-width: 640px) { .home-intro { padding: 24px 8px; } }
+.barre-droite { justify-self: end; display: flex; align-items: center; gap: 14px; }
+.barre-droite .etat { margin-left: 0; }
+.btn.cta-connexion { padding: 8px 18px; font-weight: 700; white-space: nowrap; background: var(--accent); border-color: var(--accent); color: #04140b; box-shadow: none; }
+.btn.cta-connexion:hover { background: #4fe196; border-color: #4fe196; color: #04140b; }
+.home-trois .zones-etat { grid-template-columns: 1fr; }
+#b-compte[hidden], #b-connexion[hidden] { display: none !important; }
+.burger span { transition: transform .25s ease, width .25s ease; transform-origin: left center; }
+.burger.fleche span:nth-child(1) { transform: translate(-1px, 6px) rotate(-45deg) scaleX(.55); }
+.burger.fleche span:nth-child(3) { transform: translate(-1px, -6px) rotate(45deg) scaleX(.55); }
+dialog.nav-pop { position: fixed; inset: 0; width: 100vw; height: 100vh; max-width: none; max-height: none; margin: 0; padding: 0;
+  border: 0; border-radius: 0; background: var(--rouille); color: var(--os); opacity: 0; transition: opacity .2s ease; }
+dialog.nav-pop[open] { display: flex; flex-direction: column; gap: 0; }
+dialog.nav-pop.ouvert { opacity: 1; }
+dialog.nav-pop::backdrop { background: transparent; }
+.dn-tete { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; padding: 10px 24px;
+  min-height: var(--h-barre, 57px); box-sizing: border-box; border-bottom: 1px solid var(--trait); }
+.dn-tete h2 { margin: 0; font-size: 20px; }
+.dn-corps { flex: 1; min-height: 0; overflow-y: auto; }
+.dn-contenu { width: min(1100px, 100%); margin: 0 auto; padding: 24px; box-sizing: border-box; display: grid; gap: 16px;
+  transform: translateY(-8px); transition: transform .25s ease; }
+dialog.nav-pop.ouvert .dn-contenu { transform: none; }
+.dn-lieux { overflow: visible; padding-right: 0; }
+.dn-grille { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+.dn-lieu b { font-weight: 700; }
+.dn-lieu .dn-nom { font-size: .625rem; line-height: 1.25; color: var(--os-doux); }
+.dn-lieu.vide b { font-weight: 600; }
+@media (max-width: 640px) { .dn-tete { padding: 10px 16px; } .dn-contenu { padding: 16px; } }
+@media (prefers-reduced-motion: reduce) { .burger span, dialog.nav-pop, .dn-contenu { transition: none; } }
+/* ---------- v12 : accueil */
+.home-trois { grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr) minmax(0, .8fr); }
+.home-video { display: grid; gap: 10px; background: none; border: 0; box-shadow: none; padding: 0; align-content: start; }
+.home-video h2 { font-size: 15px; margin: 0; }
+.home-video p { margin: 0; font-size: 13px; }
+.home-video .video { border: 0; }
+.home-param { padding: 28px 30px; gap: 14px; }
+@media (max-width: 1000px) {
+  .home-trois { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); }
+  .home-trois > .home-intro { grid-column: auto; }
+  .home-trois > .home-video { grid-column: 1 / -1; }
+}
+@media (max-width: 640px) { .home-trois { grid-template-columns: 1fr; } .home-param { padding: 20px; } }
+/* ---------- v13 : compte dans le menu */
+.dn-droite { justify-self: end; display: flex; align-items: center; gap: 10px; }
+.dn-droite .compte-btn { padding: 7px 12px; border: 1px solid var(--trait); border-radius: 4px; color: var(--os); font-size: 14px; }
+.dn-droite .compte-btn:hover { border-color: var(--bord); background: var(--panneau-2); }
+.dn-droite .compte-btn img { width: 20px; height: 20px; }
+/* ---------- v14 : accueil en deux colonnes */
+.home-trois { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); grid-template-areas: "video intro" "param intro"; gap: 20px 32px; align-items: start; }
+.home-trois > .home-video { grid-area: video; grid-column: auto; }
+.home-trois > .home-param { grid-area: param; }
+.home-trois > .home-intro { grid-area: intro; grid-column: auto; align-self: center; padding: 36px 56px; }
+.home-intro h1 { font-size: 28px; }
+.home-param { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px 28px; align-items: start; }
+.home-param .hp-texte, .home-param .hp-zones { display: grid; gap: 12px; align-content: start; }
+.home-param .zones-etat { grid-template-columns: 1fr; }
+@media (max-width: 1000px) {
+  .home-trois { grid-template-columns: 1fr; grid-template-areas: "video" "intro" "param"; }
+  .home-trois > .home-intro { padding: 28px 24px; }
+}
+@media (max-width: 640px) { .home-param { grid-template-columns: 1fr; } .home-trois > .home-intro { padding: 24px 8px; } }
+/* ---------- v15 : accueil */
+.home-trois { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); grid-template-areas: "video intro" "param param"; }
+@media (max-width: 1000px) { .home-trois { grid-template-columns: 1fr; grid-template-areas: "video" "intro" "param"; } }
+/* ---------- v16 : paramétrage en 3 colonnes */
+.home-param { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1fr); }
+.home-param .hp-cta { display: grid; gap: 10px; align-content: center; justify-items: start; }
+.home-param .hp-cta p { margin: 0; }
+@media (max-width: 1000px) { .home-param { grid-template-columns: 1fr 1fr; } .home-param .hp-texte { grid-column: 1 / -1; } }
+@media (max-width: 640px) { .home-param { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
 <header class="barre">
-  <a class="marque" href="#/">Manifeste de minerai</a>
-  <label class="nav"><span class="sr">Lieu</span><select id="nav"></select></label>
-  <span class="etat" id="etat">Données enregistrées dans ce navigateur</span>
-  <a class="btn petit compte-btn" id="b-compte" href="#/compte"><img id="b-compte-avatar" alt="" hidden><span id="b-compte-txt">Compte</span></a>
-  <button class="lien-deconnexion" id="b-deconnexion" type="button" hidden>Déconnexion</button>
+  <button class="burger" type="button" id="b-menu" aria-label="Ouvrir la navigation" aria-haspopup="dialog" aria-controls="d-nav">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="marque-bloc">
+    <a class="marque" href="#/">Star Manifest</a>
+    <a class="compte-btn" id="b-compte" href="#/compte"><img id="b-compte-avatar" alt="" hidden><span id="b-compte-txt">Compte</span></a>
+  </div>
+  <div class="barre-droite">
+    <span class="etat" id="etat" hidden></span>
+    <a class="btn principal cta-connexion" id="b-connexion" href="#/compte">Se connecter</a>
+  </div>
 </header>
 
 <main>
   <section id="v-home" hidden>
-    <div class="home-grille">
-      <div class="home-col">
-        <div class="carte home-intro">
-          <h1>Scanner d'inventaire semi-automatique</h1>
-          <p class="home-lead">Gérez le stock de vos minerais : leur quantité, leur qualité et leur localisation. Et partagez-le avec votre corporation.</p>
-          <div class="video"><iframe id="home-video" width="560" height="315" src="https://www.youtube.com/embed/63nSYMTkZwY?si=duC0unAr77PiTItq" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
-          <p class="note"><a id="home-video-lien" href="https://www.youtube.com/watch?v=63nSYMTkZwY" target="_blank" rel="noopener">Voir la vidéo sur YouTube</a></p>
-        </div>
-        <div class="carte">
-          <h2>Comment ça marche ?</h2>
-          <ol class="etapes">
-            <li><span class="num">1</span><div>Dans <strong>Star Citizen</strong>, ouvrez votre inventaire.</div></li>
-            <li><span class="num">2</span><div>Dans <strong>SC Manifest</strong>, <a href="#/nouvelle">créez</a> ou ouvrez l'inventaire d'une station.</div></li>
-            <li><span class="num">3</span><div>Cliquez sur <strong>« Ajouter »</strong> et choisissez la fenêtre du jeu.</div></li>
-            <li><span class="num">4</span><div>Survolez chaque minerai, un par un : l'enregistrement se fait automatiquement.</div></li>
-          </ol>
-          <div class="ligne"><a class="btn principal" href="#/nouvelle">Ouvrir une station</a><a class="btn" href="#/minerais">Voir tous mes minerais</a></div>
-        </div>
+    <div class="carte home-activite">
+      <h2 id="act-titre">Activité de la corporation et des alliés</h2>
+      <ul class="activite" id="act-liste"></ul>
+      <p class="note" id="act-vide" hidden></p>
+    </div>
+    <div class="home-trois">
+      <div class="home-video">
+        <h2>Vidéo de présentation</h2>
+        <div class="video"><iframe id="home-video" width="560" height="315" src="https://www.youtube.com/embed/63nSYMTkZwY?si=duC0unAr77PiTItq" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
+        <p class="note"><a id="home-video-lien" href="https://www.youtube.com/watch?v=63nSYMTkZwY" target="_blank" rel="noopener">Voir la vidéo sur YouTube</a></p>
       </div>
-      <div class="home-col">
-        <div class="carte">
-          <h2 id="act-titre">Activité de la corporation</h2>
-          <ul class="activite" id="act-liste"></ul>
-          <p class="note" id="act-vide" hidden></p>
-        </div>
-        <div class="carte">
+      <div class="home-intro">
+        <h1>Scanner d'inventaire semi‑automatique</h1>
+        <p class="home-lead">Gérez vos stocks de minerais : quantité, qualité, localisation. Et partagez-les avec votre corporation.</p>
+        <ol class="etapes">
+          <li><span class="num">1</span><div>Dans <strong>Star Citizen</strong>, ouvrez votre inventaire.</div></li>
+          <li><span class="num">2</span><div>Dans <strong>Star Manifest</strong>, <button type="button" class="lien" data-ouvrir-nav>choisissez une station</button> dans le menu ☰.</div></li>
+          <li><span class="num">3</span><div>Cliquez sur <strong>« Ajouter »</strong> et choisissez la fenêtre du jeu.</div></li>
+          <li><span class="num">4</span><div>Survolez chaque minerai, un par un : l'enregistrement se fait automatiquement.</div></li>
+        </ol>
+        <div class="ligne"><button type="button" class="btn principal" data-ouvrir-nav>Ouvrir une station</button><a class="btn" href="#/minerais">Mes ressources</a></div>
+      </div>
+      <div class="carte home-param">
+        <div class="hp-texte">
           <h2>Paramétrage de l'écran</h2>
-          <p>Ouvrez un inventaire dans Star Citizen, puis cliquez sur « Paramétrer » pour vérifier les zones que SC Manifest lit à l'écran.</p>
+          <p>Ouvrez un inventaire dans Star Citizen, puis cliquez sur « Paramétrer » pour vérifier les zones que Star Manifest lit à l'écran.</p>
+        </div>
+        <div class="hp-zones">
           <ul class="zones-etat" id="home-zones"></ul>
-          <div><button class="btn principal" type="button" id="b-parametrer">Paramétrer</button></div>
+        </div>
+        <div class="hp-cta">
+          <p>Votre résolution est peut-être particulière :</p>
+          <button class="btn principal" type="button" id="b-parametrer">Paramétrer</button>
         </div>
       </div>
     </div>
@@ -478,7 +620,7 @@ dialog.plein { --marge-param: 200px; }
         </div>
         <div class="carte">
           <h2>Paramétrage de l'écran</h2>
-          <p>Ouvrez un inventaire dans Star Citizen, puis cliquez sur « Paramétrer » pour vérifier les zones que SC Manifest lit à l'écran.</p>
+          <p>Ouvrez un inventaire dans Star Citizen, puis cliquez sur « Paramétrer » pour vérifier les zones que Star Manifest lit à l'écran.</p>
           <ul class="zones-etat" id="s-zones"></ul>
           <div><button class="btn" type="button" id="b-parametrer-s">Paramétrer</button></div>
         </div>
@@ -488,7 +630,7 @@ dialog.plein { --marge-param: 200px; }
 
   <section id="v-corpo" hidden>
     <div class="entete">
-      <div><h1>Corporations et alliés</h1><p class="sous-titre" id="c-compte"></p></div>
+      <div><h1 id="c-titre">Corporations et alliés</h1><p class="sous-titre" id="c-compte"></p></div>
       <div class="outils">
         <label class="visib">Voir <select id="c-groupe"></select></label>
         <span class="filtre-actif" id="c-filtre-etat"></span>
@@ -554,6 +696,22 @@ dialog.plein { --marge-param: 200px; }
     </div>
   </section>
 </form>
+
+<dialog id="d-nav" class="nav-pop" aria-labelledby="dn-titre">
+  <div class="dn-tete">
+    <button class="burger" type="button" id="dn-fermer" aria-label="Fermer la navigation"><span></span><span></span><span></span></button>
+    <h2 id="dn-titre">Navigation</h2>
+    <div class="dn-droite" id="dn-compte"></div>
+  </div>
+  <div class="dn-corps"><div class="dn-contenu">
+  <nav class="dn-cta" id="dn-cta" aria-label="Pages principales"></nav>
+  <div class="dn-outils">
+    <input type="search" id="dn-recherche" placeholder="Rechercher une station ou une ville…" aria-label="Rechercher un lieu" autocomplete="off">
+    <button type="button" class="btn" id="dn-vides" aria-pressed="false">Masquer vides</button>
+  </div>
+  <div class="dn-lieux" id="dn-lieux"></div>
+  </div></div>
+</dialog>
 
 <dialog id="d-mineraux" class="filtre-mineraux" aria-labelledby="dm-titre">
   <div class="dm-tete">
@@ -1119,7 +1277,10 @@ function toast(t) {
   $("toast").textContent = t; $("toast").classList.add("visible");
   clearTimeout(toast.t); toast.t = setTimeout(() => $("toast").classList.remove("visible"), 2800);
 }
-function etat(texte, classe = "") { $("etat").textContent = texte; $("etat").className = "etat " + classe; }
+function etat(texte, classe = "") {
+  $("etat").textContent = texte; $("etat").className = "etat " + classe;
+  $("etat").hidden = !(classe === "erreur" || /hors ligne/i.test(texte));   // rien à signaler : rien d'affiché
+}
 
 function systemeDe(station) {
   for (const [sys, liste] of Object.entries(catalogue)) if (liste.includes(station)) return sys;
@@ -1172,27 +1333,8 @@ function optionsStations(stations, { avecVide = false } = {}) {
   return html;
 }
 function renderNav() {
-  const compte = new Map();
-  for (const it of items) compte.set(it.station, (compte.get(it.station) || 0) + 1);
-  const stations = [...compte.keys()];
-  if (vue === "station" && stationCourante && !compte.has(stationCourante)) stations.push(stationCourante);
-  stations.sort((a, b) => a.localeCompare(b, "fr"));
-  const groupes = new Map();
-  for (const sys of Object.keys(catalogue)) groupes.set(sys, []);
-  for (const st of stations) { const sys = systemeDe(st); if (!groupes.has(sys)) groupes.set(sys, []); groupes.get(sys).push(st); }
-  let html = `<option value="#/">Accueil</option><option value="#/minerais">Tous mes minerais</option>`;
-  for (const [sys, liste] of groupes) {
-    if (!liste.length) continue;
-    html += `<optgroup label="${esc(sys)}">` + liste.map((st) =>
-      `<option value="#/station/${encodeURIComponent(st)}">${esc(st)} (${compte.get(st) || 0})</option>`).join("") + `</optgroup>`;
-  }
-  if (compte) html += `<option value="#/corpo">Corporations et alliés</option>`;
-  html += `<option value="#/nouvelle">+ Nouvelle station</option>`;
-  if (vue === "compte") html += `<option value="#/compte">Compte</option>`;
-  $("nav").innerHTML = html;
-  $("nav").value = vue === "station" ? `#/station/${encodeURIComponent(stationCourante)}` : ["nouvelle", "corpo", "compte"].includes(vue) ? `#/${vue}` : vue === "accueil" ? "#/minerais" : "#/";
+  if ($("d-nav")?.open) { renderNavCompte(); renderNavCta(); renderNavLieux(); }
 }
-$("nav").addEventListener("change", () => { location.hash = $("nav").value; });
 
 
 function invitationCodeFromUrl() {
@@ -1216,7 +1358,11 @@ function route() {
   else if (h === "/nouvelle") { vue = "nouvelle"; stationCourante = null; }
   else if (h === "/compte") { vue = "compte"; stationCourante = null; }
   else if (h.startsWith("/invitation/")) { vue = "compte"; stationCourante = null; }
-  else if (h === "/corpo") { vue = compte ? "corpo" : "compte"; stationCourante = null; }
+  else if (h === "/corpo" || h.startsWith("/corpo/")) {
+    vue = compte ? "corpo" : "compte"; stationCourante = null;
+    groupeDemande = h === "/corpo/allies" ? "allies" : h.startsWith("/corpo/tag/") ? "tag:" + h.slice(11) : "tous+moi";
+    if ([...$("c-groupe").options].some((o) => o.value === groupeDemande)) $("c-groupe").value = groupeDemande;
+  }
   else if (h === "/minerais") { vue = "accueil"; stationCourante = null; }
   else { vue = "home"; stationCourante = null; }
   if (session && session.station !== stationCourante) arreterSession();
@@ -1342,6 +1488,9 @@ function render() {
     $("c-compte").textContent = `${lignes.length} caisse${lignes.length > 1 ? "s" : ""} de ${joueurs} joueur${joueurs > 1 ? "s" : ""}, ` +
       `${fmtScu(lignes.reduce((s, it) => s + (Number(it.quantite_scu) || 0), 0))} SCU` + (partage.maj ? `, mis à jour ${ilYa(partage.maj / 1000)}` : "");
     $("c-filtre-etat").textContent = texteFiltre();
+    const gv = $("c-groupe").value || "";
+    const corpoVue = gv.startsWith("tag:") ? (compte?.corpos || []).find((c) => c.tag === gv.slice(4)) : null;
+    $("c-titre").textContent = corpoVue ? corpoVue.nom : gv === "allies" ? "Alliance" : "Corporations et alliés";
     $("t-corpo").hidden = !lignes.length; $("c-vide").hidden = !!lignes.length;
     $("c-vide").textContent = !compte?.corpos?.length
       ? "Tu n'es dans aucune corporation : crée-en une ou rejoins-en une depuis la page Compte."
@@ -2732,13 +2881,15 @@ async function chargerPartage() {
   partage.maj = Date.now();
   renderChoixGroupe();
 }
+let groupeDemande = null;
 function renderChoixGroupe() {
   const sel = $("c-groupe"), avant = sel.value;
   const tags = [...new Set((compte?.corpos || []).map((c) => c.tag))];
   sel.innerHTML = `<option value="tous">tous les joueurs</option><option value="tous+moi">tous, moi compris</option>` +
     tags.map((t) => `<option value="tag:${esc(t)}">corporation ${esc(t)}</option>`).join("") +
     `<option value="allies">alliés seulement</option>`;
-  sel.value = [...sel.options].some((o) => o.value === avant) ? avant : "tous+moi";
+  const voulu = groupeDemande || avant;
+  sel.value = [...sel.options].some((o) => o.value === voulu) ? voulu : "tous+moi";
 }
 function caissesCorpo() {
   const g = $("c-groupe").value || "tous";
@@ -2756,7 +2907,12 @@ function caissesCorpo() {
   if (g === "tous+moi") l = l.concat(mesCaisses);
   return l;
 }
-$("c-groupe").addEventListener("change", render);
+$("c-groupe").addEventListener("change", () => {
+  const v = $("c-groupe").value;
+  groupeDemande = v;
+  history.replaceState(null, "", v === "allies" ? "#/corpo/allies" : v.startsWith("tag:") ? `#/corpo/tag/${encodeURIComponent(v.slice(4))}` : "#/corpo");
+  render();
+});
 $("b-actualiser").addEventListener("click", async () => {
   $("b-actualiser").disabled = true;
   try { await chargerCompte(); await chargerPartage(); toast("Liste à jour."); } catch (e) { toast(messageErreur(e)); }
@@ -2765,10 +2921,12 @@ $("b-actualiser").addEventListener("click", async () => {
 
 /* ---------- page Compte */
 function renderCompteBouton() {
-  $("b-compte-txt").textContent = compte ? compte.pseudo : (cloud.url ? "Se connecter" : "Compte");
+  $("b-compte-txt").textContent = compte ? compte.pseudo : "Compte";
+  $("b-compte").hidden = !compte;
+  $("b-connexion").hidden = !!compte;
+  $("b-connexion").textContent = cloud.url ? "Se connecter" : "Compte";
   $("b-compte-avatar").hidden = !compte?.avatar;
   if (compte?.avatar) $("b-compte-avatar").src = compte.avatar;
-  $("b-deconnexion").hidden = !compte;
 }
 
 
@@ -2938,14 +3096,12 @@ async function action(nom, d, form) {
 }
 $("cp").addEventListener("click", (e) => { const b = e.target.closest("[data-action]"); if (b) action(b.dataset.action, b.dataset); });
 
-$("b-compte").addEventListener("click", (e) => {
-  if (!compte) {
+$("b-connexion").addEventListener("click", (e) => {
+  if (!compte && cloud.url) {
     e.preventDefault();
     action("connexion", {});
   }
 });
-$("b-deconnexion").addEventListener("click", () => action("deconnexion", {}));
-$("b-deconnexion").addEventListener("click", () => action("deconnexion", {}));
 $("cp").addEventListener("submit", (e) => {
   e.preventDefault();
   const f = e.target;
@@ -2969,54 +3125,57 @@ if (!/^https?:$/.test(location.protocol)) {
   $("home-video").outerHTML = `<a class="video-lien" href="https://www.youtube.com/watch?v=${VIDEO_YOUTUBE}" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/${VIDEO_YOUTUBE}/hqdefault.jpg" alt="Vidéo de présentation"><span>▶ Voir la vidéo sur YouTube</span></a>`;
 }
 
-/* Zones lues à l'écran : couleur, rôle et position par défaut (inventaire en 16:9) */
+/* Zones lues à l'écran : couleur, rôle et position par défaut, en % de la largeur / hauteur de l'écran */
 const ZONES = {
   zone:       { nom: "Tool-tip",   couleur: "#b56cff", aide: "Le panneau d'information de l'objet sélectionné (nom, qualité, quantité).",
-                defaut: { x: 1085, y: 255, w: 280, h: 140 } },
+                defaut: { x: 56.51, y: 23.61, w: 14.58, h: 12.96 } },
   grille:     { nom: "Grille",     couleur: "#2fc7d6", aide: "La grille des caisses, du bord haut-gauche de la première case jusqu'à la dernière case visible (4 colonnes, 6 lignes).",
-                defaut: { x: 1405, y: 245, w: 457, h: 660 } },
+                defaut: { x: 73.18, y: 22.69, w: 23.8, h: 61.11 } },
   ascenseur:  { nom: "Ascenseur",  couleur: "#f2b134", aide: "L'ascenseur à droite de la grille, piste entière, avec une petite marge au-dessus et au-dessous.",
-                defaut: { x: 1845, y: 222, w: 30, h: 692 } },
+                defaut: { x: 96.09, y: 20.56, w: 1.56, h: 64.07 } },
   pagination: { nom: "Pagination", couleur: "#ff6b8b", aide: "Le numéro de page (par exemple « 1/3 »), sans les flèches. Il n'apparaît que dans la vue sans filtre.",
-                defaut: { x: 1590, y: 912, w: 90, h: 30 } },
+                defaut: { x: 82.81, y: 84.44, w: 4.69, h: 2.78 } },
 };
-const zoneDefaut = (k) => { const d = ZONES[k].defaut; return { x: d.x / 1920, y: d.y / 1080, w: d.w / 1920, h: d.h / 1080 }; };
+const zoneDefaut = (k) => { const d = ZONES[k].defaut; return { x: d.x / 100, y: d.y / 100, w: d.w / 100, h: d.h / 100 }; };
+const estDefaut = (k) => { const a = base[k], b = zoneDefaut(k); return !!a && ["x", "y", "w", "h"].every((c) => Math.abs(a[c] - b[c]) < 1e-4); };
+// paramétrage existant d'office : toute zone non réglée prend sa valeur par défaut
+for (const k of Object.keys(ZONES)) if (!base[k]) base[k] = zoneDefaut(k);
 
 /* ---------- activité : 5 dernières mises à jour (joueur + station, ajouts rapprochés regroupés) */
 function activites() {
   if (!compte?.corpos?.length) return [];
-  const membres = (c) => (compte.membreDe[c.user_id] || []).filter(Boolean).length > 0;   // membres de mes corporations (pas les alliés)
-  const toutes = items.map((it) => ({ ...it, joueur: compte.pseudo, moi: true }))
-    .concat(partage.caisses.filter(membres).map((c) => ({ ...c, moi: false })))
+  const toutes = items.map((it) => ({ ...it, joueur: compte.pseudo, moi: true, groupe: "" }))
+    .concat(partage.caisses.map((c) => ({ ...c, moi: false })))   // membres de mes corporations et alliés
     .filter((c) => c.ts).sort((a, b) => b.ts - a.ts);
   const groupes = [];
   for (const c of toutes) {
     const g = groupes.find((x) => x.joueur === c.joueur && x.station === c.station && x.plusAncien - c.ts <= 1800);
     if (g) { g.caisses.push(c); g.plusAncien = c.ts; }
-    else { if (groupes.length >= 5) continue; groupes.push({ joueur: c.joueur, station: c.station, moi: c.moi, ts: c.ts, plusAncien: c.ts, caisses: [c] }); }
+    else { if (groupes.length >= 6) continue; groupes.push({ joueur: c.joueur, groupe: c.groupe, station: c.station, moi: c.moi, ts: c.ts, plusAncien: c.ts, caisses: [c] }); }
   }
   return groupes;
 }
 function renderEtatZones(ul) {
   ul.innerHTML = Object.entries(ZONES).map(([k, z]) =>
-    `<li><span class="pastille" style="background:${z.couleur}"></span>${z.nom} : ${base[k] ? "réglée" : "par défaut"}</li>`).join("");
+    `<li><span class="pastille" style="background:${z.couleur}"></span>${z.nom} : ${estDefaut(k) ? "par défaut" : "réglée"}</li>`).join("");
 }
 function renderHome() {
   // activité
   const groupes = activites();
-  $("act-titre").textContent = "Activité de la corporation";
+  $("act-titre").textContent = "Activité de la corporation et des alliés";
   $("act-liste").innerHTML = groupes.map((g) => {
     const noms = [...new Set(g.caisses.map((c) => c.nom))];
     const scu = g.caisses.reduce((s, c) => s + (Number(c.quantite_scu) || 0), 0);
     const station = g.moi ? `<a href="#/station/${encodeURIComponent(g.station)}">${esc(g.station)}</a>` : esc(g.station);
-    return `<li><div class="qui"><strong>${esc(g.joueur)}</strong><span class="quand">${ilYa(g.ts)}</span></div>
+    const tag = g.groupe ? `<span class="groupe ${g.groupe === "Allié" ? "allie" : ""}">${esc(g.groupe)}</span>` : "";
+    return `<li><div class="qui"><strong>${esc(g.joueur)}${tag}</strong><span class="quand">${ilYa(g.ts)}</span></div>
       <div class="quoi">${noms.map(esc).join(", ")}</div>
       <div class="ou">à ${station} · ${g.caisses.length} caisse${g.caisses.length > 1 ? "s" : ""}, ${fmtScu(scu)} SCU</div></li>`;
   }).join("");
   $("act-vide").hidden = !!groupes.length;
   $("act-vide").textContent = compte
     ? (compte.corpos?.length ? "Aucune activité pour l'instant." : "Rejoins ou crée une corporation (page Compte) pour suivre l'activité de tes coéquipiers.")
-    : "Connecte-toi (bouton en haut à droite) pour suivre l'activité de ta corporation.";
+    : "Connecte-toi (bouton « Se connecter », en haut à droite) pour suivre l'activité de ta corporation et de ses alliés.";
   // état des zones
   renderEtatZones($("home-zones"));
 }
@@ -3205,6 +3364,117 @@ $("dp-annuler").addEventListener("click", () => fermerParametrage(false));
 $("d-param").addEventListener("cancel", (e) => { e.preventDefault(); fermerParametrage(false); });
 $("b-parametrer").addEventListener("click", () => ouvrirParametrage("zone"));
 $("b-parametrer-s").addEventListener("click", () => ouvrirParametrage("zone"));
+
+/* =====================================================================
+   Navigation : menu burger -> popin (pages principales + choix du lieu)
+   ===================================================================== */
+const CLE_NAV = "manifeste-minerai.nav";
+const navPrefs = (() => { try { return { masquerVides: false, replies: [], ...JSON.parse(localStorage.getItem(CLE_NAV) || "{}") }; } catch { return { masquerVides: false, replies: [] }; } })();
+const sauverNav = () => { try { localStorage.setItem(CLE_NAV, JSON.stringify(navPrefs)); } catch {} };
+const sansAccents = (t) => String(t).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+
+function lienCta(href, titre, sousTitre, actif, desactive, info) {
+  return `<a class="btn${actif ? " principal" : ""}" href="${desactive ? "#" : href}"${actif ? ' aria-current="page"' : ""}${desactive ? ` aria-disabled="true" tabindex="-1" title="${esc(info)}"` : ""}>${esc(titre)}${sousTitre ? `<small>${esc(sousTitre)}</small>` : ""}</a>`;
+}
+function renderNavCta() {
+  const h = decodeURIComponent(location.hash.replace(/^#/, "")) || "/";
+  const corpos = compte?.corpos || [];
+  let html = lienCta("#/", "Accueil", "", vue === "home");
+  if (corpos.length) for (const c of corpos) html += lienCta(`#/corpo/tag/${encodeURIComponent(c.tag)}`, c.nom, `[${c.tag}]`, h === `/corpo/tag/${c.tag}`);
+  else html += lienCta("#/corpo", "Corporation", compte ? "Aucune corporation" : "Connexion nécessaire", false, true, compte ? "Rejoins ou crée une corporation (page Compte)" : "Connecte-toi pour voir ta corporation");
+  const allies = corpos.some((c) => (c.partagentAvecNous || []).length);
+  html += lienCta("#/corpo/allies", "Alliance", !compte ? "Connexion nécessaire" : !corpos.length ? "Aucune corporation" : "", h === "/corpo/allies", !compte || !corpos.length, compte ? "Aucune corporation alliée ne partage avec vous" : "Connecte-toi pour voir tes alliés");
+  html += lienCta("#/minerais", "Mes ressources", "", vue === "accueil");
+  $("dn-cta").innerHTML = html;
+}
+function etiquetteLieu(st) {
+  const m = /^([A-Z]{2,4}-L\d+)\s+(.+?)(?:\s+Station)?$/.exec(st);
+  return m ? `<b>${esc(m[1])}</b><span class="dn-nom">${esc(m[2])}</span>` : `<b>${esc(st)}</b>`;
+}
+function renderNavLieux() {
+  // caisses personnelles par lieu
+  const parLieu = new Map();
+  for (const it of items) { const e = parLieu.get(it.station) || { n: 0, scu: 0 }; e.n++; e.scu += Number(it.quantite_scu) || 0; parLieu.set(it.station, e); }
+  const systemes = new Map(Object.entries(catalogue).map(([s, l]) => [s, [...l]]));
+  for (const st of parLieu.keys()) if (systemeDe(st) === "Autres") { if (!systemes.has("Autres")) systemes.set("Autres", []); if (!systemes.get("Autres").includes(st)) systemes.get("Autres").push(st); }
+  const t = sansAccents($("dn-recherche").value.trim());
+  let html = "";
+  for (const [sys, liste] of systemes) {
+    const lieux = liste.filter((st) => (!t || sansAccents(st).includes(t)) && (!navPrefs.masquerVides || parLieu.has(st)))
+      .sort((a, b) => (parLieu.has(b) - parLieu.has(a)) || a.localeCompare(b, "fr"));
+    if (!lieux.length) continue;
+    const tot = lieux.reduce((s, st) => { const e = parLieu.get(st); if (e) { s.n += e.n; s.scu += e.scu; } return s; }, { n: 0, scu: 0 });
+    const ouvert = t || !navPrefs.replies.includes(sys);   // une recherche déplie tout
+    html += `<details class="dn-sys" data-sys="${esc(sys)}"${ouvert ? " open" : ""}><summary>${esc(sys)} <small>${tot.n ? `${tot.n} caisse${tot.n > 1 ? "s" : ""} / ${fmtScu(tot.scu)} SCU` : "vide"}</small></summary><div class="dn-grille">` +
+      lieux.map((st) => {
+        const e = parLieu.get(st), actif = vue === "station" && stationCourante === st;
+        return `<button type="button" class="dn-lieu ${e ? "plein" : "vide"}" data-lieu="${esc(st)}" title="${esc(st)}"${actif ? ' aria-current="page"' : ""}>${etiquetteLieu(st)}<small>${e ? `${e.n} caisse${e.n > 1 ? "s" : ""} / ${fmtScu(e.scu)} SCU` : "—"}</small></button>`;
+      }).join("") + `</div></details>`;
+  }
+  $("dn-lieux").innerHTML = html || `<p class="dn-rien">Aucun lieu ne correspond${navPrefs.masquerVides ? " (les lieux vides sont masqués)" : ""}.</p>`;
+  $("dn-vides").setAttribute("aria-pressed", String(navPrefs.masquerVides));
+}
+function renderNavCompte() {
+  $("dn-compte").innerHTML = compte
+    ? `<a class="compte-btn" href="#/compte" data-dn-compte>${compte.avatar ? `<img src="${esc(compte.avatar)}" alt="">` : ""}<span>${esc(compte.pseudo)}</span></a>`
+    : `<a class="btn principal cta-connexion" href="#/compte" data-dn-compte>${cloud.url ? "Se connecter" : "Compte"}</a>`;
+}
+function ouvrirNav() {
+  renderNavCompte();
+  const d = $("d-nav");
+  clearTimeout(minuterieNav);
+  $("dn-recherche").value = "";
+  renderNavCta(); renderNavLieux();
+  d.style.setProperty("--h-barre", document.querySelector(".barre").offsetHeight + "px");
+  if (!d.open) d.showModal();
+  $("dn-recherche").focus();
+  requestAnimationFrame(() => requestAnimationFrame(() => {   // laisse le navigateur peindre l'état initial
+    d.classList.add("ouvert"); $("dn-fermer").classList.add("fleche"); $("b-menu").classList.add("fleche");
+  }));
+}
+$("b-menu").addEventListener("click", ouvrirNav);
+document.addEventListener("click", (e) => { if (e.target.closest("[data-ouvrir-nav]")) ouvrirNav(); });
+$("dn-fermer").addEventListener("click", () => fermerNav());
+$("d-nav").addEventListener("click", (e) => {
+  const lieu = e.target.closest("[data-lieu]");
+  if (lieu) { location.hash = `#/station/${encodeURIComponent(lieu.dataset.lieu)}`; fermerNav(); return; }
+  const c = e.target.closest("[data-dn-compte]");
+  if (c) {
+    if (!compte && cloud.url) { e.preventDefault(); action("connexion", {}); }
+    else fermerNav();
+    return;
+  }
+  const a = e.target.closest(".dn-cta a");
+  if (a && a.getAttribute("aria-disabled") !== "true") fermerNav();
+});
+$("d-nav").addEventListener("toggle", (e) => {   // mémorise les systèmes repliés (hors recherche)
+  const d = e.target.closest?.(".dn-sys");
+  if (!d || $("dn-recherche").value.trim()) return;
+  const s = d.dataset.sys, i = navPrefs.replies.indexOf(s);
+  if (d.open && i >= 0) navPrefs.replies.splice(i, 1);
+  if (!d.open && i < 0) navPrefs.replies.push(s);
+  sauverNav();
+}, true);
+$("dn-recherche").addEventListener("input", renderNavLieux);
+$("dn-recherche").addEventListener("keydown", (e) => {
+  if (e.key !== "Enter") return;
+  const premier = $("dn-lieux").querySelector("[data-lieu]");
+  if (premier) { e.preventDefault(); premier.click(); }
+});
+$("dn-vides").addEventListener("click", () => { navPrefs.masquerVides = !navPrefs.masquerVides; sauverNav(); renderNavLieux(); });
+/* ---------- v11 : ouverture / fermeture animées du menu plein écran */
+const DUREE_NAV = matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 220;
+let minuterieNav = 0;
+function fermerNav() {
+  const d = $("d-nav");
+  if (!d.open) return;
+  d.classList.remove("ouvert");
+  $("dn-fermer").classList.remove("fleche"); $("b-menu").classList.remove("fleche");
+  clearTimeout(minuterieNav);
+  minuterieNav = setTimeout(() => { d.close(); $("b-menu").focus(); }, DUREE_NAV);
+}
+$("d-nav").addEventListener("cancel", (e) => { e.preventDefault(); fermerNav(); });
+
 
 /* ---------- démarrage */
 $("liste-materiaux").innerHTML = Object.keys(valeurs).sort().map((n) => `<option value="${esc(n)}">`).join("");
