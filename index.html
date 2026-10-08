@@ -6,6 +6,7 @@
 <title>Star Manifest</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&display=swap">
 <style>
 
 :root {
@@ -65,23 +66,23 @@ th[aria-sort] button { color: var(--os); }
 th .fleche { font-size: 11px; width: 10px; }
 td.coche, th.coche { width: 44px; text-align: center; }
 /* Lignes sélectionnables : toute la ligne est cliquable et s'éclaire au survol */
-#t-station tbody tr { cursor: pointer; transition: background-color .08s; }
-#t-station tbody tr:hover td { background: rgba(183,224,231,.09); }
-#t-station tbody tr.selectionne td { background: rgba(54,204,127,.10); }
-#t-station tbody tr.selectionne:hover td { background: rgba(54,204,127,.16); }
-#t-station tbody tr.selectionne td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
+:is(#t-station, #t-accueil) tbody tr { cursor: pointer; transition: background-color .08s; }
+:is(#t-station, #t-accueil) tbody tr:hover td { background: rgba(183,224,231,.09); }
+:is(#t-station, #t-accueil) tbody tr.selectionne td { background: rgba(54,204,127,.10); }
+:is(#t-station, #t-accueil) tbody tr.selectionne:hover td { background: rgba(54,204,127,.16); }
+:is(#t-station, #t-accueil) tbody tr.selectionne td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
 /* Case à cocher harmonisée avec l'interface */
-#t-station input[type=checkbox] { appearance: none; -webkit-appearance: none; margin: 0; width: 18px; height: 18px; vertical-align: middle;
+:is(#t-station, #t-accueil) input[type=checkbox] { appearance: none; -webkit-appearance: none; margin: 0; width: 18px; height: 18px; vertical-align: middle;
   border: 1.5px solid var(--bord); border-radius: 4px; background: var(--rouille); display: inline-grid; place-content: center;
   transition: background-color .1s, border-color .1s; }
-#t-station input[type=checkbox]::before { content: ""; width: 10px; height: 10px; transform: scale(0); transition: transform .1s;
+:is(#t-station, #t-accueil) input[type=checkbox]::before { content: ""; width: 10px; height: 10px; transform: scale(0); transition: transform .1s;
   background: #04130b; clip-path: polygon(14% 52%, 0 66%, 38% 100%, 100% 22%, 86% 8%, 38% 72%); }
-#t-station input[type=checkbox]:checked { background: var(--accent); border-color: var(--accent); }
-#t-station input[type=checkbox]:checked::before { transform: scale(1); }
-#t-station input[type=checkbox]:indeterminate { background: var(--accent); border-color: var(--accent); }
-#t-station input[type=checkbox]:indeterminate::before { transform: scale(1); clip-path: inset(40% 10%); }
-#t-station tr:hover input[type=checkbox]:not(:checked) { border-color: var(--os-doux); }
-#t-station input[type=checkbox]:focus-visible { outline: 2px solid var(--os); outline-offset: 2px; }
+:is(#t-station, #t-accueil) input[type=checkbox]:checked { background: var(--accent); border-color: var(--accent); }
+:is(#t-station, #t-accueil) input[type=checkbox]:checked::before { transform: scale(1); }
+:is(#t-station, #t-accueil) input[type=checkbox]:indeterminate { background: var(--accent); border-color: var(--accent); }
+:is(#t-station, #t-accueil) input[type=checkbox]:indeterminate::before { transform: scale(1); clip-path: inset(40% 10%); }
+:is(#t-station, #t-accueil) tr:hover input[type=checkbox]:not(:checked) { border-color: var(--os-doux); }
+:is(#t-station, #t-accueil) input[type=checkbox]:focus-visible { outline: 2px solid var(--os); outline-offset: 2px; }
 td a { color: var(--os); text-decoration-color: var(--trait); text-underline-offset: 3px; }
 td a:hover { text-decoration-color: var(--os); }
 td .bande { color: var(--os-doux); font-size: 12px; margin-left: 6px; }
@@ -89,8 +90,8 @@ td .q { color: #6fd0c4; font-weight: 600; }
 td .scu { color: #d8c86a; }
 .date { color: var(--os-doux); }
 tr.nouveau td { background: rgba(54,204,127,.12); }
-#t-station input[data-id] { cursor: pointer; }
-#t-station tbody { user-select: none; }
+:is(#t-station, #t-accueil) input[data-id] { cursor: pointer; }
+:is(#t-station, #t-accueil) tbody { user-select: none; }
 tr.selectionne td { background: rgba(183,224,231,.07); }
 .btn[aria-pressed="true"] { background: var(--os); color: var(--rouille); border-color: var(--os); }
 tr.groupe td { font-weight: 600; }
@@ -513,6 +514,127 @@ dialog.nav-pop.ouvert .dn-contenu { transform: none; }
 .barre-droite .compte-btn { padding: 7px 12px; border: 1px solid var(--trait); border-radius: 4px; color: var(--os); font-size: 14px; font-weight: 600; text-decoration: none; }
 .barre-droite .compte-btn:hover { border-color: var(--bord); background: var(--panneau-2); }
 .barre-droite .compte-btn img { width: 20px; height: 20px; }
+/* ---------- v19 : raffinage */
+.raff-liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.raff-liste li { padding: 8px 10px; border: 1px solid var(--trait); border-radius: 4px; background: var(--rouille); display: grid; gap: 4px; font-size: 13px; }
+.raff-liste li.pret { border-color: var(--accent); }
+.raff-liste.grille { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px; }
+.raff-ressources { margin-bottom: 16px; }
+.raff-liste .ro-haut { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.raff-liste .ro-haut a { color: var(--os); text-underline-offset: 3px; }
+.raff-liste .ro-etat { color: var(--os-doux); font-size: 12px; white-space: nowrap; }
+.raff-liste li.pret .ro-etat { color: var(--accent); font-weight: 600; }
+.raff-liste .ro-lignes { display: grid; gap: 2px; }
+.raff-liste .ro-l { display: flex; gap: 6px; align-items: baseline; }
+.raff-liste .ro-l small { color: var(--accent); }
+.raff-liste .ro-l b { margin-left: auto; font-weight: 500; color: #d8c86a; }
+.raff-liste li.vide { border: 0; background: none; padding: 0; color: var(--os-doux); }
+.raff-liste .ro-bas { display: flex; justify-content: space-between; align-items: center; gap: 8px; color: var(--os-doux); }
+.raff-liste li.pret .ro-bas > span:first-child { color: var(--accent); font-weight: 600; }
+dialog.raff-pop[open] { gap: 12px; }
+.dr-tete { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+.dr-tete h2 { margin: 0; font-size: 17px; }
+.dr-etat { color: var(--os-doux); font-size: 13px; }
+.dr-actions { margin-left: auto; display: flex; gap: 8px; }
+.dr-corps { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(360px, 1fr); gap: 16px; }
+.dr-apercu { align-self: start; max-height: 100%; min-height: 0; overflow: auto; border: 1px solid var(--trait); border-radius: 4px; background: #000; }
+.dr-apercu canvas { display: block; width: 100%; height: auto; }
+.dr-table { display: grid; align-content: start; gap: 12px; overflow: auto; }
+.dr-table table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.dr-table th { text-align: left; font-size: 12px; color: var(--os-doux); font-weight: 500; padding: 4px 6px; border-bottom: 1px solid var(--trait); }
+.dr-table td { padding: 4px 6px; border-bottom: 1px solid var(--trait); }
+.dr-table input { width: 72px; padding: 4px 6px; background: var(--rouille); color: var(--os); border: 1px solid var(--bord); border-radius: 3px; font: inherit; }
+.dr-table tr.ignoree { opacity: .45; }
+.dr-table tr.neuve td { background: color-mix(in srgb, var(--accent) 14%, transparent); }
+.dr-table small { color: #ffb36b; font-size: 11px; }
+.dr-vide { color: var(--os-doux); text-align: center; padding: 16px !important; }
+.dr-pied { display: grid; gap: 6px; padding: 10px 12px; background: var(--rouille); border: 1px solid var(--trait); border-radius: 4px; }
+.dr-pied div { display: flex; justify-content: space-between; gap: 10px; font-size: 14px; }
+.dr-pied span { color: var(--os-doux); }
+.dr-total.ok { color: var(--accent); }
+@media (max-width: 900px) { .dr-corps { grid-template-columns: 1fr; } }
+/* ---------- v22 : engrenage paramétrage, ordres à droite dans les ressources */
+.ligne-ajouter { display: flex; gap: 8px; }
+.ligne-ajouter > .btn { width: auto; margin: 0; }
+.ligne-ajouter #b-session { flex: 1 1 auto; }
+.ligne-ajouter .btn-engrenage { flex: 0 0 52px; width: 52px; display: grid; place-items: center; padding: 0; }
+.btn-engrenage svg { width: 22px; height: 22px; }
+.ressources-grille { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; align-items: start; }
+.ressources-grille.avec-raff { grid-template-columns: minmax(0, 1fr) 300px; }
+.ressources-grille .raff-ressources { margin: 0; }
+.raff-ressources .raff-liste.grille { grid-template-columns: 1fr; }
+@media (max-width: 900px) { .ressources-grille.avec-raff { grid-template-columns: 1fr; } .ressources-grille .raff-ressources { order: -1; } }
+/* ---------- v23 : charte du terminal de raffinerie */
+:root { --cta: #66742a; --cta-2: #76862f; --cta-texte: #f4f6ea; --orange: #c8743a; --strie: #9e3a30;
+  --hachure-a: #c23b2c; --hachure-b: transparent; }
+/* actions principales : vert-jaune plein */
+.btn.principal, .btn.cta-connexion { background: var(--cta); border-color: var(--cta); color: var(--cta-texte); box-shadow: none; font-weight: 600; letter-spacing: .02em; }
+.btn.principal:hover, .btn.cta-connexion:hover { background: var(--cta-2); border-color: var(--cta-2); color: var(--cta-texte); }
+/* actions secondaires : contour orange */
+.btn:not(.principal):not(.cta-connexion):not(.danger):not(.burger) { background: transparent; border-color: color-mix(in srgb, var(--orange) 65%, transparent); }
+.btn:not(.principal):not(.cta-connexion):not(.danger):not(.burger):hover { background: color-mix(in srgb, var(--orange) 14%, transparent); border-color: var(--orange); }
+.btn[aria-pressed="true"]:not(.principal) { background: color-mix(in srgb, var(--orange) 22%, transparent) !important; border-color: var(--orange) !important; }
+/* surtitres : orange, avec une petite bande de stries rouges */
+.carte > h2, .hp-texte > h2, .home-video > h2, .raff-ressources > h2 { color: var(--orange); text-transform: uppercase; letter-spacing: .06em; font-size: 13px; display: flex; align-items: center; gap: 10px; }
+.carte > h2::before, .hp-texte > h2::before, .home-video > h2::before, .raff-ressources > h2::before { content: ""; flex: none; width: 34px; height: 9px;
+  background: repeating-linear-gradient(135deg, var(--strie) 0 2px, transparent 2px 5px); }
+.dn-sys > summary { color: var(--orange); }
+/* stries rouges décoratives (séparateur sous les titres de page) */
+.hachures, .entete::after { background: repeating-linear-gradient(135deg, var(--strie) 0 2px, transparent 2px 6px) !important; opacity: .75; }
+/* ordre prêt : couleur des actions principales */
+.raff-liste li.pret { border-color: var(--cta); }
+.raff-liste li.pret .ro-etat, .raff-liste li.pret .ro-bas > span:first-child { color: #a3b25a; }
+/* accueil : ordres de raffinage à droite de l'activité */
+.home-haut { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; align-items: start; }
+.home-haut.avec-raff { grid-template-columns: minmax(0, 1fr) 300px; }
+.home-haut.avec-raff .home-activite .activite { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.home-haut .raff-liste.grille { grid-template-columns: 1fr; }
+@media (max-width: 1000px) { .home-haut.avec-raff { grid-template-columns: 1fr; } }
+@media (max-width: 640px) { .home-haut.avec-raff .home-activite .activite { grid-template-columns: 1fr; } }
+/* ---------- v26 : menu, page courante signalée par un soulignement */
+.dn-cta .btn[aria-current="page"] { box-shadow: inset 0 -3px 0 var(--orange) !important; }
+.dn-cta .btn.principal[aria-current="page"] { box-shadow: inset 0 -3px 0 var(--cta-texte) !important; }
+/* ---------- v28 : overlay de scan de raffinage, boutons de la station */
+.p-raff { display: grid; gap: 8px; padding: 10px; background: var(--rouille); color: var(--os); font-size: 13px; }
+.p-raff[hidden] { display: none; }
+.p-raff.flottant { position: fixed; right: 16px; bottom: 16px; width: 340px; max-height: calc(100vh - 32px); overflow: auto; z-index: 50;
+  border: 1px solid var(--bord); border-radius: 6px; box-shadow: 0 10px 40px rgba(0,0,0,.6); }
+body.overlay-raff { margin: 0; background: var(--rouille); }
+.pr-aide { margin: 0; color: var(--orange); font-size: 12px; }
+.pr-tete { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.pr-tete .dr-etat { font-size: 11px; color: var(--os-doux); text-align: right; }
+.pr-apercu { width: 100%; height: auto; max-height: 220px; object-fit: contain; background: #000; border: 1px solid var(--trait); border-radius: 3px; }
+.pr-table { width: 100%; border-collapse: collapse; }
+.pr-table th { text-align: left; font-size: 11px; font-weight: 500; color: var(--os-doux); padding: 2px 4px; border-bottom: 1px solid var(--trait); }
+.pr-table td { padding: 2px 4px; border-bottom: 1px solid var(--trait); }
+.pr-table td:first-child { font-size: 12px; }
+.pr-table input { width: 52px; padding: 2px 4px; background: transparent; color: var(--os); border: 1px solid var(--trait); border-radius: 3px; font: inherit; font-size: 12px; }
+.pr-table td:nth-child(4) { display: none; }
+.pr-table input { width: 70px; }
+.pr-table tr.ignoree { opacity: .45; }
+.pr-table tr.neuve td { background: color-mix(in srgb, var(--cta) 22%, transparent); }
+.p-raff .dr-pied { padding: 6px 8px; gap: 3px; }
+.p-raff .dr-pied div { font-size: 12px; }
+.p-raff .dr-total.ok { color: #a3b25a; }
+.p-raff .note { margin: 0; font-size: 11px; }
+.pr-temps { width: 90px; text-align: right; padding: 2px 6px; background: transparent; color: var(--os); border: 1px solid var(--trait); border-radius: 3px; font: inherit; font-weight: 600; }
+.pr-ordres { display: flex; gap: 6px; flex-wrap: wrap; }
+.pr-ordres[hidden] { display: none; }
+.pr-ordres .btn { flex: 1; padding: 5px 8px; }
+.pr-ordres .btn.actif { background: color-mix(in srgb, var(--orange) 24%, transparent) !important; border-color: var(--orange) !important; color: var(--os) !important; font-weight: 700; }
+.pr-actions { display: flex; gap: 6px; }
+.ro-barre { height: 6px; border-radius: 3px; background: color-mix(in srgb, var(--strie) 35%, transparent); overflow: hidden; }
+.ro-barre > span { display: block; height: 100%; background: #7d8db8; transition: width 1s linear; }
+.raff-liste li.pret .ro-barre > span { background: var(--cta); }
+.raff-liste .ro-etat { font-variant-numeric: tabular-nums; }
+.pr-actions .btn { flex: 1; padding: 6px 8px; }
+.pr-actions #dr-enregistrer { flex: 2; }
+.colonne > #b-raff { width: 100%; }
+.colonne .raff-liste { margin-top: -2px; }
+.home-video .h2-video2 { margin-top: 14px; }
+.home-video .note a { color: var(--os-doux); }
+/* ---------- v44 : titre du site */
+.marque-bloc .marque, .marque { font-family: "Orbitron", "Chakra Petch", sans-serif; font-weight: 900; text-transform: uppercase; font-size: 18px; letter-spacing: .04em; }
 </style>
 </head>
 <body>
@@ -532,27 +654,37 @@ dialog.nav-pop.ouvert .dn-contenu { transform: none; }
 
 <main>
   <section id="v-home" hidden>
-    <div class="carte home-activite">
-      <h2 id="act-titre">Activité de la corporation et des alliés</h2>
-      <ul class="activite" id="act-liste"></ul>
-      <p class="note" id="act-vide" hidden></p>
+    <div class="home-haut" id="h-grille">
+      <div class="carte home-activite">
+        <h2 id="act-titre">Activité de la corporation et des alliés</h2>
+        <ul class="activite" id="act-liste"></ul>
+        <p class="note" id="act-vide" hidden></p>
+      </div>
+      <aside class="carte raff-ressources" id="h-raff-bloc" hidden>
+        <h2>Ordres de raffinage</h2>
+        <ul class="raff-liste grille" id="h-raff"></ul>
+      </aside>
     </div>
     <div class="home-trois">
       <div class="home-video">
-        <h2>Vidéo de présentation</h2>
+        <h2>Inventory recorder semi auto</h2>
         <div class="video"><iframe id="home-video" width="560" height="315" src="https://www.youtube.com/embed/63nSYMTkZwY?si=duC0unAr77PiTItq" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
         <p class="note"><a id="home-video-lien" href="https://www.youtube.com/watch?v=63nSYMTkZwY" target="_blank" rel="noopener">Voir la vidéo sur YouTube</a></p>
+        <h2 class="h2-video2">Refining order recorder</h2>
+        <div class="video"><iframe id="home-video-2" width="560" height="315" src="https://www.youtube.com/embed/VuDnWUv9Xuw" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
+        <p class="note"><a href="https://www.youtube.com/watch?v=VuDnWUv9Xuw" target="_blank" rel="noopener">Voir la vidéo sur YouTube</a></p>
       </div>
       <div class="home-intro">
-        <h1>Scanner d'inventaire semi‑automatique</h1>
+        <h1>Scanner d'inventaire et de raffinage semi‑automatique</h1>
         <p class="home-lead">Gérez vos stocks de minerais : quantité, qualité, localisation. Et partagez-les avec votre corporation.</p>
+        <p class="home-lead">Aucune installation, aucun téléchargement nécessaire.</p>
         <ol class="etapes">
           <li><span class="num">1</span><div>Dans <strong>Star Citizen</strong>, ouvrez votre inventaire.</div></li>
           <li><span class="num">2</span><div>Dans <strong>Star Manifest</strong>, <button type="button" class="lien" data-ouvrir-nav>choisissez une station</button> dans le menu ☰.</div></li>
-          <li><span class="num">3</span><div>Cliquez sur <strong>« Ajouter »</strong> et choisissez la fenêtre du jeu.</div></li>
+          <li><span class="num">3</span><div>Cliquez sur <strong>« Ajouter des caisses »</strong> et choisissez la fenêtre du jeu.</div></li>
           <li><span class="num">4</span><div>Survolez chaque minerai, un par un : l'enregistrement se fait automatiquement.</div></li>
         </ol>
-        <div class="ligne"><button type="button" class="btn principal" data-ouvrir-nav>Ouvrir une station</button><a class="btn" href="#/minerais">Mes ressources</a></div>
+        <div class="ligne"><button type="button" class="btn principal" data-ouvrir-nav>+ Ajouter des caisses</button><button type="button" class="btn principal" data-ouvrir-nav>+ Ordre de raffinage</button><a class="btn" href="#/minerais">Mes ressources</a></div>
       </div>
       <div class="carte home-param">
         <div class="hp-texte">
@@ -585,8 +717,24 @@ dialog.nav-pop.ouvert .dn-contenu { transform: none; }
         <input type="file" id="i-importer" accept=".json,application/json" hidden>
       </div>
     </div>
-    <div class="tableau-wrap"><table id="t-accueil"></table></div>
-    <p class="vide" id="a-vide" hidden></p>
+    <div class="ressources-grille" id="a-grille">
+      <div>
+      <div class="actions-groupe">
+        <button class="btn" type="button" id="a-tout" data-act="tout" disabled>Tout sélectionner</button>
+        <button class="btn" type="button" id="a-rien" data-act="rien" disabled>Tout désélectionner</button>
+        <span id="a-selection">Aucun minerai sélectionné</span>
+        <button class="btn" type="button" id="a-deplacer" data-act="deplacer" disabled>Déplacer</button>
+        <button class="btn" type="button" id="a-visibilite" data-act="visibilite" disabled>Visibilité</button>
+        <button class="btn danger" type="button" id="a-supprimer" data-act="supprimer" disabled>Supprimer</button>
+      </div>
+        <div class="tableau-wrap"><table id="t-accueil"></table></div>
+        <p class="vide" id="a-vide" hidden></p>
+      </div>
+      <aside class="carte raff-ressources" id="a-raff-bloc" hidden>
+        <h2>Ordres de raffinage</h2>
+        <ul class="raff-liste grille" id="a-raff"></ul>
+      </aside>
+    </div>
   </section>
 
   <section id="v-station" hidden>
@@ -603,33 +751,32 @@ dialog.nav-pop.ouvert .dn-contenu { transform: none; }
           </div>
         </div>
         <div class="actions-groupe">
-          <button class="btn" type="button" id="b-tout" disabled>Tout sélectionner</button>
-          <button class="btn" type="button" id="b-rien" disabled>Tout désélectionner</button>
+          <button class="btn" type="button" id="b-tout" data-act="tout" disabled>Tout sélectionner</button>
+          <button class="btn" type="button" id="b-rien" data-act="rien" disabled>Tout désélectionner</button>
           <span id="s-selection">Aucun minerai sélectionné</span>
-          <button class="btn" type="button" id="b-deplacer" disabled>Déplacer</button>
-          <button class="btn" type="button" id="b-visibilite" disabled>Visibilité</button>
-          <button class="btn danger" type="button" id="b-supprimer" disabled>Supprimer</button>
+          <button class="btn" type="button" id="b-deplacer" data-act="deplacer" disabled>Déplacer</button>
+          <button class="btn" type="button" id="b-visibilite" data-act="visibilite" disabled>Visibilité</button>
+          <button class="btn danger" type="button" id="b-supprimer" data-act="supprimer" disabled>Supprimer</button>
         </div>
         <div class="tableau-wrap"><table id="t-station"></table></div>
         <p class="vide" id="s-vide" hidden></p>
       </div>
 
       <aside class="colonne">
-        <button class="btn principal grand" type="button" id="b-session">Ajouter</button>
+        <div class="ligne-ajouter">
+          <button class="btn principal grand" type="button" id="b-session">Ajouter des caisses</button>
+          <button class="btn grand btn-engrenage" type="button" id="b-parametrer-s" title="Paramètres de l'écran" aria-label="Paramètres de l'écran"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg></button>
+        </div>
         <button class="btn grand" type="button" id="b-overlay" hidden>Afficher l'overlay</button>
         <div class="carte" id="c-scan" hidden>
           <h2>Scan en cours</h2>
           <p id="scan-etat" hidden></p>
-          <label class="interrupteur"><input type="checkbox" id="c-auto" checked> Mode automatique</label>
+          <label class="interrupteur" hidden><input type="checkbox" id="c-auto" checked> Mode automatique</label>
           <div><button class="btn petit" type="button" id="b-capture" disabled>Télécharger la capture</button></div>
           <div id="emplacement-fiche"></div>
         </div>
-        <div class="carte">
-          <h2>Paramétrage de l'écran</h2>
-          <p>Ouvrez un inventaire dans Star Citizen, puis cliquez sur « Paramétrer » pour vérifier les zones que Star Manifest lit à l'écran.</p>
-          <ul class="zones-etat" id="s-zones"></ul>
-          <div><button class="btn" type="button" id="b-parametrer-s">Paramétrer</button></div>
-        </div>
+        <button class="btn grand" type="button" id="b-raff">+ Ordre de raffinerie</button>
+        <ul class="raff-liste" id="s-raff"></ul>
       </aside>
     </div>
   </section>
@@ -696,13 +843,33 @@ dialog.nav-pop.ouvert .dn-contenu { transform: none; }
       <label class="champ scu"><span>Quantité (SCU)</span><input id="f-scu" inputmode="decimal"></label>
     </div>
     <div class="boutons">
-      <button class="btn" type="button" id="b-scanner">Scanner <kbd>F8</kbd></button>
       <button class="btn" type="submit" id="b-enregistrer" disabled>Enregistrer <kbd>F9</kbd></button>
       <button class="btn danger" type="button" id="b-terminer">Terminer</button>
     </div>
   </section>
 </form>
 
+<div id="p-raff" class="p-raff" hidden>
+  <p class="pr-aide">Dans le terminal de raffinerie, affichez l'ordre lancé (« Processing »).</p>
+  <div class="pr-tete"><strong id="dr-station"></strong><span class="dr-etat" id="dr-etat"></span></div>
+  <div class="pr-ordres" id="dr-ordres" hidden></div>
+  <canvas id="dr-apercu" class="pr-apercu" width="16" height="9"></canvas>
+  <table class="pr-table">
+    <thead><tr><th>Minerai</th><th>Qualité</th><th>Rendement (cSCU)</th></tr></thead>
+    <tbody id="dr-lignes"></tbody>
+  </table>
+  <div class="dr-pied">
+    <div><span>Temps restant</span><input id="dr-temps" class="pr-temps" placeholder="ex. 1h 9m" autocomplete="off"></div>
+    <div><span>Rendement</span><strong id="dr-rend">—</strong></div>
+    <div><span>Lecture</span><strong id="dr-total" class="dr-total">—</strong></div>
+  </div>
+  <p class="note" id="dr-attente">« Enregistrer » apparaît quand la lecture est stable.</p>
+  <div class="pr-actions">
+    <button type="button" class="btn principal" id="dr-enregistrer" hidden>Enregistrer</button>
+    <button type="button" class="btn" id="dr-relire">Relire</button>
+    <button type="button" class="btn" id="dr-fermer">Fermer</button>
+  </div>
+</div>
 <dialog id="d-nav" class="nav-pop" aria-labelledby="dn-titre">
   <div class="dn-tete">
     <button class="burger" type="button" id="dn-fermer" aria-label="Fermer la navigation"><span></span><span></span><span></span></button>
@@ -987,10 +1154,11 @@ const OCR = (() => {
       const q = ok[0];
       let s = null;
       for (let k = 1; k < ok.length; k++) {
-        if (!s) { if (jaune(ok[k])) s = [...ok[k]]; continue; }
+        if (!s) { if (ok[k][0] - q[1] > vh * 5) break; if (jaune(ok[k])) s = [...ok[k]]; continue; }   // trop loin de la qualité : décor
         if (ok[k][0] - s[1] <= vh && jaune(ok[k])) s[1] = ok[k][1]; else break;
       }
-      if (!s && ok.length > 1) s = ok[1];   // aucun bloc jaune reconnu : le bloc qui suit la qualité
+      if (!s && ok.length > 1 && ok[1][0] - q[1] <= vh * 5) s = ok[1];   // aucun bloc jaune reconnu : le bloc qui suit la qualité, s'il est collé
+      if (s && s[1] - s[0] > vh * 7) s[1] = s[0] + Math.round(vh * 7);
       const cand = [[vx, vy, vw, vh], [q[0], vy, q[1] - q[0], vh], s ? [s[0], vy, s[1] - s[0], vh] : null];
       if (!best || ok.length >= 2) best = cand;
     }
@@ -1009,7 +1177,8 @@ const OCR = (() => {
         const [vx, vy, vw, vh] = v;
         if (!(Math.abs(vy + vh / 2 - tcy) < th * 0.6 && tx - (vx + vw) >= -2 && tx - (vx + vw) < th * 2 && vh / th > 0.6 && vh / th < 1.6)) continue;
         const vcy = vy + vh / 2;
-        const js = jaunes.filter((j) => j[0] > tx + tw && Math.abs(j[1] + j[3] / 2 - vcy) < vh * 0.7 && j[3] < vh * 1.6 && j[2] >= vh * 1.2)
+        // badge de quantité : collé à la qualité (pas un bloc jaune du décor plus loin à droite)
+        const js = jaunes.filter((j) => j[0] > tx + tw && j[0] - (tx + tw) < vh * 5 && Math.abs(j[1] + j[3] / 2 - vcy) < vh * 0.7 && j[3] < vh * 1.6 && j[2] >= vh * 1.2)
           .sort((a, b) => a[0] - b[0]);
         cands.push([(vx + vw / 2 - ref[0]) ** 2 + (vcy - ref[1]) ** 2, [v, [tx, ty, tw, th], js[0] || null]]);
       }
@@ -1022,10 +1191,10 @@ const OCR = (() => {
     const ct = badgesParContraste(img, c);
     if (ct && ct[2] && Math.abs(ct[0][1] - best[0][1]) <= 3 && ct[2][0] > best[1][0] + best[1][2]) {
       const j = best[2];
-      if (!j) best[2] = ct[2];
+      if (!j) { if (ct[2][0] - (best[1][0] + best[1][2]) < best[0][3] * 5) best[2] = [ct[2][0], ct[2][1], Math.min(ct[2][2], best[0][3] * 7), ct[2][3]]; }
       else if (ct[2][0] >= j[0] - j[3] && ct[2][0] <= j[0] + j[2]) {
         // même badge, tronqué à droite par la couleur : on l'étend vers la droite seulement
-        const x1 = Math.max(j[0] + j[2], ct[2][0] + ct[2][2]);
+        const x1 = Math.min(j[0] + best[0][3] * 7, Math.max(j[0] + j[2], ct[2][0] + ct[2][2]));   // « 123.45 SCU » ne dépasse pas ~7 hauteurs de badge
         best[2] = [j[0], j[1], x1 - j[0], j[3]];
       }
     }
@@ -1359,6 +1528,7 @@ function nouveauCodeInvitation() {
 
 function route() {
   const h = decodeURIComponent(location.hash.replace(/^#/, "")) || "/";
+  const vueAvant = vue;
   const ancienne = stationCourante;
   if (h.startsWith("/station/")) { vue = "station"; stationCourante = h.slice(9); }
   else if (h === "/nouvelle") { vue = "nouvelle"; stationCourante = null; }
@@ -1372,7 +1542,7 @@ function route() {
   else if (h === "/minerais") { vue = "accueil"; stationCourante = null; }
   else { vue = "home"; stationCourante = null; }
   if (session && session.station !== stationCourante) arreterSession();
-  if (ancienne !== stationCourante) selection.clear();
+  if (ancienne !== stationCourante || vueAvant !== vue) selection.clear();
   for (const v of ["home", "accueil", "station", "nouvelle", "corpo", "compte"]) $(`v-${v}`).hidden = v !== vue;
   if (vue === "home" && compte && Date.now() - partage.maj > 30000) chargerPartage().then(render).catch(() => {});
   if (vue === "corpo" && compte && Date.now() - partage.maj > 30000) chargerPartage().then(render).catch(() => {});
@@ -1483,7 +1653,9 @@ function renderTable(table, lignes, { station, cocher, joueur = false, visibilit
 function render() {
   renderNav();
   if (vue === "home") renderHome();
-  if (vue === "station" && typeof renderEtatZones === "function") renderEtatZones($("s-zones"));
+  if (vue === "home" && typeof renderRaffinages === "function") renderRaffinages();
+  if (vue === "station" && typeof renderEtatZones === "function" && $("s-zones")) renderEtatZones($("s-zones"));
+  if (vue === "station" && typeof renderRaffinages === "function") renderRaffinages();
   majBoutonsFiltre();
   renderCompteBouton();
   if (vue === "compte") renderCompte();
@@ -1505,9 +1677,12 @@ function render() {
   for (const b of document.querySelectorAll("[data-regrouper]")) b.setAttribute("aria-pressed", String(regroupe));
   const ft = texteFiltre();
   const total = (l) => fmtScu(l.reduce((s, it) => s + (Number(it.quantite_scu) || 0), 0));
+  if (vue === "accueil" && typeof renderRaffinages === "function") renderRaffinages();
   if (vue === "accueil") {
     const lignes = trier(filtrer(items), tri.accueil).map((it) => ({ ...it, joueur: it.joueur || compte?.pseudo || "Moi" }));
-    renderTable($("t-accueil"), lignes, { station: true, cocher: false, joueur: true, t: tri.accueil });
+    for (const id of [...selection]) if (!items.some((it) => it.id === id)) selection.delete(id);
+    renderTable($("t-accueil"), lignes, { station: true, cocher: true, joueur: true, visibilite: true, t: tri.accueil });
+    majBarreGroupe("a", lignes);
     $("a-compte").textContent = `${lignes.length} caisse${lignes.length > 1 ? "s" : ""}, ${total(lignes)} SCU`;
     $("a-filtre-etat").textContent = ft;
     $("t-accueil").hidden = !lignes.length; $("a-vide").hidden = !!lignes.length;
@@ -1520,18 +1695,23 @@ function render() {
     $("s-filtre-etat").textContent = ft;
     renderTable($("t-station"), lignes, { station: false, cocher: true, visibilite: true, t: tri.station });
     $("t-station").hidden = !lignes.length; $("s-vide").hidden = !!lignes.length;
-    $("s-vide").textContent = tous.length ? "Aucun minerai ne correspond au filtre." : "Aucun minerai dans cette station. Clique sur « Ajouter » pour scanner tes caisses.";
-    const n = selection.size;
-    const scuSel = items.reduce((t, it) => t + (selection.has(it.id) ? Number(it.quantite_scu) || 0 : 0), 0);
-    $("s-selection").textContent = n ? `${n} minerai${n > 1 ? "s" : ""} sélectionné${n > 1 ? "s" : ""} · ${fmtScu(scuSel)} SCU` : "Aucun minerai sélectionné";
-    $("b-deplacer").disabled = $("b-supprimer").disabled = $("b-visibilite").disabled = !n;
-    // tout sélectionner : lignes affichées (filtres compris) pas encore cochées ; tout désélectionner : lignes cochées
-    const aCocher = lignes.filter((it) => !selection.has(it.id)).length;
-    $("b-tout").disabled = !aCocher;
-    $("b-rien").disabled = !n;
+    $("s-vide").textContent = tous.length ? "Aucun minerai ne correspond au filtre." : "Aucun minerai dans cette station. Clique sur « Ajouter des caisses » pour les scanner.";
+    majBarreGroupe("b", lignes);
   }
 }
 setInterval(() => { if (vue !== "nouvelle") render(); }, 60000);
+/* Barre d'actions groupées (page station : préfixe « b », Mes ressources : « a ») */
+function majBarreGroupe(p, lignes) {
+  const n = selection.size, sel = p === "a" ? "a-selection" : "s-selection";
+  const scuSel = items.reduce((t, it) => t + (selection.has(it.id) ? Number(it.quantite_scu) || 0 : 0), 0);
+  $(sel).textContent = n ? `${n} minerai${n > 1 ? "s" : ""} sélectionné${n > 1 ? "s" : ""} · ${fmtScu(scuSel)} SCU` : "Aucun minerai sélectionné";
+  $(`${p}-deplacer`).disabled = $(`${p}-supprimer`).disabled = $(`${p}-visibilite`).disabled = !n;
+  // tout sélectionner : lignes affichées (filtres compris) pas encore cochées ; tout désélectionner : lignes cochées
+  $(`${p}-tout`).disabled = !lignes.filter((it) => !selection.has(it.id)).length;
+  $(`${p}-rien`).disabled = !n;
+}
+/* Lignes concernées par « tout sélectionner » dans la vue courante */
+const lignesCochables = () => trier(filtrer(vue === "station" ? items.filter((it) => it.station === stationCourante) : items), vue === "station" ? tri.station : tri.accueil);
 
 document.addEventListener("click", (e) => {
   if (e.target.closest("[data-regrouper]")) { regroupe = base.regroupe = !regroupe; sauver(); render(); return; }
@@ -1545,16 +1725,20 @@ document.addEventListener("click", (e) => {
     render();
   }
 });
-$("b-tout").addEventListener("click", () => {
-  for (const it of trier(filtrer(items.filter((it) => it.station === stationCourante)), tri.station)) selection.add(it.id);
-  render();
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-act]"); if (!b || b.disabled) return;
+  const act = b.dataset.act;
+  if (act === "tout") { for (const it of lignesCochables()) selection.add(it.id); render(); }
+  else if (act === "rien") { selection.clear(); render(); }
+  else if (act === "visibilite") ouvrirVisibiliteGroupe();
+  else if (act === "supprimer") supprimerSelection();
+  else if (act === "deplacer") ouvrirDeplacement();
 });
-$("b-rien").addEventListener("click", () => { selection.clear(); render(); });
 /* Maj + clic sur une case : coche (ou décoche) toutes les lignes entre la précédente case cliquée et celle-ci */
 let derniereCase = null, majEnfoncee = false;
-$("t-station").addEventListener("click", (e) => { if (e.target.matches?.("input[data-id]")) majEnfoncee = e.shiftKey; }, true);
+for (const T of ["t-station", "t-accueil"]) $(T).addEventListener("click", (e) => { if (e.target.matches?.("input[data-id]")) majEnfoncee = e.shiftKey; }, true);
 /* Clic n'importe où sur la ligne (hors liens et boutons) : coche ou décoche sa case, Maj compris */
-$("t-station").addEventListener("click", (e) => {
+for (const T of ["t-station", "t-accueil"]) $(T).addEventListener("click", (e) => {
   if (e.target.closest("input, a, button, select, label")) return;
   const cb = e.target.closest("tbody tr")?.querySelector("input[type=checkbox]");
   if (!cb) return;
@@ -1562,10 +1746,10 @@ $("t-station").addEventListener("click", (e) => {
   majEnfoncee = e.shiftKey && !!cb.dataset.id;
   cb.dispatchEvent(new Event("change", { bubbles: true }));
 });
-$("t-station").addEventListener("change", (e) => {
+for (const T of ["t-station", "t-accueil"]) $(T).addEventListener("change", (e) => {
   const cb = e.target;
   if (cb.dataset.id && majEnfoncee && derniereCase && derniereCase !== cb.dataset.id) {
-    const ids = [...$("t-station").querySelectorAll("input[data-id]")].map((c) => c.dataset.id);
+    const ids = [...e.currentTarget.querySelectorAll("input[data-id]")].map((c) => c.dataset.id);
     const a = ids.indexOf(derniereCase), b = ids.indexOf(cb.dataset.id);
     if (a >= 0 && b >= 0) {
       for (const id of ids.slice(Math.min(a, b), Math.max(a, b) + 1)) cb.checked ? selection.add(id) : selection.delete(id);
@@ -1576,7 +1760,7 @@ $("t-station").addEventListener("change", (e) => {
   if (cb.dataset.id) derniereCase = cb.dataset.id;
   majEnfoncee = false;
   if (cb.id === "tout") {
-    for (const it of trier(filtrer(items.filter((it) => it.station === stationCourante)), tri.station)) cb.checked ? selection.add(it.id) : selection.delete(it.id);
+    for (const it of lignesCochables()) cb.checked ? selection.add(it.id) : selection.delete(it.id);
   } else if (cb.dataset.groupe) {
     for (const id of groupesRendus.get(cb.dataset.groupe) || []) cb.checked ? selection.add(id) : selection.delete(id);
   } else if (cb.dataset.id) cb.checked ? selection.add(cb.dataset.id) : selection.delete(cb.dataset.id);
@@ -1595,31 +1779,31 @@ async function appliquerVisibiliteSelection(v) {
     toast(`${ids.length} caisse${ids.length > 1 ? "s" : ""} : visible par ${VISIBILITES[v]}.`);
   } catch (e) { toast(messageErreur(e)); }
 }
-$("b-visibilite").addEventListener("click", () => {
+function ouvrirVisibiliteGroupe() {
   if (!selection.size) return;
   $("dv-info").textContent = `${selection.size} caisse${selection.size > 1 ? "s" : ""} sélectionnée${selection.size > 1 ? "s" : ""}.`;
   const premier = items.find((it) => selection.has(it.id));
   $("dv-visibilite").value = premier?.visibilite || "corporation";
   $("d-visibilite").showModal();
-});
+}
 $("d-visibilite").addEventListener("close", () => {
   if ($("d-visibilite").returnValue !== "ok" || !selection.size) return;
   appliquerVisibiliteSelection($("dv-visibilite").value);
 });
-$("b-supprimer").addEventListener("click", () => {
+function supprimerSelection() {
   const n = selection.size;
-  if (!n || !confirm(`Supprimer ${n} minerai${n > 1 ? "s" : ""} de ${stationCourante} ?`)) return;
+  if (!n || !confirm(`Supprimer ${n} minerai${n > 1 ? "s" : ""}${vue === "station" ? " de " + stationCourante : ""} ?`)) return;
   noterSuppressions([...selection]);
   items = base.items = items.filter((it) => !selection.has(it.id));
   selection.clear(); sauver(); render(); planifierSync();
   // la caisse affichée dans le jeu vient d'être supprimée : on la relit (mode automatique)
   if (session && suivi.cle && suivi.registre.has(suivi.cle) && !dejaEnregistree(suivi.cle)) { suivi.aLire = true; suivi.stable = 0; }
   toast(`${n} minerai${n > 1 ? "s" : ""} supprimé${n > 1 ? "s" : ""}`);
-});
-$("b-deplacer").addEventListener("click", () => {
+}
+function ouvrirDeplacement() {
   $("dd-station").innerHTML = optionsStations(Object.values(catalogue).flat().filter((s) => s !== stationCourante).sort((a, b) => a.localeCompare(b, "fr")));
   $("d-deplacer").showModal();
-});
+}
 $("d-deplacer").addEventListener("close", () => {
   if ($("d-deplacer").returnValue !== "ok" || !selection.size) return;
   const dest = $("dd-station").value, n = selection.size;
@@ -2010,7 +2194,8 @@ function choisirQualiteListe(r, vals) {
 const qualitePlausible = (q) => Number.isInteger(q) && q >= 200 && q <= 1000;
 function verifierChamps() {
   const bEnr = $("b-enregistrer");
-  if (bEnr?.firstChild) bEnr.firstChild.nodeValue = (pending?.pile > 1 ? `Enregistrer ×${pending.pile}` : "Enregistrer") + " ";
+  const modif = !pending && !!derniereSauvegarde;      // champs = dernière caisse enregistrée : on peut la corriger
+  if (bEnr?.firstChild) bEnr.firstChild.nodeValue = (modif ? "Modifier" : pending?.pile > 1 ? `Enregistrer ×${pending.pile}` : "Enregistrer") + " ";
   const nom = $("f-nom").value, q = parseInt(qualiteCourante(), 10);
   const connue = valeursDe(nom).includes(q);
   const nouvelle = !!pending && nomExiste(nom) && !connue && qualitePlausible(q) &&
@@ -2026,7 +2211,7 @@ function verifierChamps() {
   $("f-scu").closest(".champ").querySelector("span").textContent = douteux ? "Quantité à vérifier" : "Quantité (SCU)";
   $("f-q").closest(".champ").classList.toggle("douteux", nouvelle);
   $("f-q").closest(".champ").querySelector("span").textContent = nouvelle ? "Qualité nouvelle" : "Qualité";
-  const pret = !!pending && nomExiste(nom) && (connue || nouvelle) && $("f-scu").value.trim() !== "";
+  const pret = (!!pending || modif) && nomExiste(nom) && (connue || nouvelle || (modif && qualitePlausible(q))) && $("f-scu").value.trim() !== "";
   $("b-enregistrer").disabled = !pret;
   $("b-enregistrer").classList.toggle("pret", pret);
 }
@@ -2072,7 +2257,7 @@ function pictoSauve(texte = null, deja = false, it = null) {
   }
 }
 function afficherScan(scan) {
-  pending = scan;
+  pending = scan; derniereSauvegarde = null;
   pictoSauve(null, false, { nom: scan.nom || "?", qualite: scan.qualite ?? "?", quantite_scu: OCR.fixScu(scan.quantite_txt || "") || "?" });
   $("f-nom").value = scan.nom || "";
   $("f-q-autre").value = "";
@@ -2082,7 +2267,7 @@ function afficherScan(scan) {
   fiche.classList.remove("arrivee"); void fiche.offsetWidth; fiche.classList.add("arrivee");
 }
 function viderChamps() {
-  pending = null;
+  pending = null; derniereSauvegarde = null;
   for (const id of ["f-nom", "f-scu", "f-q-autre"]) $(id).value = "";
   $("f-q").innerHTML = ""; $("f-q-autre").hidden = true;
   verifierChamps();
@@ -2167,7 +2352,7 @@ async function scanner(auto = null) {
   if (!base.zone) { await recadrer("zone"); if (!base.zone) return; }
   scanEnCours = true; debutScan = Date.now();
   const ceScan = debutScan;
-  flash($("b-scanner"), "appuye"); $("b-scanner").classList.add("en-cours");
+  fiche.classList.add("lecture-en-cours");
   $("scan-etat").className = ""; $("scan-etat").textContent = "Lecture…";
   try {
     const src = await imageCourante(), [W, H] = tailleSource(src);
@@ -2238,7 +2423,7 @@ async function scanner(auto = null) {
     $("scan-etat").className = "echec";
     $("scan-etat").textContent = `Erreur : ${e.message}`;
   } finally {
-    if (scanAbandonne !== ceScan) { scanEnCours = false; $("b-scanner").classList.remove("en-cours"); }
+    if (scanAbandonne !== ceScan) { scanEnCours = false; fiche.classList.remove("lecture-en-cours"); }
   }
 }
 
@@ -2251,8 +2436,23 @@ function apprendreChiffres(img, kind, texte) {
   base.chiffres = base.chiffres.slice(-400);
 }
 
+let derniereSauvegarde = null;   // { ids } : caisse(s) du dernier enregistrement, modifiables tant qu'aucune autre n'est lue
+function modifierDerniere() {
+  const ids = derniereSauvegarde.ids, nom = Object.keys(valeurs).find((n) => n.toLowerCase() === $("f-nom").value.trim().toLowerCase());
+  const q = parseInt(qualiteCourante(), 10), scuTxt = OCR.fixScu($("f-scu").value);
+  const liste = items.filter((it) => ids.includes(it.id));
+  if (!liste.length) { derniereSauvegarde = null; verifierChamps(); return; }
+  for (const it of liste) { it.nom = nom; it.qualite = q; it.bande = bandeDe(nom, q); it.quantite_scu = parseFloat(scuTxt); delete it.sync; }
+  if (!valeursDe(nom).includes(q)) { base.qualites = base.qualites || {}; (base.qualites[nom] = base.qualites[nom] || []).push(q); }
+  suivi.dernier = contenuCaisse(nom, q, scuTxt);
+  sauver(); planifierSync(); render();
+  flash($("b-enregistrer"), "appuye");
+  pictoSauve(liste.length > 1 ? `Modifié ×${liste.length}` : "Modifié", false, liste[0]);
+  $("scan-etat").className = ""; $("scan-etat").textContent = "Modifié.";
+}
 function enregistrer(auto = false) {
   verifierChamps();
+  if (!pending && derniereSauvegarde && !auto) { if (!$("b-enregistrer").disabled) modifierDerniere(); return; }
   if (!pending || $("b-enregistrer").disabled) { flash($("b-enregistrer"), "refuse", 400); return; }
   flash($("b-enregistrer"), "appuye");
   const nom = Object.keys(valeurs).find((n) => n.toLowerCase() === $("f-nom").value.trim().toLowerCase());
@@ -2286,13 +2486,14 @@ function enregistrer(auto = false) {
   }
   sauver(); construireModele();
   dernierAjout = it.id;
-  viderChamps(); render();
+  // les valeurs restent affichées : le bouton devient « Modifier » jusqu'à la prochaine caisse lue
+  pending = null; derniereSauvegarde = { ids: crees.map((c) => c.id) };
+  verifierChamps(); render();
   pictoSauve(nPile > 1 ? `Enregistré ×${nPile}` : "Enregistré", false, it);
   $("scan-etat").className = "";
   $("scan-etat").textContent = nPile > 1 ? `${nPile} caisses enregistrées.` : "Enregistré.";
 }
 fiche.addEventListener("submit", (e) => { e.preventDefault(); enregistrer(); });
-$("b-scanner").addEventListener("click", () => scanner());   // sans argument : lecture manuelle, pas d'enregistrement automatique
 
 /* ---------- mode automatique : surveillance du panneau, de la sélection et de la page */
 let surveillance = null;
@@ -2413,6 +2614,9 @@ async function lirePile(src, W, H, sel) {
     const m = (await lireTexte(imageZone(src, W, H, zone), "0123456789x", 3000, echelle)).replace(/\s/g, "").match(/^(\d{1,2})x$/);
     return m ? +m[1] : 1;
   };
+  const z = imageZone(src, W, H, zone); let clairs = 0;
+  for (let i = 0; i < z.d.length; i += 4) if (z.d[i] + z.d[i + 1] + z.d[i + 2] > 540) clairs++;
+  if (clairs < z.w * z.h * 0.01) return 1;            // pas de « Nx » : caisse seule
   const n = await lecture(6);
   // une pile n'est retenue que si une seconde lecture donne le même nombre (évite « 5x » lu sur un reflet)
   return n >= 2 && n <= 99 && (await lecture(4)) === n ? n : 1;
@@ -2433,7 +2637,10 @@ async function emplacementCaisse(src, W, H, sel, grille, ascenseur, pagination) 
   const ligneVue = Math.min(GRILLE_LIGNES - 1, Math.max(0, Math.round(sel[1] / (p.h / GRILLE_LIGNES))));
   const decalage = ascenseur && Number.isFinite(ascenseur.decalage) ? ascenseur.decalage : (suivi.ascenseur && Number.isFinite(suivi.ascenseur.decalage) ? suivi.ascenseur.decalage : 0);
   // numéro illisible ou absent (vue filtrée sans pagination) : dernière page lue, sinon 1
-  let page = await lireNumeroPage(src, W, H);
+  let page = null;
+  // même aspect de pagination que la dernière lecture : même numéro (ou toujours illisible), sans OCR
+  if (pagination && suivi.cachePage && OCR.ecart(pagination, suivi.cachePage.e) <= 12) page = suivi.cachePage.page;
+  else { page = await lireNumeroPage(src, W, H); if (pagination) suivi.cachePage = { e: pagination, page }; }
   if (page != null) suivi.pageLue = page; else page = suivi.pageLue ?? 1;
   const pile = await lirePile(src, W, H, sel);
   const ligne = ligneVue + decalage;
@@ -2485,11 +2692,12 @@ async function surveiller() {
   if (chSel || chPage || chAscenseur) suivi.autreCase = true;
   if (chPanneau || chSel || chPage || chAscenseur) {
     if (!suivi.aLire) suivi.attente = 0;
-    suivi.aLire = true; suivi.stable = 0;
-    if (++suivi.attente < 8) return;
+    suivi.aLire = true; suivi.stable = 0; suivi.tChange = Date.now();
+    if (++suivi.attente < 12) return;
   }
-  // l'affichage doit être stable deux fois de suite avant la lecture (animations du jeu)
-  if (suivi.aLire && (++suivi.stable >= 2 || suivi.attente >= 8)) {
+  // l'affichage doit être stable deux fois de suite avant la lecture (animations du jeu),
+  // puis 0,2 s de plus pour laisser finir le fondu du panneau
+  if (suivi.aLire && ((++suivi.stable >= 2 && Date.now() - (suivi.tChange || 0) >= 500) || suivi.attente >= 12)) {
     suivi.aLire = false; suivi.attente = 0;
     const empl = await emplacementCaisse(src, W, H, sel, grille, ascenseur, pagination);
     suivi.cle = empl?.cle || null;
@@ -2514,7 +2722,7 @@ let enSurveillance = false, debutSurveillance = 0, scanAbandonne = 0;
 function battement() {
   if (scanEnCours && Date.now() - debutScan > 12000) {          // lecture bloquée : abandonnée
     scanEnCours = false; scanAbandonne = debutScan;
-    $("b-scanner").classList.remove("en-cours");
+    fiche.classList.remove("lecture-en-cours");
     $("scan-etat").className = "echec";
     $("scan-etat").textContent = "Pas d'image du jeu : resurvole la caisse.";
     reinitialiserSurveillance();
@@ -2529,9 +2737,9 @@ function demarrerSurveillance() {
     const code = "let t = null; onmessage = (e) => { clearInterval(t); if (e.data > 0) t = setInterval(() => postMessage(0), e.data); };";
     surveillance = new Worker(URL.createObjectURL(new Blob([code], { type: "text/javascript" })));
     surveillance.onmessage = battement;
-    surveillance.postMessage(250);
+    surveillance.postMessage(150);
   } catch {
-    surveillance = setInterval(battement, 250);   // repli si le worker est indisponible
+    surveillance = setInterval(battement, 150);   // repli si le worker est indisponible
   }
 }
 function arreterSurveillance() {
@@ -2540,15 +2748,14 @@ function arreterSurveillance() {
 }
 $("c-auto").addEventListener("change", () => {
   reinitialiserSurveillance();
-  $("scan-etat").textContent = $("c-auto").checked ? "Survole une caisse." : "F8 : lire · F9 : enregistrer.";
+  $("scan-etat").textContent = "Survole une caisse.";
 });
 
 /* Touches : captées par la page et par l'overlay (le jeu affiche ses infos même sans le focus) */
 function touches(e) {
-  if (!session || !["F8", "F9"].includes(e.key)) return;
+  if (!session || e.key !== "F9") return;
   e.preventDefault();
-  if (e.key === "F8") scanner();
-  else enregistrer();
+  enregistrer();
 }
 document.addEventListener("keydown", touches);
 
@@ -2662,7 +2869,7 @@ async function demarrerSession() {
   $("b-session").textContent = "Terminer";
   $("b-session").classList.remove("principal");
   $("scan-etat").className = "";
-  $("scan-etat").textContent = $("c-auto").checked ? "Survole une caisse." : "F8 : lire · F9 : enregistrer.";
+  $("scan-etat").textContent = "Survole une caisse.";
   chargerTesseract().catch(() => {});      // préchargement, pour un premier scan rapide
   if (!base.zone) await ouvrirParametrage("zone");   // première fois : vérifier les zones lues
   if (!pip && !(await ouvrirOverlay())) $("b-overlay").hidden = false;
@@ -2681,7 +2888,7 @@ function arreterSession() {
   fiche.hidden = true; document.body.append(fiche);
   viderChamps();
   $("c-scan").hidden = true; $("b-overlay").hidden = true;
-  $("b-session").textContent = "Ajouter"; $("b-session").classList.add("principal");
+  $("b-session").textContent = "Ajouter des caisses"; $("b-session").classList.add("principal");
 }
 $("b-session").addEventListener("click", () => (session ? arreterSession() : demarrerSession()));
 $("b-terminer").addEventListener("click", () => arreterSession());
@@ -3129,7 +3336,8 @@ const VIDEO_YOUTUBE = "63nSYMTkZwY";   // à remplacer par l'identifiant de la v
 /* Page ouverte comme fichier (sans adresse web) : YouTube refuse la lecture intégrée,
    on affiche la miniature, qui ouvre la vidéo sur YouTube. */
 if (!/^https?:$/.test(location.protocol)) {
-  $("home-video").outerHTML = `<a class="video-lien" href="https://www.youtube.com/watch?v=${VIDEO_YOUTUBE}" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/${VIDEO_YOUTUBE}/hqdefault.jpg" alt="Vidéo de présentation"><span>▶ Voir la vidéo sur YouTube</span></a>`;
+  for (const [id, v] of [["home-video", VIDEO_YOUTUBE], ["home-video-2", "VuDnWUv9Xuw"]]) if ($(id))
+    $(id).outerHTML = `<a class="video-lien" href="https://www.youtube.com/watch?v=${v}" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/${v}/hqdefault.jpg" alt="Vidéo"><span>▶ Voir la vidéo sur YouTube</span></a>`;
 }
 
 /* Zones lues à l'écran : couleur, rôle et position par défaut, en % de la largeur / hauteur de l'écran */
@@ -3380,8 +3588,8 @@ const navPrefs = (() => { try { return { masquerVides: false, replies: [], ...JS
 const sauverNav = () => { try { localStorage.setItem(CLE_NAV, JSON.stringify(navPrefs)); } catch {} };
 const sansAccents = (t) => String(t).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
-function lienCta(href, titre, sousTitre, actif, desactive, info) {
-  return `<a class="btn${actif ? " principal" : ""}" href="${desactive ? "#" : href}"${actif ? ' aria-current="page"' : ""}${desactive ? ` aria-disabled="true" tabindex="-1" title="${esc(info)}"` : ""}>${esc(titre)}${sousTitre ? `<small>${esc(sousTitre)}</small>` : ""}</a>`;
+function lienCta(href, titre, sousTitre, actif, desactive, info, principal = false) {
+  return `<a class="btn${principal ? " principal" : ""}" href="${desactive ? "#" : href}"${actif ? ' aria-current="page"' : ""}${desactive ? ` aria-disabled="true" tabindex="-1" title="${esc(info)}"` : ""}>${esc(titre)}${sousTitre ? `<small>${esc(sousTitre)}</small>` : ""}</a>`;
 }
 function renderNavCta() {
   const h = decodeURIComponent(location.hash.replace(/^#/, "")) || "/";
@@ -3391,7 +3599,7 @@ function renderNavCta() {
   else html += lienCta("#/corpo", "Corporation", compte ? "Aucune corporation" : "Connexion nécessaire", false, true, compte ? "Rejoins ou crée une corporation (page Compte)" : "Connecte-toi pour voir ta corporation");
   const allies = corpos.some((c) => (c.partagentAvecNous || []).length);
   html += lienCta("#/corpo/allies", "Alliance", !compte ? "Connexion nécessaire" : !corpos.length ? "Aucune corporation" : "", h === "/corpo/allies", !compte || !corpos.length, compte ? "Aucune corporation alliée ne partage avec vous" : "Connecte-toi pour voir tes alliés");
-  html += lienCta("#/minerais", "Mes ressources", "", vue === "accueil");
+  html += lienCta("#/minerais", "Mes ressources", "", vue === "accueil", false, "", true);
   $("dn-cta").innerHTML = html;
 }
 function etiquetteLieu(st) {
@@ -3482,6 +3690,757 @@ function fermerNav() {
 }
 $("d-nav").addEventListener("cancel", (e) => { e.preventDefault(); fermerNav(); });
 
+
+/* Modèles des chiffres du terminal (8×12, normalisés), relevés sur des captures réelles (Nyx Gateway, Pyro Gateway) */
+const CHIFFRES_RAFF = [["0",[-0.1535,-0.0649,0.0559,0.0795,0.0711,0.0717,0.0423,-0.0632,-0.114,0.0231,0.1265,0.1173,0.0802,0.0843,0.1038,-0.0121,-0.0619,0.1175,0.0786,-0.0092,-0.0871,-0.0716,0.079,0.0083,-0.0469,0.1469,0.0398,-0.0643,-0.1396,-0.1411,0.0609,0.0138,-0.0462,0.1561,0.0106,-0.0976,-0.1633,-0.1682,0.0445,0.007,-0.0475,0.1561,0.012,-0.102,-0.1672,-0.1604,0.0436,0.0036,-0.0421,0.1656,0.0044,-0.1096,-0.1733,-0.1768,0.0545,0.0199,-0.0422,0.1667,0.0059,-0.1112,-0.1761,-0.1717,0.059,0.022,-0.0466,0.1554,0.0239,-0.0905,-0.1555,-0.1316,0.0684,0.0172,-0.0603,0.1212,0.0507,-0.0328,-0.085,-0.0627,0.0845,0.0138,-0.126,-0.0141,0.1281,0.1617,0.1559,0.1545,0.1139,-0.0189,-0.1683,-0.1068,0.0846,0.15,0.1558,0.1456,0.0448,-0.0781]],["1",[-0.1141,-0.0453,0.0496,0.0953,0.0773,-0.004,-0.086,-0.1141,-0.1141,-0.0432,0.0643,0.1397,0.1346,0.0296,-0.0784,-0.1141,-0.1141,-0.0679,0.0235,0.1301,0.1532,0.0397,-0.0766,-0.1141,-0.1141,-0.0807,-0.0046,0.115,0.1557,0.043,-0.0741,-0.1141,-0.1141,-0.0938,-0.0231,0.1051,0.1536,0.0384,-0.0721,-0.1141,-0.1141,-0.0969,-0.0214,0.1069,0.1527,0.035,-0.0742,-0.1141,-0.1141,-0.0921,-0.0181,0.1053,0.1524,0.0398,-0.0799,-0.1141,-0.1141,-0.0914,-0.0169,0.1069,0.1537,0.0392,-0.0783,-0.1141,-0.1141,-0.0861,-0.0118,0.1113,0.1561,0.0376,-0.0729,-0.1141,-0.1141,-0.0663,0.0162,0.1256,0.1639,0.0574,-0.0589,-0.1141,-0.1141,0.0046,0.1379,0.1962,0.2128,0.1655,0.0159,-0.1141,-0.1141,-0.0036,0.1116,0.1357,0.1391,0.1247,0.0047,-0.1141]],["1",[-0.1199,-0.0013,0.1061,0.1154,0.0658,-0.0111,-0.0908,-0.1199,-0.1199,0.0006,0.1357,0.1679,0.1296,0.0235,-0.0857,-0.1199,-0.1199,-0.0432,0.083,0.1363,0.1326,0.0345,-0.0801,-0.1199,-0.1199,-0.0723,0.0423,0.1033,0.1193,0.0343,-0.0779,-0.1199,-0.1199,-0.0937,0.0214,0.0916,0.1154,0.036,-0.0757,-0.1199,-0.1199,-0.1071,0.0157,0.0907,0.1121,0.0309,-0.0757,-0.1199,-0.1199,-0.1106,0.0169,0.0928,0.109,0.0228,-0.079,-0.1199,-0.1199,-0.1058,0.0189,0.0925,0.1078,0.0207,-0.0807,-0.1199,-0.1199,-0.0945,0.02,0.0894,0.1155,0.0375,-0.0722,-0.1199,-0.1199,-0.0703,0.0551,0.1187,0.1377,0.0668,-0.0552,-0.1199,-0.1199,-0.0194,0.1212,0.1694,0.1733,0.1244,-0.0142,-0.1199,-0.1199,0.0215,0.1599,0.1897,0.1865,0.1624,0.0203,-0.1199]],["1",[-0.07,0.063,0.1115,0.1141,0.0329,-0.0704,-0.1002,-0.1101,-0.0594,0.1007,0.1684,0.206,0.1118,-0.0495,-0.1001,-0.1101,-0.0908,-0.0255,0.0373,0.1509,0.1197,-0.048,-0.1,-0.1101,-0.1058,-0.0896,-0.0238,0.1293,0.1194,-0.044,-0.1,-0.1101,-0.1082,-0.1011,-0.0248,0.1368,0.1142,-0.048,-0.1,-0.1101,-0.1101,-0.0986,-0.0226,0.136,0.1142,-0.0488,-0.0993,-0.1101,-0.109,-0.0938,-0.0182,0.1371,0.1155,-0.0471,-0.0984,-0.1088,-0.1101,-0.0956,-0.0134,0.139,0.1097,-0.0478,-0.0973,-0.1099,-0.1062,-0.0907,-0.0118,0.1446,0.1111,-0.0493,-0.0947,-0.108,-0.0963,-0.061,0.0124,0.1549,0.125,-0.0163,-0.0702,-0.1018,-0.0566,0.0871,0.1432,0.1904,0.1756,0.1291,0.0688,-0.0712,-0.0511,0.1022,0.1296,0.1322,0.1272,0.1247,0.0765,-0.0687]],["2",[-0.1472,-0.0657,-0.0164,0.038,0.0542,0.0505,-0.0532,-0.1481,-0.1292,0.011,0.0653,0.1034,0.1138,0.1249,0.0273,-0.1222,-0.1134,0.0657,0.0942,0.0672,0.0579,0.0773,0.0951,-0.0789,-0.1263,-0.003,-0.0164,-0.0936,-0.107,-0.0817,0.0972,-0.047,-0.1484,-0.0907,-0.0895,-0.1013,-0.067,-0.0059,0.1111,-0.0586,-0.1549,-0.1126,-0.0761,-0.0092,0.0471,0.0939,0.0847,-0.0899,-0.1274,0.0158,0.0774,0.1155,0.0887,0.0553,-0.0373,-0.137,-0.1033,0.1189,0.1622,0.1123,0.0211,-0.044,-0.1154,-0.1559,-0.0818,0.1892,0.1599,-0.0196,-0.0934,-0.1201,-0.1416,-0.1599,-0.0755,0.2031,0.1875,0.0495,0.0182,0.0205,-0.0312,-0.1332,-0.0781,0.1874,0.194,0.1131,0.0996,0.1045,0.0272,-0.1188,-0.098,0.1028,0.1249,0.101,0.0979,0.0953,0.0208,-0.1186]],["3",[-0.0874,0.0037,0.0677,0.0713,0.0809,0.0563,-0.0215,-0.101,-0.0336,0.0761,0.1234,0.0909,0.0989,0.1085,0.0585,-0.0373,-0.0406,0.0311,0.0135,-0.058,-0.0444,0.0465,0.0979,0.0201,-0.0982,-0.0657,-0.0895,-0.1368,-0.1069,0.0126,0.0952,0.0192,-0.1728,-0.1557,-0.1124,-0.0666,0.016,0.1042,0.1216,0.006,-0.1839,-0.1543,-0.0687,0.0205,0.1313,0.1869,0.1459,0.006,-0.1964,-0.1807,-0.1187,-0.0468,0.0584,0.132,0.1244,0.0053,-0.1943,-0.1858,-0.1572,-0.1228,-0.0311,0.0703,0.1057,0.0012,-0.1117,-0.0966,-0.1284,-0.1684,-0.1173,0.0094,0.0914,0.0035,-0.0063,0.0362,-0.0052,-0.0775,-0.064,0.0378,0.0968,0.0051,-0.0185,0.1005,0.1714,0.1541,0.1508,0.1596,0.0868,-0.0555,-0.091,0.0309,0.1344,0.1498,0.1563,0.1268,0.0151,-0.1148]],["3",[-0.0844,0.0211,0.0841,0.0876,0.0883,0.0755,-0.0199,-0.1195,-0.0312,0.1001,0.1249,0.1101,0.1136,0.119,0.0457,-0.0836,-0.0406,0.0544,-0.0062,-0.0389,-0.0134,0.0444,0.084,-0.0488,-0.1025,-0.0508,-0.0911,-0.1194,-0.0787,0.0036,0.0969,-0.037,-0.1734,-0.138,-0.0653,-0.0309,0.0408,0.0986,0.1038,-0.0439,-0.1789,-0.1304,-0.0061,0.068,0.1568,0.1892,0.1079,-0.0508,-0.1858,-0.1614,-0.0846,-0.0278,0.0693,0.1355,0.1238,-0.0357,-0.1825,-0.1647,-0.1275,-0.1079,-0.0266,0.0583,0.0991,-0.042,-0.1209,-0.0819,-0.1256,-0.1528,-0.1039,-0.0164,0.0611,-0.0568,-0.0458,0.0328,-0.0509,-0.0743,-0.033,0.0317,0.0672,-0.0555,-0.0294,0.1166,0.1878,0.1658,0.1726,0.1745,0.0213,-0.0999,-0.0772,0.0546,0.182,0.17,0.1616,0.1378,-0.0478,-0.1399]],["3",[-0.117,0.0169,0.0785,0.0968,0.0837,0.0453,-0.043,-0.1402,-0.0974,0.0724,0.1091,0.1156,0.127,0.127,0.0326,-0.1179,-0.0991,0.0503,0.0021,-0.0224,0.042,0.1392,0.0863,-0.1001,-0.1229,-0.0239,-0.0737,-0.0963,-0.0136,0.1218,0.1018,-0.093,-0.1617,-0.1272,-0.0938,-0.0702,0.0262,0.1409,0.1014,-0.0947,-0.1637,-0.1212,-0.0255,0.0413,0.1496,0.2084,0.0914,-0.1046,-0.1676,-0.1342,-0.042,0.0247,0.1399,0.2088,0.0953,-0.1035,-0.1665,-0.1382,-0.0839,-0.0428,0.0634,0.1646,0.1036,-0.0959,-0.1469,-0.0897,-0.1001,-0.1087,-0.0374,0.0965,0.1121,-0.0854,-0.1102,0.0164,-0.0319,-0.0595,0.0022,0.1211,0.1011,-0.0928,-0.0876,0.0909,0.0651,0.0545,0.0984,0.133,0.0453,-0.115,-0.0984,0.0666,0.0853,0.1015,0.1277,0.0924,-0.021,-0.1364]],["3",[-0.0787,0.0256,0.0822,0.0861,0.0777,0.0644,-0.0222,-0.1399,-0.0476,0.0597,0.0829,0.0753,0.0923,0.115,0.0554,-0.1039,-0.0886,-0.0476,-0.0963,-0.1015,-0.0237,0.0758,0.1155,-0.0617,-0.135,-0.1216,-0.1498,-0.1263,-0.0411,0.0672,0.1308,-0.0454,-0.1841,-0.151,-0.0697,0.0008,0.0934,0.164,0.1374,-0.0653,-0.1952,-0.1429,-0.0201,0.0604,0.1618,0.2147,0.1365,-0.0801,-0.1914,-0.1559,-0.087,-0.0313,0.079,0.1542,0.1284,-0.0665,-0.171,-0.1457,-0.1196,-0.0801,0.0223,0.1102,0.1283,-0.0541,-0.0929,-0.0464,-0.0722,-0.0703,0,0.083,0.118,-0.0506,-0.039,0.0481,0.0224,0.003,0.0496,0.1025,0.0944,-0.0679,-0.0452,0.0835,0.1395,0.1358,0.1587,0.1457,0.033,-0.1089,-0.0985,0.0097,0.0807,0.0805,0.0911,0.0597,-0.0542,-0.148]],["3",[-0.1099,0.0141,0.0812,0.0927,0.0919,0.0465,-0.0573,-0.1387,-0.0286,0.1329,0.1519,0.1274,0.1405,0.1526,0.0599,-0.1093,0.0164,0.0883,0.0023,-0.0518,-0.0337,0.0831,0.1451,-0.0649,-0.072,-0.0552,-0.1055,-0.1346,-0.1262,0.0132,0.1541,-0.0458,-0.1379,-0.1325,-0.1183,-0.0772,-0.0648,0.0581,0.1435,-0.0557,-0.1427,-0.1305,-0.0773,0.0704,0.0942,0.1535,0.1079,-0.087,-0.1407,-0.1272,-0.0656,0.0993,0.1283,0.1756,0.1022,-0.0912,-0.1423,-0.1347,-0.1181,-0.0571,-0.036,0.0813,0.1413,-0.0643,-0.1115,-0.1077,-0.129,-0.131,-0.1254,0.009,0.1569,-0.0423,-0.0104,0.0108,-0.0769,-0.1037,-0.088,0.045,0.1496,-0.0543,0.02,0.1392,0.0919,0.0669,0.0821,0.1398,0.0915,-0.0919,-0.0827,0.0587,0.1187,0.127,0.1223,0.0775,-0.0346,-0.1324]],["4",[-0.1708,-0.164,-0.156,-0.0975,0.0258,0.0705,0.0348,-0.1176,-0.1729,-0.1536,-0.1172,-0.0305,0.1156,0.1563,0.1018,-0.0969,-0.1745,-0.1326,-0.0566,0.038,0.1534,0.1824,0.1186,-0.0932,-0.1691,-0.0885,0.0242,0.0901,0.1172,0.1542,0.1079,-0.0921,-0.1476,-0.0288,0.0584,0.0845,0.0685,0.1237,0.0954,-0.0953,-0.1119,0.0499,0.0667,0.0478,0.0271,0.1033,0.0869,-0.1001,-0.0542,0.096,0.0395,-0.0058,0.0057,0.1031,0.0955,-0.0964,-0.0344,0.1039,0.0378,-0.0016,0.0329,0.1307,0.1196,-0.0841,-0.0402,0.0955,0.0523,0.0367,0.0882,0.1743,0.1529,-0.0661,-0.0934,0.0046,-0.0115,-0.0053,0.0642,0.1537,0.1354,-0.0747,-0.1379,-0.08,-0.0843,-0.0683,0.0082,0.1034,0.0944,-0.0907,-0.1676,-0.1461,-0.1471,-0.1265,-0.0442,0.0493,0.0495,-0.1028]],["5",[-0.1344,-0.0137,0.0343,0.0543,0.0449,0.0177,-0.049,-0.1424,-0.1154,0.069,0.1328,0.1063,0.0946,0.0688,-0.0155,-0.1367,-0.0957,0.141,0.1947,0.0624,0.0343,0.0205,-0.0403,-0.1444,-0.0853,0.1527,0.1677,-0.0526,-0.109,-0.1126,-0.1244,-0.1626,-0.0865,0.1467,0.1724,0.0115,-0.037,-0.056,-0.0938,-0.1525,-0.0977,0.121,0.175,0.1051,0.0885,0.0778,0.0133,-0.131,-0.1338,-0.0089,0.0357,0.0313,0.0586,0.1179,0.133,-0.1029,-0.1537,-0.0991,-0.0866,-0.0915,-0.0571,0.0503,0.1576,-0.0913,-0.1429,-0.0823,-0.0896,-0.123,-0.1159,0.0022,0.1553,-0.0877,-0.1088,0.0576,0.0833,0.0214,0.0101,0.0773,0.1373,-0.0968,-0.1054,0.0854,0.1345,0.0945,0.0911,0.1172,0.0977,-0.1106,-0.1345,-0.0078,0.0479,0.0757,0.0973,0.0834,-0.0035,-0.1386]],["5",[-0.1502,-0.0595,0.0219,0.0614,0.0503,0.0355,-0.0174,-0.1326,-0.1335,0.0102,0.1203,0.1344,0.1066,0.095,0.0233,-0.1219,-0.12,0.0654,0.1921,0.1252,0.0485,0.0394,-0.0156,-0.1319,-0.1187,0.0683,0.1878,0.0381,-0.0909,-0.1025,-0.1185,-0.1599,-0.1121,0.0841,0.188,0.0818,-0.0127,-0.0241,-0.0739,-0.148,-0.1158,0.0731,0.1758,0.1564,0.1124,0.1023,0.0471,-0.114,-0.1429,-0.0444,0.0116,0.0462,0.0556,0.0774,0.1319,-0.0819,-0.158,-0.1173,-0.1035,-0.0881,-0.0684,-0.0238,0.1212,-0.0781,-0.1498,-0.0878,-0.0764,-0.1095,-0.1319,-0.0964,0.1022,-0.0794,-0.1142,0.0472,0.0881,0.0475,0.0215,0.0468,0.1354,-0.0779,-0.1144,0.0574,0.1235,0.1205,0.1101,0.1249,0.1279,-0.0861,-0.1469,-0.0464,0.0309,0.0923,0.1061,0.1041,0.0391,-0.1169]],["6",[-0.1809,-0.0834,-0.0043,0.0468,0.0844,0.0126,-0.1401,-0.2315,-0.0842,0.05,0.085,0.0833,0.1008,0.1064,-0.012,-0.1347,-0.0051,0.1082,0.0575,-0.0261,-0.0811,-0.005,-0.0181,-0.093,0.0248,0.1071,0.0205,-0.0735,-0.1455,-0.0953,-0.0916,-0.1295,0.0625,0.1287,0.0601,0.0209,-0.0037,-0.059,-0.1474,-0.1958,0.0976,0.2019,0.1697,0.1194,0.0796,0.0825,-0.0034,-0.1011,0.1117,0.2197,0.1268,0.0401,0.0064,0.0686,0.085,0.0009,0.0968,0.1736,-0.0055,-0.1183,-0.1368,-0.0572,0.0723,0.0461,0.0553,0.0937,-0.1051,-0.2159,-0.2342,-0.1613,0.0393,0.074,0.0426,0.1137,-0.0612,-0.1731,-0.1895,-0.0932,0.0653,0.0647,-0.0146,0.1063,0.0317,-0.0411,-0.0508,0.0346,0.0611,-0.0157,-0.1045,0.0235,0.0746,0.0701,0.0673,0.0861,-0.0108,-0.1285]],["6",[-0.1936,-0.0896,0.036,0.0733,0.0921,0.0692,-0.077,-0.1876,-0.1344,0.0123,0.1107,0.1082,0.12,0.1267,0.0034,-0.1414,-0.0704,0.0986,0.0661,-0.0345,-0.0684,-0.0229,-0.0345,-0.1491,-0.037,0.1364,0.0387,-0.0656,-0.1021,-0.0675,-0.0855,-0.1794,-0.0026,0.1909,0.0849,0.0388,0.0253,0.0213,-0.0877,-0.1933,0.0075,0.2286,0.1787,0.1143,0.0888,0.0977,0.0255,-0.1282,0.0057,0.2231,0.1407,0.053,0.0072,0.0337,0.0897,-0.077,-0.0023,0.1948,0.0474,-0.0525,-0.111,-0.0746,0.0894,-0.0639,-0.0203,0.1492,-0.0425,-0.1464,-0.2069,-0.164,0.075,-0.063,-0.0407,0.1228,-0.0049,-0.088,-0.1347,-0.0978,0.0731,-0.0705,-0.0969,0.0565,0.0743,0.0297,0.0054,0.0261,0.0601,-0.0906,-0.1567,-0.0248,0.0975,0.0832,0.0723,0.0811,0.0194,-0.1223]],["6",[-0.2212,-0.1171,-0.0606,-0.0095,0.0084,-0.0237,-0.1043,-0.2095,-0.1812,-0.0112,0.0539,0.085,0.0977,0.0784,-0.005,-0.1654,-0.1178,0.0881,0.1056,0.0374,0.0143,0.0343,0.0143,-0.1295,-0.0468,0.1332,0.0822,-0.0792,-0.1354,-0.1054,-0.0806,-0.1516,-0.0226,0.1557,0.1189,0.0022,-0.0353,-0.045,-0.085,-0.1791,-0.003,0.2098,0.2034,0.1226,0.0872,0.0829,0.0265,-0.1346,0.0013,0.1998,0.1622,0.0174,-0.0374,0.0281,0.0819,-0.0615,-0.007,0.1664,0.0998,-0.0892,-0.1567,-0.0536,0.0705,-0.0353,-0.0291,0.1339,0.0736,-0.1016,-0.165,-0.0619,0.0677,-0.0339,-0.0594,0.1218,0.1066,0.0115,-0.0016,0.0524,0.0869,-0.0664,-0.1181,0.077,0.1135,0.0874,0.0882,0.1039,0.0694,-0.1059,-0.2039,-0.0419,0.0312,0.0656,0.0609,0.0512,-0.0163,-0.1668]],["6",[-0.1773,-0.0888,0.0246,0.0478,0.0573,0.0355,-0.0877,-0.1717,-0.0843,0.0548,0.1261,0.1083,0.1043,0.1301,0.0616,-0.0785,0.0175,0.1175,-0.0025,-0.0897,-0.0877,-0.0107,0.0748,-0.0124,0.0586,0.1098,-0.0871,-0.1887,-0.1959,-0.1607,-0.0939,-0.1125,0.0611,0.1207,-0.0033,-0.0288,-0.0352,-0.0401,-0.0999,-0.1659,0.0708,0.1517,0.123,0.117,0.1177,0.1182,0.0548,-0.0807,0.0663,0.1472,0.0487,-0.0491,-0.0664,-0.0073,0.1212,0.055,0.0721,0.1157,-0.0691,-0.1723,-0.1776,-0.1229,0.0945,0.0913,0.0642,0.098,-0.1108,-0.1962,-0.1939,-0.1481,0.0827,0.0969,0.0497,0.1092,-0.0684,-0.1494,-0.1542,-0.0888,0.0931,0.069,-0.0321,0.0966,0.0966,0.053,0.044,0.0885,0.1069,-0.0127,-0.1474,-0.0313,0.0687,0.0892,0.087,0.0701,-0.0235,-0.1334]],["7",[-0.0643,0.0859,0.1148,0.1232,0.1118,0.1246,0.1352,-0.0552,-0.0652,0.0798,0.1026,0.1143,0.1368,0.1736,0.1969,-0.0357,-0.0986,-0.0284,-0.0245,-0.0115,0.0876,0.1535,0.1763,-0.0418,-0.1197,-0.0963,-0.098,-0.0755,0.0982,0.1596,0.1318,-0.0607,-0.1219,-0.1016,-0.0926,-0.0562,0.1371,0.1688,0.0856,-0.0808,-0.123,-0.1,-0.0698,-0.0148,0.162,0.1561,0.0308,-0.1007,-0.1185,-0.0865,-0.0235,0.0932,0.1279,0.0603,-0.0512,-0.1212,-0.1159,-0.0741,0.0127,0.1521,0.079,-0.0109,-0.0827,-0.1259,-0.1162,-0.054,0.0651,0.1708,0.0267,-0.0585,-0.0849,-0.122,-0.1068,-0.0085,0.1118,0.1418,-0.0251,-0.093,-0.0933,-0.1215,-0.0979,0.0203,0.1155,0.0881,-0.0539,-0.1038,-0.1024,-0.1234,-0.0974,0.0159,0.0828,0.0292,-0.0856,-0.1165,-0.1055,-0.1229]],["8",[-0.1362,-0.0222,0.043,0.0405,0.0334,0.0116,-0.0749,-0.1833,-0.0795,0.0402,0.0435,0.04,0.0634,0.0776,0.024,-0.1343,-0.048,0.0265,-0.1203,-0.1223,-0.0296,0.0645,0.1004,-0.0918,-0.0324,0.021,-0.2011,-0.2001,-0.0749,0.0489,0.1136,-0.0825,-0.0193,0.0922,-0.0185,-0.0329,0.0453,0.1187,0.1041,-0.0951,-0.0126,0.1398,0.1141,0.0909,0.1398,0.1767,0.0996,-0.1043,0.0015,0.1143,-0.0196,-0.0194,0.0945,0.1739,0.1067,-0.0987,-0.0056,0.0729,-0.1327,-0.1242,0.0074,0.1124,0.1026,-0.0937,-0.0246,0.0277,-0.222,-0.2118,-0.0788,0.0453,0.0994,-0.0883,-0.0297,0.0442,-0.1447,-0.1415,-0.0241,0.078,0.0852,-0.0996,-0.0484,0.1138,0.1597,0.1382,0.1511,0.1351,-0.0216,-0.1633,-0.1236,0.0214,0.1348,0.1077,0.0811,0.0352,-0.1163,-0.2094]],["8",[-0.156,-0.0642,-0.0065,0.0035,0.0038,0.0005,-0.0465,-0.1359,-0.0819,0.0163,-0.0018,-0.0081,0.0267,0.0607,0.0622,-0.0375,-0.0237,0.0556,-0.1311,-0.1766,-0.0842,0.0212,0.1245,0.0387,-0.0198,0.0548,-0.1815,-0.2489,-0.1512,-0.0171,0.1376,0.0613,-0.0125,0.1029,-0.0127,-0.0555,0.0068,0.0948,0.1612,0.0404,-0.0018,0.1351,0.0967,0.0668,0.1053,0.1672,0.1762,0.0259,0.0074,0.1176,0.0199,-0.0486,-0.0079,0.1054,0.1732,0.04,-0.0139,0.0724,-0.0917,-0.1695,-0.0951,0.0503,0.1512,0.0419,-0.023,0.045,-0.1868,-0.2641,-0.1568,0.001,0.1249,0.0339,-0.0124,0.0686,-0.1123,-0.1761,-0.0933,0.029,0.1094,0.0041,-0.072,0.0489,0.1271,0.1288,0.1418,0.1532,0.0122,-0.1215,-0.1663,-0.0704,0.0475,0.0677,0.0602,0.0387,-0.1152,-0.2158]],["8",[-0.2256,-0.1485,-0.0339,0.0179,0.034,0.012,-0.0595,-0.1741,-0.1381,-0.0169,0.0822,0.0804,0.0558,0.052,0.0368,-0.0793,-0.0187,0.0912,0.0482,-0.0384,-0.1017,-0.06,0.062,-0.0122,0.0293,0.1269,0.0059,-0.1297,-0.2182,-0.1512,0.0512,0.0043,0.023,0.1419,0.057,-0.095,-0.2003,-0.1311,0.0727,0.0128,-0.019,0.1321,0.1873,0.0986,0.0485,0.0918,0.1445,0.0273,-0.0167,0.1414,0.2013,0.1086,0.0736,0.1278,0.1639,0.0341,0.0232,0.1557,0.0999,-0.0318,-0.0871,-0.0108,0.1203,0.0268,0.0799,0.1469,-0.0599,-0.18,-0.246,-0.1794,0.0386,-0.0024,0.0451,0.1257,-0.0209,-0.1421,-0.2105,-0.143,0.0553,-0.0012,-0.0602,0.049,0.0504,-0.0177,-0.0667,-0.031,0.0528,-0.0403,-0.1586,-0.0501,0.0431,0.066,0.0529,0.0314,-0.0139,-0.1195]],["8",[-0.2666,-0.1521,-0.0244,0.0209,0.0434,0.0209,-0.055,-0.1343,-0.1865,-0.0372,0.081,0.0812,0.0676,0.0711,0.0431,-0.0249,-0.0541,0.0777,0.0825,-0.032,-0.1079,-0.0509,0.0458,0.0563,0.0008,0.1128,0.0547,-0.111,-0.2138,-0.1384,0.0126,0.0731,-0.0029,0.1169,0.0807,-0.0698,-0.175,-0.109,0.0284,0.0772,-0.0619,0.1149,0.1959,0.1239,0.0487,0.0993,0.1527,0.0908,-0.0635,0.1157,0.1947,0.1173,0.0379,0.0921,0.1509,0.0826,-0.0228,0.1199,0.122,-0.0096,-0.1074,-0.0386,0.0742,0.0658,0.0331,0.1265,0.0345,-0.1517,-0.262,-0.1869,-0.0258,0.042,0.0198,0.1149,0.0446,-0.1125,-0.2028,-0.1463,-0.0234,0.0296,-0.0928,0.0241,0.0602,0.0033,-0.035,-0.0224,-0.0064,-0.0257,-0.2227,-0.0936,0.0313,0.0593,0.0653,0.0468,-0.0209,-0.1029]],["9",[-0.1106,0.0014,0.0415,0.0421,0.0338,0.0265,-0.1013,-0.1824,-0.08,0.046,0.0487,0.0409,0.0582,0.0953,-0.0265,-0.1372,-0.0861,0.0076,-0.075,-0.0966,-0.0234,0.0976,0.0458,-0.0822,-0.0942,-0.0218,-0.1413,-0.1572,-0.0561,0.0796,0.0656,-0.0618,-0.0829,0.0009,-0.1344,-0.1386,-0.013,0.1248,0.087,-0.0557,-0.0676,0.0473,-0.0406,-0.0409,0.0627,0.179,0.0978,-0.0581,-0.0652,0.1007,0.197,0.2,0.1904,0.214,0.0967,-0.0581,-0.1198,0.0038,0.1069,0.1205,0.1286,0.1703,0.0908,-0.0545,-0.161,-0.1022,-0.1229,-0.113,-0.0228,0.0996,0.0659,-0.0663,-0.1083,-0.0181,-0.0905,-0.0981,-0.0098,0.1094,0.0305,-0.1,-0.0755,0.0857,0.1375,0.1393,0.1321,0.123,-0.0626,-0.1741,-0.1157,0.0197,0.1134,0.1228,0.0851,0.0347,-0.1337,-0.2105]],["9",[-0.1323,-0.0535,0.0109,0.009,0.0184,0.0272,-0.011,-0.1183,-0.066,0.0118,0.0534,0.0174,0.0108,0.052,0.0825,-0.0287,-0.0256,0.0288,0.0029,-0.0991,-0.1385,-0.0393,0.1274,0.0504,-0.0131,0.0291,-0.0347,-0.1777,-0.2182,-0.0904,0.1257,0.0556,-0.0013,0.0552,-0.0147,-0.158,-0.1738,-0.036,0.1721,0.0763,-0.0188,0.0603,0.0416,-0.0496,-0.0544,0.0559,0.2074,0.0893,-0.1037,-0.0016,0.122,0.1653,0.1572,0.1826,0.2038,0.0716,-0.1625,-0.0982,0.0074,0.0509,0.0534,0.0988,0.1642,0.0528,-0.1471,-0.1179,-0.1117,-0.1611,-0.1712,-0.062,0.1287,0.0477,-0.0906,-0.0278,-0.0266,-0.1119,-0.14,-0.0401,0.1322,0.0438,-0.1397,-0.0169,0.1276,0.1425,0.1475,0.1439,0.078,-0.056,-0.1969,-0.0968,0.0398,0.0779,0.0815,0.048,-0.0549,-0.1522]],["9",[-0.1564,-0.0631,0.0336,0.0458,0.0257,-0.0004,-0.0758,-0.1789,-0.048,0.0436,0.075,0.0698,0.0843,0.0946,0.0453,-0.0924,0.0177,0.0574,-0.0809,-0.1225,-0.0155,0.0838,0.1287,-0.0192,0.0298,0.0458,-0.1633,-0.2179,-0.0934,0.0367,0.1475,0.008,0.0345,0.0466,-0.1795,-0.2294,-0.1051,0.0293,0.166,0.0345,0.0325,0.0655,-0.0963,-0.127,0.0017,0.1172,0.1911,0.0424,-0.0366,0.0529,0.0576,0.0644,0.1295,0.1827,0.1969,0.0287,-0.1197,-0.0258,0.037,0.0506,0.1,0.1493,0.184,0.0212,-0.2001,-0.1655,-0.1844,-0.1988,-0.0878,0.0317,0.1542,0.0251,-0.0797,-0.0445,-0.1383,-0.1594,-0.0417,0.0679,0.1471,0.0103,-0.0406,0.0279,0.002,-0.0054,0.0542,0.0942,0.0643,-0.067,-0.1134,-0.0259,0.0552,0.0662,0.0664,0.0472,-0.0502,-0.1535]],["1",[-0.1119,0.068,0.1028,0.1148,0.1105,0.1061,0.0243,-0.1807,-0.0489,0.0459,-0.01,-0.0589,-0.0273,0.0894,0.0848,-0.1306,-0.0308,0.0048,-0.0924,-0.1677,-0.1264,0.0246,0.0783,-0.0855,-0.0383,-0.0284,-0.1296,-0.2033,-0.1606,-0.0223,0.0597,-0.0514,-0.0375,-0.0114,-0.1022,-0.1669,-0.1163,0.0237,0.0957,-0.0442,-0.039,0.0325,-0.0257,-0.0693,-0.019,0.1114,0.1553,-0.0391,-0.1238,0.0409,0.0783,0.0912,0.1026,0.1614,0.1611,-0.0401,-0.1785,-0.0113,0.0495,0.074,0.0695,0.1097,0.1155,-0.0471,-0.162,-0.0748,-0.0748,-0.0885,-0.0708,0.0298,0.0783,-0.0604,-0.1207,0.0021,0.007,-0.0021,0.0154,0.084,0.0828,-0.1028,-0.1221,0.0755,0.1206,0.1357,0.1401,0.1451,0.0748,-0.1531,-0.162,0.0843,0.1622,0.1946,0.1873,0.1447,0.0286,-0.2085]],["9",[-0.1551,0.0119,0.11,0.1124,0.1274,0.0998,0.0299,-0.1819,-0.0758,0.0393,0.0033,-0.0698,-0.0283,0.038,0.0616,-0.1299,-0.0423,0.019,-0.0896,-0.1724,-0.1301,-0.0333,0.0375,-0.0992,-0.045,0.0115,-0.0801,-0.1279,-0.1028,-0.0347,0.022,-0.0944,-0.0554,0.0594,0.0399,0.0088,0.0228,0.0577,0.0692,-0.1073,-0.0743,0.1106,0.1787,0.1658,0.1735,0.1727,0.1319,-0.1248,-0.0663,0.0769,0.0759,0.0232,0.054,0.0993,0.1052,-0.1153,-0.0485,0.0177,-0.0875,-0.1744,-0.1253,-0.0289,0.0408,-0.098,-0.0501,0.0003,-0.1102,-0.1801,-0.135,-0.0479,0.0204,-0.0956,-0.0662,0.0442,0.0259,-0.0008,0.0222,0.0521,0.0587,-0.1068,-0.1015,0.0651,0.1382,0.1407,0.149,0.1303,0.0787,-0.1375,-0.1534,0.0411,0.1804,0.2008,0.2031,0.1517,0.0578,-0.1846]],["8",[-0.1249,0.0363,0.085,0.1089,0.0759,0.0066,-0.0764,-0.1249,-0.1249,-0.0297,0.0246,0.092,0.1024,0.0362,-0.064,-0.1249,-0.1249,-0.0715,-0.018,0.0742,0.1096,0.0455,-0.0611,-0.1249,-0.1249,-0.0926,-0.0411,0.0618,0.1065,0.0434,-0.063,-0.1249,-0.1249,-0.0946,-0.0411,0.0625,0.1068,0.0427,-0.0624,-0.1249,-0.1249,-0.0944,-0.0414,0.0632,0.1069,0.0425,-0.0603,-0.1249,-0.1249,-0.0939,-0.0414,0.0634,0.1086,0.0452,-0.0571,-0.1249,-0.1249,-0.0929,-0.0406,0.0637,0.1094,0.0458,-0.0567,-0.1249,-0.1249,-0.0782,-0.0264,0.0722,0.1143,0.0523,-0.0475,-0.1249,-0.1249,0.016,0.0683,0.1358,0.1612,0.1137,0.0335,-0.1249,-0.1249,0.0869,0.1378,0.1793,0.1919,0.1581,0.0937,-0.1249,-0.1249,0.1195,0.1655,0.189,0.1951,0.1715,0.1178,-0.1249]],["1",[-0.0561,-0.0561,-0.0561,0.0891,0.2137,-0.0561,-0.0561,-0.0561,-0.0561,-0.0561,-0.0561,0.1227,0.2549,-0.0561,-0.0561,-0.0561,-0.0561,-0.0561,-0.0561,0.1187,0.2303,-0.0561,-0.0561,-0.0561,-0.0561,-0.0561,-0.0561,0.1187,0.2364,-0.0561,-0.0561,-0.0561,-0.0561,-0.0561,-0.0561,0.1144,0.2382,-0.0561,-0.0561,-0.0561,-0.0561,-0.0561,-0.0561,0.0928,0.2216,-0.0561,-0.0561,-0.0561,-0.0561,-0.0561,-0.0561,0.1023,0.2295,-0.0561,-0.0561,-0.0561,-0.0561,-0.0561,-0.0561,0.1273,0.2509,-0.0561,-0.0561,-0.0561,-0.0561,-0.0561,-0.0561,0.1268,0.2371,-0.0561,-0.0561,-0.0561,-0.0561,-0.0561,-0.0561,0.1213,0.2258,-0.0561,-0.0561,-0.0561,-0.0561,-0.0561,-0.0561,0.1083,0.2208,-0.0561,-0.0561,-0.0561,-0.0561,-0.0561,-0.0561,0.068,0.1719,-0.0561,-0.0561,-0.0561]],["8",[-0.2048,-0.1246,-0.0022,0.024,0.0187,-0.0152,-0.1412,-0.214,-0.1366,-0.0025,0.0749,0.0791,0.0919,0.0925,-0.0244,-0.1564,-0.0508,0.1111,-0.0584,-0.1281,-0.0658,0.047,0.0948,-0.0791,-0.0484,0.0987,-0.1447,-0.2157,-0.1404,-0.0208,0.0669,-0.0771,-0.05,0.1126,-0.0298,-0.0755,-0.0256,0.0489,0.079,-0.0782,-0.0571,0.1238,0.0982,0.0764,0.1011,0.1372,0.0973,-0.0819,-0.0633,0.1225,0.1319,0.1129,0.1351,0.1701,0.1039,-0.0854,-0.0461,0.1257,-0.0358,-0.1023,-0.0398,0.0699,0.1005,-0.0732,-0.0484,0.1055,-0.1259,-0.1988,-0.1226,-0.0037,0.067,-0.0774,-0.0561,0.1041,-0.0445,-0.0934,-0.04,0.0379,0.0613,-0.0841,-0.0896,0.0761,0.1145,0.1113,0.1194,0.1246,0.0377,-0.1133,-0.1389,0.0034,0.1462,0.172,0.1602,0.1278,-0.0265,-0.157]],["9",[-0.2165,-0.1382,-0.0236,0.0326,0.0472,0.0131,-0.0845,-0.1727,-0.1327,-0.0305,0.0786,0.1087,0.1097,0.116,0.0438,-0.077,-0.0101,0.0538,0.0194,-0.0741,-0.1119,0.009,0.0984,0.019,0.0107,0.0442,-0.0421,-0.1733,-0.2053,-0.0842,0.0479,0.03,0.0042,0.0426,-0.0399,-0.1641,-0.1871,-0.0699,0.065,0.0553,-0.0092,0.0512,0.0059,-0.0868,-0.1033,0.0116,0.1271,0.0893,-0.0715,0.0103,0.058,0.0449,0.0488,0.1283,0.1852,0.1169,-0.1612,-0.0885,0.047,0.1079,0.1292,0.154,0.1542,0.0919,-0.1524,-0.1327,-0.0965,-0.1036,-0.1037,-0.0247,0.0645,0.0415,-0.1207,-0.0883,-0.059,-0.0737,-0.0764,-0.0035,0.0637,0.0201,-0.1283,-0.0368,0.0866,0.129,0.1434,0.1488,0.0886,-0.0222,-0.1898,-0.0742,0.1089,0.184,0.2073,0.1783,0.0538,-0.0848]],["1",[-0.1099,0.0501,0.0998,0.1181,0.0882,0.0008,-0.0769,-0.1099,-0.1099,-0.024,0.0194,0.0667,0.1138,0.0242,-0.0744,-0.1099,-0.1099,-0.071,-0.0338,0.0281,0.1194,0.033,-0.0742,-0.1099,-0.1099,-0.0942,-0.0616,0.0055,0.1155,0.0341,-0.0744,-0.1099,-0.1099,-0.094,-0.0623,0.004,0.1158,0.0358,-0.0731,-0.1099,-0.1099,-0.0936,-0.0626,0.0031,0.1168,0.0377,-0.0719,-0.1099,-0.1099,-0.093,-0.0614,0.0042,0.1163,0.0374,-0.0721,-0.1099,-0.1099,-0.0931,-0.0608,0.0059,0.1166,0.0378,-0.0723,-0.1099,-0.1099,-0.0791,-0.0452,0.0183,0.125,0.0509,-0.0575,-0.1099,-0.1099,0.0206,0.0675,0.1072,0.1745,0.1282,0.0439,-0.1099,-0.1099,0.0965,0.1528,0.1745,0.2093,0.1846,0.1209,-0.1099,-0.1099,0.1313,0.1901,0.2006,0.2126,0.2014,0.1546,-0.1099]],["1",[-0.1158,0.0429,0.1847,0.1838,0.0896,-0.006,-0.0908,-0.1158,-0.1158,0.0023,0.1477,0.1726,0.1023,0.0123,-0.0841,-0.1158,-0.1158,-0.0737,0.0507,0.1058,0.079,0.0145,-0.0799,-0.1158,-0.1158,-0.0956,0.0221,0.0856,0.0697,0.0123,-0.0794,-0.1158,-0.1158,-0.104,0.0097,0.0771,0.064,0.0057,-0.0819,-0.1158,-0.1158,-0.1031,0.0095,0.0755,0.063,0.0046,-0.0831,-0.1158,-0.1158,-0.1024,0.0109,0.0773,0.0635,0.0057,-0.0826,-0.1158,-0.1158,-0.1035,0.0108,0.0792,0.0641,0.0069,-0.0821,-0.1158,-0.1158,-0.0884,0.0277,0.0918,0.0778,0.0244,-0.0689,-0.1158,-0.1158,-0.0356,0.0876,0.1343,0.1241,0.0867,-0.0287,-0.1158,-0.1158,0.0411,0.1855,0.2125,0.2083,0.1948,0.0387,-0.1158,-0.1158,0.0315,0.1529,0.1688,0.1671,0.1643,0.0284,-0.1158]],["4",[-0.1485,-0.1445,-0.1383,-0.1038,0.0163,0.0859,0.0768,-0.1224,-0.1484,-0.1423,-0.122,-0.06,0.1026,0.1693,0.1356,-0.1153,-0.1492,-0.1364,-0.0909,0.0004,0.1442,0.1935,0.1492,-0.1115,-0.1495,-0.1028,-0.0162,0.0858,0.0844,0.1189,0.1163,-0.1114,-0.1474,-0.0374,0.0508,0.1015,0.0177,0.0649,0.1016,-0.1141,-0.1285,0.0418,0.0969,0.0648,-0.0283,0.0395,0.096,-0.1141,-0.0556,0.1326,0.1138,-0.0036,-0.0276,0.0626,0.1157,-0.0901,-0.0012,0.1187,0.0875,0.0222,0.0319,0.1127,0.155,-0.0522,0.0053,0.1006,0.0822,0.058,0.085,0.1526,0.1839,-0.0218,-0.0571,0.0086,0.0095,0.014,0.0522,0.1239,0.1596,-0.0393,-0.1177,-0.0997,-0.1019,-0.093,-0.0452,0.0449,0.0967,-0.0913,-0.1344,-0.1353,-0.1402,-0.1316,-0.0879,-0.0054,0.0445,-0.1139]],["8",[-0.1623,-0.0291,0.1511,0.1834,0.1894,0.1433,-0.0224,-0.169,-0.1084,0.0341,0.109,0.093,0.1059,0.1137,0.0431,-0.1201,-0.0738,0.0463,-0.0446,-0.1083,-0.0867,-0.015,0.0547,-0.0863,-0.072,0.037,-0.099,-0.1723,-0.145,-0.0578,0.0445,-0.0831,-0.0721,0.0664,0.0147,-0.066,-0.0363,0.0453,0.0835,-0.0853,-0.0806,0.0938,0.194,0.1673,0.181,0.2012,0.1232,-0.0884,-0.0804,0.0819,0.1355,0.0966,0.1119,0.1472,0.107,-0.0874,-0.0748,0.0516,-0.0376,-0.1194,-0.0929,-0.0052,0.0633,-0.0843,-0.0761,0.0362,-0.0879,-0.1591,-0.1341,-0.0515,0.0394,-0.0871,-0.0818,0.0465,-0.0022,-0.0494,-0.0322,0.0193,0.0459,-0.0963,-0.1258,0.013,0.1166,0.1236,0.1285,0.1142,0.0098,-0.1394,-0.181,-0.0737,0.0638,0.0932,0.0914,0.053,-0.0757,-0.189]],["9",[-0.0732,0.0486,0.1381,0.1498,0.1526,0.162,0.0785,-0.0485,0.004,0.0792,0.0391,-0.0304,-0.0261,0.0714,0.0917,0.0043,0.0393,0.0859,-0.0358,-0.1555,-0.1505,-0.0046,0.0884,0.0359,0.0425,0.0807,-0.0703,-0.2075,-0.1988,-0.0305,0.0985,0.0618,0.0367,0.0837,-0.0417,-0.1656,-0.1537,0.0229,0.1417,0.0867,-0.01,0.0753,0.0538,-0.0084,0.0084,0.1506,0.2135,0.122,-0.1608,-0.0815,-0.0068,0.0115,0.0401,0.1412,0.1915,0.111,-0.2279,-0.1847,-0.1335,-0.1171,-0.0868,0.0258,0.1166,0.0721,-0.1897,-0.1478,-0.1332,-0.1512,-0.1406,-0.0047,0.097,0.0512,-0.0943,-0.0148,-0.0001,-0.043,-0.0641,0.0564,0.0991,0.0117,-0.0924,0.009,0.0631,0.0433,0.0214,0.0828,0.0519,-0.0551,-0.184,-0.0861,0.0216,0.0584,0.0621,0.0395,-0.059,-0.1556]],["5",[-0.0264,0.1505,0.1869,0.164,0.1503,0.1454,0.0427,-0.1593,-0.0258,0.1064,0.0815,0.0259,0.0038,-0.0032,-0.0606,-0.1733,-0.0255,0.0766,0.0108,-0.0697,-0.1026,-0.1105,-0.1339,-0.1823,-0.0202,0.0992,0.0512,-0.022,-0.0605,-0.0864,-0.1237,-0.1828,-0.0216,0.1387,0.1481,0.1084,0.0811,0.0434,-0.0335,-0.1644,-0.0697,0.0695,0.1093,0.1012,0.1131,0.1416,0.0938,-0.0936,-0.1553,-0.1059,-0.082,-0.0747,-0.0231,0.0955,0.1597,0.0205,-0.1691,-0.1516,-0.1548,-0.16,-0.111,0.0142,0.1243,0.0473,-0.1333,-0.0935,-0.1134,-0.1395,-0.0996,0.0157,0.1126,0.0293,-0.0606,0.0442,0.0188,-0.034,-0.0059,0.0902,0.1253,-0.0235,-0.0589,0.0757,0.0888,0.0532,0.0656,0.1195,0.0973,-0.083,-0.1211,0.0082,0.0916,0.1103,0.1006,0.0886,0.0163,-0.1513]],["4",[-0.2289,-0.2241,-0.1844,-0.0885,0.0623,0.0996,0.0065,-0.1118,-0.2213,-0.1963,-0.1222,0.019,0.1407,0.1227,0.0322,-0.0836,-0.208,-0.1533,-0.0524,0.0669,0.139,0.1054,0.0343,-0.0717,-0.1899,-0.0982,0.0262,0.0717,0.0744,0.0548,0.0174,-0.0712,-0.1473,-0.0441,0.048,0.0235,0.0051,0.0257,0.0094,-0.0744,-0.0967,0.0018,0.0467,-0.0261,-0.0485,0.0066,0.0042,-0.0769,-0.0301,0.0336,-0.0059,-0.0743,-0.0602,0.0055,0.0044,-0.0766,0.0536,0.0959,0.0207,-0.0254,0.0124,0.0695,0.059,-0.036,0.1422,0.1728,0.0864,0.07,0.1256,0.1633,0.1383,0.0232,0.0719,0.1176,0.084,0.0871,0.1453,0.184,0.1588,0.042,-0.0334,0.0099,0.0122,0.0309,0.0999,0.1482,0.1309,0.0248,-0.1922,-0.1791,-0.1678,-0.1368,-0.0424,0.0294,0.03,-0.0479]],["2",[-0.0668,0.0229,0.1055,0.124,0.1254,0.1221,0.0647,-0.0209,-0.0521,0.0252,0.0635,0.0452,0.0507,0.0951,0.1037,0.0351,-0.0841,-0.0317,-0.0275,-0.0649,-0.0531,0.0423,0.1116,0.0578,-0.1505,-0.1292,-0.1319,-0.1473,-0.0783,0.0427,0.1208,0.0618,-0.1778,-0.1602,-0.134,-0.1072,0.0061,0.0944,0.1184,0.041,-0.1653,-0.1222,-0.0432,0.0161,0.0844,0.0976,0.0489,-0.0327,-0.0327,0.0515,0.0973,0.0733,0.0094,-0.037,-0.1039,-0.1487,0.0501,0.1457,0.1241,0.0117,-0.0946,-0.1321,-0.1683,-0.1855,0.0793,0.1741,0.1066,-0.0571,-0.1431,-0.1585,-0.1738,-0.1846,0.1032,0.2108,0.1441,-0.0178,-0.0778,-0.0851,-0.1128,-0.1465,0.0653,0.173,0.1558,0.0557,0.0185,0.0078,-0.0399,-0.0982,-0.0137,0.078,0.1202,0.0996,0.0856,0.0716,0.0126,-0.0593]],["1",[-0.1149,-0.0158,0.0845,0.1756,0.0898,-0.0057,-0.0836,-0.1149,-0.1149,-0.0446,0.0543,0.1779,0.1044,0.0026,-0.0821,-0.1149,-0.1149,-0.0689,0.0246,0.1681,0.1043,0.0038,-0.0798,-0.1149,-0.1149,-0.0814,0.009,0.1633,0.1045,0.0044,-0.0781,-0.1149,-0.1149,-0.0821,0.0077,0.163,0.1047,0.0039,-0.0777,-0.1149,-0.1149,-0.0801,0.0087,0.1609,0.1026,0.001,-0.0797,-0.1149,-0.1149,-0.0789,0.0101,0.1606,0.101,-0.0014,-0.0816,-0.1149,-0.1149,-0.0788,0.0106,0.1608,0.1012,-0.002,-0.0814,-0.1149,-0.1149,-0.079,0.0094,0.159,0.1009,-0.0019,-0.0804,-0.1149,-0.1149,-0.0313,0.0709,0.1935,0.1436,0.0534,-0.0409,-0.1149,-0.1149,0.0315,0.148,0.2253,0.1884,0.1202,0.0087,-0.1149,-0.1149,0.003,0.085,0.119,0.1007,0.0639,-0.016,-0.1149]],["5",[0.0711,0.1952,0.0998,0.0361,0.0017,-0.0189,-0.0711,-0.1489,0.0899,0.1996,0.0587,-0.0292,-0.0701,-0.0844,-0.1214,-0.1733,0.0875,0.1922,0.039,-0.0597,-0.111,-0.1258,-0.1544,-0.1897,0.0779,0.201,0.0867,0.0067,-0.0372,-0.0573,-0.106,-0.1673,0.0402,0.1827,0.1378,0.0963,0.079,0.0647,0.0051,-0.1022,-0.0439,0.0662,0.0561,0.039,0.0557,0.0829,0.087,-0.0256,-0.1495,-0.0993,-0.0972,-0.0983,-0.0409,0.0378,0.1162,0.0225,-0.171,-0.1449,-0.1624,-0.1695,-0.0968,0.0022,0.103,0.0239,-0.1254,-0.0937,-0.1563,-0.1859,-0.1114,-0.0031,0.1052,0.0291,-0.059,0.0257,-0.0193,-0.0545,-0.0112,0.065,0.127,0.0236,-0.0203,0.1229,0.1356,0.1144,0.1139,0.1364,0.1291,-0.0044,-0.0926,0.0207,0.0661,0.0729,0.0641,0.0517,0.0119,-0.092]],["6",[-0.1047,0.0353,0.1045,0.0258,-0.05,-0.0305,0.0025,-0.0391,-0.0666,0.0855,0.1335,0.006,-0.1165,-0.0994,-0.0535,-0.0765,-0.051,0.1006,0.142,-0.0012,-0.1529,-0.1532,-0.1295,-0.1483,-0.0375,0.1204,0.177,0.0598,-0.0793,-0.0922,-0.0976,-0.1365,-0.0242,0.1416,0.216,0.1335,0.0211,0.0104,0.0044,-0.0545,-0.0078,0.1528,0.2128,0.1025,-0.0278,-0.0127,0.0543,0.0237,0.0004,0.134,0.1629,0.0015,-0.1657,-0.1163,0.0524,0.0637,-0.0021,0.1129,0.1277,-0.0594,-0.2447,-0.1792,0.0342,0.0605,-0.0046,0.1084,0.1205,-0.0761,-0.268,-0.1938,0.0399,0.0688,-0.0364,0.0838,0.1299,-0.0016,-0.1403,-0.0882,0.0757,0.0703,-0.0956,0.0239,0.1138,0.0791,0.0221,0.0398,0.0928,0.0426,-0.1834,-0.1051,-0.0171,-0.0016,-0.0085,-0.0077,-0.0168,-0.072]],["7",[0.0324,0.0421,0.0473,0.0701,0.0959,0.1229,0.0706,0.0025,0.0004,0.0122,0.0238,0.0696,0.1138,0.1525,0.0915,0.0171,-0.0882,-0.0654,-0.0304,0.0721,0.1303,0.1491,0.0538,-0.031,-0.1333,-0.0877,-0.0218,0.0946,0.1464,0.1375,0.0169,-0.0776,-0.137,-0.055,0.0456,0.1394,0.1614,0.1174,-0.0219,-0.1219,-0.1337,-0.0253,0.1023,0.1592,0.138,0.0394,-0.0666,-0.1305,-0.1132,0.0083,0.1444,0.1629,0.1018,-0.0413,-0.1088,-0.1357,-0.051,0.0496,0.1429,0.1224,0.0415,-0.1017,-0.1371,-0.1361,0.0001,0.0795,0.1324,0.0641,-0.0224,-0.1311,-0.1479,-0.1353,0.0462,0.1023,0.1146,-0.0038,-0.0918,-0.1417,-0.1489,-0.1353,0.0567,0.0847,0.0742,-0.0478,-0.1245,-0.1471,-0.1505,-0.1423,0.0407,0.0486,0.0216,-0.0876,-0.1476,-0.1505,-0.152,-0.1476]],["0",[-0.0013,0.1123,0.0781,0.0286,0.0121,0.0483,0.0653,-0.0538,0.0461,0.1529,0.062,-0.0248,-0.0595,0.0078,0.1015,-0.0093,0.0575,0.1432,0.0053,-0.115,-0.1739,-0.0826,0.0908,0.0079,0.0639,0.1387,-0.0146,-0.1477,-0.2214,-0.1237,0.0831,0.0144,0.0658,0.1381,-0.015,-0.148,-0.2261,-0.1313,0.0799,0.015,0.0648,0.1369,-0.0188,-0.1479,-0.2254,-0.1318,0.0823,0.0164,0.0619,0.135,-0.0206,-0.1469,-0.2261,-0.1343,0.0839,0.017,0.0603,0.1382,-0.0167,-0.1438,-0.2239,-0.133,0.0871,0.016,0.0611,0.1461,-0.008,-0.1384,-0.2197,-0.128,0.0937,0.0148,0.0458,0.1559,0.0558,-0.0384,-0.0915,-0.0248,0.1053,-0.0032,0.0065,0.135,0.1042,0.059,0.0407,0.0735,0.0915,-0.0407,-0.0676,0.0456,0.0602,0.0487,0.0465,0.0536,0.0169,-0.1014]],["8",[-0.0346,0.0718,-0.0434,-0.1286,-0.0851,0.0192,0.0713,-0.0399,-0.0145,0.0712,-0.1252,-0.2284,-0.1629,-0.034,0.0563,-0.0163,-0.0176,0.0676,-0.1163,-0.2017,-0.1333,-0.0244,0.0482,-0.0175,-0.0304,0.0958,0.0644,0.0281,0.0571,0.1057,0.0979,-0.0299,-0.0332,0.1154,0.1568,0.1422,0.1544,0.1793,0.1318,-0.0361,-0.0255,0.1145,0.1179,0.087,0.1102,0.1585,0.1345,-0.0316,-0.0134,0.0759,-0.0773,-0.1657,-0.1053,0.0147,0.085,-0.0137,-0.0096,0.0592,-0.1515,-0.2545,-0.1788,-0.0397,0.0585,-0.0096,-0.0211,0.0596,-0.1009,-0.1806,-0.1163,-0.006,0.0557,-0.0222,-0.0546,0.0735,0.0847,0.0665,0.0868,0.1171,0.0781,-0.05,-0.1278,0.0089,0.1241,0.144,0.1398,0.1217,0.0254,-0.113,-0.2186,-0.114,0.0129,0.0428,0.0365,0.0101,-0.0873,-0.1968]],["8",[-0.0782,-0.0156,0.0462,-0.0411,-0.1163,-0.0262,0.1024,0.0008,-0.0363,0.0058,0.0242,-0.1212,-0.2128,-0.1155,0.0643,0.0059,-0.0332,0.0055,0.0242,-0.1039,-0.179,-0.1003,0.0513,-0.004,-0.074,-0.0023,0.0917,0.0725,0.0392,0.0841,0.1176,-0.013,-0.1012,-0.008,0.1332,0.1693,0.1547,0.1879,0.1585,-0.022,-0.1001,-0.004,0.1298,0.1408,0.1092,0.1569,0.1554,-0.0248,-0.0466,0.0158,0.0562,-0.0656,-0.1627,-0.0729,0.0821,-0.0094,-0.0268,0.0192,0.0223,-0.1395,-0.2466,-0.1509,0.0471,-0.0057,-0.044,0.0057,0.0332,-0.0813,-0.1601,-0.0872,0.0553,-0.0133,-0.0983,-0.0234,0.0911,0.1087,0.0854,0.1102,0.1091,-0.0304,-0.1683,-0.0906,0.0683,0.1608,0.1715,0.1682,0.0821,-0.0867,-0.2344,-0.1754,-0.0292,0.0703,0.0914,0.081,-0.0193,-0.1649]],["3",[-0.0007,0.0936,0.0691,0.0172,0.0125,0.0629,0.1097,0.0026,-0.0763,-0.0275,-0.055,-0.0912,-0.0816,-0.0118,0.0875,0.006,-0.1495,-0.1273,-0.1311,-0.1294,-0.0956,-0.027,0.0801,0.0046,-0.1774,-0.1419,-0.1004,-0.0517,0.014,0.0611,0.1135,0.0084,-0.1881,-0.1297,-0.0421,0.0485,0.1459,0.1676,0.1489,0.0081,-0.1875,-0.1224,-0.0246,0.0722,0.183,0.2039,0.1637,0.0106,-0.1765,-0.1557,-0.1398,-0.1218,-0.045,0.0385,0.1218,0.0251,-0.1424,-0.1226,-0.1397,-0.1575,-0.1189,-0.0298,0.0919,0.0207,-0.0949,-0.0456,-0.0599,-0.0837,-0.0718,-0.0063,0.0908,0.0126,-0.0452,0.0516,0.0649,0.0561,0.0571,0.0849,0.1176,0.0082,-0.0415,0.0829,0.1355,0.1514,0.1574,0.1505,0.1068,-0.0246,-0.0743,0.0421,0.112,0.1425,0.1545,0.1281,0.0439,-0.0774]],["9",[0.1198,0.0761,-0.0831,-0.1226,-0.0689,0.0216,0.1201,0.0035,0.1053,0.0073,-0.1896,-0.22,-0.1504,-0.0422,0.087,0.0074,0.0848,-0.0354,-0.2417,-0.2648,-0.186,-0.0728,0.0615,0.0039,0.0929,-0.0047,-0.198,-0.2231,-0.1427,-0.0314,0.0912,0.0213,0.1079,0.0629,-0.0923,-0.112,-0.0408,0.0534,0.1523,0.0545,0.0784,0.1113,0.0416,0.0366,0.0777,0.1319,0.1919,0.0711,-0.0779,0.0442,0.1237,0.1394,0.1263,0.12,0.1328,0.0257,-0.1373,-0.0801,-0.0648,-0.0636,-0.0336,0.0178,0.0823,0.0056,-0.1126,-0.0967,-0.1422,-0.1559,-0.1017,-0.0195,0.0677,-0.0022,-0.0304,0.0192,-0.0133,-0.0294,-0.004,0.0415,0.0871,-0.0069,-0.0245,0.0755,0.1056,0.1036,0.1064,0.0977,0.0578,-0.0614,-0.0891,0.0248,0.0968,0.1077,0.1006,0.0605,-0.0314,-0.1447]],["3",[-0.1169,0.0513,0.1172,0.1353,0.1334,0.1133,0.0427,-0.1209,-0.1022,0.0619,0.0713,0.0315,0.0438,0.0963,0.0803,-0.0983,-0.1221,-0.0159,-0.0287,-0.0696,-0.0358,0.0456,0.0791,-0.0874,-0.1599,-0.1178,-0.0999,-0.0901,-0.029,0.0352,0.0747,-0.0861,-0.1693,-0.1172,-0.0498,-0.0004,0.0713,0.1049,0.1005,-0.0877,-0.1715,-0.0929,0.0267,0.1156,0.1959,0.1962,0.1425,-0.0855,-0.1695,-0.1171,-0.049,0.0025,0.0886,0.1307,0.1166,-0.0856,-0.1598,-0.1278,-0.1304,-0.1369,-0.0613,0.0293,0.0732,-0.0868,-0.135,-0.0545,-0.0655,-0.0968,-0.0591,0.0244,0.0717,-0.0859,-0.1085,0.0547,0.0871,0.0832,0.0911,0.1106,0.0968,-0.0905,-0.1099,0.069,0.1338,0.1604,0.1626,0.1382,0.0812,-0.1052,-0.1287,0.0147,0.0867,0.1264,0.1311,0.0917,0.0228,-0.1269]],["3",[-0.1326,-0.056,0.0459,0.0723,0.0486,0.0034,-0.1184,-0.168,-0.0854,0.0419,0.1264,0.1429,0.1298,0.1015,-0.05,-0.1338,-0.0534,0.079,0.0406,0.0206,0.0532,0.1056,0.0426,-0.0629,-0.1044,-0.0353,-0.0634,-0.0713,-0.0282,0.039,0.0689,-0.0261,-0.1672,-0.153,-0.0962,-0.0714,-0.0226,0.0568,0.068,-0.031,-0.1796,-0.175,-0.0065,0.0662,0.1092,0.1587,0.0562,-0.062,-0.1757,-0.1704,0.0565,0.1554,0.1971,0.2261,0.0508,-0.0802,-0.171,-0.1624,-0.0965,-0.0623,0.0013,0.0995,0.0671,-0.0439,-0.1116,-0.0477,-0.106,-0.1295,-0.0752,0.0256,0.072,-0.0224,-0.0745,0.0338,0.0097,-0.0082,0.0202,0.0752,0.0669,-0.0354,-0.069,0.0696,0.1517,0.1681,0.1619,0.1473,0.0213,-0.0875,-0.1041,0.017,0.1431,0.177,0.1621,0.1226,-0.0485,-0.1402]],["0",[-0.1055,0.0823,0.1358,0.1458,0.1349,0.0856,0.0105,-0.1595,-0.0516,0.1013,0.1031,0.0763,0.0984,0.1024,0.0753,-0.1129,-0.0353,0.0559,0.0071,-0.051,-0.0026,0.0549,0.0839,-0.0831,-0.0334,-0.0014,-0.087,-0.1618,-0.1027,-0.0071,0.0703,-0.0682,-0.032,-0.0111,-0.1,-0.1738,-0.1224,-0.0239,0.0642,-0.0685,-0.0307,-0.0114,-0.1008,-0.1749,-0.1288,-0.0293,0.0625,-0.0687,-0.0336,-0.0098,-0.0985,-0.1741,-0.1332,-0.0332,0.0639,-0.0658,-0.0353,-0.0065,-0.094,-0.1711,-0.1308,-0.0322,0.063,-0.0661,-0.0347,0.0158,-0.0594,-0.133,-0.0954,-0.0111,0.0656,-0.0713,-0.0362,0.1002,0.0879,0.0527,0.0685,0.0917,0.0971,-0.081,-0.0587,0.1378,0.182,0.1858,0.1857,0.1552,0.0983,-0.1109,-0.1011,0.1158,0.1972,0.2292,0.2189,0.1533,0.0552,-0.1548]],["8",[-0.1328,-0.0211,0.071,0.0866,0.1007,0.0812,-0.0239,-0.162,-0.0232,0.0834,0.0511,-0.0688,-0.0583,0.0278,0.0733,-0.0506,0.0211,0.1182,0.0182,-0.174,-0.174,-0.0397,0.0879,-0.0117,-0.0018,0.0988,0.0354,-0.1149,-0.126,-0.0255,0.0653,-0.0287,-0.0173,0.1093,0.1321,0.0716,0.0622,0.1051,0.1032,-0.0282,-0.0198,0.118,0.1792,0.1624,0.1591,0.1746,0.1247,-0.0283,-0.0096,0.1086,0.0982,0.0021,-0.0241,0.0431,0.0944,-0.022,0.0008,0.0989,0.0115,-0.1748,-0.2269,-0.1019,0.0642,-0.0135,0.0061,0.1065,0.0093,-0.1917,-0.2451,-0.1102,0.0695,-0.0132,-0.06,0.066,0.0965,0.0178,-0.0064,0.0451,0.0689,-0.0554,-0.1575,-0.0366,0.0843,0.1091,0.1121,0.0942,0.0023,-0.1281,-0.2574,-0.1899,-0.0922,-0.0463,-0.0235,-0.0489,-0.1397,-0.2253]],["9",[-0.1478,0.0548,0.1223,0.1241,0.1238,0.0944,0.0233,-0.174,-0.0228,0.0774,-0.0248,-0.0628,-0.0065,0.0776,0.1458,-0.0971,0.0255,0.0475,-0.142,-0.1829,-0.1022,0.0209,0.1413,-0.0723,0.0176,0.008,-0.1906,-0.215,-0.1309,-0.018,0.0947,-0.0712,0.0172,0.0395,-0.1412,-0.17,-0.0865,0.0282,0.1385,-0.0542,-0.0013,0.0859,-0.0409,-0.0631,0.0075,0.1046,0.1955,-0.0386,-0.1224,0.0242,0.0389,0.0461,0.0777,0.12,0.1718,-0.0511,-0.18,-0.0512,-0.006,0.0034,0.0247,0.062,0.1169,-0.0682,-0.1161,-0.0251,-0.0752,-0.1051,-0.0597,0.0264,0.1178,-0.0673,-0.0959,0.0709,0.064,0.0438,0.0706,0.1128,0.1351,-0.0911,-0.1449,0.069,0.1459,0.1538,0.1548,0.1374,0.0864,-0.1348,-0.2137,-0.0468,0.0554,0.0781,0.0764,0.0409,-0.0357,-0.1937]],["1",[-0.0876,0.0455,0.1049,0.1446,0.0668,-0.0102,-0.079,-0.12,-0.105,-0.025,0.0389,0.1058,0.0712,0.0043,-0.0667,-0.1171,-0.1172,-0.0804,-0.0189,0.0664,0.0619,0.0058,-0.0625,-0.116,-0.1234,-0.1126,-0.0556,0.0383,0.0479,0.0004,-0.0625,-0.1159,-0.1236,-0.1126,-0.0558,0.0375,0.0468,-0.0006,-0.0626,-0.1159,-0.124,-0.1134,-0.0573,0.0367,0.0475,0.0002,-0.0623,-0.116,-0.1246,-0.1144,-0.0582,0.0351,0.0483,0.0007,-0.0638,-0.1164,-0.1245,-0.113,-0.0576,0.0347,0.0489,0.0015,-0.0639,-0.1167,-0.1199,-0.0958,-0.0399,0.0499,0.064,0.0198,-0.0425,-0.1101,-0.0843,0.0432,0.1058,0.1696,0.1793,0.1564,0.1089,-0.0654,-0.0672,0.1127,0.1763,0.2202,0.2279,0.2203,0.1848,-0.0425,-0.0741,0.0907,0.1493,0.1842,0.1934,0.1939,0.1694,-0.0458]],["7",[-0.0765,0.0589,0.0721,0.0747,0.1109,0.1364,0.0926,-0.0712,-0.086,0.0296,0.0428,0.0507,0.1204,0.1768,0.1326,-0.0593,-0.1111,-0.0472,-0.0333,-0.012,0.0851,0.1584,0.1145,-0.066,-0.1293,-0.1033,-0.0849,-0.0369,0.0713,0.1314,0.0812,-0.0776,-0.138,-0.1304,-0.1036,-0.019,0.086,0.1042,0.0396,-0.0918,-0.1369,-0.1252,-0.0841,0.0365,0.1258,0.088,0.0028,-0.1048,-0.1308,-0.0914,-0.0174,0.1027,0.1443,0.0609,-0.0376,-0.1183,-0.1203,-0.0394,0.0676,0.1473,0.1217,0.0197,-0.0682,-0.126,-0.1052,0.0294,0.1708,0.1934,0.0811,-0.04,-0.1024,-0.1324,-0.0835,0.0837,0.1896,0.1707,0.0335,-0.0769,-0.1188,-0.1352,-0.0641,0.1143,0.1534,0.105,-0.0192,-0.0994,-0.1256,-0.1364,-0.0566,0.114,0.0959,0.0201,-0.081,-0.1193,-0.1307,-0.1378]],["4",[-0.2003,-0.1902,-0.1632,-0.1068,0.0142,0.0557,0.0165,-0.0975,-0.2001,-0.1869,-0.1451,-0.0628,0.1018,0.1431,0.0824,-0.0645,-0.1951,-0.1706,-0.0965,0.0077,0.1433,0.1611,0.0885,-0.0579,-0.1824,-0.1318,-0.0154,0.0946,0.1246,0.1272,0.0685,-0.0606,-0.1525,-0.0676,0.0543,0.1313,0.0661,0.0726,0.0438,-0.0662,-0.0994,0.0144,0.0607,0.0494,-0.0072,0.034,0.0348,-0.0673,-0.0262,0.0616,0.0125,-0.0734,-0.0646,0.0126,0.0318,-0.064,0.0335,0.0931,0.0321,-0.0469,-0.0056,0.0692,0.0835,-0.0051,0.0918,0.144,0.1215,0.0857,0.1232,0.1742,0.1745,0.0945,0.0124,0.053,0.0547,0.0514,0.0993,0.1578,0.1624,0.0774,-0.1076,-0.0823,-0.074,-0.0608,0.0056,0.0825,0.098,0.0068,-0.1743,-0.1615,-0.1563,-0.1406,-0.0668,0.0174,0.0389,-0.0496]],["7",[-0.0863,0.0475,0.0712,0.0753,0.0986,0.1096,0.0879,-0.0727,-0.0905,0.0337,0.0565,0.0653,0.1162,0.1519,0.139,-0.0553,-0.1124,-0.0354,-0.0181,-0.0012,0.0835,0.1443,0.1393,-0.055,-0.1313,-0.0955,-0.0802,-0.0481,0.0596,0.1278,0.1166,-0.0638,-0.143,-0.1331,-0.1123,-0.0489,0.0669,0.1165,0.084,-0.0772,-0.1427,-0.1311,-0.0913,0.0196,0.1226,0.1196,0.0493,-0.0924,-0.1384,-0.1084,-0.04,0.0954,0.1699,0.1133,-0.0003,-0.1134,-0.129,-0.062,0.0346,0.1389,0.154,0.0688,-0.0432,-0.1263,-0.1157,-0.0001,0.1245,0.1727,0.1047,-0.0035,-0.087,-0.1357,-0.1017,0.0407,0.1506,0.1615,0.0508,-0.0633,-0.1175,-0.1411,-0.0875,0.0691,0.1384,0.1148,-0.0054,-0.1013,-0.1336,-0.1439,-0.0734,0.0944,0.1134,0.0435,-0.0656,-0.1194,-0.1374,-0.1447]],["1",[-0.0851,0.0195,0.0764,0.1087,0.0623,-0.0115,-0.0827,-0.1277,-0.1012,-0.0164,0.0572,0.1206,0.081,-0.0048,-0.0889,-0.1315,-0.1234,-0.0746,0.0012,0.0858,0.0635,-0.0125,-0.0892,-0.1308,-0.1347,-0.1039,-0.0275,0.0671,0.0537,-0.0161,-0.0891,-0.1306,-0.1349,-0.1038,-0.0276,0.0674,0.0557,-0.0143,-0.0884,-0.1304,-0.1365,-0.1064,-0.0298,0.0672,0.0583,-0.0122,-0.0872,-0.1293,-0.1346,-0.1065,-0.0305,0.068,0.0558,-0.0142,-0.0883,-0.13,-0.1342,-0.1064,-0.031,0.0681,0.056,-0.014,-0.0881,-0.1297,-0.1133,-0.0624,0.0114,0.1011,0.0927,0.03,-0.0399,-0.1099,-0.0257,0.1289,0.193,0.2341,0.2334,0.2029,0.1521,-0.033,-0.029,0.1253,0.1787,0.2037,0.2078,0.1907,0.1537,-0.0301,-0.0699,0.0333,0.0707,0.0894,0.0945,0.0844,0.0611,-0.0627]],["4",[-0.2,-0.1968,-0.1771,-0.1231,-0.011,0.0702,0.0662,-0.0057,-0.1979,-0.1892,-0.1564,-0.0749,0.0653,0.1481,0.1452,0.0619,-0.1958,-0.1738,-0.1188,-0.0276,0.077,0.1103,0.1199,0.0662,-0.1915,-0.1507,-0.0707,0.0078,0.0667,0.0733,0.0978,0.0665,-0.1683,-0.1038,-0.0121,0.0229,0.0267,0.0403,0.082,0.0638,-0.1063,-0.0191,0.0463,0.0157,-0.0283,0.017,0.0756,0.061,-0.0007,0.0875,0.0706,0.0049,-0.0294,0.036,0.0977,0.0802,0.0523,0.1265,0.0591,0.0103,0.0187,0.0801,0.131,0.1076,0.0508,0.1192,0.0576,0.0301,0.0629,0.1229,0.1628,0.1336,-0.024,0.0262,-0.0067,-0.0152,0.0328,0.1025,0.1488,0.1233,-0.1276,-0.1038,-0.1088,-0.1036,-0.0441,0.0385,0.0988,0.0827,-0.1803,-0.1715,-0.1684,-0.1609,-0.1088,-0.0347,0.0226,0.0151]],["8",[-0.1581,-0.0591,0.0033,-0.0126,-0.0344,-0.0079,0.0395,-0.0538,-0.0755,0.0488,0.0563,-0.0307,-0.099,-0.0342,0.1282,0.0469,-0.0566,0.0597,0.0261,-0.1095,-0.2118,-0.1333,0.0838,0.0455,-0.0444,0.0768,0.0336,-0.1135,-0.2359,-0.1561,0.0906,0.058,-0.0593,0.0751,0.0899,0.0023,-0.0807,-0.0238,0.1421,0.0679,-0.0831,0.0655,0.1549,0.1392,0.1108,0.1397,0.1982,0.0766,-0.0317,0.0926,0.0903,-0.0285,-0.1382,-0.0629,0.1692,0.0977,-0.0088,0.0897,0.0457,-0.1131,-0.249,-0.162,0.1147,0.0782,-0.0161,0.0715,0.0408,-0.0954,-0.2097,-0.1375,0.0857,0.0526,-0.0802,0.0338,0.0991,0.0748,0.0449,0.0721,0.1307,0.0378,-0.163,-0.059,0.0655,0.1017,0.1171,0.119,0.0823,-0.0334,-0.2379,-0.1682,-0.0502,-0.0018,0.0249,0.0158,-0.0479,-0.1395]],["8",[-0.0857,0.0017,-0.003,-0.0117,0.0018,0.0516,-0.0151,-0.1547,0.0114,0.0703,0.0208,-0.0207,0.0068,0.1179,0.0933,-0.0348,-0.0014,-0.0298,-0.1468,-0.24,-0.2156,-0.0453,0.0421,0.0169,0.0106,-0.0117,-0.1249,-0.2166,-0.1903,-0.0176,0.0655,0.0303,0.0411,0.0769,0.0029,-0.06,-0.0316,0.1074,0.124,0.022,0.0634,0.1394,0.0794,0.0226,0.0498,0.1944,0.1628,-0.011,0.0673,0.1439,0.0801,0.0165,0.0437,0.1937,0.1618,-0.0151,0.0368,0.0517,-0.0406,-0.1228,-0.1007,0.0606,0.1041,0.0237,0.0128,-0.0145,-0.1337,-0.233,-0.212,-0.0363,0.0594,0.0375,-0.0039,-0.0501,-0.1836,-0.291,-0.2647,-0.082,0.0318,0.0352,0.0166,0.0853,0.0472,0.0102,0.0328,0.128,0.1098,-0.016,-0.0678,0.0486,0.069,0.0734,0.0871,0.1228,0.0415,-0.1238]],["7",[-0.0353,0.0761,0.0797,0.0967,0.1207,0.1351,0.0866,-0.0563,-0.0412,0.0665,0.0784,0.113,0.1584,0.1913,0.1372,-0.0378,-0.1133,-0.0744,-0.0496,0.0123,0.0859,0.1375,0.0871,-0.0652,-0.1355,-0.1102,-0.0688,0.0081,0.0794,0.1098,0.0482,-0.0844,-0.1354,-0.099,-0.0399,0.0464,0.102,0.0929,0.0126,-0.101,-0.1315,-0.075,0.0086,0.1026,0.1238,0.0454,-0.0457,-0.1178,-0.1173,-0.0304,0.0693,0.1427,0.1201,-0.0018,-0.0916,-0.13,-0.0887,0.0417,0.1442,0.1612,0.0839,-0.0471,-0.1204,-0.1368,-0.0613,0.0961,0.1773,0.1251,0.0108,-0.0843,-0.1294,-0.1395,-0.0332,0.1391,0.1844,0.0737,-0.0623,-0.1163,-0.1327,-0.1405,-0.003,0.1442,0.1131,0.0025,-0.0993,-0.1293,-0.1342,-0.1408,-0.0165,0.0892,0.0269,-0.0566,-0.1179,-0.1338,-0.1345,-0.1407]],["4",[-0.2154,-0.2135,-0.1988,-0.1444,-0.0272,0.0561,0.0342,-0.0434,-0.2126,-0.2022,-0.1625,-0.0722,0.0818,0.1635,0.1208,0.0132,-0.2096,-0.1765,-0.0903,0.0201,0.1379,0.1607,0.0935,-0.0117,-0.1881,-0.1269,-0.0181,0.061,0.1079,0.1109,0.0563,-0.0279,-0.1572,-0.0708,0.0436,0.0776,0.0499,0.0503,0.0191,-0.0411,-0.1025,-0.0221,0.0262,0.0167,-0.0118,0.0283,0.0132,-0.0444,-0.0411,0.0371,0.0439,0.0119,-0.0117,0.0495,0.0458,-0.0111,0.0286,0.1051,0.0959,0.0637,0.0528,0.1149,0.115,0.0573,0.0223,0.0925,0.0931,0.0765,0.0844,0.1502,0.1527,0.095,-0.0158,0.0432,0.0552,0.0553,0.0836,0.1582,0.1627,0.1046,-0.1168,-0.0832,-0.0703,-0.0628,-0.0115,0.0857,0.0945,0.0353,-0.1793,-0.1641,-0.1551,-0.147,-0.0971,-0.0077,0.0016,-0.0453]],["4",[-0.197,-0.1945,-0.1779,-0.1158,0.0273,0.1063,0.0504,-0.0803,-0.1994,-0.1892,-0.1487,-0.0497,0.1246,0.1663,0.0836,-0.0557,-0.1979,-0.169,-0.0835,0.0289,0.1575,0.1636,0.0765,-0.0495,-0.1798,-0.1184,0.0205,0.0959,0.0808,0.1046,0.0513,-0.0567,-0.1357,-0.0514,0.0635,0.0845,0.0021,0.0589,0.0367,-0.0613,-0.0697,0.0204,0.0486,0.0119,-0.0567,0.0374,0.0365,-0.0589,0.0082,0.0791,0.0271,-0.0385,-0.0513,0.0531,0.0572,-0.0335,0.0623,0.1262,0.0772,0.029,0.0425,0.1282,0.1291,0.0491,0.0606,0.1183,0.0979,0.077,0.1041,0.1785,0.177,0.103,-0.0318,0.0141,0.0182,0.0185,0.0587,0.1472,0.1488,0.0708,-0.1191,-0.0914,-0.0827,-0.0765,-0.032,0.0686,0.0766,-0.001,-0.1728,-0.1647,-0.1628,-0.1601,-0.1201,-0.0229,-0.0102,-0.0762]],["2",[-0.0477,0.0334,0.0759,0.0611,0.0696,0.0677,0.0468,-0.0263,-0.0447,0.0254,0.0529,0.0243,0.0398,0.0652,0.0815,0.0287,-0.0871,-0.0424,-0.0324,-0.0614,-0.0313,0.0251,0.0835,0.0588,-0.1583,-0.1383,-0.1315,-0.1351,-0.0756,0.0002,0.0787,0.0608,-0.1992,-0.1852,-0.1619,-0.1189,-0.0216,0.0484,0.0979,0.0522,-0.1853,-0.148,-0.0918,-0.0134,0.0782,0.1009,0.0842,0.0041,-0.0747,0.0335,0.1233,0.1495,0.0885,0.0041,-0.0799,-0.1388,0.0077,0.1154,0.1518,0.0643,-0.0444,-0.1104,-0.1654,-0.193,0.0551,0.1409,0.1269,-0.0299,-0.1301,-0.1552,-0.1756,-0.1903,0.0615,0.1318,0.1175,-0.009,-0.0755,-0.092,-0.1185,-0.151,0.0684,0.1539,0.168,0.084,0.0441,0.0256,-0.012,-0.0753,0.0555,0.1564,0.1956,0.1425,0.1171,0.0975,0.0569,-0.0243]],["3",[-0.1058,0.0454,0.0532,0.045,0.0478,0.0496,0.0115,-0.1233,-0.0924,0.0764,0.0646,0.0477,0.0639,0.087,0.0695,-0.0996,-0.1109,-0.0001,-0.0412,-0.0593,-0.0154,0.0395,0.0747,-0.0843,-0.1432,-0.0854,-0.0968,-0.0853,-0.0172,0.0377,0.0813,-0.0797,-0.1595,-0.1065,-0.0636,-0.0168,0.0594,0.09,0.094,-0.0855,-0.1632,-0.103,-0.0313,0.0396,0.1301,0.1433,0.1057,-0.0931,-0.1641,-0.1268,-0.0937,-0.0529,0.0366,0.0884,0.0941,-0.087,-0.1533,-0.1173,-0.1321,-0.1264,-0.0488,0.0299,0.0799,-0.0802,-0.123,-0.0394,-0.0894,-0.1068,-0.0498,0.02,0.0731,-0.0807,-0.0926,0.0836,0.0807,0.0765,0.0904,0.1022,0.0903,-0.0901,-0.0911,0.1214,0.1791,0.1962,0.1847,0.1515,0.0786,-0.1093,-0.105,0.1011,0.205,0.2388,0.2123,0.1518,0.035,-0.1359]],["3",[-0.1233,0.0266,0.0458,0.038,0.0474,0.0529,0.0294,-0.123,-0.1142,0.0549,0.0696,0.055,0.0769,0.0982,0.0886,-0.1029,-0.1318,-0.0215,-0.0148,-0.0218,0.0201,0.0601,0.079,-0.0968,-0.1544,-0.1004,-0.0767,-0.0502,0.0127,0.057,0.0809,-0.0941,-0.1615,-0.113,-0.0626,-0.0052,0.0664,0.1018,0.1053,-0.0932,-0.1602,-0.1002,-0.0308,0.0477,0.1248,0.153,0.1338,-0.0933,-0.1637,-0.1281,-0.0945,-0.0513,0.0473,0.105,0.1165,-0.0931,-0.1604,-0.1293,-0.1299,-0.1262,-0.025,0.0499,0.0902,-0.0929,-0.143,-0.0678,-0.081,-0.106,-0.0291,0.0374,0.0771,-0.0943,-0.1161,0.0422,0.0653,0.0638,0.0925,0.1074,0.0959,-0.0962,-0.1078,0.0877,0.1444,0.1721,0.1749,0.1508,0.0954,-0.104,-0.1113,0.0875,0.1621,0.2066,0.1987,0.1516,0.0668,-0.1186]],["0",[-0.1487,-0.1089,-0.0103,0.0174,0.0099,0.0315,0.0351,-0.0562,-0.0817,-0.0445,0.056,0.0356,0.0142,0.0669,0.1147,0.0149,-0.0196,-0.0054,0.0534,-0.0705,-0.1119,-0.0102,0.1055,0.0367,0.0038,0.0149,0.0421,-0.1501,-0.2027,-0.073,0.0838,0.0423,-0.0265,0.0108,0.0396,-0.1535,-0.2053,-0.0783,0.0778,0.04,-0.0742,0.0031,0.0394,-0.1549,-0.2081,-0.0807,0.0784,0.0424,-0.052,0.0065,0.0409,-0.1474,-0.2055,-0.0802,0.0784,0.0419,-0.0148,0.0139,0.0426,-0.1403,-0.2019,-0.075,0.0853,0.0442,-0.0013,0.0173,0.0533,-0.1071,-0.1643,-0.0395,0.1075,0.0494,-0.0387,-0.0012,0.0993,0.0746,0.0603,0.1186,0.1518,0.0389,-0.1025,-0.0489,0.1073,0.1809,0.1983,0.2036,0.138,-0.0082,-0.1776,-0.1181,0.078,0.207,0.2429,0.214,0.0763,-0.0813]],["8",[-0.1542,-0.057,-0.0053,-0.02,-0.0059,0.0194,0.0451,-0.1558,-0.0974,0.0149,0.0148,-0.008,0.0238,0.0807,0.1454,-0.1062,-0.0656,0.0132,-0.1075,-0.1232,-0.064,0.0278,0.1354,-0.0844,-0.054,0.0263,-0.1114,-0.1286,-0.0842,0.0081,0.1315,-0.0758,-0.0633,0.0473,-0.0087,-0.0346,-0.0171,0.0523,0.1574,-0.0804,-0.0789,0.0628,0.0989,0.0664,0.0742,0.1257,0.2025,-0.0858,-0.0629,0.0545,-0.0093,-0.0711,-0.0494,0.0509,0.1904,-0.0722,-0.0507,0.0377,-0.1181,-0.1802,-0.1462,-0.0222,0.1519,-0.0661,-0.0552,0.0227,-0.1421,-0.1773,-0.139,-0.0321,0.1197,-0.0726,-0.0742,0.0455,0.0247,0.014,0.0338,0.082,0.1503,-0.0849,-0.1163,0.029,0.1469,0.1462,0.1533,0.1508,0.1346,-0.119,-0.1741,-0.0287,0.1901,0.196,0.1975,0.1536,0.0614,-0.17]],["9",[0.0038,0.0919,0.0255,-0.033,-0.0381,-0.0035,0.023,0.0231,0.0489,0.1021,-0.0667,-0.1879,-0.1721,-0.1022,-0.0243,0.0327,0.0716,0.1052,-0.1182,-0.2746,-0.2467,-0.1552,-0.0483,0.0411,0.0689,0.1119,-0.0868,-0.2285,-0.2024,-0.1167,-0.0171,0.0646,0.0586,0.1244,-0.0155,-0.1184,-0.0956,-0.0309,0.0453,0.1061,0.0114,0.1025,0.055,0.0157,0.0308,0.0627,0.1022,0.1333,-0.1335,-0.029,0.0561,0.1073,0.109,0.0999,0.0973,0.0967,-0.1605,-0.088,-0.0565,-0.0465,-0.045,-0.0123,0.0303,0.0671,-0.1308,-0.0766,-0.1062,-0.1419,-0.1384,-0.0739,-0.0024,0.0533,-0.0751,0.009,0.0107,-0.0014,0.0003,0.034,0.0584,0.0611,-0.0845,0.0329,0.1037,0.1415,0.1405,0.1413,0.1019,0.0246,-0.1489,-0.0172,0.1133,0.1953,0.1923,0.1764,0.0897,-0.0546]],["1",[-0.0979,-0.0106,0.0316,0.0628,0.0454,-0.0359,-0.1121,-0.1237,-0.0964,-0.0029,0.0572,0.1108,0.1058,-0.002,-0.1072,-0.1231,-0.1112,-0.063,0.007,0.0867,0.1117,0.0053,-0.1045,-0.1227,-0.1201,-0.1011,-0.0253,0.071,0.1126,0.0079,-0.1046,-0.1232,-0.1201,-0.1019,-0.0259,0.0714,0.1123,0.0078,-0.1051,-0.1235,-0.1202,-0.1017,-0.0258,0.0708,0.1105,0.0078,-0.1035,-0.123,-0.1207,-0.1011,-0.025,0.071,0.1083,0.0072,-0.1035,-0.123,-0.1206,-0.0996,-0.0228,0.0733,0.1085,0.0078,-0.1027,-0.123,-0.1145,-0.0779,-0.0037,0.0867,0.1184,0.0238,-0.0828,-0.1177,-0.0837,0.0352,0.0946,0.1504,0.1688,0.1075,0.0241,-0.0892,-0.0632,0.11,0.1588,0.1907,0.1983,0.1601,0.0948,-0.0694,-0.055,0.1394,0.179,0.1946,0.1951,0.1725,0.1229,-0.0607]],["7",[0.0022,0.0522,0.0755,0.0742,0.0811,0.0731,0.0476,-0.0116,0.0537,0.1144,0.1447,0.1476,0.1624,0.157,0.1281,0.053,0.0324,0.0845,0.1128,0.1233,0.1636,0.1751,0.1549,0.0746,-0.0876,-0.0662,-0.0511,-0.0281,0.0636,0.1072,0.1087,0.0332,-0.1525,-0.1466,-0.1316,-0.0902,0.029,0.081,0.082,-0.0006,-0.1626,-0.1544,-0.1217,-0.0549,0.0643,0.0933,0.0658,-0.0313,-0.1663,-0.1451,-0.0737,0.0382,0.1311,0.0977,0.0098,-0.0822,-0.1583,-0.1155,-0.0296,0.0821,0.1446,0.0734,-0.0457,-0.1203,-0.1446,-0.0762,0.0118,0.0988,0.1207,0.0287,-0.0983,-0.1502,-0.1258,-0.0358,0.0462,0.0929,0.0526,-0.0361,-0.131,-0.1614,-0.1015,-0.0038,0.0653,0.0747,-0.02,-0.0953,-0.1484,-0.163,-0.0727,0.0174,0.0709,0.0536,-0.0768,-0.139,-0.1576,-0.1614]],["4",[-0.233,-0.2273,-0.2034,-0.1372,-0.0161,0.0588,0.0427,-0.0315,-0.2333,-0.2181,-0.1701,-0.0805,0.0595,0.1355,0.1078,0.0139,-0.2258,-0.1824,-0.0846,0.0071,0.1001,0.1423,0.1034,0.0093,-0.2026,-0.1348,-0.0149,0.0619,0.1062,0.1208,0.08,-0.0048,-0.1613,-0.0789,0.0248,0.0686,0.0707,0.0784,0.0471,-0.0234,-0.114,-0.0298,0.0288,0.0304,0.0157,0.0518,0.0376,-0.0261,-0.0382,0.0374,0.0453,0.0154,0.0042,0.0722,0.0713,0.0103,0.0097,0.0764,0.0718,0.0441,0.0462,0.1191,0.1186,0.0563,0.016,0.077,0.0748,0.0606,0.0802,0.1527,0.1518,0.0891,-0.0306,0.0205,0.0277,0.029,0.0675,0.1468,0.1464,0.083,-0.117,-0.0798,-0.0634,-0.0492,0.0095,0.1056,0.1089,0.0438,-0.1831,-0.1621,-0.1499,-0.1367,-0.0754,0.0228,0.0303,-0.0262]],["7",[0.0053,0.0496,0.0823,0.0898,0.0996,0.1161,0.0712,-0.0033,0.0503,0.1048,0.146,0.157,0.1779,0.2109,0.1608,0.0596,-0.0059,0.0315,0.0617,0.0856,0.1602,0.2228,0.1859,0.0757,-0.0951,-0.0824,-0.0683,-0.0289,0.1009,0.1666,0.1324,0.0334,-0.132,-0.1267,-0.1078,-0.0456,0.1105,0.0916,0.0037,-0.0697,-0.1347,-0.1275,-0.0855,-0.0154,0.1067,0.0584,-0.0421,-0.1031,-0.1353,-0.1244,-0.039,0.0396,0.0795,0.0128,-0.0781,-0.1203,-0.1317,-0.1128,0.0015,0.0794,0.0524,-0.0215,-0.098,-0.1253,-0.1074,-0.0418,0.0739,0.1106,0.0128,-0.067,-0.1251,-0.1334,-0.0816,0.0319,0.124,0.1094,-0.0223,-0.0898,-0.1316,-0.1351,-0.0679,0.0728,0.1292,0.0682,-0.0733,-0.1142,-0.1359,-0.1372,-0.081,0.0332,0.067,0.0074,-0.1063,-0.1265,-0.1368,-0.1397]],["1",[-0.1209,-0.0153,0.1039,0.1111,0.0664,0.0083,-0.0797,-0.1209,-0.1209,0.0181,0.1723,0.1833,0.1191,0.0327,-0.0852,-0.1209,-0.1209,-0.0172,0.1239,0.1569,0.121,0.0429,-0.0875,-0.1209,-0.1209,-0.073,0.0335,0.0864,0.0904,0.038,-0.0862,-0.1209,-0.1209,-0.0957,-0.0037,0.0579,0.0782,0.0348,-0.0863,-0.1209,-0.1209,-0.0979,-0.0055,0.0565,0.0779,0.0347,-0.0853,-0.1209,-0.1209,-0.0999,-0.0053,0.0571,0.0769,0.0336,-0.0848,-0.1209,-0.1209,-0.1004,-0.0051,0.0571,0.0772,0.0336,-0.0853,-0.1209,-0.1209,-0.0836,0.0209,0.08,0.0992,0.0584,-0.0686,-0.1209,-0.1209,-0.0341,0.0991,0.1528,0.1686,0.1339,-0.0123,-0.1209,-0.1209,0.0037,0.1523,0.1957,0.207,0.1819,0.0316,-0.1209,-0.1209,-0.0134,0.1093,0.1423,0.1502,0.1321,0.0107,-0.1209]],["4",[-0.2339,-0.225,-0.1809,-0.0925,0.0696,0.0791,-0.0046,-0.0999,-0.2333,-0.215,-0.136,-0.0321,0.1305,0.1362,0.0487,-0.056,-0.2274,-0.193,-0.0849,0.007,0.1142,0.1134,0.0464,-0.039,-0.2105,-0.151,-0.0371,0.0264,0.0772,0.0811,0.0362,-0.0342,-0.1768,-0.0921,0.0025,0.0255,0.0263,0.0484,0.025,-0.0399,-0.1202,-0.0312,0.0277,0.0132,-0.0174,0.0316,0.0234,-0.048,-0.0034,0.0674,0.0661,0.0269,0.0037,0.066,0.0557,-0.0271,0.0794,0.1292,0.093,0.0566,0.0681,0.1215,0.0987,0.0095,0.1035,0.1439,0.1025,0.0786,0.1188,0.1651,0.1336,0.041,0.0382,0.0746,0.0505,0.0463,0.1109,0.1593,0.1293,0.0392,-0.0877,-0.055,-0.0522,-0.0338,0.0525,0.1106,0.0905,0.0084,-0.1764,-0.1575,-0.1489,-0.1242,-0.0361,0.0234,0.0149,-0.0526]],["8",[-0.2382,-0.1307,-0.0075,0.0371,0.0209,-0.0374,-0.1755,-0.2817,-0.1248,0.0185,0.1421,0.1832,0.1634,0.102,-0.0523,-0.1897,-0.0081,0.1185,0.1176,0.043,0.0388,0.0577,0.0201,-0.0915,0.0354,0.126,0.0139,-0.163,-0.1519,-0.0588,0.0155,-0.0589,0.0514,0.1499,0.0313,-0.1434,-0.1296,-0.0395,0.0212,-0.0619,0.063,0.1956,0.1131,-0.0308,-0.0075,0.0521,0.0437,-0.0681,0.0662,0.2099,0.1564,0.047,0.0722,0.1087,0.0574,-0.0712,0.0584,0.1758,0.1088,-0.0027,0.0142,0.0626,0.0469,-0.0694,0.0465,0.1141,-0.0134,-0.1753,-0.1753,-0.0808,0.0142,-0.0627,0.0347,0.1246,0.0513,-0.0611,-0.0614,-0.0041,0.0249,-0.0726,-0.0404,0.0768,0.0885,0.0497,0.0535,0.054,-0.0205,-0.1416,-0.1493,-0.0435,-0.0022,-0.0098,-0.0062,-0.0253,-0.1229,-0.23]],["8",[-0.1937,-0.0931,0.031,0.057,0.045,-0.0062,-0.1361,-0.2136,-0.1201,0.0207,0.0907,0.0888,0.0791,0.0523,-0.0485,-0.1643,-0.0538,0.1017,0.0513,-0.0221,-0.0212,0.0256,0.0257,-0.1155,-0.0352,0.1126,-0.0061,-0.1181,-0.1122,-0.024,0.0447,-0.0993,-0.0354,0.1161,0.0127,-0.087,-0.0864,-0.0102,0.0482,-0.0985,-0.0338,0.1553,0.1648,0.1238,0.1252,0.1386,0.0617,-0.1037,-0.0352,0.1706,0.2354,0.2232,0.2237,0.2066,0.0686,-0.1057,-0.0386,0.1478,0.1581,0.1201,0.116,0.1278,0.0622,-0.1026,-0.0444,0.0939,-0.0428,-0.1517,-0.1594,-0.0705,0.0405,-0.0977,-0.0461,0.0985,-0.0235,-0.1173,-0.1131,-0.0346,0.0313,-0.1066,-0.0842,0.0607,0.0247,-0.0227,-0.0186,0.0133,-0.0122,-0.1392,-0.1399,-0.0169,0.0161,0.0037,0.0027,-0.0014,-0.0762,-0.1783]],["7",[-0.1206,0.0754,0.0943,0.1011,0.1048,0.1134,0.0859,-0.1206,-0.1206,0.0896,0.1091,0.1165,0.1299,0.1657,0.147,-0.1206,-0.1206,0.0439,0.0594,0.0677,0.0971,0.168,0.1687,-0.1206,-0.1206,-0.0588,-0.0536,-0.0384,0.0285,0.1203,0.1326,-0.1206,-0.1206,-0.0953,-0.0955,-0.0689,0.0357,0.0992,0.0883,-0.1206,-0.1206,-0.1063,-0.1059,-0.0648,0.0734,0.0945,0.0501,-0.1206,-0.1206,-0.0988,-0.0621,0.0095,0.1277,0.0821,-0.0026,-0.1206,-0.1206,-0.0812,0.0043,0.0935,0.1276,0.0548,-0.0306,-0.1206,-0.1206,-0.0541,0.0747,0.1706,0.1049,0.0147,-0.0588,-0.1206,-0.1206,0.0074,0.1359,0.2,0.0514,-0.0374,-0.0872,-0.1206,-0.1206,0.0542,0.1398,0.1558,0.0048,-0.0664,-0.099,-0.1206,-0.1206,0.0567,0.0925,0.0713,-0.0404,-0.087,-0.1055,-0.1206]],["4",[-0.1631,-0.1614,-0.1523,-0.1205,-0.0104,0.0756,0.1021,-0.0666,-0.1632,-0.1604,-0.1402,-0.0759,0.0524,0.1367,0.1665,-0.0409,-0.1641,-0.1501,-0.1128,-0.0216,0.0892,0.1464,0.1857,-0.0284,-0.1656,-0.1087,-0.0388,0.0445,0.0785,0.0883,0.1598,-0.024,-0.1584,-0.0473,0.0419,0.0659,0.0411,0.0465,0.14,-0.0231,-0.1384,0.0242,0.1141,0.0666,0.0025,0.0247,0.1328,-0.02,-0.0671,0.1129,0.1369,0.0416,-0.0074,0.0537,0.1592,-0.0014,-0.0461,0.1125,0.1122,0.0519,0.0393,0.0995,0.1851,0.0134,-0.0511,0.0765,0.0704,0.0527,0.0718,0.126,0.1976,0.0217,-0.1006,-0.0193,-0.0126,-0.0122,0.0192,0.0771,0.1608,0.0036,-0.1384,-0.1013,-0.0965,-0.092,-0.0548,0.0075,0.0968,-0.0307,-0.1601,-0.1503,-0.1497,-0.1469,-0.1144,-0.0603,0.0168,-0.073]],["4",[-0.2508,-0.236,-0.1805,-0.0724,0.0603,0.0609,-0.0113,-0.1142,-0.2451,-0.2056,-0.1186,0.0185,0.151,0.1341,0.0398,-0.0843,-0.2276,-0.1514,-0.0461,0.0772,0.1793,0.1461,0.0448,-0.0802,-0.1951,-0.0834,0.0183,0.0852,0.1403,0.1041,0.0156,-0.0957,-0.144,-0.0218,0.0543,0.0589,0.0835,0.056,-0.0138,-0.1109,-0.0672,0.0167,0.0429,0.0059,0.0399,0.0348,-0.0198,-0.1108,0.0325,0.0571,0.0286,-0.0296,0.0323,0.0535,0.0122,-0.0792,0.0792,0.0827,0.0432,-0.0045,0.0725,0.1016,0.0644,-0.0349,0.0979,0.1054,0.08,0.0549,0.134,0.1615,0.1261,0.0164,0.0381,0.0554,0.0481,0.0435,0.1321,0.1599,0.124,0.0151,-0.0611,-0.0401,-0.035,-0.0249,0.0768,0.1083,0.0713,-0.027,-0.1674,-0.1573,-0.1535,-0.1375,-0.0251,0.0108,-0.0234,-0.1005]],["2",[-0.157,-0.0495,0.029,0.1017,0.117,0.082,-0.0103,-0.1403,-0.1239,0.024,0.1038,0.1445,0.156,0.1648,0.0977,-0.095,-0.0968,0.0574,0.1023,0.0523,0.0438,0.1472,0.1785,-0.044,-0.1298,-0.069,-0.065,-0.1058,-0.0627,0.0975,0.1909,-0.023,-0.1583,-0.1478,-0.1438,-0.1181,-0.0229,0.1172,0.1783,-0.0341,-0.1604,-0.1279,-0.0872,0.0119,0.131,0.1788,0.1277,-0.0827,-0.1156,0.0144,0.0828,0.1119,0.1296,0.0755,-0.0369,-0.1533,-0.0763,0.0711,0.119,0.082,0.0121,-0.0471,-0.1186,-0.1711,-0.0387,0.0939,0.0984,0.0105,-0.0851,-0.1185,-0.1446,-0.1727,-0.0407,0.0868,0.0839,0.0197,-0.0097,-0.015,-0.054,-0.1477,-0.0712,0.0701,0.099,0.0773,0.0672,0.063,0.0086,-0.1279,-0.1238,-0.0109,0.0351,0.0431,0.0415,0.0426,-0.0056,-0.1344]]];
+/* =====================================================================
+   Raffinage : scan de l'écran « RÉGLAGE » du terminal de raffinerie
+   1) remise à plat par les points de fuite des lignes du contenu
+   2) repères : bandeau rouge (haut gauche) + bouton de fermeture (haut droite)
+   3) lecture des lignes (minerai, qualité, quantité, rendement) et des totaux
+   ===================================================================== */
+const RAFF = {
+  bandeau: 0.567,
+  proc: { bandeau: { du: 0.0179, dv: 0.0511, w: 0.0968 }, barre: { du: 0.024, dv: 0.398, w: 0.220 }, titre: { du: 0.128, dv: 0.050, w: 0.120, h: 0.022 }, temps: { du: 0.150, dv: 0.356, w: 0.100, h: 0.032 },
+    ligne0: 0.1223, pasLigne: 0.0262, hLigne: 0.016, vMax: 0.300,
+    cols: { nom: [0.037, 0.120], qualite: [0.130, 0.160], rend: [0.160, 0.188] } },   // largeur du bandeau rouge / largeur du terminal
+  // positions relatives au terminal redressé, en unités « largeur du terminal »
+  // (origine : coin haut-gauche du bandeau rouge ; unité : jusqu'au bord droit du bouton de fermeture)
+  slot: { u0: 0.181, pas: 0.2545 },
+  titre:   { du: 0.150, dv: 0.057, w: 0.090, h: 0.020 },
+  aRaff:   { du: 0.154, dv: 0.127, w: 0.050, h: 0.021 },
+  temps:   { du: 0.170, dv: 0.444, w: 0.070, h: 0.026 },
+  ligne0: 0.2590, pasLigne: 0.0277, hLigne: 0.016, vMax: 0.405,
+  cols: { nom: [0.022, 0.106], qualite: [0.106, 0.146], qte: [0.143, 0.174], rend: [0.170, 0.205] },
+};
+const FR_EN = { fer: "Iron", or: "Gold", cuivre: "Copper", etain: "Tin", corindon: "Corundum", quantain: "Quantainium", aluminium: "Aluminum",
+  titane: "Titanium", tungstene: "Tungsten", beryl: "Beryl", glace: "Pressurized Ice", "glace pressurisee": "Pressurized Ice", silicium: "Silicon" };
+
+/* ---------- algèbre 3×3 */
+const cross3 = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+const mul33 = (A, B) => A.map((r) => [0, 1, 2].map((j) => r[0] * B[0][j] + r[1] * B[1][j] + r[2] * B[2][j]));
+const app33 = (M, p) => { const x = M[0][0] * p[0] + M[0][1] * p[1] + M[0][2], y = M[1][0] * p[0] + M[1][1] * p[1] + M[1][2], w = M[2][0] * p[0] + M[2][1] * p[1] + M[2][2]; return [x / w, y / w]; };
+function inv33(m) {
+  const [a, b, c] = m[0], [d, e, f] = m[1], [g, h, i] = m[2];
+  const A = e * i - f * h, B = -(d * i - f * g), C = d * h - e * g, det = a * A + b * B + c * C;
+  return [[A / det, -(b * i - c * h) / det, (b * f - c * e) / det], [B / det, (a * i - c * g) / det, -(a * f - c * d) / det], [C / det, -(a * h - b * g) / det, (a * e - b * d) / det]];
+}
+function vecteurPropreMin(S) {   // Jacobi sur une matrice symétrique 3×3
+  const a = S.map((r) => r.slice()), V = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+  for (let it = 0; it < 50; it++) {
+    let p = 0, q = 1;
+    if (Math.abs(a[0][2]) > Math.abs(a[p][q])) { p = 0; q = 2; }
+    if (Math.abs(a[1][2]) > Math.abs(a[p][q])) { p = 1; q = 2; }
+    if (Math.abs(a[p][q]) < 1e-12) break;
+    const th = 0.5 * Math.atan2(2 * a[p][q], a[q][q] - a[p][p]), c = Math.cos(th), s = Math.sin(th);
+    for (let k = 0; k < 3; k++) { const x = a[k][p], y = a[k][q]; a[k][p] = c * x - s * y; a[k][q] = s * x + c * y; }
+    for (let k = 0; k < 3; k++) { const x = a[p][k], y = a[q][k]; a[p][k] = c * x - s * y; a[q][k] = s * x + c * y; }
+    for (let k = 0; k < 3; k++) { const x = V[k][p], y = V[k][q]; V[k][p] = c * x - s * y; V[k][q] = s * x + c * y; }
+  }
+  let m = 0; for (let k = 1; k < 3; k++) if (a[k][k] < a[m][m]) m = k;
+  return [V[0][m], V[1][m], V[2][m]];
+}
+
+/* ---------- 1) remise à plat */
+function grisToile(src, maxL = 1280) {
+  const W0 = src.width || src.videoWidth, H0 = src.height || src.videoHeight, k = Math.min(1, maxL / W0);
+  const W = Math.round(W0 * k), H = Math.round(H0 * k), c = document.createElement("canvas"); c.width = W; c.height = H;
+  const x = c.getContext("2d", { willReadFrequently: true }); x.drawImage(src, 0, 0, W, H);
+  const d = x.getImageData(0, 0, W, H).data, g = new Float32Array(W * H);
+  for (let i = 0; i < W * H; i++) g[i] = 0.299 * d[i * 4] + 0.587 * d[i * 4 + 1] + 0.114 * d[i * 4 + 2];
+  return { g, W, H, k };
+}
+/* Petits segments droits : pixels de contour dont l'orientation locale (tenseur de structure) est nette */
+function elementsDeContour(G) {
+  const { g, W, H } = G, gx = new Float32Array(W * H), gy = new Float32Array(W * H);
+  for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) {
+    const i = y * W + x;
+    gx[i] = (g[i - W + 1] + 2 * g[i + 1] + g[i + W + 1]) - (g[i - W - 1] + 2 * g[i - 1] + g[i + W - 1]);
+    gy[i] = (g[i + W - 1] + 2 * g[i + W] + g[i + W + 1]) - (g[i - W - 1] + 2 * g[i - W] + g[i - W + 1]);
+  }
+  const hor = [], ver = [], R = 3;
+  for (let y = R + 1; y < H - R - 1; y += 2) for (let x = R + 1; x < W - R - 1; x += 2) {
+    const i = y * W + x, m = Math.hypot(gx[i], gy[i]);
+    if (m < 120) continue;
+    let sxx = 0, syy = 0, sxy = 0;
+    for (let dy = -R; dy <= R; dy++) for (let dx = -R; dx <= R; dx++) { const j = i + dy * W + dx; sxx += gx[j] * gx[j]; syy += gy[j] * gy[j]; sxy += gx[j] * gy[j]; }
+    const tr = sxx + syy, det = sxx * syy - sxy * sxy, l1 = tr / 2 + Math.sqrt(Math.max(0, tr * tr / 4 - det)), l2 = tr - l1;
+    if (l2 > 0.08 * l1) continue;                           // coin ou texture : pas une ligne
+    const ang = 0.5 * Math.atan2(2 * sxy, sxx - syy);         // direction du gradient
+    const dx = -Math.sin(ang), dy = Math.cos(ang);            // direction de la ligne
+    const deg = ((Math.atan2(dy, dx) * 180 / Math.PI) + 180) % 180;
+    const e = { x, y, dx, dy, w: Math.sqrt(l1) };
+    if (deg < 12 || deg > 168) hor.push(e); else if (Math.abs(deg - 90) < 12) ver.push(e);
+  }
+  return { hor, ver };
+}
+function pointDeFuite(E) {
+  if (E.length < 30) return null;
+  const S = E.length > 4000 ? E.filter((_, i) => i % Math.ceil(E.length / 4000) === 0) : E;
+  const ligne = (e) => { const l = cross3([e.x, e.y, 1], [e.x + e.dx, e.y + e.dy, 1]); const n = Math.hypot(l[0], l[1]); return [l[0] / n, l[1] / n, l[2] / n]; };
+  const L = S.map(ligne), seuil = Math.cos(1.5 * Math.PI / 180);
+  const accord = (v) => {
+    let sc = 0; const inl = [];
+    for (let i = 0; i < S.length; i++) {
+      const e = S[i]; let ux, uy;
+      if (Math.abs(v[2]) < 1e-9) { ux = v[0]; uy = v[1]; } else { ux = v[0] / v[2] - e.x; uy = v[1] / v[2] - e.y; }
+      const n = Math.hypot(ux, uy) || 1, c = Math.abs((ux * e.dx + uy * e.dy) / n);
+      if (c > seuil) { sc += e.w; inl.push(i); }
+    }
+    return { sc, inl };
+  };
+  let best = null, graine = 12345;
+  const alea = () => { graine = (graine * 1103515245 + 12345) & 0x7fffffff; return graine / 0x7fffffff; };
+  for (let it = 0; it < 400; it++) {
+    const i = Math.floor(alea() * S.length), j = Math.floor(alea() * S.length);
+    if (i === j || Math.hypot(S[i].x - S[j].x, S[i].y - S[j].y) < 40) continue;
+    const v = cross3(L[i], L[j]); if (Math.hypot(...v) < 1e-12) continue;
+    const r = accord(v); if (!best || r.sc > best.sc) best = { v, ...r };
+  }
+  if (!best || best.inl.length < 20) return null;
+  const M = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+  for (const i of best.inl) { const l = L[i], w = S[i].w; for (let a = 0; a < 3; a++) for (let b = 0; b < 3; b++) M[a][b] += w * l[a] * l[b]; }
+  return { v: vecteurPropreMin(M), pts: best.inl.map((i) => S[i]) };
+}
+/* Perspective : homographie source -> terminal redressé (largeur L). Coûteuse : calculée une fois,
+   puis réutilisée tant que l'image ne bouge pas (voir perspectiveCourante). */
+function calculerPerspective(src, L = 1200) {
+  const G = grisToile(src), { hor, ver } = elementsDeContour(G);
+  const fh = pointDeFuite(hor), fv = pointDeFuite(ver);
+  if (!fh || !fv) return null;
+  let li = cross3(fh.v, fv.v); li = li.map((c) => c / li[2]);
+  const Hp = [[1, 0, 0], [0, 1, 0], li];
+  const dir = (v) => { const r = [v[0], v[1], li[0] * v[0] + li[1] * v[1] + li[2] * v[2]]; const n = Math.hypot(r[0], r[1]); return [r[0] / n, r[1] / n]; };
+  let dh = dir(fh.v), dv = dir(fv.v);
+  if (dh[0] < 0) dh = [-dh[0], -dh[1]];
+  if (dv[1] < 0) dv = [-dv[0], -dv[1]];
+  let Hr = mul33(inv33([[dh[0], dv[0], 0], [dh[1], dv[1], 0], [0, 0, 1]]), Hp);
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (const e of [...fh.pts, ...fv.pts]) { const [x, y] = app33(Hr, [e.x, e.y]); x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); }
+  const k = L / (x1 - x0), Hc = Math.round((y1 - y0) * k);
+  if (!isFinite(k) || Hc < 50 || Hc > L * 2) return null;
+  Hr = mul33([[k, 0, -x0 * k], [0, k, -y0 * k], [0, 0, 1]], mul33(Hr, [[G.k, 0, 0], [0, G.k, 0], [0, 0, 1]]));
+  return { Hi: inv33(Hr), L, Hc };
+}
+/* Pixels de la source (copie RGBA), lus une fois par passage */
+function pixelsSource(src) {
+  const W = src.width || src.videoWidth, H = src.height || src.videoHeight, c = document.createElement("canvas"); c.width = W; c.height = H;
+  const x = c.getContext("2d", { willReadFrequently: true }); x.drawImage(src, 0, 0);
+  return { W, H, d: x.getImageData(0, 0, W, H).data };
+}
+/* Échantillonne une zone du terminal redressé [x, y, l, h] (coordonnées redressées), agrandie f fois */
+function echantillonner(S, P, x, y, l, h, f = 1) {
+  const ow = Math.max(1, Math.round(l * f)), oh = Math.max(1, Math.round(h * f)), o = new Uint8ClampedArray(ow * oh * 4), Hi = P.Hi, sd = S.d, W0 = S.W;
+  for (let j = 0; j < oh; j++) for (let i = 0; i < ow; i++) {
+    const X = x + (i + 0.5) / f, Y = y + (j + 0.5) / f, w = Hi[2][0] * X + Hi[2][1] * Y + Hi[2][2];
+    const sx = (Hi[0][0] * X + Hi[0][1] * Y + Hi[0][2]) / w - 0.5, sy = (Hi[1][0] * X + Hi[1][1] * Y + Hi[1][2]) / w - 0.5, k = (j * ow + i) * 4;
+    o[k + 3] = 255;
+    if (sx < 0 || sy < 0 || sx >= W0 - 1 || sy >= S.H - 1) continue;
+    const ix = sx | 0, iy = sy | 0, fx = sx - ix, fy = sy - iy, i0 = (iy * W0 + ix) * 4, i1 = i0 + W0 * 4;
+    for (let c = 0; c < 3; c++) o[k + c] = (sd[i0 + c] * (1 - fx) + sd[i0 + 4 + c] * fx) * (1 - fy) + (sd[i1 + c] * (1 - fx) + sd[i1 + 4 + c] * fx) * fy;
+  }
+  return { w: ow, h: oh, d: o };
+}
+function toileDe(img) { const c = document.createElement("canvas"); c.width = img.w; c.height = img.h; c.getContext("2d").putImageData(new ImageData(img.d, img.w, img.h), 0, 0); return c; }
+/* Vignette grise 64×36 : sert à savoir si l'image a bougé */
+function signature(src) {
+  const c = document.createElement("canvas"); c.width = 64; c.height = 36; const x = c.getContext("2d", { willReadFrequently: true }); x.drawImage(src, 0, 0, 64, 36);
+  const d = x.getImageData(0, 0, 64, 36).data, g = new Uint8Array(64 * 36); for (let i = 0; i < g.length; i++) g[i] = (d[i * 4] + d[i * 4 + 1] + d[i * 4 + 2]) / 3; return g;
+}
+const ecartSig = (a, b) => { let s = 0; for (let i = 0; i < a.length; i++) s += Math.abs(a[i] - b[i]); return s / a.length; };
+let raffPersp = null;
+/* Perspective + aperçu + repères, recalculés seulement si l'image a changé de cadrage */
+function perspectiveCourante(src, S) {
+  const sig = signature(src);
+  if (raffPersp && ecartSig(sig, raffPersp.sig) < 4 && raffPersp.age++ < 20) return raffPersp;
+  const P = calculerPerspective(src);
+  if (!P) { raffPersp = null; return null; }
+  const apercu = toileDe(echantillonner(S, P, 0, 0, P.L, P.Hc, 1));
+  const R = reperesTerminal(apercu);
+  raffPersp = { ...P, apercu, R, sig, age: 0, titre: null };
+  return raffPersp;
+}
+/* ---------- 2) repères */
+function hsvPx(r, g, b) {
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn;
+  let h = 0;
+  if (d) h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  return [(h * 30 + 180) % 180, mx ? (d / mx) * 255 : 0, mx];   // même échelle qu'OpenCV (teinte 0-180)
+}
+function reperesTerminal(c) {
+  const W = c.width, H = c.height, d = c.getContext("2d", { willReadFrequently: true }).getImageData(0, 0, W, H).data;
+  const hsv = (x, y) => { const i = (y * W + x) * 4; return hsvPx(d[i], d[i + 1], d[i + 2]); };
+  // bandeau rouge : lignes du tiers supérieur avec beaucoup de rouge saturé
+  let y0 = -1, x0 = W, xd = 0; const droites = [];
+  for (let y = 0; y < H * 0.3; y++) {
+    let n = 0, gauche = W, droite = 0, trou = 0, fini = false;
+    for (let x = 0; x < W; x++) {
+      const [h, s, v] = hsv(x, y), r = (h < 8 || h > 170) && s > 120 && v > 70;
+      if (r) { n++; if (gauche === W) gauche = x; if (!fini) droite = x; trou = 0; }
+      else if (gauche < W && ++trou >= W * 0.03) fini = true;   // fin du bandeau : la suite (autre bloc rouge) est ignorée
+    }
+    if (n > W * 0.25) { if (y0 < 0) y0 = y; x0 = Math.min(x0, gauche); droites.push(droite); }
+    else if (y0 >= 0 && y - y0 > 4) break;
+  }
+  if (y0 < 0) return null;
+  droites.sort((a, b) => a - b); xd = droites[Math.floor(droites.length / 2)];   // médiane : ignore le filet rouge plus long
+  const parBandeau = (xd + 1 - x0) / RAFF.bandeau;   // largeur du terminal estimée par le bandeau rouge
+  // bouton de fermeture : carré vert-jaune, haut-droite ; bord droit = colonne la plus à droite
+  let x1 = -1;
+  for (let x = W - 1; x > W / 2 && x1 < 0; x--) {
+    let n = 0;
+    for (let y = 0; y < H * 0.25; y++) { const [h, s, v] = hsv(x, y); if (h > 25 && h < 45 && s > 80 && v > 110) n++; }
+    if (n >= 4) x1 = x;
+  }
+  // le bouton peut être caché (overlay posé dessus) : on se rabat sur la largeur du bandeau
+  const parBouton = x1 > 0 ? x1 + 1 - x0 : 0;
+  const span = parBouton && Math.abs(parBouton / parBandeau - 1) < 0.06 ? parBouton : parBandeau;
+  return { x0, y0, span, bandeau: (xd + 1 - x0), parBouton };
+}
+
+/* ---------- 3) lecture */
+/* Zone (u, v, w, h en unités terminal) prélevée dans la source, à ~`haut` px de hauteur ; binarisée si `seuil` */
+function zoneTerminal(S, P, u, v, w, h, seuil = 110, haut = 40) {
+  const R = P.R, x = R.x0 + u * R.span, y = R.y0 + v * R.span, l = w * R.span, t = h * R.span;
+  const img = echantillonner(S, P, x, y, l, t, haut / t), dd = img.d;
+  if (seuil != null) for (let i = 0; i < dd.length; i += 4) { const g = 0.299 * dd[i] + 0.587 * dd[i + 1] + 0.114 * dd[i + 2], b = g > seuil ? 255 : 0; dd[i] = dd[i + 1] = dd[i + 2] = b; }
+  img.box = [Math.round(x), Math.round(y), Math.round(l), Math.round(t)];
+  return img;
+}
+/* ---------- lecteur de chiffres dédié (police du terminal) : découpe en glyphes + modèles */
+const GL_W = 8, GL_H = 12, RAFF_CONF = 0.8, RAFF_MARGE = 0.01;
+function glyphes(img) {
+  const { w, h, d } = img, g = new Float32Array(w * h);
+  let mn = 255, mx = 0;
+  for (let i = 0; i < w * h; i++) { g[i] = 0.299 * d[i * 4] + 0.587 * d[i * 4 + 1] + 0.114 * d[i * 4 + 2]; mn = Math.min(mn, g[i]); mx = Math.max(mx, g[i]); }
+  if (mx - mn < 40) return [];
+  const seuil = mn + (mx - mn) * 0.45, enc = (x, y) => g[y * w + x] > seuil;
+  const col = []; for (let x = 0; x < w; x++) { let n = 0; for (let y = 0; y < h; y++) if (enc(x, y)) n++; col.push(n); }
+  const runs = []; let x = 0;
+  while (x < w) { if (col[x] > 0) { const a = x; while (x < w && col[x] > 0) x++; runs.push([a, x]); } else x++; }
+  const out = [];
+  for (const [a, b] of runs) {
+    let y0 = h, y1 = -1; for (let yy = 0; yy < h; yy++) for (let xx = a; xx < b; xx++) if (enc(xx, yy)) { y0 = Math.min(y0, yy); y1 = Math.max(y1, yy); }
+    const gh = y1 - y0 + 1, gw = b - a;
+    if (gh < h * 0.3 || gw < 1) continue;                     // poussière ou point décimal
+    if (gw > gh * 1.3) {                                       // deux chiffres collés : coupe au creux
+      let m = a + 1, mv = Infinity; for (let xx = a + Math.floor(gw * 0.3); xx < a + Math.ceil(gw * 0.7); xx++) if (col[xx] < mv) { mv = col[xx]; m = xx; }
+      for (const [p, q] of [[a, m], [m, b]]) out.push(normGlyphe(g, w, p, q, y0, y1, mn, mx));
+      continue;
+    }
+    out.push(normGlyphe(g, w, a, b, y0, y1, mn, mx));
+  }
+  return out;
+}
+function normGlyphe(g, w, a, b, y0, y1, mn, mx) {
+  const v = new Float32Array(GL_W * GL_H), gw = b - a, gh = y1 - y0 + 1;
+  // centré dans un cadre au ratio du chiffre (un « 1 » étroit garde sa forme)
+  const cadre = Math.max(gw, gh * GL_W / GL_H), ox = a + gw / 2 - cadre / 2;
+  for (let j = 0; j < GL_H; j++) for (let i = 0; i < GL_W; i++) {
+    let s = 0, n = 0;
+    for (let yy = y0 + (j * gh) / GL_H; yy < y0 + ((j + 1) * gh) / GL_H; yy += 0.5) for (let xx = ox + (i * cadre) / GL_W; xx < ox + ((i + 1) * cadre) / GL_W; xx += 0.5) {
+      const X = Math.floor(xx), Y = Math.floor(yy); n++; if (X >= a && X < b && Y >= 0) s += (g[Y * w + X] - mn) / (mx - mn);
+    }
+    v[j * GL_W + i] = n ? s / n : 0;
+  }
+  // centré (moyenne nulle) puis normé : la comparaison devient une corrélation, plus discriminante
+  let moy = 0; for (const x of v) moy += x; moy /= v.length; for (let i = 0; i < v.length; i++) v[i] -= moy;
+  let m = 0; for (const x of v) m += x * x; m = Math.sqrt(m) || 1; for (let i = 0; i < v.length; i++) v[i] /= m;
+  return v;
+}
+function modelesChiffres() { return [...CHIFFRES_RAFF.map(([c, v]) => [c, v]), ...((base.chiffresRaff || []))]; }
+function lireNombre(img) {
+  const gs = glyphes(img), M = modelesChiffres();
+  if (!gs.length || !M.length) return { n: NaN, conf: 0, marge: 0, gs };
+  let txt = "", conf = 1, marge = 1;
+  for (const v of gs) {
+    const meilleur = {};   // meilleur score par chiffre
+    for (const [c, t] of M) { let s = 0; for (let i = 0; i < v.length; i++) s += v[i] * t[i]; if (!(c in meilleur) || s > meilleur[c]) meilleur[c] = s; }
+    const tri = Object.entries(meilleur).sort((a, b) => b[1] - a[1]);
+    txt += tri[0][0]; conf = Math.min(conf, tri[0][1]); marge = Math.min(marge, tri[0][1] - (tri[1] ? tri[1][1] : 0));
+  }
+  return { n: parseInt(txt, 10), txt, conf, marge, gs };
+}
+/* Apprentissage : quand l'utilisateur corrige un nombre, ses glyphes deviennent des modèles */
+function apprendreNombre(gs, valeur) {
+  const t = String(valeur); if (!gs || gs.length !== t.length) return;
+  base.chiffresRaff = base.chiffresRaff || [];
+  gs.forEach((v, i) => base.chiffresRaff.push([t[i], Array.from(v, (x) => Math.round(x * 1e4) / 1e4)]));
+  base.chiffresRaff = base.chiffresRaff.slice(-300);
+}
+function nomMinerai(t) {
+  const s = sansAccents(t).replace(/\((brut|raw|ore|minerai)\)/g, "").replace(/[^a-z ]/g, " ").replace(/\s+/g, " ").trim();
+  if (!s || /inert/.test(s)) return null;
+  const en = FR_EN[s] || s;
+  return Object.keys(valeurs).find((n) => sansAccents(n) === sansAccents(en)) || null;
+}
+const entier = (t) => { const m = String(t).replace(/[oO]/g, "0").match(/\d+/); return m ? parseInt(m[0], 10) : NaN; };
+async function lireReglage(S, P) {
+  const R = P.R;
+  if (!R) return { erreur: "Terminal non trouvé." };
+  // l'emplacement « Réglage » ne change pas tant que la perspective est la même : lu une seule fois
+  if (P.titre == null) {
+    P.titre = -1;
+    for (let s = 0; s < 3; s++) {
+      const u = RAFF.slot.u0 + s * RAFF.slot.pas, T = RAFF.titre;
+      const t = sansAccents(await lireTexte(zoneTerminal(S, P, u + T.du, T.dv, T.w, T.h, 110, 30), "ABCDEFGHIJKLMNOPQRSTUVWXYZÉ ", 3000, 3));
+      if (/(egl|setup|reglage)/.test(t)) { P.titre = s; break; }
+    }
+  }
+  if (P.titre < 0) return { erreur: "Écran « Réglage » non trouvé." };
+  const s = P.titre, u = RAFF.slot.u0 + s * RAFF.slot.pas, A = RAFF.aRaff, Tp = RAFF.temps;
+  const nombre = async (img, ech = 4) => {   // lecteur dédié, Tesseract en secours si la lecture est douteuse
+    const r = lireNombre(img);
+    if (Number.isFinite(r.n) && r.conf > RAFF_CONF && r.marge > RAFF_MARGE) return { ...r, src: "modele" };
+    const t = entier(await lireTexte(binariser(img, 80), "0123456789", 3000, ech));
+    return { n: Number.isFinite(t) ? t : r.n, conf: 0, gs: r.gs, src: "tesseract" };
+  };
+  const aRaffiner = (await nombre(zoneTerminal(S, P, u + A.du, A.dv, A.w, A.h, null))).n;
+  const lignes = [], boites = [];
+  P.noms = P.noms || {};
+  for (let i = 0; ; i++) {
+    const v = RAFF.ligne0 + i * RAFF.pasLigne - RAFF.hLigne / 2;
+    if (v > RAFF.vMax) break;
+    const z = (k, seuil) => zoneTerminal(S, P, u + RAFF.cols[k][0], v, RAFF.cols[k][1] - RAFF.cols[k][0], RAFF.hLigne, seuil);
+    const zn = z("nom", 110); boites.push(zn.box);
+    if (!(i in P.noms)) P.noms[i] = nomMinerai(await lireTexte(zn, "ABCDEFGHIJKLMNOPQRSTUVWXYZ() ", 3000, 3));   // nom lu une fois par cadrage
+    const nom = P.noms[i];
+    if (!nom) continue;                      // ligne vide, matériaux inertes ou texte inconnu
+    const [rq, rqte, rrend] = [await nombre(z("qualite", null)), await nombre(z("qte", null)), await nombre(z("rend", null))];
+    const paliers = valeursDe(nom);
+    let q = rq.n;
+    if (!paliers.includes(q)) q = palierProche([[q, 1]], paliers) ?? q;
+    lignes.push({ nom, qualite: q, qte: rqte.n, rend: rrend.n, candidatsQte: [rqte.n], connue: paliers.includes(q),
+      glyphes: { qualite: rq.gs, qte: rqte.gs, rend: rrend.gs }, sources: [rq.src, rqte.src, rrend.src] });
+  }
+  if (P.temps == null) P.temps = (await lireTexte(zoneTerminal(S, P, u + Tp.du, Tp.dv, Tp.w, Tp.h, 110, 30), "0123456789hmsj ", 3000, 3)).replace(/\s+/g, " ").trim();
+  return { emplacement: s + 1, lignes, aRaffiner, temps: P.temps, boites, R };
+}
+function binariser(img, seuil) {
+  const d = new Uint8ClampedArray(img.d);
+  for (let i = 0; i < d.length; i += 4) { const g = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2], b = g > seuil ? 255 : 0; d[i] = d[i + 1] = d[i + 2] = b; }
+  return { w: img.w, h: img.h, d };
+}
+/* Repère de base de l'ordre : le bandeau hachuré orange à gauche du titre « PROCESSING ».
+   Gros, coloré et toujours au même endroit dans la colonne : on cale toutes les cases sur son coin haut-gauche. */
+function bandeauOrdre(P, s) {
+  const c = P.apercu, W = c.width, H = c.height, R = P.R, u = RAFF.slot.u0 + s * RAFF.slot.pas;
+  const X0 = Math.max(0, Math.round(R.x0 + (u - 0.03) * R.span)), X1 = Math.min(W, Math.round(R.x0 + (u + 0.13) * R.span));
+  const Y0 = Math.max(0, Math.round(R.y0 + 0.02 * R.span)), Y1 = Math.min(H, Math.round(R.y0 + 0.09 * R.span));
+  if (X1 <= X0 || Y1 <= Y0) return null;
+  const d = c.getContext("2d", { willReadFrequently: true }).getImageData(X0, Y0, X1 - X0, Y1 - Y0).data, w = X1 - X0, h = Y1 - Y0;
+  const m = new Uint8Array(w * h);
+  for (let i = 0; i < w * h; i++) { const [hh, sa, v] = hsvPx(d[i * 4], d[i * 4 + 1], d[i * 4 + 2]); m[i] = (hh < 28 || hh > 170) && sa > 90 && v > 70 ? 1 : 0; }
+  const col = new Array(w).fill(0), lig = new Array(h).fill(0);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (m[y * w + x]) { col[x]++; lig[y]++; }
+  // plus longue suite de colonnes colorées (le bandeau fait ~0,09 unité de large)
+  let best = [0, 0], a = -1;
+  for (let x = 0; x <= w; x++) { if (x < w && col[x] >= 3) { if (a < 0) a = x; } else if (a >= 0) { if (x - a > best[1] - best[0]) best = [a, x]; a = -1; } }
+  if ((best[1] - best[0]) / R.span < 0.075 || (best[1] - best[0]) / R.span > 0.13) return null;   // pas la bonne taille : pas le bandeau
+  let yh = -1, yb = -1; for (let y = 0; y < h; y++) { let n = 0; for (let x = best[0]; x < best[1]; x++) n += m[y * w + x]; if (n > (best[1] - best[0]) * 0.25) { if (yh < 0) yh = y; yb = y; } }
+  if (yh < 0 || (yb - yh + 1) / R.span > 0.03) return null;
+  return { u: (X0 + best[0] - R.x0) / R.span, v: (Y0 + yh - R.y0) / R.span, w: (best[1] - best[0]) / R.span, h: (yb - yh + 1) / R.span };
+}
+/* Écran des ordres en cours (« PROCESSING ») : seul écran scanné, l'ordre est alors sûr d'être lancé */
+/* Bandeaux hachurés orange (en-tête de chaque ordre), cherchés dans toute l'image redressée :
+   ne dépend pas des bords de l'écran du terminal (qui peuvent être hors champ quand on est très près). */
+function trouverBandeaux(c) {
+  const W = c.width, H = c.height, d = c.getContext("2d", { willReadFrequently: true }).getImageData(0, 0, W, H).data;
+  const m = new Uint8Array(W * H);
+  for (let i = 0; i < W * H; i++) { const [hh, sa, v] = hsvPx(d[i * 4], d[i * 4 + 1], d[i * 4 + 2]); m[i] = (hh < 28 || hh > 170) && sa > 90 && v > 70 ? 1 : 0; }
+  const k = 3, gw = Math.ceil(W / k), gh = Math.ceil(H / k), g = new Uint8Array(gw * gh);   // grille grossière : bouche les hachures
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (m[y * W + x]) g[((y / k) | 0) * gw + ((x / k) | 0)]++;
+  const on = (i) => g[i] >= 2, vu = new Uint8Array(gw * gh), out = [];
+  for (let i0 = 0; i0 < gw * gh; i0++) {
+    if (!on(i0) || vu[i0]) continue;
+    const pile = [i0]; vu[i0] = 1; let x0 = gw, x1 = 0, y0 = gh, y1 = 0;
+    while (pile.length) {
+      const i = pile.pop(), x = i % gw, y = (i / gw) | 0;
+      x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y);
+      for (const j of [i - 1, i + 1, i - gw, i + gw]) if (j >= 0 && j < gw * gh && !vu[j] && on(j) && Math.abs((j % gw) - x) <= 1) { vu[j] = 1; pile.push(j); }
+    }
+    const bw = (x1 - x0 + 1) * k, bh = (y1 - y0 + 1) * k;
+    if (bw < W * 0.03 || bw / bh < 3.5 || bw / bh > 12) continue;
+    let n = 0; for (let y = y0 * k; y < Math.min(H, (y1 + 1) * k); y++) for (let x = x0 * k; x < Math.min(W, (x1 + 1) * k); x++) n += m[y * W + x];
+    const rempli = n / (bw * bh);
+    if (rempli < 0.25 || rempli > 0.85) continue;          // les hachures ne remplissent pas tout (contrairement aux barres pleines)
+    // mesure fine (au pixel) : l'échelle de toute la colonne dépend de la largeur du bandeau
+    const X0 = Math.max(0, x0 * k - k), X1 = Math.min(W, (x1 + 1) * k + k), Y0 = Math.max(0, y0 * k - k), Y1 = Math.min(H, (y1 + 1) * k + k);
+    let fx0 = -1, fx1 = -1, fy0 = -1, fy1 = -1;
+    for (let x = X0; x < X1; x++) { let c = 0; for (let y = Y0; y < Y1; y++) c += m[y * W + x]; if (c >= 3) { if (fx0 < 0) fx0 = x; fx1 = x; } }
+    for (let y = Y0; y < Y1; y++) { let c = 0; for (let x = X0; x < X1; x++) c += m[y * W + x]; if (c > bw * 0.25) { if (fy0 < 0) fy0 = y; fy1 = y; } }
+    if (fx0 < 0 || fy0 < 0) continue;
+    out.push({ x: fx0, y: fy0, w: fx1 - fx0 + 1, h: fy1 - fy0 + 1 });
+  }
+  return out.sort((a, b) => a.x - b.x);
+}
+/* Colonnes « PROCESSING » de l'écran (les « COMPLETED » sont ignorées) ; résultat gardé tant que le cadrage ne change pas */
+async function colonnesProcessing(S, P) {
+  if (P.titres) return P.titres;
+  const G = RAFF.proc; P.titres = []; P.cs = {};
+  for (const b of trouverBandeaux(P.apercu)) {
+    // le bandeau donne l'échelle (sa largeur) et l'origine de la colonne
+    const span = b.w / G.bandeau.w, R = { x0: b.x - (RAFF.slot.u0 + G.bandeau.du) * span, y0: b.y - G.bandeau.dv * span, span };
+    const Pc = { ...P, R }, u = RAFF.slot.u0, T = G.titre;
+    const t = sansAccents(await lireTexte(zoneTerminal(S, Pc, u + T.du, T.dv, T.w, T.h, 110, 30), "ABCDEFGHIJKLMNOPQRSTUVWXYZÉ ", 3000, 3));
+    if (!/(proces|traitement|cours)/.test(t)) continue;      // « COMPLETED » et autres : ignorés
+    const s = P.titres.length;
+    P.titres.push(s); P.cs[s] = { R, noms: {}, decal: { du: 0, dv: 0 } };
+  }
+  return P.titres;
+}
+async function lireProcessing(S, P) {
+  const titres = await colonnesProcessing(S, P);
+  if (!titres.length) { raffPersp = null; return { erreur: "Aucun ordre « Processing »." }; }
+  const colonnes = [];
+  for (const s of titres) colonnes.push(await lireColonne({ ...S }, { ...P, R: P.cs[s].R }, s, P));
+  return { colonnes };
+}
+/* Lignes du tableau repérées par le texte des noms (projection horizontale dans la colonne « nom ») :
+   donne les centres réels des lignes et le facteur d'échelle vertical fv (pas mesuré / pas de référence). */
+function lignesDeTexte(P, u, G) {
+  const c = P.apercu, R = P.R, W = c.width, H = c.height;
+  const x0 = Math.max(0, Math.round(R.x0 + (u + G.cols.nom[0]) * R.span)), x1 = Math.min(W, Math.round(R.x0 + (u + G.cols.nom[1]) * R.span));
+  const y0 = Math.max(0, Math.round(R.y0 + (G.ligne0 - G.pasLigne * 0.7) * R.span)), y1 = Math.min(H, Math.round(R.y0 + (G.vMax + G.pasLigne) * R.span));
+  const ref = { fv: 1, centres: [] };
+  if (x1 - x0 < 5 || y1 - y0 < 10) return ref;
+  const d = c.getContext("2d", { willReadFrequently: true }).getImageData(x0, y0, x1 - x0, y1 - y0).data, w = x1 - x0, h = y1 - y0;
+  const prof = []; for (let y = 0; y < h; y++) { let n = 0; for (let x = 0; x < w; x++) { const i = (y * w + x) * 4; if (d[i] * 0.3 + d[i + 1] * 0.59 + d[i + 2] * 0.11 > 140) n++; } prof.push(n); }
+  const centres = []; let y = 0;
+  while (y < h) { if (prof[y] >= 3) { const a = y; while (y < h && prof[y] >= 3) y++; const hh = y - a; if (hh >= 3 && hh <= G.pasLigne * R.span * 0.8) centres.push((y0 + (a + y) / 2 - R.y0) / R.span); } else y++; }
+  if (centres.length < 2) return { fv: 1, centres };
+  const pas = []; for (let i = 1; i < centres.length; i++) pas.push(centres[i] - centres[i - 1]);
+  pas.sort((a, b) => a - b); const med = pas[Math.floor(pas.length / 2)], fv = med / G.pasLigne;
+  if (fv < 0.8 || fv > 1.25) return { fv: 1, centres: [] };          // mesure peu crédible : on garde la géométrie de référence
+  return { fv, centres };
+}
+/* Barre de progression de l'ordre (sous « Time remaining ») : part remplie (bleu-gris) de 0 à 1 */
+function lireProgression(S, P, u, G, fv, dv0) {
+  const B = G.barre, v = G.bandeau.dv + (B.dv - G.bandeau.dv) * fv + dv0;
+  const img = zoneTerminal(S, P, u + B.du, v - 0.004, B.w, 0.008, null, 8), { w, h, d } = img;
+  const bleu = []; for (let x = 0; x < w; x++) { let n = 0; for (let y = 0; y < h; y++) { const i = (y * w + x) * 4, r = d[i], g = d[i + 1], b = d[i + 2]; if (b > r + 15 && b > 80) n++; } bleu.push(n > h / 2); }
+  let fin = 0; for (let x = 0; x < w; x++) if (bleu[x]) fin = x + 1;
+  return w ? fin / w : null;
+}
+async function lireColonne(S, P, s, P0) {
+  const R = P.R, G = RAFF.proc, C = P0.cs[s];
+  if (!C.decal) {   // décalage mesuré par rapport à la position de référence du bandeau de cette colonne
+    const b = bandeauOrdre(P, s), u0 = RAFF.slot.u0 + s * RAFF.slot.pas;
+    C.decal = b ? { du: b.u - (u0 + G.bandeau.du), dv: b.v - G.bandeau.dv, b } : { du: 0, dv: 0 };
+  }
+  const u = RAFF.slot.u0 + C.decal.du, dv0 = C.decal.dv;
+  // l'échelle verticale peut différer de l'horizontale (redressement) : on mesure les lignes de texte réelles
+  if (!C.lignesV) C.lignesV = lignesDeTexte(P, u, G);
+  const fv = C.lignesV.fv;
+  const nombre = async (img) => {
+    const r = lireNombre(img);
+    if (Number.isFinite(r.n) && r.conf > RAFF_CONF && r.marge > RAFF_MARGE) return { ...r, src: "modele" };
+    const t = entier(await lireTexte(binariser(img, 80), "0123456789", 3000, 4));
+    return { n: Number.isFinite(t) ? t : r.n, conf: 0, gs: r.gs, src: "tesseract" };
+  };
+  const lignes = [], boites = [];
+  for (let i = 0; ; i++) {
+    const v = (C.lignesV.centres[i] ?? (G.ligne0 + i * G.pasLigne * fv)) - G.hLigne / 2 + dv0;
+    if (v > G.bandeau.dv + (G.vMax - G.bandeau.dv) * fv + dv0) break;
+    const z = (k, seuil) => zoneTerminal(S, P, u + G.cols[k][0], v, G.cols[k][1] - G.cols[k][0], G.hLigne, seuil);
+    const zn = z("nom", 110);
+    if (!(i in C.noms) || C.noms[i]) boites.push(zn.box, z("qualite", null).box, z("rend", null).box);   // cases des lignes vides masquées
+    // nom lu une fois par cadrage ; une ligne sans nom reconnu est retentée (3 essais, réglages différents)
+    C.essais = C.essais || {};
+    if (!C.noms[i] && (C.essais[i] || 0) < 3) {
+      const [se, ech] = [[110, 3], [80, 4], [140, 5]][C.essais[i] || 0];
+      C.noms[i] = nomMinerai(await lireTexte(z("nom", se), "ABCDEFGHIJKLMNOPQRSTUVWXYZ() ", 3000, ech));
+      C.essais[i] = (C.essais[i] || 0) + 1;
+    }
+    const nom = C.noms[i];
+    if (!nom) continue;
+    let rq = await nombre(z("qualite", null)), rr = await nombre(z("rend", null));
+    const paliers = valeursDe(nom);
+    let q = rq.n; if (!paliers.includes(q)) q = palierProche([[q, 1]], paliers) ?? q;
+    if (!paliers.includes(q)) for (const [se, ech] of [[80, 4], [110, 4], [140, 5], [65, 6]]) {   // relecture de la qualité
+      const t = entier(await lireTexte(z("qualite", se), "0123456789", 3000, ech));
+      const p = paliers.includes(t) ? t : palierProche([[t, 1]], paliers);
+      if (p != null) { q = p; break; }
+    }
+    if (!Number.isFinite(rr.n)) for (const [se, ech] of [[80, 4], [110, 5]]) {                      // relecture du rendement
+      const t = entier(await lireTexte(z("rend", se), "0123456789", 3000, ech));
+      if (Number.isFinite(t)) { rr = { ...rr, n: t }; break; }
+    }
+    lignes.push({ nom, qualite: q, qte: rr.n, rend: rr.n, connue: paliers.includes(q), glyphes: { qualite: rq.gs, rend: rr.gs }, sources: [rq.src, rr.src] });
+  }
+  if (!C.temps) {   // plusieurs réglages ; on garde la lecture valide la plus complète (« 1h 9m » plutôt que « 1h »)
+    let best = "";
+    for (const se of [110, null, 150, 80]) for (const ech of [3, 5]) {
+      const t = (await lireTexte(zoneTerminal(S, P, u + G.temps.du, G.bandeau.dv + (G.temps.dv - G.bandeau.dv) * fv + dv0, G.temps.w, G.temps.h, se, 30), "0123456789hmsj ", 3000, ech)).replace(/\s+/g, " ").trim();
+      if (/^(\d+\s*[jhms]\s*)+$/.test(t) && (t.match(/[jhms]/g) || []).length > (best.match(/[jhms]/g) || []).length) best = t;
+    }
+    if (best) { C.temps = best; C.tempsLuA = Date.now() / 1000; }   // heure exacte de la lecture du minuteur
+  }
+  if (C.progression == null) C.progression = lireProgression(S, P, u, G, fv, dv0);
+  return { s, lignes, temps: C.temps, tempsLuA: C.tempsLuA, boites, progression: C.progression };
+}
+const RAFF_VARIANTES = [[80, 4, 1.5], [80, 6, 1], [95, 4, 1], [65, 4, 1], [95, 6, 1]];   // [seuil, agrandissement, poids]
+function vote(r) { const c = new Map(); for (const [n, p] of r) c.set(n, (c.get(n) || 0) + p); let b = NaN, m = 0; for (const [n, k] of c) if (k > m) { b = n; m = k; } return b; }
+/* Palier connu qui ne diffère d'une lecture que d'un seul chiffre (8/6/0/3 se confondent souvent) */
+function palierProche(lectures, paliers) {
+  const proches = new Map();
+  for (const [n, p] of lectures) for (const v of paliers) {
+    const a = String(n), b = String(v);
+    if (a.length === b.length && [...a].filter((ch, i) => ch !== b[i]).length === 1) proches.set(v, (proches.get(v) || 0) + p);
+  }
+  let best = null, m = 0; for (const [v, k] of proches) if (k > m) { best = v; m = k; }
+  return best;
+}
+function candidats(r) { const c = new Map(); for (const [n, p] of r) c.set(n, (c.get(n) || 0) + p); return [...c].sort((a, b) => b[1] - a[1]).slice(0, 3).map(([n]) => n); }
+/* Parmi les lectures possibles de chaque quantité, garde la combinaison dont la somme colle au total affiché */
+function ajusterQuantites(lignes, cible) {
+  if (!Number.isFinite(cible) || !lignes.length || lignes.length > 8) return;
+  let best = null;
+  const essai = (i, somme, choix) => {
+    if (i === lignes.length) { const e = Math.abs(somme - cible); if (!best || e < best.e) best = { e, choix: choix.slice() }; return; }
+    const cands = lignes[i].candidatsQte.length ? lignes[i].candidatsQte : [lignes[i].qte];
+    for (const n of cands) { choix.push(n); essai(i + 1, somme + (n || 0), choix); choix.pop(); }
+  };
+  essai(0, 0, []);
+  if (best && best.e <= Math.max(1, lignes.length * 0.5)) best.choix.forEach((n, i) => { lignes[i].qte = n; });
+}
+function dureeSecondes(t) {
+  let s = 0; const re = /(\d+)\s*([jdhms])/g; let m;
+  while ((m = re.exec(t))) s += +m[1] * { j: 86400, d: 86400, h: 3600, m: 60, s: 1 }[m[2]];
+  return s;
+}
+
+/* ---------- fenêtre de scan (lignes en direct, totaux, Enregistrer) */
+let raff = null, pipRaff = null;
+const O = () => (raff && raff.ordres[raff.actif]) || { lignes: [], temps: "", stable: 0, sig: "", complet: false };
+const nouvelOrdre = () => ({ lignes: [], temps: "", stable: 0, sig: "", complet: false, rates: 0, tempsManuel: false });
+const R$ = (id) => document.getElementById(id) || pipRaff?.document.getElementById(id);
+function cleLigne(l) { return `${l.nom}|${l.qualite}`; }
+function totauxOrdre(ord) {
+  const ok = ord.lignes.filter((l) => l.connue || l.force);
+  const rend = ok.reduce((s, l) => s + (l.rend || 0), 0);
+  const egal = !ord.enregistre && ok.length > 0 && ord.complet !== false && !!ord.temps && ord.stable >= 2;
+  return { ok, rend, egal };
+}
+const totauxRaff = () => totauxOrdre(O());
+function renderRaff() {
+  if (!raff) return;
+  const cles = Object.keys(raff.ordres).map(Number).sort();
+  R$("dr-ordres").innerHTML = cles.map((k) => { const o = raff.ordres[k], ok = o.enregistre || totauxOrdre(o).egal;
+    return `<button type="button" class="btn petit${k === raff.actif ? " actif" : ""}" data-ordre="${k}" aria-pressed="${k === raff.actif}">Ordre ${k + 1}${o.enregistre ? " ✓" : ok ? " ●" : ""}</button>`; }).join("");
+  R$("dr-ordres").hidden = cles.length < 2;
+  const t = totauxRaff();
+  R$("dr-etat").textContent = raff.etat || "";
+  R$("dr-lignes").innerHTML = O().lignes.length ? O().lignes.map((l, i) => `<tr class="${l.connue || l.force ? "" : "ignoree"}${l.neuve ? " neuve" : ""}">
+      <td>${esc(l.nom)}</td>
+      <td><input type="number" data-i="${i}" data-k="qualite" value="${Number.isFinite(l.qualite) ? l.qualite : ""}" min="0" max="1000"></td>
+      <td><input type="number" data-i="${i}" data-k="rend" value="${Number.isFinite(l.rend) ? l.rend : ""}" min="0"></td>
+      <td>${l.connue || l.force ? "" : `<small>qualité inconnue : ignorée</small>`}</td></tr>`).join("")
+    : `<tr><td colspan="5" class="dr-vide">Aucune ligne lue pour l'instant.</td></tr>`;
+  { const e = R$("dr-temps"); if (e.ownerDocument.activeElement !== e) e.value = O().temps || ""; }
+  R$("dr-rend").textContent = `${fmtScu(t.rend / 100)} SCU`;
+  R$("dr-total").textContent = O().enregistre ? "enregistré" : t.egal ? "stable" : "en cours…";
+  R$("dr-total").classList.toggle("ok", t.egal);
+  R$("dr-enregistrer").hidden = !t.egal;
+  R$("dr-attente").hidden = t.egal;
+}
+/* Fusion des lectures successives. Une même ligne du jeu peut d'abord être mal lue (qualité « 33 » au lieu de 330) :
+   on reconnaît la ligne par son minerai + quantité + rendement, et une lecture valide remplace la lecture ratée.
+   Les lignes à qualité inconnue ne sont gardées que si aucune ligne valide ne leur correspond. */
+function fusionnerLignes(nouvelles, ord = O()) {
+  for (const l of ord.lignes) l.neuve = false;
+  const meme = (a, b) => a.nom === b.nom && a.qte === b.qte && a.rend === b.rend;
+  for (const n of nouvelles) {
+    if (!Number.isFinite(n.qualite)) continue;
+    let ex = ord.lignes.find((l) => cleLigne(l) === cleLigne(n));
+    if (!ex && n.connue) ex = ord.lignes.find((l) => !l.connue && !l.edite && meme(l, n));
+    if (!ex && !n.connue && ord.lignes.some((l) => l.connue && meme(l, n))) continue;
+    if (ex) { ex.glyphes = n.glyphes; if (!ex.edite) Object.assign(ex, { qualite: n.qualite, connue: n.connue, qte: n.qte, rend: n.rend }); }
+    else ord.lignes.push({ ...n, neuve: true });
+  }
+  ord.lignes = ord.lignes.filter((l) => l.connue || l.force || l.edite || !ord.lignes.some((v) => v !== l && v.connue && meme(v, l)));
+}
+function etatOrdre(ord) {
+  if (ord.enregistre) return "Enregistré.";
+  const t = totauxOrdre(ord);
+  return t.egal ? "Lecture stable." : ord.complet ? "Vérification…" : "Tableau incomplet : relecture…";
+}
+/* Miniature réduite : la colonne de l'ordre affiché (ou tout le terminal tant qu'aucun ordre n'est trouvé) */
+function dessinerApercu(P, s) {
+  const cv = R$("dr-apercu"), ctx = cv.getContext("2d");
+  let zx = 0, zy = 0, zw = P.L, zh = P.Hc;
+  const Rc = s != null && P.cs?.[s]?.R;
+  if (Rc) { const u = RAFF.slot.u0; zx = Rc.x0 + u * Rc.span; zy = Rc.y0 + 0.04 * Rc.span; zw = 0.247 * Rc.span; zh = 0.36 * Rc.span; }
+  cv.width = Math.round(zw); cv.height = Math.round(zh);
+  ctx.drawImage(P.apercu, zx, zy, zw, zh, 0, 0, cv.width, cv.height);
+  const b = s != null && raff.ordres[s]?.boites;
+  if (b) { ctx.strokeStyle = "#8fa045"; ctx.lineWidth = 2; for (const x of b) ctx.strokeRect(x[0] - zx, x[1] - zy, x[2], x[3]); }
+}
+async function scannerRaff() {
+  if (!raff || raff.enCours) return;
+  raff.enCours = true;
+  try {
+    const src = await imageCourante(), t0 = performance.now();
+    const S = pixelsSource(src), P = perspectiveCourante(src, S);
+    if (!P) { raff.etat = "Terminal non trouvé."; return; }
+    const r = await lireProcessing(S, P);
+    raff.duree = Math.round(performance.now() - t0);
+    raff.P = P;
+    if (r.erreur) { raff.etat = r.erreur; dessinerApercu(P, null); return; }
+    let rate = false;
+    for (const c of r.colonnes) {
+      const ord = (raff.ordres[c.s] = raff.ordres[c.s] || nouvelOrdre());
+      if (ord.enregistre) continue;
+      ord.boites = c.boites;
+      const sig = JSON.stringify(c.lignes.filter((l) => l.connue).map((l) => [l.nom, l.qualite, l.rend]));
+      ord.stable = sig !== "[]" && sig === ord.sig ? ord.stable + 1 : 1; ord.sig = sig;
+      ord.complet = c.lignes.length > 0 && c.lignes.every((l) => l.connue && Number.isFinite(l.rend)) && !!(c.temps || ord.temps);
+      if (!ord.complet) rate = true;
+      fusionnerLignes(c.lignes, ord);
+      if (c.temps && !ord.tempsManuel) { ord.temps = c.temps; ord.tempsLuA = c.tempsLuA; }
+      if (c.progression != null) ord.progression = c.progression;
+      ord.etat = etatOrdre(ord);
+    }
+    // ordres disparus de l'écran (récupérés, ou changement d'écran)
+    for (const k of Object.keys(raff.ordres)) if (!r.colonnes.some((c) => c.s === +k) && !raff.ordres[k].enregistre) delete raff.ordres[k];
+    if (!(raff.actif in raff.ordres)) raff.actif = r.colonnes[0].s;
+    // tableau incomplet : toutes les 3 lectures ratées, on repart de zéro (perspective, repères, recalage, noms, temps)
+    if (rate) { raff.rates = (raff.rates || 0) + 1; if (raff.rates >= 3) { raffPersp = null; raff.rates = 0; } } else raff.rates = 0;
+    raff.etat = O().etat || "";
+    dessinerApercu(P, raff.actif);
+  } catch (e) { raff.etat = "Lecture impossible : " + (e.message || e); }
+  finally { if (raff) { raff.enCours = false; renderRaff(); } }
+}
+/* Overlay (fenêtre incrustée, comme pour le scan d'inventaire) ; à défaut, panneau flottant dans la page */
+async function ouvrirRaff() {
+  if (raff) return;
+  const propre = await obtenirFlux();
+  if (propre === null) return;
+  raff = { propre, ordres: {}, actif: 0, etat: "Recherche du terminal…", minuterie: 0, rates: 0 };
+  const panneau = document.getElementById("p-raff");
+  R$("dr-station").textContent = stationCourante || SANS_STATION;
+  panneau.hidden = false;
+  if ("documentPictureInPicture" in window && !pipRaff) {
+    try {
+      pipRaff = await documentPictureInPicture.requestWindow({ width: 340, height: 560 });
+      for (const n of document.querySelectorAll("style, link[rel=stylesheet]")) pipRaff.document.head.append(n.cloneNode(true));
+      pipRaff.document.title = "Ordre de raffinage";
+      pipRaff.document.body.classList.add("overlay", "overlay-raff");
+      pipRaff.document.body.append(panneau);
+      pipRaff.addEventListener("pagehide", () => { pipRaff = null; document.body.append(panneau); fermerRaff(); });
+    } catch { pipRaff = null; }
+  }
+  panneau.classList.toggle("flottant", !pipRaff);
+  renderRaff();
+  const boucle = async () => { if (!raff) return; await scannerRaff(); if (raff) raff.minuterie = setTimeout(boucle, 500); };
+  boucle();
+}
+function fermerRaff() {
+  if (!raff) return;
+  raffPersp = null;
+  clearTimeout(raff.minuterie);
+  if (raff.propre && !session) { arreterLecteurFlux(); if (fluxTrack) fluxTrack.stop(); fluxTrack = null; $("flux-video").srcObject = null; }
+  raff = null;
+  const panneau = R$("p-raff");
+  if (pipRaff) { const w = pipRaff; pipRaff = null; document.body.append(panneau); w.close(); }
+  if (panneau) panneau.hidden = true;
+}
+function enregistrerRaff() {
+  const t = totauxRaff(); if (!t.egal) return;
+  const maintenant = Date.now() / 1000, duree = dureeSecondes(O().temps), station = stationCourante || SANS_STATION;
+  // fin = heure à laquelle le minuteur a été lu (ou saisi) + temps restant, et non l'heure du clic sur Enregistrer
+  const p = O().progression, fin = (O().tempsLuA || maintenant) + duree;
+  // début estimé : temps restant / part restante de la barre (sinon : l'heure du scan)
+  const debut = duree && p > 0.02 && p < 0.98 ? fin - duree / (1 - p) : maintenant;
+  const lignes = t.ok.map((l) => ({ nom: l.nom, qualite: l.qualite, rend: l.rend }));
+  const cle = (ls) => ls.map((l) => `${l.nom}|${l.qualite}`).sort().join(",");
+  base.raffinages = base.raffinages || [];
+  const ex = base.raffinages.find((o) => o.station === station && cle(o.lignes) === cle(lignes));
+  if (ex) { ex.lignes = lignes; if (duree) { ex.fin = fin; ex.debut = Math.min(ex.debut || debut, debut); } toast("Ordre de raffinage mis à jour."); }
+  else { base.raffinages.push({ id: uid(), station, ts: maintenant, debut, fin: duree ? fin : maintenant, lignes }); toast("Ordre de raffinage enregistré."); }
+  sauver(); renderRaffinages();
+  O().enregistre = true; O().etat = "Enregistré.";
+  const reste = Object.keys(raff.ordres).map(Number).filter((k) => !raff.ordres[k].enregistre);
+  if (!reste.length) { fermerRaff(); return; }
+  raff.actif = reste[0]; raff.etat = O().etat || ""; if (raff.P) dessinerApercu(raff.P, raff.actif); renderRaff();
+  clearTimeout(raff.minuterie); const boucle = async () => { if (!raff) return; await scannerRaff(); raff.minuterie = setTimeout(boucle, 500); }; boucle();
+}
+function tempsRestant(fin) {
+  const s = Math.round(fin - Date.now() / 1000);
+  if (s <= 0) return "prêt";
+  const h = Math.floor(s / 3600), m = Math.ceil((s % 3600) / 60);
+  return h ? `${h} h ${String(m).padStart(2, "0")}` : `${m} min`;
+}
+const progressionOrdre = (o) => { const d = o.debut || o.ts, t = Date.now() / 1000; return o.fin > d ? Math.max(0, Math.min(1, (t - d) / (o.fin - d))) : 1; };
+function minuteur(fin) {
+  const s = Math.max(0, Math.round(fin - Date.now() / 1000)), h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), x = s % 60;
+  return h ? `${h} h ${String(m).padStart(2, "0")} min ${String(x).padStart(2, "0")} s` : `${m} min ${String(x).padStart(2, "0")} s`;
+}
+/* Mise à jour en direct (chaque seconde) des minuteurs et des barres, sans tout redessiner ;
+   quand un ordre devient prêt, on redessine pour activer « En caisses » */
+setInterval(() => {
+  const t = Date.now() / 1000; let pret = false;
+  for (const e of document.querySelectorAll("[data-minuteur]")) { const f = +e.dataset.minuteur; if (f <= t) pret = true; else e.textContent = minuteur(f); }
+  for (const b of document.querySelectorAll(".ro-barre")) { const d = +b.dataset.debut, f = +b.dataset.fin; b.firstElementChild.style.width = (f > d ? Math.max(0, Math.min(1, (t - d) / (f - d))) : 1) * 100 + "%"; }
+  if (pret) renderRaffinages();
+}, 1000);
+function htmlOrdre(o, avecStation) {
+  const scu = o.lignes.reduce((s, l) => s + l.rend, 0) / 100, pret = !o.fin || o.fin <= Date.now() / 1000;
+  const lignes = o.lignes.map((l) => `<span class="ro-l">${esc(l.nom)} <small>${l.qualite}</small> <b>${fmtScu(l.rend / 100)}</b></span>`).join("");
+  return `<li class="${pret ? "pret" : ""}">
+    <div class="ro-haut"><strong>${avecStation ? `<a href="#/station/${encodeURIComponent(o.station)}">${esc(o.station)}</a>` : "Ordre de raffinage"}</strong><span class="ro-etat"${o.fin && !pret ? ` data-minuteur="${o.fin}"` : ""}>${o.fin ? (pret ? "Prêt" : minuteur(o.fin)) : "Durée inconnue"}</span></div>
+    ${o.fin ? `<div class="ro-barre" data-debut="${o.debut || o.ts}" data-fin="${o.fin}"><span style="width:${progressionOrdre(o) * 100}%"></span></div>` : ""}
+    <div class="ro-lignes">${lignes}</div>
+    <div class="ro-bas"><span>${fmtScu(scu)} SCU</span>
+      <span><button class="btn petit${pret ? " principal" : ""}" type="button" data-raff-caisses="${o.id}"${pret ? "" : " disabled"}>En caisses</button>
+      <button class="btn petit" type="button" data-raff-suppr="${o.id}" aria-label="Supprimer l'ordre">✕</button></span></div></li>`;
+}
+function renderRaffinages() {
+  const tous = (base.raffinages || []).slice().sort((a, b) => (a.fin || 0) - (b.fin || 0));
+  const ul = $("s-raff");
+  if (ul) { const l = tous.filter((o) => o.station === stationCourante); ul.innerHTML = l.length ? l.map((o) => htmlOrdre(o, false)).join("") : ""; }
+  const ua = $("a-raff");
+  const uh = $("h-raff");
+  if (uh) { $("h-raff-bloc").hidden = !tous.length; $("h-grille").classList.toggle("avec-raff", tous.length > 0); uh.innerHTML = tous.map((o) => htmlOrdre(o, true)).join(""); }
+  if (ua) { $("a-raff-bloc").hidden = !tous.length; $("a-grille").classList.toggle("avec-raff", tous.length > 0); ua.innerHTML = tous.map((o) => htmlOrdre(o, true)).join(""); }
+}
+/* Découpage d'une quantité en caisses : autant de 4 SCU que possible, puis 2 SCU, puis 1 SCU, puis le reste (< 1 SCU) */
+function decouperCaisses(scu) {
+  let reste = Math.round(scu * 100), out = [];   // en cSCU, pour éviter les erreurs d'arrondi
+  for (const t of [400, 200, 100]) while (reste >= t) { out.push(t / 100); reste -= t; if (t < 400) break; }
+  if (reste > 0) out.push(reste / 100);
+  return out;
+}
+function ordreEnCaisses(id) {
+  const o = (base.raffinages || []).find((x) => x.id === id); if (!o) return;
+  let n = 0;
+  for (const l of o.lignes) for (const q of decouperCaisses(l.rend / 100)) {
+    items.push({ id: uid(), nom: l.nom, qualite: l.qualite, bande: bandeDe(l.nom, l.qualite), quantite_scu: q,
+      station: o.station, visibilite: "corporation", ts: Date.now() / 1000, heure: new Date().toLocaleString("fr-FR") });
+    n++;
+  }
+  base.raffinages = base.raffinages.filter((x) => x.id !== id);
+  sauver(); planifierSync(); render(); toast(`${n} caisse${n > 1 ? "s" : ""} ajoutée${n > 1 ? "s" : ""}.`);
+}
+$("b-raff").addEventListener("click", ouvrirRaff);
+R$("dr-fermer").addEventListener("click", fermerRaff);
+R$("dr-enregistrer").addEventListener("click", enregistrerRaff);
+R$("dr-relire").addEventListener("click", scannerRaff);
+R$("dr-ordres").addEventListener("click", (e) => { const b = e.target.closest("[data-ordre]"); if (!b || !raff) return; raff.actif = +b.dataset.ordre; raff.etat = O().etat || ""; if (raff.P) dessinerApercu(raff.P, raff.actif); renderRaff(); });
+R$("dr-temps").addEventListener("change", (e) => { if (!raff) return; O().temps = e.target.value.trim(); O().tempsManuel = true; O().tempsLuA = Date.now() / 1000; });
+R$("dr-lignes").addEventListener("change", (e) => {
+  const inp = e.target.closest("input[data-i]"); if (!inp || !raff) return;
+  const l = O().lignes[+inp.dataset.i]; l[inp.dataset.k] = parseInt(inp.value, 10); l.edite = true;
+  if (Number.isFinite(l[inp.dataset.k])) { apprendreNombre(l.glyphes?.[inp.dataset.k], l[inp.dataset.k]); sauver(); }
+  if (inp.dataset.k === "qualite") l.connue = valeursDe(l.nom).includes(l.qualite);
+  renderRaff();
+});
+document.addEventListener("click", (e) => {
+  const c = e.target.closest("[data-raff-caisses]"); if (c) { ordreEnCaisses(c.dataset.raffCaisses); return; }
+  const s = e.target.closest("[data-raff-suppr]");
+  if (s && confirm("Supprimer cet ordre de raffinage ?")) { base.raffinages = (base.raffinages || []).filter((x) => x.id !== s.dataset.raffSuppr); sauver(); renderRaffinages(); }
+});
+setInterval(() => { if (vue === "station" || vue === "accueil" || vue === "home") renderRaffinages(); }, 30000);
 
 /* ---------- démarrage */
 $("liste-materiaux").innerHTML = Object.keys(valeurs).sort().map((n) => `<option value="${esc(n)}">`).join("");
