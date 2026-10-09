@@ -668,6 +668,15 @@ body.overlay-raff { margin: 0; background: var(--rouille); }
 .visib-prive .ico-visib { color: #c49a6c; }
 .visib-corporation .ico-visib { color: var(--accent); }
 .visib-allies .ico-visib { color: #f2b134; }
+/* ---------- v51 : image d'arrière-plan du lieu (moitié droite, fondu vers le fond) */
+.fond-lieu { position: fixed; top: 0; right: 0; width: 50vw; height: 100vh; z-index: 0; pointer-events: none;
+  background: center / cover no-repeat; opacity: 0; transition: opacity .6s ease;
+  -webkit-mask-image: linear-gradient(to left, #000 35%, transparent), linear-gradient(to top, transparent, #000 45%);
+  -webkit-mask-composite: source-in; mask-image: linear-gradient(to left, #000 35%, transparent), linear-gradient(to top, transparent, #000 45%); mask-composite: intersect; }
+.fond-lieu.visible { opacity: .7; }
+main, .barre { position: relative; z-index: 1; }
+.credit-lieu { position: fixed; right: 12px; bottom: 8px; z-index: 2; margin: 0; font-size: 11px; color: var(--os-doux); opacity: .7; }
+.credit-lieu a { color: inherit; }
 </style>
 </head>
 <body>
@@ -685,6 +694,8 @@ body.overlay-raff { margin: 0; background: var(--rouille); }
   </div>
 </header>
 
+<div class="fond-lieu" id="fond-lieu" aria-hidden="true"></div>
+<p class="credit-lieu" id="credit-lieu" hidden>Image : <a href="https://starcitizen.tools/" target="_blank" rel="noopener">starcitizen.tools</a> · © Cloud Imperium Games</p>
 <main>
   <section id="v-home" hidden>
     <div class="home-haut" id="h-grille">
@@ -4479,11 +4490,81 @@ document.addEventListener("click", (e) => {
 });
 setInterval(() => { if (vue === "station" || vue === "accueil" || vue === "home") renderRaffinages(); }, 30000);
 
+/* Image d'arrière-plan du lieu : fichier « lieux/<nom-du-lieu>.jpg » à côté de index.html
+   (ex. lieux/port-tressler.jpg, lieux/arc-l1-wide-forest-station.jpg). Absente : pas d'image. */
+const nomFichierLieu = (st) => sansAccents(st).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+/* Images par défaut : starcitizen.tools (images © Cloud Imperium Games), utilisées si aucun fichier local n'existe */
+const IMAGES_LIEUX = {
+"Area18": "https://media.starcitizen.tools/thumb/0/0f/RSI-Arccorp_03-Min.jpg/1200px-RSI-Arccorp_03-Min.jpg.webp?5t29n",
+"Lorville": "https://media.starcitizen.tools/thumb/0/02/Lorville_Temporary_Splashscreen.png/1200px-Lorville_Temporary_Splashscreen.png.webp?mnywd",
+"New Babbage": "https://media.starcitizen.tools/thumb/9/9c/Microtech-new-babbage-cityscape-01.jpg/1200px-Microtech-new-babbage-cityscape-01.jpg.webp?deppm",
+"Orison": "https://media.starcitizen.tools/a/a7/Orison_-_Platform_firing_Seraph_thrusters.png?3ir5m",
+"Baijini Point": "https://media.starcitizen.tools/thumb/6/6e/Arccorp-baijini-point-01.jpg/1200px-Arccorp-baijini-point-01.jpg.webp?pxf0e",
+"Everus Harbor": "https://media.starcitizen.tools/thumb/7/72/Hurston-everus-harbor-01.jpg/1200px-Hurston-everus-harbor-01.jpg.webp?0wsez",
+"Port Tressler": "https://media.starcitizen.tools/thumb/4/4a/Port-Tressler-Exterior-Alpha-3.12.png/1200px-Port-Tressler-Exterior-Alpha-3.12.png.webp?kkhby",
+"Seraphim Station": "https://media.starcitizen.tools/thumb/9/9f/Seraphim_Station.png/1200px-Seraphim_Station.png.webp?r2bok",
+"Grim HEX": "https://media.starcitizen.tools/thumb/0/09/Star_Citizen_-_GrimHEX_close-up.png/1200px-Star_Citizen_-_GrimHEX_close-up.png.webp?ofpq0",
+"ARC-L1 Wide Forest Station": "https://media.starcitizen.tools/thumb/1/13/ARC-L1-Exterior-Alpha3.12.png/1200px-ARC-L1-Exterior-Alpha3.12.png.webp?1j0ks",
+"ARC-L2 Lively Pathway Station": "https://media.starcitizen.tools/8/8b/ARC-L2-Exterior-Alpha-3.17.2.jpg",
+"ARC-L3 Modern Express Station": "https://media.starcitizen.tools/6/6c/ARC-L3-Exterior-Alpha-3.17.2.jpg",
+"ARC-L4 Faint Glen Station": "https://media.starcitizen.tools/thumb/3/3c/ARC-L4-Exterior-Alpha-3.17.2.jpg/1200px-ARC-L4-Exterior-Alpha-3.17.2.jpg.webp?2885k",
+"ARC-L5 Yellow Core Station": "https://media.starcitizen.tools/9/9b/ARC-L5-Exterior-Alpha-3.17.2.jpg",
+"CRU-L1 Ambitious Dream Station": "https://media.starcitizen.tools/thumb/e/e9/CRU-L1-Exterior-Alpha-3.12.png/1200px-CRU-L1-Exterior-Alpha-3.12.png.webp?3wyf1",
+"CRU-L4 Shallow Fields Station": "https://media.starcitizen.tools/e/e1/CRU-L4-Exterior-Alpha-3.12.png",
+"CRU-L5 Beautiful Glen Station": "https://media.starcitizen.tools/4/4d/CRU-L5-Exterior-Alpha-3.14.jpg",
+"HUR-L1 Green Glade Station": "https://media.starcitizen.tools/thumb/4/49/HUR-L1-Exterior-Alpha-3.12.png/1200px-HUR-L1-Exterior-Alpha-3.12.png.webp?jjc1o",
+"HUR-L2 Faithful Dream Station": "https://media.starcitizen.tools/2/2c/HUR-L2-Exterior2-Alpha-3.12.png",
+"HUR-L3 Thundering Express Station": "https://media.starcitizen.tools/thumb/a/a9/HUR-L3-Exterior-Alpha-3.12.png/1200px-HUR-L3-Exterior-Alpha-3.12.png.webp?gum61",
+"HUR-L4 Melodic Fields Station": "https://media.starcitizen.tools/thumb/7/71/HUR-L4-Exterior-Alpha-3.12.png/1200px-HUR-L4-Exterior-Alpha-3.12.png.webp?oqubr",
+"HUR-L5 High Course Station": "https://media.starcitizen.tools/thumb/7/7e/HUR-L5-Exterior-Alpha-3.12.png/1200px-HUR-L5-Exterior-Alpha-3.12.png.webp?s1jyd",
+"MIC-L1 Shallow Frontier Station": "https://media.starcitizen.tools/thumb/5/56/MIC-L1-Exterior1-Alpha-3.12.png/1200px-MIC-L1-Exterior1-Alpha-3.12.png.webp?7q8us",
+"MIC-L2 Long Forest Station": "https://media.starcitizen.tools/7/7e/MIC-L2-Exterior2-Alpha-3.17.2.jpg",
+"MIC-L3 Endless Odyssey Station": "https://media.starcitizen.tools/thumb/a/a6/MIC-L3-Exterior-Alpha-3.17.2.jpg/1200px-MIC-L3-Exterior-Alpha-3.17.2.jpg.webp?9wv4t",
+"MIC-L4 Red Crossroads Station": "https://media.starcitizen.tools/5/58/MIC-L4-Exterior2-Alpha-3.17.2.jpg",
+"MIC-L5 Modern Icarus Station": "https://media.starcitizen.tools/thumb/b/b8/MIC-L5-Exterior1-Alpha-3.17.2.jpg/1200px-MIC-L5-Exterior1-Alpha-3.17.2.jpg.webp?nafb0",
+"Pyro Gateway (Stanton)": "https://media.starcitizen.tools/thumb/c/cc/Pyro_Gateway%2C_Stanton_System.jpg/1200px-Pyro_Gateway%2C_Stanton_System.jpg.webp?fr8er",
+"Checkmate": "https://media.starcitizen.tools/thumb/b/b8/Cutter_Approaching_Checkmate_Station.png/1200px-Cutter_Approaching_Checkmate_Station.png.webp?ljfn6",
+"Orbituary": "https://media.starcitizen.tools/thumb/2/24/Pyro_-_Orbituary_space_station.png/1200px-Pyro_-_Orbituary_space_station.png.webp?elkcl",
+"Ruin Station": "https://media.starcitizen.tools/thumb/0/0c/Ruin_Station%2C_Terminus%2C_Pyro.webp/1200px-Ruin_Station%2C_Terminus%2C_Pyro.webp?i6saf",
+"Starlight Service Station": "https://media.starcitizen.tools/thumb/4/4c/Starlight_Service_Station%2C_Pyro.webp/1200px-Starlight_Service_Station%2C_Pyro.webp?d7uqs",
+"Patch City": "https://media.starcitizen.tools/thumb/7/79/Patch_City%2C_Pyro.webp/1200px-Patch_City%2C_Pyro.webp?l0p3y",
+"Gaslight": "https://media.starcitizen.tools/2/21/Pyro_V_L2_-_Gaslight_space_station.webp",
+"Rod's Fuel 'N Supplies": "https://media.starcitizen.tools/1/1b/Rod%27s_Fuel_%27N_Supplies%2C_Pyro_system.jpg",
+"Rat's Nest": "https://media.starcitizen.tools/6/61/Rat%27s_Nest%2C_Pyro.png",
+"Endgame": "https://media.starcitizen.tools/0/0b/Endgame_station%2C_Pyro.jpg",
+"Dudley & Daughters": "https://media.starcitizen.tools/7/71/Dudley_%26_Daughters.jpg",
+"Megumi Refueling": "https://media.starcitizen.tools/thumb/e/e5/Megumi_Refueling%2C_Pyro_system.jpg/1200px-Megumi_Refueling%2C_Pyro_system.jpg.webp?n65n4",
+"Stanton Gateway (Pyro)": "https://media.starcitizen.tools/thumb/0/06/Stanton_Gateway_and_jump_point%2C_Pyro_system.webp/1200px-Stanton_Gateway_and_jump_point%2C_Pyro_system.webp?blcqx",
+"Nyx Gateway (Pyro)": "https://media.starcitizen.tools/thumb/a/a9/Nyx_Gateway_Station_%28Pyro%29.png/1200px-Nyx_Gateway_Station_%28Pyro%29.png.webp?skaxt",
+"Levski": "https://media.starcitizen.tools/thumb/b/bc/Levski_-_Above_complex.jpg/1200px-Levski_-_Above_complex.jpg.webp?qa5ke",
+"Pyro Gateway (Nyx)": "https://media.starcitizen.tools/thumb/7/7c/Pyro_Gateway_Station_%28Nyx%29.png/1200px-Pyro_Gateway_Station_%28Nyx%29.png.webp?toclb"
+};
+let imageLieuCourante = null;
+function majFondLieu() {
+  const el = $("fond-lieu"), st = vue === "station" ? stationCourante : null;
+  if (st === imageLieuCourante) return;
+  imageLieuCourante = st; el.classList.remove("visible");
+  if (!st || st === SANS_STATION) return;
+  // 1) fichier local « lieux/<nom>.jpg » ; 2) sinon, image du wiki starcitizen.tools
+  const essais = [`lieux/${nomFichierLieu(st)}.jpg`, IMAGES_LIEUX[st]].filter(Boolean);
+  const essayer = (i) => {
+    if (i >= essais.length || imageLieuCourante !== st) return;
+    const img = new Image();
+    img.onload = () => { if (imageLieuCourante !== st) return; el.style.backgroundImage = `url("${essais[i]}")`; el.classList.add("visible");
+      $("credit-lieu").hidden = i === 0; };
+    img.onerror = () => essayer(i + 1);
+    img.src = essais[i];
+  };
+  $("credit-lieu").hidden = true;
+  essayer(0);
+}
+window.addEventListener("hashchange", () => setTimeout(majFondLieu, 0));
 /* ---------- démarrage */
 $("liste-materiaux").innerHTML = Object.keys(valeurs).sort().map((n) => `<option value="${esc(n)}">`).join("");
 for (const it of items) { it.station ||= SANS_STATION; it.ts ||= Date.now() / 1000; }
 construireModele().then(() => { if (!compte) etat("Données enregistrées dans ce navigateur"); }).catch(() => etat("Exemples de chiffres illisibles", "erreur"));
 route();
+majFondLieu();
 initCloud();
 </script>
 </body>
