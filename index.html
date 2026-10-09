@@ -635,6 +635,39 @@ body.overlay-raff { margin: 0; background: var(--rouille); }
 .home-video .note a { color: var(--os-doux); }
 /* ---------- v44 : titre du site */
 .marque-bloc .marque, .marque { font-family: "Orbitron", "Chakra Petch", sans-serif; font-weight: 900; text-transform: uppercase; font-size: 18px; letter-spacing: .04em; }
+/* ---------- v46 : contrastes adoucis, bouton actif lisible, actions de l'accueil à droite */
+:root { --rouille: #0b131c; --panneau: #16202a; --panneau-2: #202b35; --trait: #2c3a43; --bord: #42525b;
+  --os: #b9d4d9; --os-doux: #7b939b; }
+.barre { background: #0e1720 !important; }
+.carte { background: linear-gradient(180deg, #18222c, #131c25) !important; }
+.btn[aria-pressed="true"]:not(.principal) { background: var(--orange) !important; border-color: var(--orange) !important; color: #fff !important; }
+.home-haut { grid-template-columns: minmax(0, 1fr) 220px; }
+.home-haut.avec-raff { grid-template-columns: minmax(0, 1fr) 300px 220px; }
+.home-cta { display: grid; gap: 10px; align-content: start; background: none; border: 0; padding: 0; }
+.home-cta .btn { width: 100%; text-align: center; padding: 12px 14px; }
+@media (max-width: 1000px) { .home-haut, .home-haut.avec-raff { grid-template-columns: 1fr; } .home-cta { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); order: -1; } }
+/* ---------- v47 : ligne de filtres au-dessus des actions groupées */
+.ligne-filtres { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 8px; }
+.ligne-filtres .ico-filtre { width: 22px; height: 22px; color: var(--orange); flex: none; margin: 0 2px 0 4px; }
+.ligne-filtres .filtre-actif { margin-left: auto; color: var(--os-doux); font-size: 13px; }
+/* ---------- v48 : ligne de filtres alignée à droite, boutons gris compacts, picto « regrouper » */
+.ligne-filtres { justify-content: flex-end; gap: 6px; }
+.ligne-filtres .filtre-actif { margin-left: 0; margin-right: 6px; }
+.ligne-filtres .btn { background: var(--panneau-2) !important; border: 0 !important; padding: 5px 10px; font-size: 13px; display: inline-flex; align-items: center; gap: 4px; }
+.ligne-filtres .btn:hover { background: #2a3641 !important; }
+.ligne-filtres .btn[aria-pressed="true"] { background: var(--orange) !important; color: #fff !important; }
+.ligne-filtres .ico-reg { width: 18px; height: 18px; }
+.ligne-filtres [data-regrouper] .ico-plus { display: none; }
+.ligne-filtres [data-regrouper][aria-pressed="true"] .ico-moins { display: none; }
+.ligne-filtres [data-regrouper][aria-pressed="true"] .ico-plus { display: inline; }
+/* ---------- v49 : pictos de visibilité */
+.visib-cell { display: inline-flex; align-items: center; gap: 6px; }
+.visib-cell::before { display: none !important; }
+.ico-visib { width: 18px; height: 18px; fill: currentColor; color: var(--os-doux); flex: none; }
+.ico-visib.large { width: 36px; }
+.visib-prive .ico-visib { color: #c49a6c; }
+.visib-corporation .ico-visib { color: var(--accent); }
+.visib-allies .ico-visib { color: #f2b134; }
 </style>
 </head>
 <body>
@@ -664,6 +697,12 @@ body.overlay-raff { margin: 0; background: var(--rouille); }
         <h2>Ordres de raffinage</h2>
         <ul class="raff-liste grille" id="h-raff"></ul>
       </aside>
+      <div class="home-cta">
+        <button type="button" class="btn principal" data-ouvrir-nav>+ Ajouter des caisses</button>
+        <button type="button" class="btn principal" data-ouvrir-nav>+ Ordre de raffinage</button>
+        <a class="btn" href="#/minerais">Mes ressources</a>
+        <a class="btn" href="#/corpo">Stock corpo</a>
+      </div>
     </div>
     <div class="home-trois">
       <div class="home-video">
@@ -684,7 +723,6 @@ body.overlay-raff { margin: 0; background: var(--rouille); }
           <li><span class="num">3</span><div>Cliquez sur <strong>« Ajouter des caisses »</strong> et choisissez la fenêtre du jeu.</div></li>
           <li><span class="num">4</span><div>Survolez chaque minerai, un par un : l'enregistrement se fait automatiquement.</div></li>
         </ol>
-        <div class="ligne"><button type="button" class="btn principal" data-ouvrir-nav>+ Ajouter des caisses</button><button type="button" class="btn principal" data-ouvrir-nav>+ Ordre de raffinage</button><a class="btn" href="#/minerais">Mes ressources</a></div>
       </div>
       <div class="carte home-param">
         <div class="hp-texte">
@@ -706,10 +744,6 @@ body.overlay-raff { margin: 0; background: var(--rouille); }
     <div class="entete">
       <div><h1>Tous les minerais</h1><p class="sous-titre" id="a-compte"></p></div>
       <div class="outils">
-        <span class="filtre-actif" id="a-filtre-etat"></span>
-        <button class="btn" type="button" data-regrouper aria-pressed="false">Regrouper</button>
-        <button class="btn" type="button" data-filtre-mineraux aria-pressed="false">Minerais</button>
-        <button class="btn" type="button" data-filtre-qualite aria-pressed="false">Qualité</button>
         <button class="btn petit" type="button" data-discord>Discord</button>
         <button class="btn petit" type="button" id="b-exporter">Sauvegarder</button>
         <button class="btn petit" type="button" id="b-importer">Restaurer</button>
@@ -719,6 +753,7 @@ body.overlay-raff { margin: 0; background: var(--rouille); }
     </div>
     <div class="ressources-grille" id="a-grille">
       <div>
+      <div class="ligne-filtres"><span class="filtre-actif" id="a-filtre-etat"></span><svg class="ico-filtre" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4.25 5.61C6.27 8.2 10 13 10 13v6c0 .55.45 1 1 1h2c.55 0 1-.45 1-1v-6s3.72-4.8 5.74-7.39A.998.998 0 0 0 18.95 4H5.04c-.83 0-1.3.95-.79 1.61z"/></svg><button class="btn" type="button" data-filtre-mineraux aria-pressed="false">Minerais : tous</button><button class="btn" type="button" data-filtre-qualite aria-pressed="false">Qualité : toutes</button><button class="btn" type="button" data-regrouper aria-pressed="false" title="Regrouper / dégrouper les caisses identiques"><svg class="ico-reg ico-moins" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7.41 18.59 8.83 20 12 16.83 15.17 20l1.41-1.41L12 14l-4.59 4.59zm9.18-13.18L15.17 4 12 7.17 8.83 4 7.41 5.41 12 10l4.59-4.59z"/></svg><svg class="ico-reg ico-plus" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 5.83 15.17 9l1.41-1.41L12 3 7.41 7.59 8.83 9 12 5.83zm0 12.34L8.83 15l-1.41 1.41L12 21l4.59-4.59L15.17 15 12 18.17z"/></svg>Regrouper</button></div>
       <div class="actions-groupe">
         <button class="btn" type="button" id="a-tout" data-act="tout" disabled>Tout sélectionner</button>
         <button class="btn" type="button" id="a-rien" data-act="rien" disabled>Tout désélectionner</button>
@@ -743,13 +778,10 @@ body.overlay-raff { margin: 0; background: var(--rouille); }
         <div class="entete">
           <div><h1 id="s-titre"></h1><p class="sous-titre" id="s-compte"></p></div>
           <div class="outils">
-            <span class="filtre-actif" id="s-filtre-etat"></span>
-            <button class="btn" type="button" data-regrouper aria-pressed="false">Regrouper</button>
-            <button class="btn" type="button" data-filtre-mineraux aria-pressed="false">Minerais</button>
-        <button class="btn" type="button" data-filtre-qualite aria-pressed="false">Qualité</button>
             <button class="btn petit" type="button" data-discord>Discord</button>
           </div>
         </div>
+        <div class="ligne-filtres"><span class="filtre-actif" id="s-filtre-etat"></span><svg class="ico-filtre" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4.25 5.61C6.27 8.2 10 13 10 13v6c0 .55.45 1 1 1h2c.55 0 1-.45 1-1v-6s3.72-4.8 5.74-7.39A.998.998 0 0 0 18.95 4H5.04c-.83 0-1.3.95-.79 1.61z"/></svg><button class="btn" type="button" data-filtre-mineraux aria-pressed="false">Minerais : tous</button><button class="btn" type="button" data-filtre-qualite aria-pressed="false">Qualité : toutes</button><button class="btn" type="button" data-regrouper aria-pressed="false" title="Regrouper / dégrouper les caisses identiques"><svg class="ico-reg ico-moins" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7.41 18.59 8.83 20 12 16.83 15.17 20l1.41-1.41L12 14l-4.59 4.59zm9.18-13.18L15.17 4 12 7.17 8.83 4 7.41 5.41 12 10l4.59-4.59z"/></svg><svg class="ico-reg ico-plus" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 5.83 15.17 9l1.41-1.41L12 3 7.41 7.59 8.83 9 12 5.83zm0 12.34L8.83 15l-1.41 1.41L12 21l4.59-4.59L15.17 15 12 18.17z"/></svg>Regrouper</button></div>
         <div class="actions-groupe">
           <button class="btn" type="button" id="b-tout" data-act="tout" disabled>Tout sélectionner</button>
           <button class="btn" type="button" id="b-rien" data-act="rien" disabled>Tout désélectionner</button>
@@ -786,14 +818,11 @@ body.overlay-raff { margin: 0; background: var(--rouille); }
       <div><h1 id="c-titre">Corporations et alliés</h1><p class="sous-titre" id="c-compte"></p></div>
       <div class="outils">
         <label class="visib">Voir <select id="c-groupe"></select></label>
-        <span class="filtre-actif" id="c-filtre-etat"></span>
-        <button class="btn" type="button" data-regrouper aria-pressed="false">Regrouper</button>
-        <button class="btn" type="button" data-filtre-mineraux aria-pressed="false">Minerais</button>
-        <button class="btn" type="button" data-filtre-qualite aria-pressed="false">Qualité</button>
         <button class="btn petit" type="button" data-discord>Discord</button>
         <button class="btn petit" type="button" id="b-actualiser">Actualiser</button>
       </div>
     </div>
+    <div class="ligne-filtres"><span class="filtre-actif" id="c-filtre-etat"></span><svg class="ico-filtre" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4.25 5.61C6.27 8.2 10 13 10 13v6c0 .55.45 1 1 1h2c.55 0 1-.45 1-1v-6s3.72-4.8 5.74-7.39A.998.998 0 0 0 18.95 4H5.04c-.83 0-1.3.95-.79 1.61z"/></svg><button class="btn" type="button" data-filtre-mineraux aria-pressed="false">Minerais : tous</button><button class="btn" type="button" data-filtre-qualite aria-pressed="false">Qualité : toutes</button><button class="btn" type="button" data-regrouper aria-pressed="false" title="Regrouper / dégrouper les caisses identiques"><svg class="ico-reg ico-moins" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7.41 18.59 8.83 20 12 16.83 15.17 20l1.41-1.41L12 14l-4.59 4.59zm9.18-13.18L15.17 4 12 7.17 8.83 4 7.41 5.41 12 10l4.59-4.59z"/></svg><svg class="ico-reg ico-plus" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 5.83 15.17 9l1.41-1.41L12 3 7.41 7.59 8.83 9 12 5.83zm0 12.34L8.83 15l-1.41 1.41L12 21l4.59-4.59L15.17 15 12 18.17z"/></svg>Regrouper</button></div>
     <div class="tableau-wrap"><table id="t-corpo"></table></div>
     <p class="vide" id="c-vide" hidden></p>
   </section>
@@ -923,7 +952,7 @@ body.overlay-raff { margin: 0; background: var(--rouille); }
     <select id="dv-visibilite" style="width:100%">
       <option value="prive">moi seul</option>
       <option value="corporation">ma corporation</option>
-      <option value="allies">corporation et alliés</option>
+      <option value="allies">Alliance</option>
     </select>
     <div class="pied">
       <button class="btn" type="submit" value="annuler">Annuler</button>
@@ -1593,7 +1622,15 @@ function grouper(lignes) {
   return [...m.values()];
 }
 function libelleVisibilite(v) { return v === "multiple" ? "plusieurs" : (VISIBILITES[v] || VISIBILITES.corporation); }
-function visibiliteCellule(v) { return `<span class="visib-cell">${esc(libelleVisibilite(v))}</span>`; }
+/* Pictos de visibilité (Material Icons) : une personne / un groupe / deux groupes */
+const ICO_PERSONNE = '<path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>';
+const ICO_GROUPE = '<path d="M12 12.75c1.63 0 3.07.39 4.24.9 1.08.48 1.76 1.56 1.76 2.73V18H6v-1.61c0-1.18.68-2.26 1.76-2.73 1.17-.52 2.61-.91 4.24-.91zM4 13c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm1.13 1.1c-.37-.06-.74-.1-1.13-.1-.99 0-1.93.21-2.78.58A2.01 2.01 0 0 0 0 16.43V18h4.5v-1.61c0-.83.23-1.61.63-2.29zM20 13c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm4 3.43c0-.81-.48-1.53-1.22-1.85A6.95 6.95 0 0 0 20 14c-.39 0-.76.04-1.13.1.4.68.63 1.46.63 2.29V18H24v-1.57zM12 6c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3z"/>';
+function pictoVisibilite(v) {
+  if (v === "prive") return `<svg class="ico-visib" viewBox="0 0 24 24" aria-hidden="true">${ICO_PERSONNE}</svg>`;
+  if (v === "allies") return `<svg class="ico-visib large" viewBox="0 0 50 24" aria-hidden="true">${ICO_GROUPE}<g transform="translate(26 0)">${ICO_GROUPE}</g></svg>`;
+  return `<svg class="ico-visib" viewBox="0 0 24 24" aria-hidden="true">${ICO_GROUPE}</svg>`;
+}
+function visibiliteCellule(v) { return `<span class="visib-cell visib-${esc(v || "corporation")}" title="${esc(libelleVisibilite(v))}">${pictoVisibilite(v)}${esc(libelleVisibilite(v))}</span>`; }
 function ligneItem(it, { station, cocher, joueur, enfant = false, visibilite = false }) {
   return `<tr class="${enfant ? "enfant" : ""} ${it.id === dernierAjout ? "nouveau" : ""} ${selection.has(it.id) ? "selectionne" : ""}">` +
     (cocher ? `<td class="coche"><input type="checkbox" data-id="${it.id}" aria-label="Sélectionner ${esc(it.nom)} ${it.qualite ?? ""}" ${selection.has(it.id) ? "checked" : ""}></td>` : "") +
@@ -1822,11 +1859,11 @@ function listeVue() {
 function majBoutonsFiltre() {
   const nm = filtre.mineraux?.size || 0, q = filtre.qmin > 0 || filtre.qmax < 1000;
   for (const b of document.querySelectorAll("[data-filtre-mineraux]")) {
-    b.textContent = nm ? `Minerais : ${nm === 1 ? [...filtre.mineraux][0] : nm}` : "Minerais";
+    b.textContent = `Minerais : ${nm ? (nm === 1 ? [...filtre.mineraux][0] : nm) : "tous"}`;
     b.setAttribute("aria-pressed", String(!!nm));
   }
   for (const b of document.querySelectorAll("[data-filtre-qualite]")) {
-    b.textContent = q ? `Qualité : ${filtre.qmin} à ${filtre.qmax}` : "Qualité";
+    b.textContent = `Qualité : ${q ? `${filtre.qmin} à ${filtre.qmax}` : "toutes"}`;
     b.setAttribute("aria-pressed", String(q));
   }
 }
@@ -2918,7 +2955,7 @@ let cloud = (() => {
 let sb = null, compte = null, sessionId = null, syncEnCours = false, minuterieSync = null, etatCloud = "";
 let partage = { caisses: [], maj: 0 };
 let apprisPartages = { chiffres: [], signatures: [], qualites: {} };
-const VISIBILITES = { prive: "moi seul", corporation: "ma corporation", allies: "corporation et alliés" };
+const VISIBILITES = { prive: "moi seul", corporation: "ma corporation", allies: "Alliance" };
 
 const versCloud = (it) => ({ id: it.id, nom: it.nom, qualite: it.qualite ?? null, bande: it.bande ?? null,
   quantite_scu: it.quantite_scu ?? null, station: it.station, ts: it.ts, heure: it.heure || null,
@@ -3243,7 +3280,7 @@ function renderCompte() {
       <p class="note">Partage le lien d'invitation. Générer un nouveau code invalide automatiquement l'ancien lien.</p>
       <h3>Partage avec d'autres corporations</h3>
       <ul class="liste-cp">${(c.partageAvec || []).map((a) => `<li><span class="grand">${esc(a.nom)} <span class="tag">[${esc(a.tag)}]</span></span>
-        ${admin ? `<button class="btn petit danger" type="button" data-action="retirer-allie" data-corpo="${c.id}" data-allie="${a.id}">Retirer</button>` : ""}</li>`).join("") || `<li class="note">Aucune : vos stations « corporation et alliés » ne sont vues que par vous.</li>`}</ul>
+        ${admin ? `<button class="btn petit danger" type="button" data-action="retirer-allie" data-corpo="${c.id}" data-allie="${a.id}">Retirer</button>` : ""}</li>`).join("") || `<li class="note">Aucune : vos caisses « Alliance » ne sont vues que par vous.</li>`}</ul>
       ${admin ? `<form data-form="allie" data-corpo="${c.id}" class="ligne"><input name="tag" placeholder="Tag de la corporation alliée" required style="flex:1">
         <button class="btn petit" type="submit">Partager</button></form>` : ""}
       ${(c.partagentAvecNous || []).length ? `<p class="note">Partagent avec vous : ${c.partagentAvecNous.map((a) => `${esc(a.nom)} [${esc(a.tag)}]`).join(", ")}.</p>` : ""}
