@@ -677,6 +677,21 @@ body.overlay-raff { margin: 0; background: var(--rouille); }
 main, .barre { position: relative; z-index: 1; }
 .credit-lieu { position: fixed; right: 12px; bottom: 8px; z-index: 2; margin: 0; font-size: 11px; color: var(--os-doux); opacity: .7; }
 .credit-lieu a { color: inherit; }
+.filtre-reset { display:inline-grid; place-items:center; width:16px; height:16px; margin-left:4px; margin-right:-4px; border-radius:50%; font-size:14px; line-height:1; cursor:pointer; opacity:.85 }
+.filtre-reset:hover { background:rgba(255,255,255,.25); opacity:1 }
+.f-titre .b-son { float:right; background:none; border:0; padding:0 2px; color:var(--orange); cursor:pointer; line-height:0 }
+.b-son svg { width:18px; height:18px }
+.b-son[aria-pressed="false"] { color:var(--os-doux) }
+.b-son[aria-pressed="true"] .ico-son-off, .b-son[aria-pressed="false"] .ico-son-on { display:none }
+.fiche .boutons { grid-template-columns: 1fr 1fr !important; }
+.fiche .boutons #b-enregistrer { grid-column: 2; }
+.fiche .boutons #b-terminer { grid-column: 1; grid-row: 2; }
+.b-editer-scu.vide { display:inline-block; width:18px; height:1px }
+.b-editer-scu { background:none; border:0; padding:0 0 0 4px; margin:0; color:var(--os-doux); cursor:pointer; line-height:0; vertical-align:-2px; opacity:.55 }
+.b-editer-scu svg { width:14px; height:14px }
+tr:hover .b-editer-scu, .b-editer-scu:focus-visible { opacity:1 }
+.b-editer-scu:hover { color:var(--orange) }
+.champ-scu-table { width:5.5em; text-align:right; font:inherit; padding:1px 4px; background:var(--panneau-2); color:inherit; border:1px solid var(--orange); border-radius:4px }
 </style>
 </head>
 <body>
@@ -855,7 +870,7 @@ main, .barre { position: relative; z-index: 1; }
 
 <form class="fiche" id="fiche" autocomplete="off" hidden>
   <section class="f-part" aria-label="Dernier scan">
-    <h3 class="f-titre">Dernier scan</h3>
+    <h3 class="f-titre">Dernier scan<button type="button" class="b-son" id="b-son" aria-pressed="false" title="Lecture vocale coupée" aria-label="Lecture vocale"><svg class="ico-son-on" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg><svg class="ico-son-off" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg></button></h3>
     <div class="barre-sauve" id="f-barre" hidden aria-label="Valeurs lues">
       <span class="b-nom" id="f-barre-nom"></span>
       <span class="b-q" id="f-barre-q"></span>
@@ -1642,12 +1657,40 @@ function pictoVisibilite(v) {
   return `<svg class="ico-visib" viewBox="0 0 24 24" aria-hidden="true">${ICO_GROUPE}</svg>`;
 }
 function visibiliteCellule(v) { return `<span class="visib-cell visib-${esc(v || "corporation")}" title="${esc(libelleVisibilite(v))}">${pictoVisibilite(v)}${esc(libelleVisibilite(v))}</span>`; }
+const ICO_CRAYON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a.996.996 0 0 0 0-1.41l-2.34-2.34a.996.996 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>';
+/* ---------- modification de la quantité d'une caisse à soi, directement dans le tableau */
+document.addEventListener("click", (e) => {
+  const b = e.target.closest?.("[data-editer-scu]");
+  if (!b) return;
+  e.preventDefault(); e.stopPropagation();
+  const it = items.find((x) => x.id === b.dataset.editerScu);
+  if (!it) return;
+  const td = b.closest("td");
+  td.innerHTML = `<input class="champ-scu-table" inputmode="decimal" aria-label="Quantité (SCU)" value="${it.quantite_scu != null ? String(it.quantite_scu).replace(".", ",") : ""}"> SCU`;
+  const inp = td.querySelector("input");
+  inp.focus(); inp.select();
+  let fini = false;
+  const finir = (garder) => {
+    if (fini) return; fini = true;
+    const v = parseFloat(inp.value.replace(",", "."));
+    if (garder && Number.isFinite(v) && v >= 0 && v !== it.quantite_scu) {
+      it.quantite_scu = Math.round(v * 100) / 100; delete it.sync;
+      sauver(); planifierSync();
+    }
+    render();
+  };
+  inp.addEventListener("keydown", (k) => {
+    if (k.key === "Enter") { k.preventDefault(); finir(true); }
+    else if (k.key === "Escape") { k.preventDefault(); finir(false); }
+  });
+  inp.addEventListener("blur", () => finir(true));
+}, true);
 function ligneItem(it, { station, cocher, joueur, enfant = false, visibilite = false }) {
   return `<tr class="${enfant ? "enfant" : ""} ${it.id === dernierAjout ? "nouveau" : ""} ${selection.has(it.id) ? "selectionne" : ""}">` +
     (cocher ? `<td class="coche"><input type="checkbox" data-id="${it.id}" aria-label="Sélectionner ${esc(it.nom)} ${it.qualite ?? ""}" ${selection.has(it.id) ? "checked" : ""}></td>` : "") +
     `<td class="nom-cell">${esc(it.nom)}</td>` +
     `<td class="num"><span class="q">${it.qualite ?? "?"}</span>${it.bande ? `<span class="bande">B${it.bande}</span>` : ""}</td>` +
-    `<td class="num"><span class="scu">${it.quantite_scu != null ? fmtScu(it.quantite_scu) : "?"}</span> SCU</td>` +
+    `<td class="num"><span class="scu">${it.quantite_scu != null ? fmtScu(it.quantite_scu) : "?"}</span> SCU${items.some((x) => x.id === it.id) ? `<button type="button" class="b-editer-scu" data-editer-scu="${it.id}" title="Modifier la quantité" aria-label="Modifier la quantité">${ICO_CRAYON}</button>` : cocher ? `<span class="b-editer-scu vide"></span>` : ""}</td>` +
     (station ? `<td><a href="#/station/${encodeURIComponent(it.station)}">${esc(it.station)}</a></td>` : "") +
     (visibilite ? `<td>${visibiliteCellule(it.visibilite || "corporation")}</td>` : "") +
     `<td class="date" title="${esc(it.heure || "")}">${ilYa(it.ts)}</td>` +
@@ -1660,7 +1703,7 @@ function ligneGroupe(g, { station, cocher, joueur, visibilite = false }) {
     (cocher ? `<td class="coche"><input type="checkbox" data-groupe="${esc(g.cle)}" aria-label="Sélectionner les ${g.items.length} ${esc(g.nom)} ${g.qualite ?? ""}" ${nbSel === ids.length ? "checked" : ""}></td>` : "") +
     `<td class="nom-cell"><button type="button" class="ouvrir" data-ouvrir="${esc(g.cle)}" aria-expanded="${ouvert}"><span class="chevron" aria-hidden="true">▸</span>${esc(g.nom)} <span class="compte">${g.items.length} caisses</span></button></td>` +
     `<td class="num"><span class="q">${g.qualite ?? "?"}</span>${g.bande ? `<span class="bande">B${g.bande}</span>` : ""}</td>` +
-    `<td class="num"><span class="scu">${fmtScu(g.quantite_scu)}</span> SCU</td>` +
+    `<td class="num"><span class="scu">${fmtScu(g.quantite_scu)}</span> SCU${cocher ? `<span class="b-editer-scu vide"></span>` : ""}</td>` +
     (station ? `<td>${g.stations.size === 1 ? `<a href="#/station/${encodeURIComponent(g.station)}">${esc(g.station)}</a>` : esc(g.station)}</td>` : "") +
     (visibilite ? `<td>${visibiliteCellule(g.visibilite)}</td>` : "") +
     `<td class="date">${ilYa(g.ts)}</td>` +
@@ -1867,14 +1910,22 @@ function listeVue() {
   if (vue === "station") return items.filter((it) => it.station === stationCourante);
   return items;
 }
+const CROIX_FILTRE = (k) => `<span class="filtre-reset" data-reset="${k}" role="button" aria-label="Réinitialiser" title="Réinitialiser">×</span>`;
+document.addEventListener("click", (e) => {
+  const x = e.target.closest?.("[data-reset]");
+  if (!x) return;
+  e.stopPropagation(); e.preventDefault();
+  if (x.dataset.reset === "mineraux") filtre.mineraux = null; else { filtre.qmin = 0; filtre.qmax = 1000; }
+  majBoutonsFiltre(); render();
+}, true);
 function majBoutonsFiltre() {
   const nm = filtre.mineraux?.size || 0, q = filtre.qmin > 0 || filtre.qmax < 1000;
   for (const b of document.querySelectorAll("[data-filtre-mineraux]")) {
-    b.textContent = `Minerais : ${nm ? (nm === 1 ? [...filtre.mineraux][0] : nm) : "tous"}`;
+    b.innerHTML = esc(`Minerais : ${nm ? (nm === 1 ? [...filtre.mineraux][0] : nm) : "tous"}`) + (nm ? CROIX_FILTRE("mineraux") : "");
     b.setAttribute("aria-pressed", String(!!nm));
   }
   for (const b of document.querySelectorAll("[data-filtre-qualite]")) {
-    b.textContent = `Qualité : ${q ? `${filtre.qmin} à ${filtre.qmax}` : "toutes"}`;
+    b.innerHTML = esc(`Qualité : ${q ? `${filtre.qmin} à ${filtre.qmax}` : "toutes"}`) + (q ? CROIX_FILTRE("qualite") : "");
     b.setAttribute("aria-pressed", String(q));
   }
 }
@@ -2292,7 +2343,39 @@ function flash(bouton, classe, ms = 220) {
   void bouton.offsetWidth; bouton.classList.add(classe);
   bouton["t_" + classe] = setTimeout(() => bouton.classList.remove(classe), ms);
 }
+/* ---------- lecture vocale (TTS du navigateur) : « Minerai, quantité » à chaque enregistrement */
+// par défaut : son activé seulement sans overlay PiP (Firefox), coupé ailleurs ; ensuite le choix est mémorisé
+let sonActif = !("documentPictureInPicture" in window);
+try { const m = localStorage.getItem("manifeste-son"); if (m !== null) sonActif = m === "1"; } catch {}
+function majBoutonSon() {
+  const b = $("b-son"); if (!b) return;
+  b.setAttribute("aria-pressed", String(sonActif));
+  b.title = sonActif ? "Lecture vocale activée" : "Lecture vocale coupée";
+}
+majBoutonSon();
+$("b-son").addEventListener("click", () => {
+  sonActif = !sonActif;
+  try { localStorage.setItem("manifeste-son", sonActif ? "1" : "0"); } catch {}
+  if (!sonActif) speechSynthesis?.cancel();
+  majBoutonSon();
+});
+function direScan(it, deja = false) {
+  if (!sonActif || !window.speechSynthesis || !it) return;
+  const scu = String(it.quantite_scu ?? "").replace(".", ",");
+  const u = new SpeechSynthesisUtterance(deja ? "Déjà scanné" : `${it.nom}, ${it.qualite ?? ""}, ${scu}`);
+  u.lang = "fr-FR"; u.rate = 1.5;
+  const v = speechSynthesis.getVoices().find((x) => x.lang?.startsWith("fr"));
+  if (v) u.voice = v;
+  direScan.u = u;                 // garde une référence : sinon Chrome peut jeter la phrase avant de la lire
+  u.onend = u.onerror = () => { if (direScan.u === u) direScan.u = null; };
+  const occupe = speechSynthesis.speaking || speechSynthesis.pending;
+  if (occupe) speechSynthesis.cancel();
+  speechSynthesis.resume();       // Chrome reste parfois bloqué en pause
+  // juste après cancel(), Chrome ignore souvent speak() : on laisse passer un instant
+  setTimeout(() => speechSynthesis.speak(u), occupe ? 60 : 0);
+}
 function pictoSauve(texte = null, deja = false, it = null) {
+  if (texte && it) direScan(it, deja);
   $("f-sauve").hidden = !texte;
   if (texte) { $("f-sauve-txt").textContent = texte; $("f-sauve").classList.toggle("deja", deja); }
   // barre « tool-tip » du dernier scan : changée seulement quand des valeurs sont fournies
