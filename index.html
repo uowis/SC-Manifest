@@ -87,7 +87,7 @@ td a { color: var(--os); text-decoration-color: var(--trait); text-underline-off
 td a:hover { text-decoration-color: var(--os); }
 td .bande { color: var(--os-doux); font-size: 12px; margin-left: 6px; }
 td .q { color: #6fd0c4; font-weight: 600; }
-td .scu { color: #d8c86a; }
+td .scu { color: var(--scu); }
 .date { color: var(--os-doux); }
 tr.nouveau td { background: rgba(54,204,127,.12); }
 :is(#t-station, #t-accueil) input[data-id] { cursor: pointer; }
@@ -427,7 +427,7 @@ dialog.nav-pop[open] { display: flex; flex-direction: column; gap: 12px; }
   background: var(--rouille); color: var(--os); cursor: pointer; font: inherit; font-size: 14px; }
 .dn-lieu:hover { border-color: var(--bord); background: var(--panneau-2); }
 .dn-lieu small { font-size: 12px; color: var(--os-doux); }
-.dn-lieu.plein small { color: #d8c86a; }
+.dn-lieu.plein small { color: var(--os-doux); }
 .dn-lieu.vide { color: #8aa0a8; }
 .dn-lieu[aria-current="page"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
 .dn-rien { margin: 0; color: var(--os-doux); font-size: 14px; }
@@ -527,7 +527,7 @@ dialog.nav-pop.ouvert .dn-contenu { transform: none; }
 .raff-liste .ro-lignes { display: grid; gap: 2px; }
 .raff-liste .ro-l { display: flex; gap: 6px; align-items: baseline; }
 .raff-liste .ro-l small { color: var(--accent); }
-.raff-liste .ro-l b { margin-left: auto; font-weight: 500; color: #d8c86a; }
+.raff-liste .ro-l b { margin-left: auto; font-weight: 500; color: var(--scu); }
 .raff-liste li.vide { border: 0; background: none; padding: 0; color: var(--os-doux); }
 .raff-liste .ro-bas { display: flex; justify-content: space-between; align-items: center; gap: 8px; color: var(--os-doux); }
 .raff-liste li.pret .ro-bas > span:first-child { color: var(--accent); font-weight: 600; }
@@ -693,6 +693,18 @@ tr:hover .b-editer-scu, .b-editer-scu:focus-visible { opacity:1 }
 .b-editer-scu:hover { color:var(--orange) }
 .champ-scu-table { width:5.5em; text-align:right; font:inherit; padding:1px 4px; background:var(--panneau-2); color:inherit; border:1px solid var(--orange); border-radius:4px }
 header.barre { position: sticky; top: 0; z-index: 50; }
+.btn-tout { display:inline-flex; align-items:center; gap:8px; }
+.btn-tout .case { width:16px; height:16px; border:1.5px solid var(--bord); border-radius:4px; background:var(--rouille); display:inline-grid; place-content:center; flex:none; box-sizing:border-box; }
+.btn-tout .case::before { content:""; width:9px; height:9px; transform:scale(0); transition:transform .1s; background:#04130b; clip-path:polygon(14% 52%, 0 66%, 38% 100%, 100% 22%, 86% 8%, 38% 72%); }
+.btn-tout:is([aria-checked="true"], [aria-checked="mixed"]) .case { background:var(--accent); border-color:var(--accent); }
+.btn-tout:is([aria-checked="true"], [aria-checked="mixed"]) .case::before { transform:scale(1); }
+.btn-tout[aria-checked="mixed"] .case::before { clip-path:inset(40% 10%); }
+:root { --scu: #a9c25e; }
+span.scu, td .scu, #dr-rend, .raff-liste .ro-l b { color: var(--scu); }
+.nb-caisses { color: var(--orange-texte, #e08a4c); font-weight: 600; }
+.actions-groupe span :is(.nb-caisses, .scu) { margin: 0; font-size: inherit; }
+.actions-groupe span .nb-caisses, span.nb-caisses { color: #e08a4c; }
+span.scu, td .scu, #dr-rend, .raff-liste .ro-l b, .nb-caisses, .actions-groupe span .nb-caisses { font-weight: 700; }
 </style>
 </head>
 <body>
@@ -782,8 +794,7 @@ header.barre { position: sticky; top: 0; z-index: 50; }
       <div>
       <div class="ligne-filtres"><span class="filtre-actif" id="a-filtre-etat"></span><svg class="ico-filtre" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4.25 5.61C6.27 8.2 10 13 10 13v6c0 .55.45 1 1 1h2c.55 0 1-.45 1-1v-6s3.72-4.8 5.74-7.39A.998.998 0 0 0 18.95 4H5.04c-.83 0-1.3.95-.79 1.61z"/></svg><button class="btn" type="button" data-filtre-mineraux aria-pressed="false">Minerais : tous</button><button class="btn" type="button" data-filtre-qualite aria-pressed="false">Qualité : toutes</button><button class="btn" type="button" data-regrouper aria-pressed="false" title="Regrouper / dégrouper les caisses identiques"><svg class="ico-reg ico-moins" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7.41 18.59 8.83 20 12 16.83 15.17 20l1.41-1.41L12 14l-4.59 4.59zm9.18-13.18L15.17 4 12 7.17 8.83 4 7.41 5.41 12 10l4.59-4.59z"/></svg><svg class="ico-reg ico-plus" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 5.83 15.17 9l1.41-1.41L12 3 7.41 7.59 8.83 9 12 5.83zm0 12.34L8.83 15l-1.41 1.41L12 21l4.59-4.59L15.17 15 12 18.17z"/></svg>Regrouper</button></div>
       <div class="actions-groupe">
-        <button class="btn" type="button" id="a-tout" data-act="tout" disabled>Tout sélectionner</button>
-        <button class="btn" type="button" id="a-rien" data-act="rien" disabled>Tout désélectionner</button>
+        <button class="btn btn-tout" type="button" id="a-tout" data-act="basculer" role="checkbox" aria-checked="false" disabled><span class="case" aria-hidden="true"></span><span class="txt">Tout sélectionner</span></button>
         <span id="a-selection">Aucun minerai sélectionné</span>
         <button class="btn" type="button" id="a-deplacer" data-act="deplacer" disabled>Déplacer</button>
         <button class="btn" type="button" id="a-visibilite" data-act="visibilite" disabled>Visibilité</button>
@@ -810,8 +821,7 @@ header.barre { position: sticky; top: 0; z-index: 50; }
         </div>
         <div class="ligne-filtres"><span class="filtre-actif" id="s-filtre-etat"></span><svg class="ico-filtre" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4.25 5.61C6.27 8.2 10 13 10 13v6c0 .55.45 1 1 1h2c.55 0 1-.45 1-1v-6s3.72-4.8 5.74-7.39A.998.998 0 0 0 18.95 4H5.04c-.83 0-1.3.95-.79 1.61z"/></svg><button class="btn" type="button" data-filtre-mineraux aria-pressed="false">Minerais : tous</button><button class="btn" type="button" data-filtre-qualite aria-pressed="false">Qualité : toutes</button><button class="btn" type="button" data-regrouper aria-pressed="false" title="Regrouper / dégrouper les caisses identiques"><svg class="ico-reg ico-moins" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7.41 18.59 8.83 20 12 16.83 15.17 20l1.41-1.41L12 14l-4.59 4.59zm9.18-13.18L15.17 4 12 7.17 8.83 4 7.41 5.41 12 10l4.59-4.59z"/></svg><svg class="ico-reg ico-plus" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 5.83 15.17 9l1.41-1.41L12 3 7.41 7.59 8.83 9 12 5.83zm0 12.34L8.83 15l-1.41 1.41L12 21l4.59-4.59L15.17 15 12 18.17z"/></svg>Regrouper</button></div>
         <div class="actions-groupe">
-          <button class="btn" type="button" id="b-tout" data-act="tout" disabled>Tout sélectionner</button>
-          <button class="btn" type="button" id="b-rien" data-act="rien" disabled>Tout désélectionner</button>
+          <button class="btn btn-tout" type="button" id="b-tout" data-act="basculer" role="checkbox" aria-checked="false" disabled><span class="case" aria-hidden="true"></span><span class="txt">Tout sélectionner</span></button>
           <span id="s-selection">Aucun minerai sélectionné</span>
           <button class="btn" type="button" id="b-deplacer" data-act="deplacer" disabled>Déplacer</button>
           <button class="btn" type="button" id="b-visibilite" data-act="visibilite" disabled>Visibilité</button>
@@ -1686,6 +1696,8 @@ document.addEventListener("click", (e) => {
   });
   inp.addEventListener("blur", () => finir(true));
 }, true);
+const NB = (n) => n ? `<span class="nb-caisses">${n}</span>` : String(n);   // nombre de caisses : orange quand il y en a
+const SC = (x) => `<span class="scu">${x}</span>`;                         // nombre de SCU : vert clair
 function ligneItem(it, { station, cocher, joueur, enfant = false, visibilite = false }) {
   return `<tr class="${enfant ? "enfant" : ""} ${it.id === dernierAjout ? "nouveau" : ""} ${selection.has(it.id) ? "selectionne" : ""}">` +
     (cocher ? `<td class="coche"><input type="checkbox" data-id="${it.id}" aria-label="Sélectionner ${esc(it.nom)} ${it.qualite ?? ""}" ${selection.has(it.id) ? "checked" : ""}></td>` : "") +
@@ -1755,8 +1767,8 @@ function render() {
     const lignes = trier(filtrer(caissesCorpo()), tri.corpo);
     renderTable($("t-corpo"), lignes, { station: true, cocher: false, joueur: true, t: tri.corpo });
     const joueurs = new Set(lignes.map((it) => it.joueur)).size;
-    $("c-compte").textContent = `${lignes.length} caisse${lignes.length > 1 ? "s" : ""} de ${joueurs} joueur${joueurs > 1 ? "s" : ""}, ` +
-      `${fmtScu(lignes.reduce((s, it) => s + (Number(it.quantite_scu) || 0), 0))} SCU` + (partage.maj ? `, mis à jour ${ilYa(partage.maj / 1000)}` : "");
+    $("c-compte").innerHTML = `${NB(lignes.length)} caisse${lignes.length > 1 ? "s" : ""} de ${joueurs} joueur${joueurs > 1 ? "s" : ""}, ` +
+      `${SC(fmtScu(lignes.reduce((s, it) => s + (Number(it.quantite_scu) || 0), 0)))} SCU` + (partage.maj ? `, mis à jour ${ilYa(partage.maj / 1000)}` : "");
     $("c-filtre-etat").textContent = texteFiltre();
     const gv = $("c-groupe").value || "";
     const corpoVue = gv.startsWith("tag:") ? (compte?.corpos || []).find((c) => c.tag === gv.slice(4)) : null;
@@ -1775,7 +1787,7 @@ function render() {
     for (const id of [...selection]) if (!items.some((it) => it.id === id)) selection.delete(id);
     renderTable($("t-accueil"), lignes, { station: true, cocher: true, joueur: true, visibilite: true, t: tri.accueil });
     majBarreGroupe("a", lignes);
-    $("a-compte").textContent = `${lignes.length} caisse${lignes.length > 1 ? "s" : ""}, ${total(lignes)} SCU`;
+    $("a-compte").innerHTML = `${NB(lignes.length)} caisse${lignes.length > 1 ? "s" : ""}, ${SC(total(lignes))} SCU`;
     $("a-filtre-etat").textContent = ft;
     $("t-accueil").hidden = !lignes.length; $("a-vide").hidden = !!lignes.length;
     $("a-vide").textContent = items.length ? "Aucun minerai ne correspond au filtre." : "Aucun minerai enregistré. Choisis « + Nouvelle station » dans le menu pour commencer.";
@@ -1783,7 +1795,7 @@ function render() {
     const tous = items.filter((it) => it.station === stationCourante), lignes = trier(filtrer(tous), tri.station);
     for (const id of [...selection]) if (!tous.some((it) => it.id === id)) selection.delete(id);
     $("s-titre").textContent = stationCourante;
-    $("s-compte").textContent = `${systemeDe(stationCourante)}, ${tous.length} caisse${tous.length > 1 ? "s" : ""}, ${total(tous)} SCU`;
+    $("s-compte").innerHTML = `${esc(systemeDe(stationCourante))}, ${NB(tous.length)} caisse${tous.length > 1 ? "s" : ""}, ${SC(total(tous))} SCU`;
     $("s-filtre-etat").textContent = ft;
     renderTable($("t-station"), lignes, { station: false, cocher: true, visibilite: true, t: tri.station });
     $("t-station").hidden = !lignes.length; $("s-vide").hidden = !!lignes.length;
@@ -1796,11 +1808,15 @@ setInterval(() => { if (vue !== "nouvelle") render(); }, 60000);
 function majBarreGroupe(p, lignes) {
   const n = selection.size, sel = p === "a" ? "a-selection" : "s-selection";
   const scuSel = items.reduce((t, it) => t + (selection.has(it.id) ? Number(it.quantite_scu) || 0 : 0), 0);
-  $(sel).textContent = n ? `${n} minerai${n > 1 ? "s" : ""} sélectionné${n > 1 ? "s" : ""} · ${fmtScu(scuSel)} SCU` : "Aucun minerai sélectionné";
+  $(sel).innerHTML = n ? `${NB(n)} minerai${n > 1 ? "s" : ""} sélectionné${n > 1 ? "s" : ""} · ${SC(fmtScu(scuSel))} SCU` : "Aucun minerai sélectionné";
   $(`${p}-deplacer`).disabled = $(`${p}-supprimer`).disabled = $(`${p}-visibilite`).disabled = !n;
   // tout sélectionner : lignes affichées (filtres compris) pas encore cochées ; tout désélectionner : lignes cochées
-  $(`${p}-tout`).disabled = !lignes.filter((it) => !selection.has(it.id)).length;
-  $(`${p}-rien`).disabled = !n;
+  // un seul bouton : rien coché → tout sélectionner ; sinon (tout ou partie) → tout désélectionner
+  const b = $(`${p}-tout`), nonCoches = lignes.filter((it) => !selection.has(it.id)).length;
+  const etat = !n ? "false" : nonCoches ? "mixed" : "true";
+  b.setAttribute("aria-checked", etat);
+  b.querySelector(".txt").textContent = n ? "Tout désélectionner" : "Tout sélectionner";
+  b.disabled = !lignes.length && !n;
 }
 /* Lignes concernées par « tout sélectionner » dans la vue courante */
 const lignesCochables = () => trier(filtrer(vue === "station" ? items.filter((it) => it.station === stationCourante) : items), vue === "station" ? tri.station : tri.accueil);
@@ -1820,7 +1836,8 @@ document.addEventListener("click", (e) => {
 document.addEventListener("click", (e) => {
   const b = e.target.closest("[data-act]"); if (!b || b.disabled) return;
   const act = b.dataset.act;
-  if (act === "tout") { for (const it of lignesCochables()) selection.add(it.id); render(); }
+  if (act === "basculer") { if (selection.size) selection.clear(); else for (const it of lignesCochables()) selection.add(it.id); render(); }
+  else if (act === "tout") { for (const it of lignesCochables()) selection.add(it.id); render(); }
   else if (act === "rien") { selection.clear(); render(); }
   else if (act === "visibilite") ouvrirVisibiliteGroupe();
   else if (act === "supprimer") supprimerSelection();
@@ -1873,7 +1890,7 @@ async function appliquerVisibiliteSelection(v) {
 }
 function ouvrirVisibiliteGroupe() {
   if (!selection.size) return;
-  $("dv-info").textContent = `${selection.size} caisse${selection.size > 1 ? "s" : ""} sélectionnée${selection.size > 1 ? "s" : ""}.`;
+  $("dv-info").innerHTML = `${NB(selection.size)} caisse${selection.size > 1 ? "s" : ""} sélectionnée${selection.size > 1 ? "s" : ""}.`;
   const premier = items.find((it) => selection.has(it.id));
   $("dv-visibilite").value = premier?.visibilite || "corporation";
   $("d-visibilite").showModal();
@@ -3356,7 +3373,7 @@ function renderCompte() {
   const attente = items.filter((it) => !it.sync).length + (base.suppressions || []).length;
   let html = `<div class="carte">
     <div class="profil">${compte.avatar ? `<img src="${esc(compte.avatar)}" alt="">` : ""}<div><strong>${esc(compte.pseudo)}</strong>
-      <p class="note">${items.length} caisse${items.length > 1 ? "s" : ""}${attente ? `, ${attente} modification${attente > 1 ? "s" : ""} en attente d'envoi` : ", tout est synchronisé"}</p></div></div>
+      <p class="note">${NB(items.length)} caisse${items.length > 1 ? "s" : ""}${attente ? `, ${attente} modification${attente > 1 ? "s" : ""} en attente d'envoi` : ", tout est synchronisé"}</p></div></div>
     ${etatCloud ? `<p class="note echec">${esc(etatCloud)}</p>` : ""}
     <div class="ligne"><button class="btn petit" type="button" data-action="sync">Synchroniser maintenant</button>
       <button class="btn petit" type="button" data-action="deconnexion">Se déconnecter</button></div></div>`;
@@ -3517,7 +3534,7 @@ function renderHome() {
     const tag = g.groupe ? `<span class="groupe ${g.groupe === "Allié" ? "allie" : ""}">${esc(g.groupe)}</span>` : "";
     return `<li><div class="qui"><strong>${esc(g.joueur)}${tag}</strong><span class="quand">${ilYa(g.ts)}</span></div>
       <div class="quoi">${noms.map(esc).join(", ")}</div>
-      <div class="ou">à ${station} · ${g.caisses.length} caisse${g.caisses.length > 1 ? "s" : ""}, ${fmtScu(scu)} SCU</div></li>`;
+      <div class="ou">à ${station} · ${NB(g.caisses.length)} caisse${g.caisses.length > 1 ? "s" : ""}, <span class="scu">${fmtScu(scu)}</span> SCU</div></li>`;
   }).join("");
   $("act-vide").hidden = !!groupes.length;
   $("act-vide").textContent = compte
@@ -3752,10 +3769,10 @@ function renderNavLieux() {
     if (!lieux.length) continue;
     const tot = lieux.reduce((s, st) => { const e = parLieu.get(st); if (e) { s.n += e.n; s.scu += e.scu; } return s; }, { n: 0, scu: 0 });
     const ouvert = t || !navPrefs.replies.includes(sys);   // une recherche déplie tout
-    html += `<details class="dn-sys" data-sys="${esc(sys)}"${ouvert ? " open" : ""}><summary>${esc(sys)} <small>${tot.n ? `${tot.n} caisse${tot.n > 1 ? "s" : ""} / ${fmtScu(tot.scu)} SCU` : "vide"}</small></summary><div class="dn-grille">` +
+    html += `<details class="dn-sys" data-sys="${esc(sys)}"${ouvert ? " open" : ""}><summary>${esc(sys)} <small>${tot.n ? `${NB(tot.n)} caisse${tot.n > 1 ? "s" : ""} / <span class="scu">${fmtScu(tot.scu)}</span> SCU` : "vide"}</small></summary><div class="dn-grille">` +
       lieux.map((st) => {
         const e = parLieu.get(st), actif = vue === "station" && stationCourante === st;
-        return `<button type="button" class="dn-lieu ${e ? "plein" : "vide"}" data-lieu="${esc(st)}" title="${esc(st)}"${actif ? ' aria-current="page"' : ""}>${etiquetteLieu(st)}<small>${e ? `${e.n} caisse${e.n > 1 ? "s" : ""} / ${fmtScu(e.scu)} SCU` : "—"}</small></button>`;
+        return `<button type="button" class="dn-lieu ${e ? "plein" : "vide"}" data-lieu="${esc(st)}" title="${esc(st)}"${actif ? ' aria-current="page"' : ""}>${etiquetteLieu(st)}<small>${e ? `${NB(e.n)} caisse${e.n > 1 ? "s" : ""} / <span class="scu">${fmtScu(e.scu)}</span> SCU` : "—"}</small></button>`;
       }).join("") + `</div></details>`;
   }
   $("dn-lieux").innerHTML = html || `<p class="dn-rien">Aucun lieu ne correspond${navPrefs.masquerVides ? " (les lieux vides sont masqués)" : ""}.</p>`;
@@ -4523,7 +4540,7 @@ function htmlOrdre(o, avecStation) {
     <div class="ro-haut"><strong>${avecStation ? `<a href="#/station/${encodeURIComponent(o.station)}">${esc(o.station)}</a>` : "Ordre de raffinage"}</strong><span class="ro-etat"${o.fin && !pret ? ` data-minuteur="${o.fin}"` : ""}>${o.fin ? (pret ? "Prêt" : minuteur(o.fin)) : "Durée inconnue"}</span></div>
     ${o.fin ? `<div class="ro-barre" data-debut="${o.debut || o.ts}" data-fin="${o.fin}"><span style="width:${progressionOrdre(o) * 100}%"></span></div>` : ""}
     <div class="ro-lignes">${lignes}</div>
-    <div class="ro-bas"><span>${fmtScu(scu)} SCU</span>
+    <div class="ro-bas"><span><span class="scu">${fmtScu(scu)}</span> SCU</span>
       <span><button class="btn petit${pret ? " principal" : ""}" type="button" data-raff-caisses="${o.id}"${pret ? "" : " disabled"}>En caisses</button>
       <button class="btn petit" type="button" data-raff-suppr="${o.id}" aria-label="Supprimer l'ordre">✕</button></span></div></li>`;
 }
