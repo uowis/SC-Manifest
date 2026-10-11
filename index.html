@@ -2383,9 +2383,13 @@ $("b-son").addEventListener("click", () => {
   majBoutonSon();
 });
 function direScan(it, deja = false) {
-  if (!sonActif || !window.speechSynthesis || !it) return;
+  if (!it) return;
   const scu = String(it.quantite_scu ?? "").replace(".", ",");
-  const u = new SpeechSynthesisUtterance(deja ? "Déjà scanné" : `${it.nom}, ${it.qualite ?? ""}, ${scu}`);
+  dire(deja ? "Déjà scanné" : `${it.nom}, ${it.qualite ?? ""}, ${scu}`);
+}
+function dire(texte) {
+  if (!sonActif || !window.speechSynthesis || !texte) return;
+  const u = new SpeechSynthesisUtterance(texte);
   u.lang = "fr-FR"; u.rate = 1.5;
   const v = speechSynthesis.getVoices().find((x) => x.lang?.startsWith("fr"));
   if (v) u.voice = v;
@@ -3028,6 +3032,7 @@ async function demarrerSession() {
   if (!base.zone) await ouvrirParametrage("zone");   // première fois : vérifier les zones lues
   if (!pip && !(await ouvrirOverlay())) $("b-overlay").hidden = false;
   demarrerSurveillance();
+  dire("Scanner démarré, survolez les minerais");
   render();
 }
 function arreterSession() {
