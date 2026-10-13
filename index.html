@@ -821,6 +821,7 @@ span.scu, td .scu, #dr-rend, .raff-liste .ro-l b, .nb-caisses, .actions-groupe s
 .ad-membres li { display: flex; align-items: center; gap: 10px; }
 .ad-membres li small { color: var(--os-doux); }
 .ad-membres li .btn { margin-left: auto; }
+.id-compte { margin: 2px 0 0; font-size: 10px; color: var(--os-doux); opacity: .55; font-family: ui-monospace, monospace; user-select: all; letter-spacing: .02em; }
 .ad-detail { white-space: normal !important; color: var(--os-doux); }
 </style>
 </head>
@@ -3586,7 +3587,8 @@ function renderCompte() {
   const attente = items.filter((it) => !it.sync).length + (base.suppressions || []).length;
   let html = `<div class="carte">
     <div class="profil">${compte.avatar ? `<img src="${esc(compte.avatar)}" alt="">` : ""}<div><strong>${esc(compte.pseudo)}</strong>
-      <p class="note">${NB(items.length)} caisse${items.length > 1 ? "s" : ""}${attente ? `, ${attente} modification${attente > 1 ? "s" : ""} en attente d'envoi` : ", tout est synchronisé"}</p></div></div>
+      <p class="note">${NB(items.length)} caisse${items.length > 1 ? "s" : ""}${attente ? `, ${attente} modification${attente > 1 ? "s" : ""} en attente d'envoi` : ", tout est synchronisé"}</p>
+      <p class="id-compte" data-no-tr title="Identifiant du compte">ID ${esc(compte.id)}</p></div></div>
     ${etatCloud ? `<p class="note echec">${esc(etatCloud)}</p>` : ""}
     <div class="ligne"><button class="btn petit" type="button" data-action="sync">Synchroniser maintenant</button>
       <button class="btn petit" type="button" data-action="deconnexion">Se déconnecter</button></div></div>`;
