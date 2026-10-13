@@ -895,6 +895,9 @@ span.scu, td .scu, #dr-rend, .raff-liste .ro-l b, .nb-caisses, .actions-groupe s
 .activite li { padding: 14px 16px; gap: 6px; }
 .activite .qui { margin-bottom: 6px; }
 .activite .quoi { color: var(--os); }
+.act-stocks { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+.act-stocks .btn b { font-weight: 700; color: var(--orange); }
+.act-stocks .btn.desactive { opacity: .4; cursor: not-allowed; filter: grayscale(1); }
 </style>
 </head>
 <body>
@@ -920,7 +923,7 @@ span.scu, td .scu, #dr-rend, .raff-liste .ro-l b, .nb-caisses, .actions-groupe s
     <div class="home-haut" id="h-grille">
       <div class="carte home-activite">
         <div class="act-tete"><h2 id="act-titre">Activité de la corporation et des alliés</h2>
-          <a class="btn petit" id="act-stock" href="#/corpo">Stock corpo</a></div>
+          <span class="act-stocks" id="act-stocks"></span></div>
         <ul class="activite" id="act-liste"></ul>
         <p class="note" id="act-vide" hidden></p>
         <div class="act-cta" id="act-cta" hidden>
@@ -3858,11 +3861,17 @@ function renderHome() {
       <div class="ou">à ${station} · ${NB(g.caisses.length)} caisse${g.caisses.length > 1 ? "s" : ""}, <span class="scu">${fmtScu(scu)}</span> SCU</div></li>`;
   }).join("");
   const sansCorpo = !compte?.corpos?.length;
-  const st = $("act-stock");
-  st.classList.toggle("desactive", sansCorpo);
-  if (sansCorpo) { st.setAttribute("aria-disabled", "true"); st.setAttribute("tabindex", "-1"); st.removeAttribute("href");
-    st.title = compte ? "Rejoins ou crée une corporation pour voir son stock" : "Connecte-toi pour voir le stock de ta corporation"; }
-  else { st.removeAttribute("aria-disabled"); st.removeAttribute("tabindex"); st.href = "#/corpo"; st.title = ""; }
+  // boutons de stock : un par corporation, puis l'alliance (grisés s'il n'y a rien à voir)
+  const bouton = (href, html, actif, info) => actif
+    ? `<a class="btn petit" href="${href}">${html}</a>`
+    : `<a class="btn petit desactive" aria-disabled="true" tabindex="-1" title="${esc(info)}">${html}</a>`;
+  const corpos = compte?.corpos || [];
+  const allies = corpos.some((c) => (c.partagentAvecNous || []).length);
+  $("act-stocks").innerHTML =
+    (corpos.length ? corpos.map((c) => bouton(`#/corpo/tag/${encodeURIComponent(c.tag)}`, `<span>Stock corpo :</span> <b>${esc(c.nom)}</b>`, true)).join("")
+      : bouton("", "<span>Stock corpo</span>", false, compte ? "Rejoins ou crée une corporation pour voir son stock" : "Connecte-toi pour voir le stock de ta corporation")) +
+    bouton("#/corpo/allies", "<span>Stock Alliance</span>", allies, !compte ? "Connecte-toi pour voir le stock de ta corporation"
+      : !corpos.length ? "Rejoins ou crée une corporation pour voir son stock" : "Aucune corporation alliée ne partage avec vous");
   $("act-cta").hidden = !sansCorpo;
   $("act-vide").hidden = !!groupes.length || sansCorpo;
   $("act-vide").textContent = compte
