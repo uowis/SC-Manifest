@@ -289,6 +289,7 @@ window.TRAD_EN = {
       "Membres": "Members",
       "Membres (": "Members (",
       "Mes ressources": "My resources",
+      "Mes stocks": "My stock",
       "Message": "Message",
       "messages (limite de # caractères par message Discord) : colle chaque bloc dans Discord, dans l'ordre.": "messages (# characters max per Discord message): paste each block into Discord, in order.",
       "Minerai": "Ore",
