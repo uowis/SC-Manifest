@@ -7,6 +7,75 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&display=swap">
+<script src="trad-en.js"></script>
+<script>
+/* ---------- Langue : FR (texte d'origine) ou EN (trad-en.js). Traduction au niveau des nœuds texte et des attributs,
+   nombres remplacés par « # » dans les clés. Les données (noms, stations…) ne sont jamais modifiées. */
+(() => {
+  let L = null;
+  try { L = localStorage.getItem("manifeste-langue"); } catch {}
+  if (L !== "fr" && L !== "en") L = /^fr\b/i.test(navigator.language || "") ? "fr" : "en";
+  if (L === "en" && !window.TRAD_EN) L = "fr";          // fichier de traduction absent : on reste en français
+  window.LANGUE = L;
+  window.LOCALE = L === "en" ? "en-US" : "fr-FR";
+  document.documentElement.lang = L;
+  const NOMBRE = /\d[\d.,  ]*\d|\d/g;
+  const D = L === "en" ? new Map(Object.entries(window.TRAD_EN.textes || {})) : null;
+  const MOTIFS = L === "en" ? (window.TRAD_EN.motifs || []).map(([r, v]) => [new RegExp(r), v]) : [];
+  function trCoeur(c) {
+    const nums = c.match(NOMBRE) || [], cle = c.replace(NOMBRE, "#");
+    let v = D.get(cle);
+    if (v != null) { let i = 0; return v.replace(/#(\d)?/g, (_, k) => (k ? nums[k - 1] : nums[i++]) ?? ""); }
+    for (const [re, rv] of MOTIFS) if (re.test(c)) return c.replace(re, rv);
+    return null;
+  }
+  function tr(t) {
+    if (!D || t == null) return t;
+    const s = String(t), m = /^(\s*)([\s\S]*?)(\s*)$/.exec(s), c = m[2].replace(/\s+/g, " ");
+    if (!c || !/[A-Za-zÀ-ÿ]/.test(c)) return s;
+    let v = trCoeur(c);
+    if (v == null && /[.!?:]\s/.test(c)) {           // phrases collées : on traduit morceau par morceau
+      const p = c.split(/(?<=[.!?:])\s+/), q = p.map(trCoeur);
+      if (q.some((x) => x != null)) v = p.map((x, i) => q[i] ?? x).join(" ");
+    }
+    if (v == null) { if (window.__i18nManques) window.__i18nManques.add(c); return s; }
+    return m[1] + v + m[3];
+  }
+  window.tr = tr;
+  if (!D) return;
+  const ATTRS = ["title", "aria-label", "placeholder", "alt"];
+  const IGNORER = /^(SCRIPT|STYLE|TEXTAREA|CODE|PRE)$/;
+  function trTexte(n) {
+    const p = n.parentNode; if (!p || IGNORER.test(p.nodeName) || p.closest?.("[data-no-tr]")) return;
+    const v = n.nodeValue, t = tr(v); if (t !== v) n.nodeValue = t;
+  }
+  function trAttrs(e) {
+    for (const a of ATTRS) if (e.hasAttribute(a)) { const v = e.getAttribute(a), t = tr(v); if (t !== v) e.setAttribute(a, t); }
+  }
+  function trArbre(r) {
+    if (r.nodeType === 3) return trTexte(r);
+    if (r.nodeType !== 1 && r.nodeType !== 9 && r.nodeType !== 11) return;
+    if (r.nodeType === 1) { if (IGNORER.test(r.nodeName)) return; trAttrs(r); }
+    const w = (r.ownerDocument || r).createTreeWalker(r, 5);   // éléments + textes
+    for (let n = w.nextNode(); n; n = w.nextNode()) n.nodeType === 3 ? trTexte(n) : trAttrs(n);
+  }
+  function observer(doc) {
+    new MutationObserver((ms) => {
+      for (const m of ms) {
+        if (m.type === "childList") m.addedNodes.forEach(trArbre);
+        else if (m.type === "characterData") trTexte(m.target);
+        else if (m.type === "attributes") trAttrs(m.target);
+      }
+    }).observe(doc.documentElement, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ATTRS });
+    if (doc.body) trArbre(doc.body);
+    if (doc.title) doc.title = tr(doc.title);
+  }
+  window.i18nObserver = observer;
+  observer(document);
+  document.addEventListener("DOMContentLoaded", () => trArbre(document.body));
+  for (const f of ["confirm", "alert", "prompt"]) { const o = window[f]; window[f] = (msg, ...r) => o.call(window, tr(msg), ...r); }
+})();
+</script>
 <style>
 
 :root {
@@ -720,6 +789,39 @@ span.scu, td .scu, #dr-rend, .raff-liste .ro-l b, .nb-caisses, .actions-groupe s
 .invite-overlay span { font-size: 15px; color: var(--os); }
 .invite-flux { cursor: default; }
 .invite-flux > div { min-width: 320px; }
+.home-corpo { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0; margin-top: 28px;
+  background: var(--panneau, #1a2430); border: 1px solid var(--trait); border-radius: 6px; overflow: hidden; }
+.hc-image { position: relative; min-height: 260px; background: linear-gradient(135deg, #2a3a2a, #1a2430 60%, #3a2a20); }
+.hc-image img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.hc-image.vide img { display: none; }
+.hc-image::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent 55%, var(--panneau, #1a2430)); pointer-events: none; }
+.hc-texte { padding: 32px 36px; display: grid; gap: 12px; align-content: center; }
+.hc-texte h2 { margin: 0; color: var(--orange); text-transform: uppercase; letter-spacing: .06em; font-size: 15px; display: flex; align-items: center; gap: 10px; }
+.hc-texte h2::before { content: ""; flex: none; width: 34px; height: 9px; background: repeating-linear-gradient(-55deg, var(--strie, #9e3a30) 0 3px, transparent 3px 6px); }
+.hc-texte p { margin: 0; color: var(--os-doux); line-height: 1.55; }
+.hc-texte .hc-lead { color: var(--os); font-size: 18px; font-weight: 600; }
+.hc-cta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
+@media (max-width: 800px) { .home-corpo { grid-template-columns: 1fr; } .hc-image { min-height: 180px; } .hc-image::after { background: linear-gradient(180deg, transparent 55%, var(--panneau, #1a2430)); } .hc-texte { padding: 22px; } }
+.btn-langue { background: none; border: 1px solid var(--trait); color: var(--os-doux); border-radius: 4px; padding: 5px 8px; font: inherit; font-size: 12px; font-weight: 700; letter-spacing: .06em; cursor: pointer; }
+.btn-langue:hover { color: var(--os); border-color: var(--os-doux); }
+.ad-recherche { margin: 0 0 14px; }
+.ad-recherche input { width: min(420px, 100%); }
+#ad { display: grid; gap: 16px; }
+.ad-table td, .ad-table th { white-space: nowrap; }
+.ad-table tr.banni td { opacity: .6; }
+.ad-table tr.banni td.ad-actions, .ad-table tr.banni td:nth-last-child(2) { opacity: 1; }
+.ad-actions { text-align: right; display: flex; gap: 6px; justify-content: flex-end; }
+.ad-banni { color: #ff8a7a; font-weight: 700; }
+.ad-ok { color: var(--scu); }
+.ad-admin { color: var(--orange); }
+.ad-joueur { display: inline-flex; align-items: center; gap: 8px; }
+.ad-joueur img { width: 22px; height: 22px; border-radius: 50%; }
+.ad-membres td { background: rgba(0,0,0,.18); }
+.ad-membres ul { list-style: none; margin: 0; padding: 4px 0; display: grid; gap: 6px; }
+.ad-membres li { display: flex; align-items: center; gap: 10px; }
+.ad-membres li small { color: var(--os-doux); }
+.ad-membres li .btn { margin-left: auto; }
+.ad-detail { white-space: normal !important; color: var(--os-doux); }
 </style>
 </head>
 <body>
@@ -732,6 +834,7 @@ span.scu, td .scu, #dr-rend, .raff-liste .ro-l b, .nb-caisses, .actions-groupe s
   </div>
   <div class="barre-droite">
     <span class="etat" id="etat" hidden></span>
+    <button type="button" class="btn-langue" id="b-langue" data-no-tr title="Français / English"></button>
     <a class="btn principal cta-connexion" id="b-connexion" href="#/compte">Se connecter</a>
     <a class="compte-btn" id="b-compte" href="#/compte"><img id="b-compte-avatar" alt="" hidden><svg class="compte-ico" id="b-compte-ico" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span id="b-compte-txt">Compte</span></a>
   </div>
@@ -792,6 +895,19 @@ span.scu, td .scu, #dr-rend, .raff-liste .ro-l b, .nb-caisses, .actions-groupe s
         </div>
       </div>
     </div>
+    <section class="home-corpo" aria-labelledby="hc-titre">
+      <div class="hc-image"><img src="corpo.jpg" alt="Groupe de joueurs de Star Citizen" loading="lazy" onerror="this.closest('.hc-image').classList.add('vide')"></div>
+      <div class="hc-texte">
+        <h2 id="hc-titre">Jouez en corporation</h2>
+        <p class="hc-lead">Le partage des ressources est le premier objectif de Star Manifest.</p>
+        <p>Créez votre corporation ou rejoignez celle de vos coéquipiers : chacun scanne ses caisses, et tout le monde voit en un coup d'œil ce que la corpo possède, où, et en quelle qualité.</p>
+        <p>Vous pouvez aussi vous allier avec d'autres corporations pour partager vos stocks entre alliés. Chaque joueur choisit, caisse par caisse, ce qu'il partage.</p>
+        <div class="hc-cta">
+          <a class="btn principal" href="#/compte">Créer une corporation</a>
+          <a class="btn" href="#/compte">Rejoindre une corporation</a>
+        </div>
+      </div>
+    </section>
   </section>
 
   <section id="v-accueil" hidden>
@@ -882,6 +998,12 @@ span.scu, td .scu, #dr-rend, .raff-liste .ro-l b, .nb-caisses, .actions-groupe s
   <section id="v-compte" hidden>
     <div class="entete"><div><h1>Compte</h1><p class="sous-titre">Connexion, corporations et partage de tes inventaires.</p></div></div>
     <div class="compte-grille" id="cp"></div>
+  </section>
+
+  <section id="v-admin" hidden>
+    <div class="entete"><div><h1>Administration</h1><p class="sous-titre" id="ad-sous-titre">Joueurs et corporations du site.</p></div>
+      <div class="outils"><button class="btn" type="button" data-admin="recharger">Actualiser</button></div></div>
+    <div id="ad"></div>
   </section>
 
   <section id="v-nouvelle" hidden>
@@ -1504,7 +1626,7 @@ const EXEMPLES = [{"type": "q", "label": "298", "url": "data:image/png;base64,iV
 /* Cherche aussi dans la fenêtre de l'overlay : la fiche y est déplacée quand il est ouvert. */
 const $ = (id) => document.getElementById(id) || (typeof pip !== "undefined" && pip ? pip.document.getElementById(id) : null);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const fmtScu = (v) => Number(v).toLocaleString("fr-FR", { maximumFractionDigits: 3 });
+const fmtScu = (v) => Number(v).toLocaleString(LOCALE, { maximumFractionDigits: 3 });
 const uid = () => Math.random().toString(36).slice(2, 12);
 
 /* ---------- données (stockées dans ce navigateur) */
@@ -1627,10 +1749,11 @@ function route() {
     if ([...$("c-groupe").options].some((o) => o.value === groupeDemande)) $("c-groupe").value = groupeDemande;
   }
   else if (h === "/minerais") { vue = "accueil"; stationCourante = null; }
+  else if (h === "/admin") { vue = "admin"; stationCourante = null; }
   else { vue = "home"; stationCourante = null; }
   if (session && session.station !== stationCourante) arreterSession();
   if (ancienne !== stationCourante || vueAvant !== vue) selection.clear();
-  for (const v of ["home", "accueil", "station", "nouvelle", "corpo", "compte"]) $(`v-${v}`).hidden = v !== vue;
+  for (const v of ["home", "accueil", "station", "nouvelle", "corpo", "compte", "admin"]) $(`v-${v}`).hidden = v !== vue;
   if (vue === "home" && compte && Date.now() - partage.maj > 30000) chargerPartage().then(render).catch(() => {});
   if (vue === "corpo" && compte && Date.now() - partage.maj > 30000) chargerPartage().then(render).catch(() => {});
   if (vue === "nouvelle") $("n-station").innerHTML = optionsStations(Object.values(catalogue).flat().sort((a, b) => a.localeCompare(b, "fr")), { avecVide: true });
@@ -1784,6 +1907,7 @@ function render() {
   majBoutonsFiltre();
   renderCompteBouton();
   if (vue === "compte") renderCompte();
+  if (vue === "admin") renderAdmin();
   if (vue === "corpo") {
     const lignes = trier(filtrer(caissesCorpo()), tri.corpo);
     renderTable($("t-corpo"), lignes, { station: true, cocher: false, joueur: true, t: tri.corpo });
@@ -2049,7 +2173,7 @@ function lignesDiscord(liste, avecStations) {
     const e = g.get(cle) || { nom: it.nom, qualite: it.qualite, bande: bandeDe(it.nom, it.qualite), n: 0, scu: 0 };
     e.n++; e.scu += Number(it.quantite_scu) || 0; g.set(cle, e);
   }
-  const fmt = (v) => Number(v).toLocaleString("fr-FR", { minimumFractionDigits: 3, maximumFractionDigits: 3 });
+  const fmt = (v) => Number(v).toLocaleString(LOCALE, { minimumFractionDigits: 3, maximumFractionDigits: 3 });
   const largeurNom = Math.max(8, ...liste.map((it) => it.nom.length));
   const sections = [];
   let totN = 0, totScu = 0;
@@ -2075,7 +2199,7 @@ function exporterDiscord() {
   const { sections, totN, totScu, fmt } = lignesDiscord(liste, avecStations);
   const titre = vue === "corpo" ? `**Stock partagé : ${$("c-groupe").selectedOptions[0]?.text || "corporations et alliés"}**`
     : avecStations ? "**Manifeste de minerai**" : `**Manifeste de minerai : ${stationCourante}** (${systemeDe(stationCourante)})`;
-  const date = new Date().toLocaleDateString("fr-FR");
+  const date = new Date().toLocaleDateString(LOCALE);
   const pied = avecStations && sections.length > 1 ? `Total général : ${totN} caisses, ${fmt(totScu)} SCU` : "";
   // découpe en messages de moins de 2000 caractères, sans couper une station
   const messages = [];
@@ -2384,7 +2508,7 @@ function flash(bouton, classe, ms = 220) {
 }
 /* ---------- lecture vocale (TTS du navigateur) : « Minerai, quantité » à chaque enregistrement */
 // par défaut : son activé seulement sans overlay PiP (Firefox), coupé ailleurs ; ensuite le choix est mémorisé
-let sonActif = !("documentPictureInPicture" in window);
+let sonActif = false;   // coupé par défaut partout (l'overlay marche aussi sur Firefox)
 try { const m = localStorage.getItem("manifeste-son"); if (m !== null) sonActif = m === "1"; } catch {}
 function majBoutonSon() {
   const b = $("b-son"); if (!b) return;
@@ -2405,9 +2529,9 @@ function direScan(it, deja = false) {
 }
 function dire(texte) {
   if (!sonActif || !window.speechSynthesis || !texte) return;
-  const u = new SpeechSynthesisUtterance(texte);
-  u.lang = "fr-FR"; u.rate = 1.5;
-  const v = speechSynthesis.getVoices().find((x) => x.lang?.startsWith("fr"));
+  const u = new SpeechSynthesisUtterance(tr(texte));
+  u.lang = LOCALE; u.rate = 1.5;
+  const v = speechSynthesis.getVoices().find((x) => x.lang?.startsWith(LANGUE));
   if (v) u.voice = v;
   direScan.u = u;                 // garde une référence : sinon Chrome peut jeter la phrase avant de la lire
   u.onend = u.onerror = () => { if (direScan.u === u) direScan.u = null; };
@@ -2637,7 +2761,7 @@ function enregistrer(auto = false) {
     const c = {
       id: uid(), nom, qualite: q, bande: bandeDe(nom, q), quantite_scu: parseFloat(scuTxt),
       station: session?.station || stationCourante || SANS_STATION, visibilite: "corporation", ts: Date.now() / 1000,
-      heure: new Date().toLocaleString("fr-FR"),
+      heure: new Date().toLocaleString(LOCALE),
     };
     items.push(c); crees.push(c);
   }
@@ -3003,10 +3127,10 @@ async function ouvrirOverlay() {
   let ratio = 0.5;
   try { const [W, H] = tailleSource(await imageCourante()); if (W && base.zone) ratio = (base.zone.h * H) / (base.zone.w * W); } catch {}
   const LARGEUR = 300, hauteur = Math.round(315 + (LARGEUR - 12) * Math.min(1, Math.max(0.2, ratio)));
-  try { pip = await documentPictureInPicture.requestWindow({ width: LARGEUR, height: hauteur }); }
+  try { pip = await documentPictureInPicture.requestWindow({ width: LARGEUR, height: hauteur }); window.i18nObserver?.(pip.document); }
   catch { pip = null; $("b-overlay").hidden = !session; return false; }
   for (const n of document.querySelectorAll("style, link[rel=stylesheet]")) pip.document.head.append(n.cloneNode(true));
-  pip.document.title = "Scan minerai";
+  pip.document.title = tr("Scan minerai");
   pip.document.body.classList.add("overlay");
   pip.document.body.append(fiche);
   pip.document.addEventListener("keydown", touches);
@@ -3237,6 +3361,7 @@ async function chargerCompte() {
   ]);
   const profil = verifier(p);
   if (profil) { compte.pseudo = profil.pseudo || compte.pseudo; compte.avatar = profil.avatar || compte.avatar; }
+  try { compte.superAdmin = !!verifier(await sb.rpc("est_super_admin")); } catch { compte.superAdmin = false; }   // supabase-admin.sql non installé : pas d'admin
   compte.corpos = verifier(m).map((x) => ({ id: x.corporation_id, role: x.role, nom: x.corporations?.nom || "?", tag: x.corporations?.tag || "?" }));
   compte.membreDe = {}; compte.pseudos = { [me]: compte.pseudo };
   const ids = compte.corpos.map((c) => c.id);
@@ -3849,6 +3974,7 @@ function renderNavCta() {
   const allies = corpos.some((c) => (c.partagentAvecNous || []).length);
   html += lienCta("#/corpo/allies", "Alliance", !compte ? "Connexion nécessaire" : !corpos.length ? "Aucune corporation" : "", h === "/corpo/allies", !compte || !corpos.length, compte ? "Aucune corporation alliée ne partage avec vous" : "Connecte-toi pour voir tes alliés");
   html += lienCta("#/minerais", "Mes ressources", "", vue === "accueil", false, "", true);
+  if (compte?.superAdmin) html += lienCta("#/admin", "Administration", "", vue === "admin");
   $("dn-cta").innerHTML = html;
 }
 function etiquetteLieu(st) {
@@ -4571,9 +4697,9 @@ async function ouvrirRaff() {
   panneau.hidden = false;
   if ("documentPictureInPicture" in window && !pipRaff) {
     try {
-      pipRaff = await documentPictureInPicture.requestWindow({ width: 340, height: 560 });
+      pipRaff = await documentPictureInPicture.requestWindow({ width: 340, height: 560 }); window.i18nObserver?.(pipRaff.document);
       for (const n of document.querySelectorAll("style, link[rel=stylesheet]")) pipRaff.document.head.append(n.cloneNode(true));
-      pipRaff.document.title = "Ordre de raffinage";
+      pipRaff.document.title = tr("Ordre de raffinage");
       pipRaff.document.body.classList.add("overlay", "overlay-raff");
       pipRaff.document.body.append(panneau);
       pipRaff.addEventListener("pagehide", () => { pipRaff = null; document.body.append(panneau); fermerRaff(); });
@@ -4665,7 +4791,7 @@ function ordreEnCaisses(id) {
   let n = 0;
   for (const l of o.lignes) for (const q of decouperCaisses(l.rend / 100)) {
     items.push({ id: uid(), nom: l.nom, qualite: l.qualite, bande: bandeDe(l.nom, l.qualite), quantite_scu: q,
-      station: o.station, visibilite: "corporation", ts: Date.now() / 1000, heure: new Date().toLocaleString("fr-FR") });
+      station: o.station, visibilite: "corporation", ts: Date.now() / 1000, heure: new Date().toLocaleString(LOCALE) });
     n++;
   }
   base.raffinages = base.raffinages.filter((x) => x.id !== id);
@@ -4767,6 +4893,133 @@ construireModele().then(() => { if (!compte) etat("Données enregistrées dans c
 route();
 majFondLieu();
 initCloud();
+
+/* ---------- bouton de langue : affiche l'autre langue, recharge la page */
+$("b-langue").textContent = LANGUE === "en" ? "FR" : "EN";
+$("b-langue").addEventListener("click", () => {
+  try { localStorage.setItem("manifeste-langue", LANGUE === "en" ? "fr" : "en"); } catch {}
+  location.reload();
+});
+
+/* =====================================================================
+   Administration du site (super admins, voir supabase-admin.sql)
+   ===================================================================== */
+const admin = { joueurs: null, corpos: null, membres: {}, ouverte: null, recherche: "", erreur: "", chargement: false };
+async function chargerAdmin() {
+  if (!sb || !compte?.superAdmin || admin.chargement) return;
+  admin.chargement = true; admin.erreur = "";
+  try {
+    const [j, c] = await Promise.all([sb.rpc("admin_joueurs"), sb.rpc("admin_corporations")]);
+    admin.joueurs = verifier(j); admin.corpos = verifier(c);
+    try { admin.journal = verifier(await sb.rpc("admin_journal_liste", { p_limite: 200 })); } catch { admin.journal = null; }   // supabase-securite.sql non installé
+  } catch (e) { admin.erreur = e.message || String(e); }
+  admin.chargement = false;
+  if (vue === "admin") renderAdmin();
+}
+const dateCourte = (d) => d ? new Date(d).toLocaleDateString(LOCALE) : "—";
+function renderAdmin() {
+  const ad = $("ad");
+  if (!compte) { ad.innerHTML = `<div class="carte"><p class="note">Connecte-toi pour accéder à l'administration.</p></div>`; return; }
+  if (!compte.superAdmin) { ad.innerHTML = `<div class="carte"><p class="note">Page réservée aux administrateurs du site.</p></div>`; return; }
+  if (!admin.joueurs && !admin.erreur) { ad.innerHTML = `<div class="carte"><p class="note">Chargement…</p></div>`; chargerAdmin(); return; }
+  if (admin.erreur) { ad.innerHTML = `<div class="carte"><p class="erreur">Erreur : ${esc(admin.erreur)}</p></div>`; return; }
+  const q = admin.recherche.trim().toLowerCase();
+  const joueurs = admin.joueurs.filter((j) => !q || (j.pseudo || "").toLowerCase().includes(q) || (j.corporations || "").toLowerCase().includes(q));
+  const corpos = admin.corpos.filter((c) => !q || c.nom.toLowerCase().includes(q) || c.tag.toLowerCase().includes(q));
+  const nbBj = admin.joueurs.filter((j) => j.banni).length, nbBc = admin.corpos.filter((c) => c.banni).length;
+  $("ad-sous-titre").innerHTML = `${NB(admin.joueurs.length)} joueurs (${nbBj} bannis), ${NB(admin.corpos.length)} corporations (${nbBc} bannies)`;
+  const statut = (b, motif) => b ? `<span class="ad-banni" title="${esc(motif || "")}">Banni</span>` : `<span class="ad-ok">Actif</span>`;
+  const ligneMembres = (c) => {
+    const m = admin.membres[c.id];
+    if (!m) return `<tr class="ad-membres"><td colspan="8"><p class="note">Chargement…</p></td></tr>`;
+    return `<tr class="ad-membres"><td colspan="8"><ul>${m.map((x) => `<li><span>${esc(x.pseudo || "Joueur")}</span><small><span>${x.role === "admin" ? "admin" : "membre"}</span> · ${dateCourte(x.rejoint_le)}</small>${x.banni ? `<span class="ad-banni">Banni</span>` : ""}<button class="btn petit" type="button" data-admin="exclure" data-corpo="${c.id}" data-user="${x.user_id}" data-nom="${esc(x.pseudo || "")}">Exclure</button></li>`).join("") || `<li class="note">Aucun membre</li>`}</ul></td></tr>`;
+  };
+  ad.innerHTML = `
+    <div class="ad-recherche"><input type="search" id="ad-q" placeholder="Rechercher un joueur, une corporation, un tag…" value="${esc(admin.recherche)}"></div>
+    <div class="carte">
+      <h2>Corporations</h2>
+      <div class="tableau-wrap"><table class="ad-table">
+        <thead><tr><th>Tag</th><th>Nom</th><th>Créée par</th><th class="num">Membres</th><th class="num">Alliances</th><th>Créée le</th><th>Statut</th><th></th></tr></thead>
+        <tbody>${corpos.map((c) => `<tr class="${c.banni ? "banni" : ""}">
+          <td><b>[${esc(c.tag)}]</b></td><td>${esc(c.nom)}</td><td>${esc(c.createur || "—")}</td>
+          <td class="num"><button class="lien" type="button" data-admin="membres" data-corpo="${c.id}" aria-expanded="${admin.ouverte === c.id}">${NB(Number(c.nb_membres))}</button></td>
+          <td class="num">${Number(c.nb_allies)}</td><td>${dateCourte(c.cree_le)}</td><td>${statut(c.banni, c.banni_motif)}</td>
+          <td class="ad-actions">${c.banni
+            ? `<button class="btn petit" type="button" data-admin="debannir-c" data-corpo="${c.id}" data-nom="${esc(c.nom)}">Débannir</button>`
+            : `<button class="btn petit danger" type="button" data-admin="bannir-c" data-corpo="${c.id}" data-nom="${esc(c.nom)}">Bannir</button>`}
+            <button class="btn petit danger" type="button" data-admin="suppr-c" data-corpo="${c.id}" data-nom="${esc(c.nom)}">Supprimer</button></td>
+        </tr>${admin.ouverte === c.id ? ligneMembres(c) : ""}`).join("") || `<tr><td colspan="8" class="note">Aucune corporation.</td></tr>`}</tbody>
+      </table></div>
+    </div>
+    <div class="carte">
+      <h2>Joueurs</h2>
+      <div class="tableau-wrap"><table class="ad-table">
+        <thead><tr><th>Joueur</th><th>Corporations</th><th class="num">Caisses</th><th>Inscrit le</th><th>Dernière connexion</th><th>Statut</th><th></th></tr></thead>
+        <tbody>${joueurs.map((j) => `<tr class="${j.banni ? "banni" : ""}">
+          <td><span class="ad-joueur">${j.avatar ? `<img src="${esc(j.avatar)}" alt="">` : ""}${esc(j.pseudo || "Joueur")}${j.super_admin ? ` <small class="ad-admin">admin du site</small>` : ""}${j.id === compte.id ? ` <small>(toi)</small>` : ""}</span></td>
+          <td>${esc(j.corporations || "—")}</td><td class="num">${NB(Number(j.nb_caisses))}</td>
+          <td>${dateCourte(j.cree_le)}</td><td>${dateCourte(j.derniere_connexion)}</td><td>${statut(j.banni, j.banni_motif)}</td>
+          <td class="ad-actions"><button class="btn petit" type="button" data-admin="copier-id" data-user="${j.id}" title="${esc(j.id)}">Copier l'identifiant</button>${j.super_admin || j.id === compte.id ? "" : j.banni
+            ? `<button class="btn petit" type="button" data-admin="debannir-j" data-user="${j.id}" data-nom="${esc(j.pseudo || "")}">Débannir</button>`
+            : `<button class="btn petit danger" type="button" data-admin="bannir-j" data-user="${j.id}" data-nom="${esc(j.pseudo || "")}">Bannir</button>`}</td>
+        </tr>`).join("") || `<tr><td colspan="7" class="note">Aucun joueur.</td></tr>`}</tbody>
+      </table></div>
+    </div>
+    ${admin.journal ? `<div class="carte">
+      <h2>Journal</h2>
+      <div class="tableau-wrap"><table class="ad-table">
+        <thead><tr><th>Date</th><th>Par</th><th>Action</th><th>Cible</th><th>Détail</th></tr></thead>
+        <tbody>${admin.journal.map((l) => `<tr><td>${new Date(l.ts).toLocaleString(LOCALE)}</td><td>${esc(l.admin_nom || "—")}</td>
+          <td><span>${esc(l.action)}</span></td><td>${esc(l.cible_nom || "—")}</td><td class="ad-detail">${esc(l.detail || "")}</td></tr>`).join("")
+          || `<tr><td colspan="5" class="note">Aucune action pour l'instant.</td></tr>`}</tbody>
+      </table></div>
+    </div>` : ""}`;
+  const champ = $("ad-q");
+  champ.addEventListener("input", () => { admin.recherche = champ.value; const p = champ.selectionStart; renderAdmin(); const c2 = $("ad-q"); c2.focus(); c2.setSelectionRange(p, p); });
+}
+document.addEventListener("click", async (e) => {
+  const b = e.target.closest?.("[data-admin]"); if (!b || !sb) return;
+  const a = b.dataset.admin, nom = b.dataset.nom || "";
+  try {
+    if (a === "copier-id") { await navigator.clipboard.writeText(b.dataset.user).catch(() => prompt("Identifiant :", b.dataset.user)); toast("Identifiant copié : colle-le dans admins.txt."); return; }
+    if (a === "recharger") { admin.joueurs = null; admin.membres = {}; renderAdmin(); return; }
+    if (a === "membres") {
+      const c = b.dataset.corpo;
+      admin.ouverte = admin.ouverte === c ? null : c; renderAdmin();
+      if (admin.ouverte && !admin.membres[c]) { admin.membres[c] = verifier(await sb.rpc("admin_membres", { p_corp: c })); renderAdmin(); }
+      return;
+    }
+    if (a === "bannir-j") {
+      const motif = prompt(`Bannir ${nom} ? Il ne pourra plus se connecter et ses caisses seront masquées. Motif (facultatif) :`, "");
+      if (motif === null) return;
+      verifier(await sb.rpc("admin_bannir_joueur", { p_user: b.dataset.user, p_banni: true, p_motif: motif || null }));
+      toast(`${nom} est banni.`);
+    } else if (a === "debannir-j") {
+      if (!confirm(`Débannir ${nom} ?`)) return;
+      verifier(await sb.rpc("admin_bannir_joueur", { p_user: b.dataset.user, p_banni: false, p_motif: null }));
+      toast(`${nom} est débanni.`);
+    } else if (a === "bannir-c") {
+      const motif = prompt(`Bannir la corporation ${nom} ? Elle disparaîtra pour ses membres et ses alliés. Motif (facultatif) :`, "");
+      if (motif === null) return;
+      verifier(await sb.rpc("admin_bannir_corporation", { p_corp: b.dataset.corpo, p_banni: true, p_motif: motif || null }));
+      toast(`${nom} est bannie.`);
+    } else if (a === "debannir-c") {
+      if (!confirm(`Débannir la corporation ${nom} ?`)) return;
+      verifier(await sb.rpc("admin_bannir_corporation", { p_corp: b.dataset.corpo, p_banni: false, p_motif: null }));
+      toast(`${nom} est débannie.`);
+    } else if (a === "suppr-c") {
+      if (!confirm(`Supprimer définitivement la corporation ${nom} ? Ses membres, son code d'invitation et ses alliances seront supprimés. Les caisses des joueurs sont conservées.`)) return;
+      verifier(await sb.rpc("admin_supprimer_corporation", { p_corp: b.dataset.corpo }));
+      toast(`${nom} est supprimée.`);
+    } else if (a === "exclure") {
+      if (!confirm(`Exclure ${nom} de cette corporation ?`)) return;
+      verifier(await sb.rpc("admin_exclure_membre", { p_corp: b.dataset.corpo, p_user: b.dataset.user }));
+      delete admin.membres[b.dataset.corpo];
+      toast(`${nom} est exclu.`);
+    } else return;
+    admin.joueurs = null; admin.membres = {}; renderAdmin();
+  } catch (err) { toast(`Erreur : ${err.message || err}`); }
+});
 </script>
 </body>
 </html>
