@@ -823,6 +823,13 @@ span.scu, td .scu, #dr-rend, .raff-liste .ro-l b, .nb-caisses, .actions-groupe s
 .ad-membres li .btn { margin-left: auto; }
 .id-compte { margin: 2px 0 0; font-size: 10px; color: var(--os-doux); opacity: .55; font-family: ui-monospace, monospace; user-select: all; letter-spacing: .02em; }
 .ad-detail { white-space: normal !important; color: var(--os-doux); }
+.demandes { border: 1px solid var(--orange); border-radius: 6px; padding: 8px 12px; background: color-mix(in srgb, var(--orange) 8%, transparent); }
+.demandes h3 { color: var(--orange); margin-top: 0; }
+.mini-avatar { width: 20px; height: 20px; border-radius: 50%; vertical-align: -5px; margin-right: 6px; }
+#b-compte { position: relative; }
+.pastille-notif { position: absolute; top: -6px; right: -6px; min-width: 18px; height: 18px; padding: 0 5px; box-sizing: border-box; border-radius: 9px;
+  background: var(--orange); color: #fff; font-size: 11px; font-weight: 700; line-height: 18px; text-align: center; }
+.pastille-notif[hidden] { display: none; }
 </style>
 </head>
 <body>
@@ -3362,7 +3369,8 @@ async function chargerCompte() {
   ]);
   const profil = verifier(p);
   if (profil) { compte.pseudo = profil.pseudo || compte.pseudo; compte.avatar = profil.avatar || compte.avatar; }
-  try { compte.superAdmin = !!verifier(await sb.rpc("est_super_admin")); } catch { compte.superAdmin = false; }   // supabase-admin.sql non installé : pas d'admin
+  try { compte.superAdmin = !!verifier(await sb.rpc("est_super_admin")); } catch { compte.superAdmin = false; }
+  await chargerDemandes();   // supabase-admin.sql non installé : pas d'admin
   compte.corpos = verifier(m).map((x) => ({ id: x.corporation_id, role: x.role, nom: x.corporations?.nom || "?", tag: x.corporations?.tag || "?" }));
   compte.membreDe = {}; compte.pseudos = { [me]: compte.pseudo };
   const ids = compte.corpos.map((c) => c.id);
@@ -3504,6 +3512,11 @@ function renderCompteBouton() {
   $("b-compte-avatar").hidden = !compte?.avatar;
   $("b-compte-ico").style.display = compte?.avatar ? "none" : "";
   if (compte?.avatar) $("b-compte-avatar").src = compte.avatar;
+  const n = (compte?.demandesRecues || []).length;
+  let p = $("b-compte").querySelector(".pastille-notif");
+  if (n && !p) { p = document.createElement("span"); p.className = "pastille-notif"; $("b-compte").append(p); }
+  if (p) { p.hidden = !n; p.textContent = n > 9 ? "9+" : String(n); }
+  $("b-compte").title = n ? `${n} demande${n > 1 ? "s" : ""} d'adhésion à valider` : "";
 }
 
 
@@ -3521,12 +3534,18 @@ async function renderInvitation(code) {
   }
 
   try {
-    const { data, error } = await sb.from("corporations")
-      .select("id,nom,tag,code")
-      .eq("code", code)
-      .maybeSingle();
-
+    const { data: lignes, error } = await sb.rpc("apercu_invitation", { p_code: code });
     if (error) throw error;
+    const data = (lignes || [])[0];
+    const deja = (compte.corpos || []).find((c) => c.id === data?.id);
+    const enAttente = (compte.demandesEnvoyees || []).find((x) => x.corporation_id === data?.id);
+    if (data && (deja || enAttente)) {
+      cp.innerHTML = `<div class="carte"><h2>Invitation à rejoindre une corporation</h2>
+        <p class="grand"><strong>${esc(data.nom)}</strong> <span class="tag">[${esc(data.tag)}]</span></p>
+        <p class="note">${deja ? "Tu fais déjà partie de cette corporation." : "Ta demande est en attente de validation par un administrateur."}</p>
+        <a class="btn" href="#/compte">Retour au compte</a></div>`;
+      return;
+    }
 
     if (!data) {
       cp.innerHTML = `<div class="carte">
@@ -3542,9 +3561,10 @@ async function renderInvitation(code) {
       <p>Tu es invité à rejoindre :</p>
       <p class="grand"><strong>${esc(data.nom)}</strong> <span class="tag">[${esc(data.tag)}]</span></p>
       <div class="ligne">
-        <button class="btn principal" type="button" data-action="rejoindre-invitation" data-code="${esc(code)}">Rejoindre</button>
+        <button class="btn principal" type="button" data-action="rejoindre-invitation" data-code="${esc(code)}">Demander à rejoindre</button>
         <a class="btn" href="#/compte">Annuler</a>
       </div>
+      <p class="note">Un administrateur de la corporation devra valider ta demande.</p>
     </div>`;
   } catch (e) {
     console.error(e);
@@ -3596,6 +3616,10 @@ function renderCompte() {
   for (const c of compte.corpos) {
     const admin = c.role === "admin";
     html += `<div class="carte"><div class="corpo-tete"><h2>${esc(c.nom)}</h2><span class="tag">[${esc(c.tag)}]</span><span class="role ${admin ? "admin" : ""}">${admin ? "admin" : "membre"}</span></div>
+      ${admin && demandesDe(c.id).length ? `<div class="demandes"><h3>Demandes d'adhésion (${demandesDe(c.id).length})</h3><ul class="liste-cp">${demandesDe(c.id).map((x) => `<li>
+        <span class="grand">${x.avatar ? `<img class="mini-avatar" src="${esc(x.avatar)}" alt="">` : ""}${esc(x.pseudo || "Joueur")}</span><small class="note">${ilYa(new Date(x.cree_le).getTime() / 1000)}</small>
+        <button class="btn petit principal" type="button" data-demande="accepter" data-corpo="${c.id}" data-user="${x.user_id}" data-nom="${esc(x.pseudo || "")}">Accepter</button>
+        <button class="btn petit danger" type="button" data-demande="refuser" data-corpo="${c.id}" data-user="${x.user_id}" data-nom="${esc(x.pseudo || "")}">Refuser</button></li>`).join("")}</ul></div>` : ""}
       <h3>Membres (${c.membres?.length || 0})</h3><ul class="liste-cp">` +
       (c.membres || []).map((m) => `<li><span class="grand">${esc(m.pseudo)}${m.id === compte.id ? " (toi)" : ""}</span>
         <span class="role ${m.role === "admin" ? "admin" : ""}">${m.role}</span>
@@ -3614,6 +3638,9 @@ function renderCompte() {
       <div><button class="btn petit danger" type="button" data-action="quitter" data-corpo="${c.id}" data-nom="${esc(c.nom)}">Quitter la corporation</button></div></div>`;
   }
 
+  if ((compte.demandesEnvoyees || []).length) html += `<div class="carte"><h2>Demandes en attente</h2><ul class="liste-cp">${compte.demandesEnvoyees.map((x) => `<li>
+      <span class="grand">${esc(x.nom)} <span class="tag">[${esc(x.tag)}]</span></span><small class="note">en attente de validation</small>
+      <button class="btn petit" type="button" data-demande="annuler" data-corpo="${x.corporation_id}" data-nom="${esc(x.nom)}">Annuler</button></li>`).join("")}</ul></div>`;
   html += `<div class="carte"><h2>Rejoindre une corporation</h2>
       <form data-form="rejoindre" class="ligne"><input name="code" placeholder="Code d'invitation" required style="flex:1"><button class="btn principal" type="submit">Rejoindre</button></form>
       <h2>Créer une corporation</h2>
@@ -3636,9 +3663,7 @@ async function action(nom, d, form) {
       if (!compte) return;
       const c = (compte.corpos || []).find(x => x.id === d.corpo);
       if (!c) return;
-      const code = nouveauCodeInvitation();
-      const r = await sb.from("corporations").update({ code }).eq("id", c.id);
-      verifier(r);
+      const code = verifier(await sb.rpc("changer_code", { p_corp: c.id }));
       c.code = code;
       render();
       const url = invitationUrl(code);
@@ -3656,7 +3681,7 @@ async function action(nom, d, form) {
       if (!code) return;
       const r = await sb.rpc("rejoindre_corporation", { p_code: code });
       verifier(r);
-      toast("Bienvenue dans la corporation !");
+      toast("Demande envoyée : un administrateur de la corporation doit la valider.");
       location.hash = "#/compte";
       await chargerCompte();
       return;
@@ -3666,7 +3691,7 @@ async function action(nom, d, form) {
     if (nom === "retirer-allie") verifier(await sb.from("alliances").delete().eq("corporation_id", d.corpo).eq("allie_id", d.allie));
     if (nom === "quitter") { if (!confirm(`Quitter ${d.nom} ?`)) return; verifier(await sb.rpc("quitter_corporation", { p_corp: d.corpo })); }
     if (nom === "creer") { verifier(await sb.rpc("creer_corporation", { p_nom: form.nom.value, p_tag: form.tag.value })); toast("Corporation créée : invite tes membres avec son code."); }
-    if (nom === "rejoindre") { verifier(await sb.rpc("rejoindre_corporation", { p_code: form.code.value })); toast("Bienvenue dans la corporation !"); }
+    if (nom === "rejoindre") { verifier(await sb.rpc("rejoindre_corporation", { p_code: form.code.value })); toast("Demande envoyée : un administrateur de la corporation doit la valider."); }
     if (nom === "allie") { verifier(await sb.rpc("ajouter_allie", { p_corp: d.corpo, p_tag: form.tag.value })); toast("Partage ajouté."); }
     await chargerCompte(); await chargerPartage();
   } catch (e) { toast(messageErreur(e)); }
@@ -5020,6 +5045,34 @@ document.addEventListener("click", async (e) => {
       toast(`${nom} est exclu.`);
     } else return;
     admin.joueurs = null; admin.membres = {}; renderAdmin();
+  } catch (err) { toast(`Erreur : ${err.message || err}`); }
+});
+
+/* ---------- Demandes d'adhésion (voir supabase-demandes.sql) */
+const demandesDe = (corp) => (compte?.demandesRecues || []).filter((x) => x.corporation_id === corp);
+async function chargerDemandes() {
+  if (!sb || !compte) return;
+  const avant = (compte.demandesRecues || []).length;
+  try { compte.demandesRecues = verifier(await sb.rpc("demandes_recues")) || []; } catch { compte.demandesRecues = []; }
+  try { compte.demandesEnvoyees = verifier(await sb.rpc("demandes_envoyees")) || []; } catch { compte.demandesEnvoyees = []; }
+  const n = compte.demandesRecues.length;
+  if (n > avant && !chargerDemandes.vu) toast(`${n} demande${n > 1 ? "s" : ""} d'adhésion à valider (page Compte).`);
+  chargerDemandes.vu = n <= avant ? chargerDemandes.vu : false;
+}
+setInterval(async () => {
+  if (!compte || !sb || document.hidden) return;
+  const n = (compte.demandesRecues || []).length;
+  await chargerDemandes();
+  if ((compte.demandesRecues || []).length !== n) render();
+}, 90000);
+document.addEventListener("click", async (e) => {
+  const b = e.target.closest?.("[data-demande]"); if (!b || !sb) return;
+  const a = b.dataset.demande, nom = b.dataset.nom || "";
+  try {
+    if (a === "accepter") { verifier(await sb.rpc("traiter_demande", { p_corp: b.dataset.corpo, p_user: b.dataset.user, p_accepter: true })); toast(`${nom} a rejoint la corporation.`); }
+    else if (a === "refuser") { if (!confirm(`Refuser la demande de ${nom} ?`)) return; verifier(await sb.rpc("traiter_demande", { p_corp: b.dataset.corpo, p_user: b.dataset.user, p_accepter: false })); toast("Demande refusée."); }
+    else if (a === "annuler") { if (!confirm(`Annuler ta demande pour ${nom} ?`)) return; verifier(await sb.rpc("annuler_demande", { p_corp: b.dataset.corpo })); toast("Demande annulée."); }
+    await chargerCompte(); render();
   } catch (err) { toast(`Erreur : ${err.message || err}`); }
 });
 </script>
