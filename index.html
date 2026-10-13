@@ -890,6 +890,11 @@ span.scu, td .scu, #dr-rend, .raff-liste .ro-l b, .nb-caisses, .actions-groupe s
 .home-activite::after { content: ""; margin-top: auto; }
 .home-activite .act-cta, .home-activite #act-vide { text-align: center; justify-items: center; }
 .home-activite .act-cta .hc-cta { justify-content: center; }
+/* activité : cartes plus étroites, plus aérées, types de minerais sans jaune */
+.home-activite .activite { width: 100%; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)) !important; gap: 10px; }
+.activite li { padding: 14px 16px; gap: 6px; }
+.activite .qui { margin-bottom: 6px; }
+.activite .quoi { color: var(--os); }
 </style>
 </head>
 <body>
