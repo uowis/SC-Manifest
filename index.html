@@ -1693,7 +1693,8 @@ function ilYa(ts) {
 function valeursDe(nom) {
   const cle = Object.keys(valeurs).find((n) => n.toLowerCase() === String(nom).trim().toLowerCase());
   if (!cle) return [];
-  const appr = [...((base.qualites || {})[cle] || []), ...((typeof apprisPartages !== "undefined" && apprisPartages.qualites[cle]) || [])];
+  const appr = [...((base.qualites || {})[cle] || []), ...((typeof apprisPartages !== "undefined" && apprisPartages.qualites[cle]) || []),
+    ...((typeof qualitesCommunes !== "undefined" && qualitesCommunes[cle]) || [])];
   return appr.length ? [...new Set([...valeurs[cle], ...appr])].sort((a, b) => a - b) : valeurs[cle];
 }
 const valeursWiki = (nom) => { const cle = Object.keys(valeurs).find((n) => n.toLowerCase() === String(nom).trim().toLowerCase()); return cle ? valeurs[cle] : []; };
@@ -3371,6 +3372,7 @@ async function chargerCompte() {
   if (profil) { compte.pseudo = profil.pseudo || compte.pseudo; compte.avatar = profil.avatar || compte.avatar; }
   try { compte.superAdmin = !!verifier(await sb.rpc("est_super_admin")); } catch { compte.superAdmin = false; }
   await chargerDemandes();   // supabase-admin.sql non installé : pas d'admin
+  await chargerQualitesCommunes();
   compte.corpos = verifier(m).map((x) => ({ id: x.corporation_id, role: x.role, nom: x.corporations?.nom || "?", tag: x.corporations?.tag || "?" }));
   compte.membreDe = {}; compte.pseudos = { [me]: compte.pseudo };
   const ids = compte.corpos.map((c) => c.id);
@@ -3437,6 +3439,7 @@ async function synchroniser() {
         chiffres: (base.chiffres || []).slice(-200), signatures: (base.signatures || []).slice(-100), qualites: base.qualites || {} }, modifie_le: new Date().toISOString() }));
       base.apprisModifie = false;
     }
+    await signalerQualites();
     const enLigne = verifier(await sb.from("caisses").select("*").eq("user_id", compte.id)).map(depuisCloud);
     const enAttente = items.filter((it) => !it.sync);   // modifié pendant la synchronisation
     items = base.items = enLigne.filter((c) => !enAttente.some((it) => it.id === c.id)).concat(enAttente);
@@ -4938,7 +4941,8 @@ async function chargerAdmin() {
   try {
     const [j, c] = await Promise.all([sb.rpc("admin_joueurs"), sb.rpc("admin_corporations")]);
     admin.joueurs = verifier(j); admin.corpos = verifier(c);
-    try { admin.journal = verifier(await sb.rpc("admin_journal_liste", { p_limite: 200 })); } catch { admin.journal = null; }   // supabase-securite.sql non installé
+    try { admin.journal = verifier(await sb.rpc("admin_journal_liste", { p_limite: 200 })); } catch { admin.journal = null; }
+    try { admin.qualites = verifier(await sb.rpc("admin_qualites")); } catch { admin.qualites = null; }   // supabase-qualites.sql non installé   // supabase-securite.sql non installé
   } catch (e) { admin.erreur = e.message || String(e); }
   admin.chargement = false;
   if (vue === "admin") renderAdmin();
@@ -4992,6 +4996,7 @@ function renderAdmin() {
         </tr>`).join("") || `<tr><td colspan="7" class="note">Aucun joueur.</td></tr>`}</tbody>
       </table></div>
     </div>
+    ${admin.qualites ? carteQualites(q) : ""}
     ${admin.journal ? `<div class="carte">
       <h2>Journal</h2>
       <div class="tableau-wrap"><table class="ad-table">
@@ -5075,6 +5080,77 @@ document.addEventListener("click", async (e) => {
     await chargerCompte(); render();
   } catch (err) { toast(`Erreur : ${err.message || err}`); }
 });
+
+/* ---------- Recensement commun des qualités (voir supabase-qualites.sql) */
+let qualitesCommunes = {};
+async function chargerQualitesCommunes() {
+  if (!sb || !compte) return;
+  try {
+    const l = verifier(await sb.rpc("qualites_communes")) || [];
+    qualitesCommunes = {};
+    for (const x of l) (qualitesCommunes[x.nom] ||= []).push(Number(x.qualite));
+  } catch {}   // supabase-qualites.sql non installé
+}
+async function signalerQualites() {
+  try {
+    const paires = new Set();
+    for (const it of items) if (it.nom && Number.isInteger(Number(it.qualite)) && Number(it.qualite) > 0) paires.add(`${it.nom}|${Number(it.qualite)}`);
+    for (const [n, vs] of Object.entries(base.qualites || {})) for (const v of vs) paires.add(`${n}|${v}`);
+    const deja = new Set(base.qualitesSignalees || []);
+    const neuves = [...paires].filter((k) => !deja.has(k)).slice(0, 300);
+    if (!neuves.length) return;
+    const r = await sb.rpc("signaler_qualites", { p: neuves.map((k) => { const i = k.lastIndexOf("|"); return { nom: k.slice(0, i), qualite: Number(k.slice(i + 1)) }; }) });
+    if (!r.error) { base.qualitesSignalees = [...deja, ...neuves]; sauver(); }
+  } catch {}
+}
+
+const SEUIL_QUALITES = 3;
+function carteQualites(q) {
+  const l = admin.qualites.filter((x) => !q || x.nom.toLowerCase().includes(q) || String(x.qualite).includes(q));
+  const etat = (x) => x.statut === "valide" ? `<span class="ad-ok">Validée</span>` : x.statut === "rejete" ? `<span class="ad-banni">Rejetée</span>`
+    : Number(x.nb_joueurs) >= SEUIL_QUALITES ? `<span class="ad-ok">Adoptée</span>` : `<span class="note">En observation</span>`;
+  const nouvelles = admin.qualites.filter((x) => !valeursWiki(x.nom).includes(Number(x.qualite))).length;
+  return `<div class="carte">
+    <h2>Qualités observées</h2>
+    <p class="note">Qualités vues sur les caisses enregistrées par les joueurs. Une qualité vue par ${SEUIL_QUALITES} joueurs ou plus est adoptée automatiquement, sauf si tu la rejettes. ${NB(nouvelles)} absentes du tableau d'origine (wiki 4.9).</p>
+    <div><button class="btn petit" type="button" data-admin="export-qualites">Copier la liste à jour (JSON)</button></div>
+    <div class="tableau-wrap"><table class="ad-table">
+      <thead><tr><th>Minerai</th><th class="num">Qualité</th><th>Tableau d'origine</th><th class="num">Joueurs</th><th>Dernière vue</th><th>Statut</th><th></th></tr></thead>
+      <tbody>${l.map((x) => `<tr>
+        <td>${esc(x.nom)}</td><td class="num"><span class="q">${Number(x.qualite)}</span></td>
+        <td>${valeursWiki(x.nom).includes(Number(x.qualite)) ? "oui" : `<b class="ad-admin">nouvelle</b>`}</td>
+        <td class="num">${NB(Number(x.nb_joueurs))}</td><td>${dateCourte(x.derniere)}</td><td>${etat(x)}</td>
+        <td class="ad-actions">
+          ${x.statut !== "valide" ? `<button class="btn petit" type="button" data-admin="q-statut" data-statut="valide" data-nom="${esc(x.nom)}" data-q="${Number(x.qualite)}">Valider</button>` : ""}
+          ${x.statut !== "rejete" ? `<button class="btn petit danger" type="button" data-admin="q-statut" data-statut="rejete" data-nom="${esc(x.nom)}" data-q="${Number(x.qualite)}">Rejeter</button>` : ""}
+          ${x.statut ? `<button class="btn petit" type="button" data-admin="q-statut" data-statut="" data-nom="${esc(x.nom)}" data-q="${Number(x.qualite)}">Auto</button>` : ""}</td>
+      </tr>`).join("") || `<tr><td colspan="7" class="note">Aucune qualité signalée pour l'instant.</td></tr>`}</tbody>
+    </table></div>
+  </div>`;
+}
+document.addEventListener("click", async (e) => {
+  const b = e.target.closest?.('[data-admin="q-statut"], [data-admin="export-qualites"]'); if (!b || !sb) return;
+  e.stopImmediatePropagation();
+  try {
+    if (b.dataset.admin === "export-qualites") {
+      const liste = {};
+      for (const [n, vs] of Object.entries(valeurs)) liste[n] = new Set(vs);
+      for (const x of admin.qualites || []) {
+        const ok = x.statut === "valide" || (x.statut !== "rejete" && Number(x.nb_joueurs) >= SEUIL_QUALITES);
+        (liste[x.nom] ||= new Set());
+        if (ok) liste[x.nom].add(Number(x.qualite));
+        if (x.statut === "rejete") liste[x.nom].delete(Number(x.qualite));
+      }
+      const json = JSON.stringify(Object.fromEntries(Object.entries(liste).sort().map(([n, v]) => [n, [...v].sort((a, c) => a - c)])));
+      await navigator.clipboard.writeText(json).catch(() => prompt("Liste :", json));
+      toast("Liste des qualités copiée.");
+      return;
+    }
+    verifier(await sb.rpc("admin_statut_qualite", { p_nom: b.dataset.nom, p_qualite: Number(b.dataset.q), p_statut: b.dataset.statut || null }));
+    admin.joueurs = null; renderAdmin();
+    chargerQualitesCommunes();
+  } catch (err) { toast(`Erreur : ${err.message || err}`); }
+}, true);
 </script>
 </body>
 </html>
