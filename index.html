@@ -867,6 +867,29 @@ span.scu, td .scu, #dr-rend, .raff-liste .ro-l b, .nb-caisses, .actions-groupe s
 .home-video .etapes { margin: 6px 0 0; }
 @media (max-width: 1100px) { .home-trois { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: "intro intro" "v1 v2" "param param"; } }
 @media (max-width: 700px) { .home-trois { grid-template-columns: 1fr; grid-template-areas: "intro" "v1" "v2" "param"; } }
+.act-tete { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; padding: 4px 0 10px; margin-bottom: 4px; border-bottom: 1px solid var(--trait); }
+.act-tete h2 { margin: 0; color: var(--orange); text-transform: uppercase; letter-spacing: .06em; font-size: 14px; display: flex; align-items: center; gap: 10px; }
+.act-tete h2::before { content: ""; flex: none; width: 34px; height: 9px; background: repeating-linear-gradient(135deg, var(--strie) 0 2px, transparent 2px 5px); }
+#act-stock.desactive { opacity: .4; cursor: not-allowed; pointer-events: auto; filter: grayscale(1); }
+/* image de corporation : seulement à hauteur du bloc d'activité, collée à gauche, fondue vers la droite */
+#v-home::before, #v-home::after { display: none !important; }
+.home-haut { position: relative; }
+.home-haut::before { content: ""; position: absolute; z-index: -1; pointer-events: none; top: -24px; bottom: -16px; left: calc(50% - 50vw); width: 50vw;
+  background: url("corpo.jpg") center 40% / cover no-repeat; opacity: .6;
+  -webkit-mask-image: linear-gradient(to right, #000 25%, transparent 100%), linear-gradient(to bottom, #000 70%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(to right, #000 25%, transparent 100%), linear-gradient(to bottom, #000 70%, transparent 100%); mask-composite: intersect; }
+.home-haut > * { position: relative; z-index: 1; }
+#v-home > .home-haut { z-index: 1; isolation: isolate; }
+/* description de l'accueil : plus aérée et descendue */
+.home-trois > .home-intro { padding-top: 34px !important; gap: 22px; }
+.home-intro .home-lead { line-height: 1.6; }
+.home-trois { padding-top: 10vh; }
+.home-activite { min-height: 24em; display: flex !important; flex-direction: column; gap: 10px; }
+.home-activite > .act-tete { margin-bottom: auto; }
+.home-activite::after { content: ""; margin-top: auto; }
+.home-activite .act-cta, .home-activite #act-vide { text-align: center; justify-items: center; }
+.home-activite .act-cta .hc-cta { justify-content: center; }
 </style>
 </head>
 <body>
@@ -891,7 +914,8 @@ span.scu, td .scu, #dr-rend, .raff-liste .ro-l b, .nb-caisses, .actions-groupe s
   <section id="v-home" hidden>
     <div class="home-haut" id="h-grille">
       <div class="carte home-activite">
-        <h2 id="act-titre">Activité de la corporation et des alliés</h2>
+        <div class="act-tete"><h2 id="act-titre">Activité de la corporation et des alliés</h2>
+          <a class="btn petit" id="act-stock" href="#/corpo">Stock corpo</a></div>
         <ul class="activite" id="act-liste"></ul>
         <p class="note" id="act-vide" hidden></p>
         <div class="act-cta" id="act-cta" hidden>
@@ -910,7 +934,6 @@ span.scu, td .scu, #dr-rend, .raff-liste .ro-l b, .nb-caisses, .actions-groupe s
         <button type="button" class="btn principal" data-ouvrir-nav>+ Ajouter des caisses</button>
         <button type="button" class="btn principal" data-ouvrir-nav>+ Ordre de raffinage</button>
         <a class="btn" href="#/minerais">Mes ressources</a>
-        <a class="btn" href="#/corpo">Stock corpo</a>
       </div>
     </div>
     <div class="home-trois">
@@ -3830,6 +3853,11 @@ function renderHome() {
       <div class="ou">à ${station} · ${NB(g.caisses.length)} caisse${g.caisses.length > 1 ? "s" : ""}, <span class="scu">${fmtScu(scu)}</span> SCU</div></li>`;
   }).join("");
   const sansCorpo = !compte?.corpos?.length;
+  const st = $("act-stock");
+  st.classList.toggle("desactive", sansCorpo);
+  if (sansCorpo) { st.setAttribute("aria-disabled", "true"); st.setAttribute("tabindex", "-1"); st.removeAttribute("href");
+    st.title = compte ? "Rejoins ou crée une corporation pour voir son stock" : "Connecte-toi pour voir le stock de ta corporation"; }
+  else { st.removeAttribute("aria-disabled"); st.removeAttribute("tabindex"); st.href = "#/corpo"; st.title = ""; }
   $("act-cta").hidden = !sansCorpo;
   $("act-vide").hidden = !!groupes.length || sansCorpo;
   $("act-vide").textContent = compte
