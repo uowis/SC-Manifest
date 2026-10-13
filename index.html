@@ -898,6 +898,15 @@ span.scu, td .scu, #dr-rend, .raff-liste .ro-l b, .nb-caisses, .actions-groupe s
 .act-stocks { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
 .act-stocks .btn b { font-weight: 700; color: var(--orange); }
 .act-stocks .btn.desactive { opacity: .4; cursor: not-allowed; filter: grayscale(1); }
+/* bloc « Mes ressources » à droite de l'activité */
+.home-haut { grid-template-columns: minmax(0, 1fr) 300px !important; }
+.home-haut.avec-raff { grid-template-columns: minmax(0, 1fr) 300px 300px !important; }
+@media (max-width: 1000px) { .home-haut, .home-haut.avec-raff { grid-template-columns: 1fr !important; } }
+.act-stats { margin: -4px 0 0; color: var(--os-doux); font-size: 14px; }
+.home-activite > .act-stats { margin-bottom: auto; }
+.home-activite > .act-tete:has(+ .act-stats:not([hidden])) { margin-bottom: 0; }
+.home-mes .mes-cta { display: grid; gap: 10px; }
+.home-mes .mes-cta .btn { justify-content: center; text-align: center; padding: 11px 14px; }
 </style>
 </head>
 <body>
@@ -924,6 +933,7 @@ span.scu, td .scu, #dr-rend, .raff-liste .ro-l b, .nb-caisses, .actions-groupe s
       <div class="carte home-activite">
         <div class="act-tete"><h2 id="act-titre">Activité de la corporation et des alliés</h2>
           <span class="act-stocks" id="act-stocks"></span></div>
+        <p class="act-stats" id="act-stats" hidden></p>
         <ul class="activite" id="act-liste"></ul>
         <p class="note" id="act-vide" hidden></p>
         <div class="act-cta" id="act-cta" hidden>
@@ -938,10 +948,14 @@ span.scu, td .scu, #dr-rend, .raff-liste .ro-l b, .nb-caisses, .actions-groupe s
         <h2>Ordres de raffinage</h2>
         <ul class="raff-liste grille" id="h-raff"></ul>
       </aside>
-      <div class="home-cta">
-        <button type="button" class="btn principal" data-ouvrir-nav>+ Ajouter des caisses</button>
-        <button type="button" class="btn principal" data-ouvrir-nav>+ Ordre de raffinage</button>
-        <a class="btn" href="#/minerais">Mes ressources</a>
+      <div class="carte home-activite home-mes">
+        <div class="act-tete"><h2>Mes ressources</h2></div>
+        <p class="act-stats" id="mes-stats"></p>
+        <div class="mes-cta">
+          <a class="btn" href="#/minerais">Mes stocks</a>
+          <button type="button" class="btn principal" data-ouvrir-nav>+ Ajouter des caisses</button>
+          <button type="button" class="btn principal" data-ouvrir-nav>+ Ordre de raffinage</button>
+        </div>
       </div>
     </div>
     <div class="home-trois">
@@ -3873,6 +3887,13 @@ function renderHome() {
     bouton("#/corpo/allies", "<span>Stock Alliance</span>", allies, !compte ? "Connecte-toi pour voir le stock de ta corporation"
       : !corpos.length ? "Rejoins ou crée une corporation pour voir son stock" : "Aucune corporation alliée ne partage avec vous");
   $("act-cta").hidden = !sansCorpo;
+  // totaux : caisses visibles par la corporation (les miennes hors « moi seul » + celles partagées) et mes ressources
+  const somme = (l) => l.reduce((t, it) => t + (Number(it.quantite_scu) || 0), 0);
+  const stat = (l) => `${NB(l.length)} caisse${l.length > 1 ? "s" : ""}, ${SC(fmtScu(somme(l)))} SCU`;
+  const visiblesCorpo = sansCorpo ? [] : [...items.filter((it) => (it.visibilite || "corporation") !== "prive"), ...(partage.caisses || [])];
+  $("act-stats").hidden = sansCorpo;
+  $("act-stats").innerHTML = stat(visiblesCorpo);
+  $("mes-stats").innerHTML = stat(items);
   $("act-vide").hidden = !!groupes.length || sansCorpo;
   $("act-vide").textContent = compte
     ? (compte.corpos?.length ? "Aucune activité pour l'instant." : "Rejoins ou crée une corporation (page Compte) pour suivre l'activité de tes coéquipiers.")
