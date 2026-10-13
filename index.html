@@ -830,6 +830,43 @@ span.scu, td .scu, #dr-rend, .raff-liste .ro-l b, .nb-caisses, .actions-groupe s
 .pastille-notif { position: absolute; top: -6px; right: -6px; min-width: 18px; height: 18px; padding: 0 5px; box-sizing: border-box; border-radius: 9px;
   background: var(--orange); color: #fff; font-size: 11px; font-weight: 700; line-height: 18px; text-align: center; }
 .pastille-notif[hidden] { display: none; }
+/* accueil : vidéo 1 | vidéo 2 | description, puis paramétrage sur toute la largeur */
+.home-trois { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-areas: "v1 v2 intro" "param param param"; gap: 20px 28px; align-items: start; }
+.home-trois > .home-video-1 { grid-area: v1; grid-column: auto; }
+.home-trois > .home-video-2 { grid-area: v2; grid-column: auto; }
+.home-trois > .home-intro { grid-area: intro; align-self: start; padding: 0 0 0 8px; }
+.home-trois > .home-param { grid-area: param; }
+@media (max-width: 1100px) { .home-trois { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: "intro intro" "v1 v2" "param param"; } .home-trois > .home-intro { padding: 0; } }
+@media (max-width: 700px) { .home-trois { grid-template-columns: 1fr; grid-template-areas: "intro" "v1" "v2" "param"; } }
+/* accueil : image de corporation en fond, derrière le bloc d'activité */
+#v-home { position: relative; }
+#v-home::before { content: ""; position: absolute; z-index: 0; pointer-events: none; top: -24px; left: 50%; width: 100vw; transform: translateX(-50%);
+  height: 560px; background: url("corpo.jpg") center 35% / cover no-repeat; opacity: .55;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgba(0,0,0,.55) 45%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, rgba(0,0,0,.55) 45%, transparent 100%); }
+#v-home::after { content: ""; position: absolute; z-index: 0; pointer-events: none; top: -24px; left: 50%; width: 100vw; transform: translateX(-50%);
+  height: 560px; background: linear-gradient(180deg, rgba(5,11,19,.25) 0%, rgba(5,11,19,.6) 50%, rgba(5,11,19,0) 100%); }
+#v-home > * { position: relative; z-index: 1; }
+.home-activite { background: rgba(14, 22, 30, .72) !important; -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
+.act-cta { display: grid; gap: 10px; }
+.act-cta p { margin: 0; color: var(--os-doux); line-height: 1.5; }
+.act-cta .hc-lead { color: var(--os); font-size: 17px; font-weight: 600; }
+.act-cta .hc-cta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+/* contraste adouci : fonds plus clairs, textes clairs un peu plus sombres */
+:root { --rouille: #121b25; --panneau: #1a2530; --panneau-2: #24303b; --trait: #34434d; --bord: #4a5a62;
+  --os: #aec6cb; --os-doux: #7c9299; }
+.barre { background: #141e28 !important; }
+.carte { background: linear-gradient(180deg, #1c2732, #18222c) !important; }
+.home-activite { background: rgba(26, 37, 48, .74) !important; }
+.video, .video-facade, .fiche img, .dc-bloc textarea { background: #0c131a; }
+#v-home::after { background: linear-gradient(180deg, rgba(18,27,37,.25) 0%, rgba(18,27,37,.6) 50%, rgba(18,27,37,0) 100%) !important; }
+/* accueil : description étroite | vidéo inventaire + étapes | vidéo raffinage + étapes */
+.home-trois { grid-template-columns: minmax(0, .62fr) minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "intro v1 v2" "param param param"; }
+.home-trois > .home-intro { padding: 0 8px 0 0; }
+.home-intro h1 { font-size: 24px; line-height: 1.25; }
+.home-video .etapes { margin: 6px 0 0; }
+@media (max-width: 1100px) { .home-trois { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: "intro intro" "v1 v2" "param param"; } }
+@media (max-width: 700px) { .home-trois { grid-template-columns: 1fr; grid-template-areas: "intro" "v1" "v2" "param"; } }
 </style>
 </head>
 <body>
@@ -857,6 +894,13 @@ span.scu, td .scu, #dr-rend, .raff-liste .ro-l b, .nb-caisses, .actions-groupe s
         <h2 id="act-titre">Activité de la corporation et des alliés</h2>
         <ul class="activite" id="act-liste"></ul>
         <p class="note" id="act-vide" hidden></p>
+        <div class="act-cta" id="act-cta" hidden>
+          <p class="hc-lead">Partagez vos inventaires avec votre corporation</p>
+          <div class="hc-cta">
+            <a class="btn principal" href="#/compte">Créer une corporation</a>
+            <a class="btn" href="#/compte">Rejoindre une corporation</a>
+          </div>
+        </div>
       </div>
       <aside class="carte raff-ressources" id="h-raff-bloc" hidden>
         <h2>Ordres de raffinage</h2>
@@ -870,24 +914,31 @@ span.scu, td .scu, #dr-rend, .raff-liste .ro-l b, .nb-caisses, .actions-groupe s
       </div>
     </div>
     <div class="home-trois">
-      <div class="home-video">
+      <div class="home-video home-video-1">
         <h2>Inventory recorder semi auto</h2>
         <div class="video"><button type="button" class="video-facade" id="home-video" data-yt="63nSYMTkZwY" aria-label="Lire la vidéo « Inventory recorder semi auto »"><img src="inventaire.jpg" alt="" loading="lazy" data-repli="https://i.ytimg.com/vi/63nSYMTkZwY/maxresdefault.jpg|https://i.ytimg.com/vi/63nSYMTkZwY/hqdefault.jpg"><span class="vf-play" aria-hidden="true"><svg viewBox="0 0 68 48"><path d="M66.5 7.7a8.5 8.5 0 0 0-6-6C55.3.3 34 .3 34 .3s-21.3 0-26.5 1.4a8.5 8.5 0 0 0-6 6C.1 13 .1 24 .1 24s0 11 1.4 16.3a8.5 8.5 0 0 0 6 6C12.7 47.7 34 47.7 34 47.7s21.3 0 26.5-1.4a8.5 8.5 0 0 0 6-6C67.9 35 67.9 24 67.9 24s0-11-1.4-16.3z" fill="#c4302b"/><path d="M45 24 27 14v20z" fill="#fff"/></svg></span></button></div>
         <p class="note"><a id="home-video-lien" href="https://www.youtube.com/watch?v=63nSYMTkZwY" target="_blank" rel="noopener">Voir la vidéo sur YouTube</a></p>
-        <h2 class="h2-video2">Refining order recorder</h2>
-        <div class="video"><button type="button" class="video-facade" id="home-video-2" data-yt="VuDnWUv9Xuw" aria-label="Lire la vidéo « Refining order recorder »"><img src="raffinage.jpg" alt="" loading="lazy" data-repli="https://i.ytimg.com/vi/VuDnWUv9Xuw/maxresdefault.jpg|https://i.ytimg.com/vi/VuDnWUv9Xuw/hqdefault.jpg"><span class="vf-play" aria-hidden="true"><svg viewBox="0 0 68 48"><path d="M66.5 7.7a8.5 8.5 0 0 0-6-6C55.3.3 34 .3 34 .3s-21.3 0-26.5 1.4a8.5 8.5 0 0 0-6 6C.1 13 .1 24 .1 24s0 11 1.4 16.3a8.5 8.5 0 0 0 6 6C12.7 47.7 34 47.7 34 47.7s21.3 0 26.5-1.4a8.5 8.5 0 0 0 6-6C67.9 35 67.9 24 67.9 24s0-11-1.4-16.3z" fill="#c4302b"/><path d="M45 24 27 14v20z" fill="#fff"/></svg></span></button></div>
-        <p class="note"><a href="https://www.youtube.com/watch?v=VuDnWUv9Xuw" target="_blank" rel="noopener">Voir la vidéo sur YouTube</a></p>
-      </div>
-      <div class="home-intro">
-        <h1>Scanner d'inventaire et de raffinage semi‑automatique</h1>
-        <p class="home-lead">Gérez vos stocks de minerais : quantité, qualité, localisation. Et partagez-les avec votre corporation.</p>
-        <p class="home-lead">Aucune installation, aucun téléchargement nécessaire.</p>
         <ol class="etapes">
           <li><span class="num">1</span><div>Dans <strong>Star Citizen</strong>, ouvrez votre inventaire.</div></li>
           <li><span class="num">2</span><div>Dans <strong>Star Manifest</strong>, <button type="button" class="lien" data-ouvrir-nav>choisissez une station</button> dans le menu ☰.</div></li>
           <li><span class="num">3</span><div>Cliquez sur <strong>« Ajouter des caisses »</strong> et choisissez la fenêtre du jeu.</div></li>
           <li><span class="num">4</span><div>Survolez chaque minerai, un par un : l'enregistrement se fait automatiquement.</div></li>
         </ol>
+      </div>
+      <div class="home-video home-video-2">
+        <h2>Refining order recorder</h2>
+        <div class="video"><button type="button" class="video-facade" id="home-video-2" data-yt="VuDnWUv9Xuw" aria-label="Lire la vidéo « Refining order recorder »"><img src="raffinage.jpg" alt="" loading="lazy" data-repli="https://i.ytimg.com/vi/VuDnWUv9Xuw/maxresdefault.jpg|https://i.ytimg.com/vi/VuDnWUv9Xuw/hqdefault.jpg"><span class="vf-play" aria-hidden="true"><svg viewBox="0 0 68 48"><path d="M66.5 7.7a8.5 8.5 0 0 0-6-6C55.3.3 34 .3 34 .3s-21.3 0-26.5 1.4a8.5 8.5 0 0 0-6 6C.1 13 .1 24 .1 24s0 11 1.4 16.3a8.5 8.5 0 0 0 6 6C12.7 47.7 34 47.7 34 47.7s21.3 0 26.5-1.4a8.5 8.5 0 0 0 6-6C67.9 35 67.9 24 67.9 24s0-11-1.4-16.3z" fill="#c4302b"/><path d="M45 24 27 14v20z" fill="#fff"/></svg></span></button></div>
+        <p class="note"><a href="https://www.youtube.com/watch?v=VuDnWUv9Xuw" target="_blank" rel="noopener">Voir la vidéo sur YouTube</a></p>
+        <ol class="etapes">
+          <li><span class="num">1</span><div>Lancez vos ordres de raffinage (gardez l'écran du terminal ouvert).</div></li>
+          <li><span class="num">2</span><div>Sur <strong>Star Manifest</strong>, lancez le scan de raffinage (<strong>« + Ordre de raffinage »</strong>).</div></li>
+          <li><span class="num">3</span><div>Les résultats du scan s'affichent : vous pouvez enregistrer chaque ordre.</div></li>
+        </ol>
+      </div>
+      <div class="home-intro">
+        <h1>Scanner d'inventaire et de raffinage semi‑automatique</h1>
+        <p class="home-lead">Gérez vos stocks de minerais : quantité, qualité, localisation. Et partagez-les avec votre corporation.</p>
+        <p class="home-lead">Aucune installation, aucun téléchargement nécessaire.</p>
       </div>
       <div class="carte home-param">
         <div class="hp-texte">
@@ -903,19 +954,6 @@ span.scu, td .scu, #dr-rend, .raff-liste .ro-l b, .nb-caisses, .actions-groupe s
         </div>
       </div>
     </div>
-    <section class="home-corpo" aria-labelledby="hc-titre">
-      <div class="hc-image"><img src="corpo.jpg" alt="Groupe de joueurs de Star Citizen" loading="lazy" onerror="this.closest('.hc-image').classList.add('vide')"></div>
-      <div class="hc-texte">
-        <h2 id="hc-titre">Jouez en corporation</h2>
-        <p class="hc-lead">Le partage des ressources est le premier objectif de Star Manifest.</p>
-        <p>Créez votre corporation ou rejoignez celle de vos coéquipiers : chacun scanne ses caisses, et tout le monde voit en un coup d'œil ce que la corpo possède, où, et en quelle qualité.</p>
-        <p>Vous pouvez aussi vous allier avec d'autres corporations pour partager vos stocks entre alliés. Chaque joueur choisit, caisse par caisse, ce qu'il partage.</p>
-        <div class="hc-cta">
-          <a class="btn principal" href="#/compte">Créer une corporation</a>
-          <a class="btn" href="#/compte">Rejoindre une corporation</a>
-        </div>
-      </div>
-    </section>
   </section>
 
   <section id="v-accueil" hidden>
@@ -3791,7 +3829,9 @@ function renderHome() {
       <div class="quoi">${noms.map(esc).join(", ")}</div>
       <div class="ou">à ${station} · ${NB(g.caisses.length)} caisse${g.caisses.length > 1 ? "s" : ""}, <span class="scu">${fmtScu(scu)}</span> SCU</div></li>`;
   }).join("");
-  $("act-vide").hidden = !!groupes.length;
+  const sansCorpo = !compte?.corpos?.length;
+  $("act-cta").hidden = !sansCorpo;
+  $("act-vide").hidden = !!groupes.length || sansCorpo;
   $("act-vide").textContent = compte
     ? (compte.corpos?.length ? "Aucune activité pour l'instant." : "Rejoins ou crée une corporation (page Compte) pour suivre l'activité de tes coéquipiers.")
     : "Connecte-toi (bouton « Se connecter », en haut à droite) pour suivre l'activité de ta corporation et de ses alliés.";
