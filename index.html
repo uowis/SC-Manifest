@@ -1040,6 +1040,16 @@ body.overlay .fiche.mode-raff > .f-part, body.overlay .fiche.attente > .f-part {
 .f-derniers tr:hover .b-suppr-ligne, .f-derniers tr:hover .b-editer-scu { opacity: 1; }
 .b-suppr-ligne:hover { color: #e5484d; }
 .f-derniers .champ-scu-table { width: 4.5em; font: inherit; padding: 0 3px; height: 17px; background: #fff; color: #142028; border: 0; border-radius: 2px; text-align: right; }
+
+/* v161 : bloc « Signatures radar » à droite du paramétrage, image en arrière-plan (radar.jpg) */
+.home-trois { grid-template-areas: "intro v1 v2" "param param outil"; }
+@media (max-width: 1100px) { .home-trois { grid-template-areas: "intro intro" "v1 v2" "param outil"; } }
+@media (max-width: 700px) { .home-trois { grid-template-areas: "intro" "v1" "v2" "param" "outil"; } }
+.home-trois > .home-outil { grid-area: outil; align-self: stretch; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-start; gap: 10px; padding: 28px 30px;
+  background: linear-gradient(to top, rgba(10,14,18,.92) 30%, rgba(10,14,18,.45)), url("radar.jpg") center / cover no-repeat, #1a222a !important; }
+.home-trois > .home-param { align-self: stretch; }
+.home-outil h2 { margin: 0; color: var(--orange); text-transform: uppercase; letter-spacing: .06em; font-size: 14px; }
+.home-outil p { margin: 0; line-height: 1.5; }
 </style>
 </head>
 <body>
@@ -1130,6 +1140,11 @@ body.overlay .fiche.mode-raff > .f-part, body.overlay .fiche.attente > .f-part {
           <p>Votre résolution est peut-être particulière :</p>
           <button class="btn principal" type="button" id="b-parametrer">Paramétrer</button>
         </div>
+      </div>
+      <div class="carte home-outil">
+        <h2>Signatures radar</h2>
+        <p>Lit les signatures radar du jeu et affiche dans un overlay le minerai correspondant.</p>
+        <a class="btn principal" href="sc-radar-ocr-overlay.html" target="_blank" rel="noopener">Ouvrir l'outil</a>
       </div>
     </div>
   </section>
