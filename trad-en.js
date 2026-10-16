@@ -3,6 +3,10 @@
    Ajoute ou corrige des lignes librement ; un texte absent reste en français. */
 window.TRAD_EN = {
   textes: {
+    "Signatures radar": "Radar signatures",
+    "Lit les signatures radar du jeu et affiche dans un overlay le minerai correspondant.": "Reads in-game radar signatures and shows the matching ore in an overlay.",
+    "Ouvrir l'outil": "Open the tool",
+    "Recherche de l'écran": "Searching for the screen",
     "Mode manuel : lecture sans enregistrement automatique.": "Manual mode: reading without auto-save.",
     "Lu (mode manuel) : vérifiez, puis Enregistrer.": "Read (manual mode): check, then Save.",
     "Qté (SCU)": "Qty (SCU)",

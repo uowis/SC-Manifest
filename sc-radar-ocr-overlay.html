@@ -1,0 +1,1746 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Radar OCR Overlay — Star Citizen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.1.1/tesseract.min.js"></script>
+<style>
+  :root{
+    --bg: #0c0c0d;
+    --panel: #161616;
+    --panel-2: #1c1c1e;
+    --border: #2e2e30;
+    --accent: #e8732c;
+    --accent-dim: #5a3a22;
+    --accent2: #5b9bd5;
+    --accent2-dim: #2c4258;
+    --header-bar: #3d4a5c;
+    --header-bar-2: #2a3340;
+    --green: #6ee7a0;
+    --text: #e8e8e8;
+    --muted: #8b8d92;
+    --danger: #ff5f6d;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background-color: var(--bg);
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E"),
+      radial-gradient(ellipse at top, #1a1715 0%, var(--bg) 55%);
+    background-repeat: repeat, no-repeat;
+    background-size: 180px 180px, 100% 100%;
+    background-attachment: fixed, fixed;
+    color:var(--text);
+    font-family:'Rajdhani', sans-serif;
+    min-height:100vh;
+    padding-bottom:120px;
+  }
+  ::selection{ background: rgba(232,115,44,0.3); }
+
+  /* ===== Header ===== */
+  header.topbar{
+    position:relative;
+    display:flex;align-items:center;gap:18px;flex-wrap:wrap;
+    padding:22px 28px;
+    border-bottom:1px solid var(--border);
+    background:linear-gradient(180deg, rgba(232,115,44,0.05), transparent);
+  }
+  header.topbar::before{
+    content:'';position:absolute;top:0;left:0;right:0;height:3px;
+    background:linear-gradient(90deg, #c0392b, rgba(192,57,43,0) 65%);
+  }
+  .radar{
+    width:52px;height:52px;border-radius:50%;
+    border:1px solid var(--accent-dim);
+    position:relative;overflow:hidden;flex:none;
+    background:radial-gradient(circle, rgba(232,115,44,0.08) 0%, transparent 70%);
+  }
+  .radar::before{
+    content:'';position:absolute;inset:0;
+    background:conic-gradient(from 0deg, rgba(232,115,44,0.65), transparent 70deg);
+    animation:sweep 3s linear infinite;
+  }
+  .radar::after{
+    content:'';position:absolute;inset:0;
+    background:
+      linear-gradient(var(--accent-dim) 1px, transparent 1px) 0 50% / 100% 1px no-repeat,
+      linear-gradient(90deg, var(--accent-dim) 1px, transparent 1px) 50% 0 / 1px 100% no-repeat;
+    opacity:0.6;
+  }
+  @keyframes sweep{ to{ transform:rotate(360deg); } }
+  header h1{
+    font-family:'Rajdhani', sans-serif;
+    font-size:1.4rem;
+    font-weight:700;
+    letter-spacing:.12em;
+    margin:0;
+    color:#f1f2f3;
+  }
+  header h1 span{ color:var(--accent); }
+  header p{
+    margin:4px 0 0;
+    font-size:.85rem;
+    color:var(--muted);
+    letter-spacing:.04em;
+  }
+
+  /* ===== Layout ===== */
+  main.layout{
+    display:grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap:20px;
+    padding:24px 28px;
+    align-items:start;
+  }
+  @media (max-width: 980px){
+    main.layout{ grid-template-columns:1fr; }
+  }
+  .panel{
+    background:linear-gradient(180deg, var(--panel), var(--panel-2));
+    border:1px solid var(--border);
+    border-radius:3px;
+    padding:0 20px 18px;
+    position:relative;
+    overflow:hidden;
+  }
+  .panel h2{
+    font-family:'Rajdhani', sans-serif;
+    font-weight:700;
+    font-size:.8rem;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:#eef2f5;
+    background:linear-gradient(90deg, var(--header-bar), var(--header-bar-2));
+    margin:0 -20px 14px;
+    padding:9px 20px;
+    display:flex;align-items:center;gap:10px;
+    border-bottom:1px solid rgba(255,255,255,0.06);
+  }
+  .panel h2::before{ content:'//'; color:var(--accent); font-weight:700; }
+  .panel h2::after{
+    content:'';flex:1;
+  }
+
+  /* ===== Controls ===== */
+  .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:12px; }
+  .btn{
+    font-family:'Rajdhani', sans-serif;
+    font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+    font-size:.82rem;
+    background:rgba(232,115,44,0.08);
+    border:1px solid var(--accent-dim);
+    color:var(--accent);
+    padding:9px 16px;border-radius:3px;cursor:pointer;
+    transition:all .15s ease;
+  }
+  .btn:hover{ background:rgba(232,115,44,0.18); border-color:var(--accent); }
+  .btn:active{ transform:translateY(1px); }
+  .btn.danger{ color:var(--danger); border-color:#5e2c33; background:rgba(255,95,109,0.07); }
+  .btn.danger:hover{ background:rgba(255,95,109,0.16); border-color:var(--danger); }
+  .btn.ghost{ background:transparent; color:var(--muted); border-color:var(--border); }
+  .btn.ghost:hover{ color:var(--text); border-color:var(--muted); }
+  .btn:disabled{ opacity:.4; cursor:not-allowed; }
+
+  .status-line{
+    font-family:'Share Tech Mono', monospace;
+    font-size:.78rem;
+    color:var(--muted);
+    margin-bottom:10px;
+    min-height:1.2em;
+  }
+  .status-line.ok{ color:var(--green); }
+  .status-line.err{ color:var(--danger); }
+
+  /* ===== Video / capture box ===== */
+  .video-wrap{
+    position:relative;
+    width:100%;
+    aspect-ratio: 16/9;
+    background:#04070a;
+    border:1px solid var(--border);
+    border-radius:4px;
+    overflow:hidden;
+  }
+  .video-wrap video, .video-wrap img, .video-wrap canvas#zoomCanvas{
+    position:absolute;inset:0;
+    width:100%;height:100%;
+    object-fit:contain;
+  }
+  .video-wrap canvas.select-canvas{
+    position:absolute;inset:0;
+    width:100%;height:100%;
+    cursor:crosshair;
+  }
+  .video-wrap.empty::before{
+    content:'Aucune source — démarre le partage d\'écran';
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    color:var(--muted);font-size:.85rem;text-align:center;padding:20px;
+    font-family:'Share Tech Mono', monospace;
+  }
+
+  .crop-info{
+    font-family:'Share Tech Mono', monospace;
+    font-size:.75rem;color:var(--muted);
+    margin-top:8px;
+  }
+  .crop-info b{ color:var(--accent); font-weight:400; }
+
+  label.field{
+    display:flex;flex-direction:column;gap:4px;
+    font-size:.75rem;color:var(--muted);
+    letter-spacing:.06em;text-transform:uppercase;
+    flex:1;min-width:140px;
+  }
+  label.field input[type=range]{ accent-color:var(--accent); }
+  label.field .val{ color:var(--accent); font-family:'Share Tech Mono', monospace; }
+
+  .raw-text{
+    font-family:'Share Tech Mono', monospace;
+    font-size:.78rem;color:var(--text);
+    background:#04080c;
+    border:1px solid var(--border);
+    border-radius:3px;
+    padding:10px;
+    min-height:54px;
+    white-space:pre-wrap;word-break:break-word;
+    margin-top:10px;
+  }
+
+  /* ===== Rules table ===== */
+  .rules{ display:flex;flex-direction:column;gap:8px; }
+  .rule{
+    display:grid;
+    grid-template-columns: 28px 90px 1fr 70px 70px 26px;
+    gap:6px;align-items:center;
+    background:var(--panel-2);
+    border:1px solid var(--border);
+    border-radius:3px;padding:6px 8px;
+  }
+  .rule input[type=text], .rule input[type=number], .rule select{
+    background:#04080c;border:1px solid var(--border);color:var(--text);
+    border-radius:2px;padding:5px 6px;font-size:.78rem;
+    font-family:'Share Tech Mono', monospace;width:100%;
+  }
+  .rule select{ font-family:'Rajdhani', sans-serif; }
+  .rule input[type=color]{
+    width:28px;height:28px;border:1px solid var(--border);background:none;
+    border-radius:2px;padding:0;cursor:pointer;
+  }
+  .rule .del{
+    background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;
+    line-height:1;
+  }
+  .rule .del:hover{ color:var(--danger); }
+  .rule.disabled{ opacity:.4; }
+  .rules-head{
+    display:grid;
+    grid-template-columns: 28px 90px 1fr 70px 70px 26px;
+    gap:6px;font-size:.68rem;color:var(--muted);
+    text-transform:uppercase;letter-spacing:.08em;padding:0 8px;
+    margin-bottom:2px;
+  }
+  .hint{ font-size:.78rem;color:var(--muted);line-height:1.5;margin:0 0 12px; }
+  .hint code{ color:var(--accent); font-family:'Share Tech Mono', monospace; }
+
+  /* ===== Signature panel (dans le header) ===== */
+  .overlay-panel{
+    margin-left:auto;
+    flex:none;
+    width:240px;
+    background:rgba(12,12,13,0.92);
+    border:1px solid var(--accent-dim);
+    border-radius:3px;
+    box-shadow:0 4px 16px rgba(0,0,0,0.4), 0 0 0 1px rgba(232,115,44,0.05);
+    backdrop-filter: blur(6px);
+    user-select:none;
+  }
+  .overlay-head{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:5px 8px;
+    border-bottom:1px solid var(--border);
+    font-family:'Rajdhani', sans-serif;
+    font-weight:700;
+    font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--accent);
+  }
+  .overlay-head .controls{ display:flex;gap:4px; }
+  .overlay-head button{
+    background:none;border:1px solid var(--border);color:var(--muted);
+    width:18px;height:18px;border-radius:2px;cursor:pointer;font-size:.75rem;
+    display:flex;align-items:center;justify-content:center;line-height:1;
+  }
+  .overlay-head button:hover{ color:var(--accent); border-color:var(--accent-dim); }
+  .overlay-head button.active{
+    color:#0c0c0d;
+    background:var(--green);
+    border-color:var(--green);
+  }
+  .overlay-head button.active:hover{ color:#0c0c0d; }
+  .overlay-body{ padding:8px; }
+  .overlay-panel.minimized .overlay-body{ display:none; }
+  .badges{ display:flex;flex-wrap:wrap;gap:4px;min-height:0; }
+  .overlay-signature{
+    font-family:'Share Tech Mono', monospace;
+    font-size:1.4rem; font-weight:700;
+    color:#f1f2f3;
+    letter-spacing:.06em;
+    margin-bottom:6px;
+    padding-bottom:6px;
+    border-bottom:1px solid var(--border);
+  }
+  .overlay-signature .label{
+    display:block;font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--muted);font-weight:500;margin-bottom:2px;
+  }
+  .overlay-signature.stale{ color:var(--muted); }
+  .badge{
+    font-family:'Share Tech Mono', monospace;
+    font-size:.78rem;
+    padding:3px 7px;border-radius:3px;
+    border:1px solid currentColor;
+    display:flex;align-items:center;gap:6px;
+    animation:pop .18s ease;
+  }
+  .badge .dot{ width:8px;height:8px;border-radius:50%;background:currentColor; }
+  @keyframes pop{ from{ transform:scale(.85); opacity:0; } to{ transform:scale(1); opacity:1; } }
+  .badges-empty{ color:var(--muted);font-size:.78rem;font-family:'Share Tech Mono', monospace; }
+  .overlay-raw{
+    margin-top:6px;font-family:'Share Tech Mono', monospace;
+    font-size:.68rem;color:var(--muted);
+    border-top:1px solid var(--border);padding-top:6px;
+    max-height:50px;overflow:auto;white-space:pre-wrap;word-break:break-word;
+  }
+  .overlay-panel.opaque{ background:rgba(12,12,13,1); }
+  .overlay-panel.transparent{
+    background:transparent;
+    border-color:rgba(91,227,255,0.25);
+    box-shadow:none;
+    backdrop-filter:none;
+  }
+  .overlay-panel.transparent .overlay-head{
+    border-bottom-color:rgba(91,227,255,0.15);
+    text-shadow:0 1px 4px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.7);
+  }
+  .overlay-panel.transparent .overlay-signature{
+    border-bottom-color:rgba(255,255,255,0.12);
+    text-shadow:0 1px 4px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.7);
+  }
+  .overlay-panel.transparent .overlay-signature .label,
+  .overlay-panel.transparent .badges-empty,
+  .overlay-panel.transparent .overlay-raw{
+    text-shadow:0 1px 4px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.7);
+  }
+  .overlay-panel.transparent .badge{
+    background:rgba(0,0,0,0.35);
+  }
+
+  input[type=file]{ display:none; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="radar"></div>
+  <div>
+    <h1>RADAR <span>// OCR</span> OVERLAY</h1>
+    <p>Lecture des signatures de la zone de scan radar — Star Citizen</p>
+  </div>
+
+  <!-- ============ SIGNATURE PANEL ============ -->
+  <div class="overlay-panel" id="overlayPanel">
+    <div class="overlay-head" id="overlayHead">
+      <span>Signatures détectées</span>
+      <div class="controls">
+        <button id="btnPip" title="Afficher en Picture-in-Picture (au-dessus de toutes les fenêtres)" style="width:auto;padding:0 8px;font-family:'Share Tech Mono',monospace;font-size:.65rem;letter-spacing:.08em;text-transform:uppercase;">Overlay</button>
+        <button id="btnOpaque" title="Fond verre dépoli (clic = fond transparent)">◐</button>
+        <button id="btnMin" title="Réduire / agrandir">_</button>
+      </div>
+    </div>
+    <div class="overlay-body">
+      <div class="overlay-signature" id="overlaySignature">— aucune signature lue —</div>
+      <div class="badges" id="badges"><span class="badges-empty">Aucune correspondance pour l'instant</span></div>
+      <div class="overlay-raw" id="overlayRaw"></div>
+    </div>
+  </div>
+</header>
+
+<main class="layout">
+
+  <!-- ============ CAPTURE PANEL ============ -->
+  <section class="panel">
+    <h2>Source &amp; Zone de scan</h2>
+
+    <div class="row">
+      <button class="btn" id="btnShare">▶ Partager l'écran / fenêtre</button>
+      <button class="btn danger" id="btnStop" disabled>■ Arrêter</button>
+      <button class="btn ghost" id="btnResetCrop">Réinitialiser le cadrage</button>
+    </div>
+
+    <div class="status-line" id="status">En attente d'une source…</div>
+
+    <div class="video-wrap empty" id="videoWrap">
+      <video id="video" autoplay muted playsinline></video>
+      <img id="testImg" alt="">
+      <canvas id="zoomCanvas" style="display:none;"></canvas>
+      <canvas class="select-canvas" id="selectCanvas"></canvas>
+    </div>
+
+    <div class="crop-info" id="cropInfo">Aucune zone définie — dessine un rectangle sur la source ci-dessus pour délimiter la zone des signatures radar.</div>
+
+    <div class="row" style="margin-top:14px;">
+      <label class="field">
+        Intervalle de scan : <span class="val" id="intervalVal">1.5 s</span>
+        <input type="range" id="intervalSlider" min="0.5" max="5" step="0.25" value="1.5">
+      </label>
+      <label class="field">
+        Agrandissement OCR : <span class="val" id="scaleVal">×3</span>
+        <input type="range" id="scaleSlider" min="1" max="6" step="0.5" value="3">
+      </label>
+    </div>
+    <div class="row">
+      <label class="field">
+        Seuil binarisation : <span class="val" id="threshVal">205</span>
+        <input type="range" id="threshSlider" min="0" max="255" step="5" value="205">
+      </label>
+      <label class="field" style="flex-direction:row;align-items:center;gap:8px;">
+        <input type="checkbox" id="invertChk" checked style="width:auto;accent-color:var(--accent);">
+        Texte clair sur fond sombre
+      </label>
+      <label class="field" style="flex-direction:row;align-items:center;gap:8px;">
+        <input type="checkbox" id="multiThreshChk" style="width:auto;accent-color:var(--accent);">
+        Lecture multi-seuils (3 passes, plus fiable mais plus lent)
+      </label>
+      <label class="field">
+        Écart multi-seuils : <span class="val" id="spreadVal">±30</span>
+        <input type="range" id="spreadSlider" min="5" max="60" step="5" value="30">
+      </label>
+    </div>
+    <p class="hint" style="margin-top:8px;">
+      La police du HUD est petite et condensée — un agrandissement ×3 à ×5 combiné à la binarisation
+      aide beaucoup l'OCR. Augmente le seuil si l'image prétraitée ci-dessous est trop "chargée" de bruit,
+      baisse-le si les chiffres disparaissent. La case <code>lecture multi-seuils</code> relance l'OCR avec
+      trois seuils (seuil − écart, seuil, seuil + écart) et garde le résultat majoritaire — utile si la lecture
+      est instable d'une frame à l'autre, au prix d'environ trois fois plus de calcul par cycle. Le curseur
+      <code>écart multi-seuils</code> règle cet écart (±x autour du seuil principal).
+    </p>
+    <canvas id="ocrPreview" style="width:100%;max-height:120px;object-fit:contain;background:#04080c;border:1px solid var(--border);border-radius:3px;image-rendering:pixelated;display:block;"></canvas>
+    <div class="raw-text" id="rawText">—</div>
+  </section>
+
+  <!-- ============ RULES PANEL ============ -->
+  <section class="panel">
+    <h2>Table de correspondance minéraux</h2>
+    <p class="hint">
+      Chaque ligne associe un texte/valeur lu par l'OCR à un minéral affiché dans l'overlay.
+      Type <code>Signature (×1)</code> : valeur de référence pour 1 roche/objet, et <code>max</code> = nombre maximum
+      de roches/objets observable pour ce minéral — l'appli cherche, pour le nombre lu, le minéral et le
+      multiplicateur (de ×1 à <code>max</code>) dont <code>base × N</code> est le plus proche, dans une tolérance
+      de ±6. Limiter <code>max</code> évite les fausses correspondances avec un minéral dont
+      <code>base × N</code> coïncide pour un N trop grand. Type <code>contient</code> : le texte lu doit contenir
+      ce mot (ex. nom du minéral affiché dans la composition d'une roche). Type <code>plage</code> : un nombre lu
+      doit être compris entre min et max.
+      La table par défaut est calibrée sur la 4.7 (LoudGuns) — vérifie/ajuste si le patch a changé les valeurs.
+    </p>
+
+    <div class="rules-head">
+      <span></span><span>Type</span><span>Valeur ×1 / max</span><span>Minéral</span><span>Couleur</span><span></span>
+    </div>
+    <div class="rules" id="rulesList"></div>
+
+    <div class="row" style="margin-top:12px;">
+      <button class="btn" id="btnAddRule">+ Ajouter une ligne</button>
+      <button class="btn ghost" id="btnResetRules">Réinitialiser la table</button>
+    </div>
+  </section>
+
+</main>
+
+<!-- Vidéo cachée utilisée pour le mode Picture-in-Picture -->
+<video id="pipVideo" muted playsinline style="position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;left:-9999px;top:-9999px;"></video>
+
+<script>
+(function(){
+
+// ---------------------------------------------------------------------
+// Default mapping table (à calibrer selon ton interface in-game)
+// ---------------------------------------------------------------------
+// "base" = valeur de signature (RS) pour un cluster de 1 roche/objet (×1).
+// Pour un cluster de N, la signature observée ≈ base × N (N de 1 à 10).
+// "base" = valeur de signature (RS) pour un cluster de 1 roche/objet (×1).
+// "maxN" = nombre maximum de roches/objets observable pour ce minéral —
+// limite le multiplicateur testé (évite les fausses correspondances avec
+// un ×N trop grand qui coïnciderait avec un autre minéral).
+const DEFAULT_RULES = [
+  { enabled:true, type:'signature', base:3170, maxN:2,  mineral:'Quantainium',    color:'#ffaa33' },
+  { enabled:true, type:'signature', base:3185, maxN:2,  mineral:'Stileron',       color:'#ffaa33' },
+  { enabled:true, type:'signature', base:3200, maxN:3,  mineral:'Savrilium',      color:'#ffaa33' },
+  { enabled:true, type:'signature', base:3370, maxN:3,  mineral:'Ouratite',       color:'#cc66ff' },
+  { enabled:true, type:'signature', base:3385, maxN:3,  mineral:'Riccite',        color:'#cc66ff' },
+  { enabled:true, type:'signature', base:3400, maxN:3,  mineral:'Lindinium',      color:'#cc66ff' },
+  { enabled:true, type:'signature', base:3540, maxN:4,  mineral:'Beryl',          color:'#3399ff' },
+  { enabled:true, type:'signature', base:3555, maxN:4,  mineral:'Taranite',       color:'#3399ff' },
+  { enabled:true, type:'signature', base:3570, maxN:4,  mineral:'Borase',         color:'#3399ff' },
+  { enabled:true, type:'signature', base:3585, maxN:4,  mineral:'Gold',           color:'#3399ff' },
+  { enabled:true, type:'signature', base:3600, maxN:4,  mineral:'Bexalite',       color:'#3399ff' },
+  { enabled:true, type:'signature', base:3825, maxN:5,  mineral:'Laranite',       color:'#33ccaa' },
+  { enabled:true, type:'signature', base:3840, maxN:5,  mineral:'Aslarite',       color:'#33ccaa' },
+  { enabled:true, type:'signature', base:3855, maxN:5,  mineral:'Titanium',       color:'#33ccaa' },
+  { enabled:true, type:'signature', base:3870, maxN:5,  mineral:'Tungsten',       color:'#33ccaa' },
+  { enabled:true, type:'signature', base:3885, maxN:5,  mineral:'Agricium',       color:'#33ccaa' },
+  { enabled:true, type:'signature', base:3900, maxN:5,  mineral:'Torite',         color:'#33ccaa' },
+  { enabled:true, type:'signature', base:4180, maxN:6,  mineral:'Hephaestanite',  color:'#8899aa' },
+  { enabled:true, type:'signature', base:4195, maxN:6,  mineral:'Tin',            color:'#8899aa' },
+  { enabled:true, type:'signature', base:4210, maxN:6,  mineral:'Quartz',         color:'#8899aa' },
+  { enabled:true, type:'signature', base:4225, maxN:6,  mineral:'Corundum',       color:'#8899aa' },
+  { enabled:true, type:'signature', base:4240, maxN:6,  mineral:'Copper',         color:'#8899aa' },
+  { enabled:true, type:'signature', base:4255, maxN:6,  mineral:'Silicon',        color:'#8899aa' },
+  { enabled:true, type:'signature', base:4270, maxN:6,  mineral:'Iron',           color:'#8899aa' },
+  { enabled:true, type:'signature', base:4285, maxN:6,  mineral:'Aluminium',      color:'#8899aa' },
+  { enabled:true, type:'signature', base:4300, maxN:6,  mineral:'Ice',            color:'#8899aa' },
+  { enabled:true, type:'signature', base:4000, maxN:7,  mineral:'ROC Mineables',  color:'#66ddaa' },
+  { enabled:true, type:'signature', base:3000, maxN:10, mineral:'FPS Mineables',  color:'#77bbdd' },
+  { enabled:true, type:'signature', base:2000, maxN:10, mineral:'Salvage',        color:'#aa9977' }
+];
+
+const STORAGE_KEY = 'sc-radar-ocr-rules-v3';
+const SETTINGS_KEY = 'sc-radar-ocr-settings-v2';
+
+let rules = loadRules();
+let settings = loadSettings();
+
+function loadRules(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULT_RULES));
+}
+function saveRules(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(rules)); }catch(e){}
+}
+function loadSettings(){
+  try{
+    const raw = localStorage.getItem(SETTINGS_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return { interval:1.5, scale:3, threshold:205, invert:true, multiThreshold:false, thresholdSpread:30 };
+}
+function saveSettings(){
+  try{ localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); }catch(e){}
+}
+
+// ---------------------------------------------------------------------
+// DOM refs
+// ---------------------------------------------------------------------
+const video = document.getElementById('video');
+const testImg = document.getElementById('testImg');
+const videoWrap = document.getElementById('videoWrap');
+const zoomCanvas = document.getElementById('zoomCanvas');
+const selectCanvas = document.getElementById('selectCanvas');
+const selectCtx = selectCanvas.getContext('2d');
+const btnResetCrop = document.getElementById('btnResetCrop');
+const statusEl = document.getElementById('status');
+const cropInfoEl = document.getElementById('cropInfo');
+const rawTextEl = document.getElementById('rawText');
+const intervalSlider = document.getElementById('intervalSlider');
+const intervalVal = document.getElementById('intervalVal');
+const scaleSlider = document.getElementById('scaleSlider');
+const scaleVal = document.getElementById('scaleVal');
+const threshSlider = document.getElementById('threshSlider');
+const threshVal = document.getElementById('threshVal');
+const invertChk = document.getElementById('invertChk');
+const multiThreshChk = document.getElementById('multiThreshChk');
+const spreadSlider = document.getElementById('spreadSlider');
+const spreadVal = document.getElementById('spreadVal');
+const ocrPreview = document.getElementById('ocrPreview');
+const rulesListEl = document.getElementById('rulesList');
+const btnShare = document.getElementById('btnShare');
+const btnStop = document.getElementById('btnStop');
+const btnAddRule = document.getElementById('btnAddRule');
+const btnResetRules = document.getElementById('btnResetRules');
+
+const overlayPanel = document.getElementById('overlayPanel');
+const overlayHead = document.getElementById('overlayHead');
+const badgesEl = document.getElementById('badges');
+const overlayRawEl = document.getElementById('overlayRaw');
+const overlaySignatureEl = document.getElementById('overlaySignature');
+const btnMin = document.getElementById('btnMin');
+const btnOpaque = document.getElementById('btnOpaque');
+const btnPip = document.getElementById('btnPip');
+const pipVideo = document.getElementById('pipVideo');
+
+intervalSlider.value = settings.interval;
+scaleSlider.value = settings.scale;
+threshSlider.value = settings.threshold ?? 205;
+invertChk.checked = settings.invert !== false;
+multiThreshChk.checked = settings.multiThreshold === true;
+spreadSlider.value = settings.thresholdSpread ?? 30;
+spreadVal.textContent = '±' + (settings.thresholdSpread ?? 30);
+intervalVal.textContent = settings.interval + ' s';
+scaleVal.textContent = '×' + settings.scale;
+threshVal.textContent = settings.threshold ?? 205;
+
+// ---------------------------------------------------------------------
+// Status helper
+// ---------------------------------------------------------------------
+function setStatus(msg, type){
+  statusEl.textContent = msg;
+  statusEl.className = 'status-line' + (type ? ' ' + type : '');
+}
+
+// ---------------------------------------------------------------------
+// Source abstraction: either <video> (screen share) or <img> (test image)
+// ---------------------------------------------------------------------
+let activeSource = null; // 'video' | 'image' | null
+let stream = null;
+
+function getSourceEl(){
+  return activeSource === 'video' ? video : (activeSource === 'image' ? testImg : null);
+}
+function getSourceSize(){
+  const el = getSourceEl();
+  if(!el) return null;
+  if(activeSource === 'video') return { w: el.videoWidth, h: el.videoHeight };
+  return { w: el.naturalWidth, h: el.naturalHeight };
+}
+
+// ---------------------------------------------------------------------
+// Screen capture
+// ---------------------------------------------------------------------
+function checkCaptureSupport(){
+  const supported = !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia);
+  if(!supported){
+    btnShare.disabled = true;
+    btnShare.title = 'Indisponible dans ce contexte (voir le message sous les boutons)';
+    let msg;
+    if(location.protocol === 'file:'){
+      msg = 'Partage d\'écran indisponible : la page est ouverte en file:// (double-clic). Sers-la via http://localhost ou https pour activer le partage d\'écran.';
+    } else if(!window.isSecureContext){
+      msg = 'Partage d\'écran indisponible : cette page doit être servie en HTTPS (ou http://localhost).';
+    } else {
+      msg = 'Partage d\'écran non supporté par ce navigateur (essaie Chrome, Edge ou Firefox récent).';
+    }
+    setStatus(msg, 'err');
+    showWarningBanner(msg);
+    return false;
+  }
+  return true;
+}
+
+function showWarningBanner(msg){
+  let banner = document.getElementById('captureWarning');
+  if(!banner){
+    banner = document.createElement('div');
+    banner.id = 'captureWarning';
+    banner.style.cssText = 'margin:0 28px 16px;padding:10px 14px;border:1px solid var(--danger);' +
+      'background:rgba(255,95,109,0.08);color:#ffb3ba;border-radius:4px;font-size:.8rem;' +
+      'font-family:"Share Tech Mono", monospace;line-height:1.5;';
+    document.querySelector('main.layout').before(banner);
+  }
+  banner.textContent = '⚠ ' + msg + ' (URL actuelle : ' + location.href + ')';
+}
+checkCaptureSupport();
+
+btnShare.addEventListener('click', async () => {
+  if(!checkCaptureSupport()) return;
+  setStatus('Ouverture de la fenêtre de sélection d\'écran…', '');
+  try{
+    // 1. Ouvre la boîte de dialogue native du navigateur (Screen Capture API)
+    stream = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: 30 }, audio: false });
+
+    // 2. Branche le flux sur la vidéo et force la lecture explicitement
+    video.srcObject = stream;
+    await video.play();
+
+    testImg.style.display = 'none';
+    video.style.display = 'block';
+    activeSource = 'video';
+    videoWrap.classList.remove('empty');
+    btnStop.disabled = false;
+    setStatus('Capture active — sélectionne la zone des signatures radar.', 'ok');
+
+    // 3. Si l'utilisateur arrête le partage depuis la barre du navigateur
+    stream.getVideoTracks()[0].onended = () => stopCapture();
+  }catch(e){
+    let hint = '';
+    if(e.name === 'NotAllowedError') hint = ' (partage refusé ou bloqué par les permissions du navigateur/OS)';
+    else if(e.name === 'NotFoundError') hint = ' (aucune source disponible)';
+    else if(e.name === 'NotSupportedError') hint = ' (API non supportée dans ce contexte — vérifie que la page est en https ou http://localhost)';
+    setStatus('Échec du partage d\'écran : ' + e.name + ' — ' + e.message + hint, 'err');
+  }
+});
+
+btnStop.addEventListener('click', stopCapture);
+function stopCapture(){
+  if(zoomedMode) exitZoomedMode();
+  if(stream){
+    stream.getTracks().forEach(t => t.stop());
+    stream = null;
+  }
+  video.srcObject = null;
+  if(activeSource === 'video'){
+    activeSource = null;
+    videoWrap.classList.add('empty');
+  }
+  btnStop.disabled = true;
+  setStatus('Capture arrêtée.', '');
+}
+
+// ---------------------------------------------------------------------
+// Crop selection (zone de scan radar)
+// ---------------------------------------------------------------------
+// outerRect : rectangle dessiné sur la vue complète (coordonnées d'affichage,
+//              relatives à videoWrap) — délimite grossièrement la zone.
+// innerRect : rectangle dessiné dans la vue zoomée sur outerRect (coordonnées
+//              du zoomCanvas) — affine précisément la zone OCR finale.
+let outerRect = null;
+let innerRect = null;
+let zoomedMode = false;
+let zoomSource = null; // {sx,sy,sw,sh} en pixels source, région agrandie
+let dragging = false, dragStart = null;
+
+function resizeSelectCanvas(){
+  const rect = videoWrap.getBoundingClientRect();
+  selectCanvas.width = rect.width;
+  selectCanvas.height = rect.height;
+  zoomCanvas.width = rect.width;
+  zoomCanvas.height = rect.height;
+  redrawSelection();
+}
+new ResizeObserver(resizeSelectCanvas).observe(videoWrap);
+
+selectCanvas.addEventListener('mousedown', (e) => {
+  const rect = selectCanvas.getBoundingClientRect();
+  dragStart = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+  dragging = true;
+});
+window.addEventListener('mousemove', (e) => {
+  if(!dragging) return;
+  const rect = selectCanvas.getBoundingClientRect();
+  const cur = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+  const r = normalizeRect(dragStart, cur);
+  if(zoomedMode) innerRect = r; else outerRect = r;
+  redrawSelection();
+});
+window.addEventListener('mouseup', () => {
+  if(dragging){
+    dragging = false;
+    if(!zoomedMode){
+      if(outerRect && outerRect.w >= 10 && outerRect.h >= 10){
+        enterZoomedMode();
+      }
+    }
+    updateCropInfo();
+  }
+});
+
+function normalizeRect(a, b){
+  return {
+    x: Math.min(a.x, b.x),
+    y: Math.min(a.y, b.y),
+    w: Math.abs(b.x - a.x),
+    h: Math.abs(b.y - a.y)
+  };
+}
+
+function redrawSelection(){
+  selectCtx.clearRect(0,0,selectCanvas.width, selectCanvas.height);
+  const r = zoomedMode ? innerRect : outerRect;
+  if(!r) return;
+  const color = zoomedMode ? '#ffb454' : '#5be3ff';
+  selectCtx.strokeStyle = color;
+  selectCtx.lineWidth = 2;
+  selectCtx.setLineDash([6,4]);
+  selectCtx.strokeRect(r.x, r.y, r.w, r.h);
+  selectCtx.setLineDash([]);
+  selectCtx.fillStyle = zoomedMode ? 'rgba(255,180,84,0.08)' : 'rgba(91,227,255,0.08)';
+  selectCtx.fillRect(r.x, r.y, r.w, r.h);
+  // corner ticks
+  selectCtx.fillStyle = color;
+  const s = 4;
+  [[r.x,r.y],[r.x+r.w,r.y],
+   [r.x,r.y+r.h],[r.x+r.w,r.y+r.h]].forEach(([px,py])=>{
+    selectCtx.fillRect(px-s/2, py-s/2, s, s);
+  });
+}
+
+function updateCropInfo(){
+  if(!outerRect || outerRect.w < 5 || outerRect.h < 5){
+    cropInfoEl.innerHTML = 'Zone trop petite ou non définie — redessine un rectangle sur la source.';
+    return;
+  }
+  const final = getFinalSourceRect();
+  if(!final){
+    cropInfoEl.innerHTML = 'En attente de la source vidéo…';
+    return;
+  }
+  let txt = `Zone OCR : <b>${Math.round(final.sw)}×${Math.round(final.sh)}</b> px (résolution source)`;
+  if(innerRect && innerRect.w >= 5 && innerRect.h >= 5){
+    txt += ' — affinée';
+  } else if(zoomedMode){
+    txt += ' — dessine un rectangle dans la vue zoomée pour affiner';
+  }
+  cropInfoEl.innerHTML = txt;
+}
+
+// Convertit outerRect (+ innerRect éventuel) en rectangle de pixels source
+function getFinalSourceRect(){
+  const dr = getDisplayRect();
+  if(!dr || !outerRect) return null;
+
+  let sx = (outerRect.x - dr.ox) / dr.scale;
+  let sy = (outerRect.y - dr.oy) / dr.scale;
+  let sw = outerRect.w / dr.scale;
+  let sh = outerRect.h / dr.scale;
+
+  sx = Math.max(0, Math.min(sx, dr.sw));
+  sy = Math.max(0, Math.min(sy, dr.sh));
+  sw = Math.max(1, Math.min(sw, dr.sw - sx));
+  sh = Math.max(1, Math.min(sh, dr.sh - sy));
+
+  if(innerRect && innerRect.w >= 2 && innerRect.h >= 2 && zoomCanvas.width > 0 && zoomCanvas.height > 0){
+    const fx = innerRect.x / zoomCanvas.width;
+    const fy = innerRect.y / zoomCanvas.height;
+    const fw = innerRect.w / zoomCanvas.width;
+    const fh = innerRect.h / zoomCanvas.height;
+
+    let nsx = sx + fx * sw;
+    let nsy = sy + fy * sh;
+    let nsw = sw * fw;
+    let nsh = sh * fh;
+
+    nsx = Math.max(0, Math.min(nsx, dr.sw));
+    nsy = Math.max(0, Math.min(nsy, dr.sh));
+    nsw = Math.max(1, Math.min(nsw, dr.sw - nsx));
+    nsh = Math.max(1, Math.min(nsh, dr.sh - nsy));
+
+    sx = nsx; sy = nsy; sw = nsw; sh = nsh;
+  }
+
+  return { sx, sy, sw, sh };
+}
+
+// ---------------------------------------------------------------------
+// Vue zoomée : affiche en boucle uniquement la zone outerRect, agrandie
+// pour remplir l'aperçu, et permet d'y dessiner le recadrage fin (innerRect)
+// ---------------------------------------------------------------------
+let zoomRafId = null;
+
+function renderZoomFrame(){
+  if(!zoomedMode) return;
+  const el = getSourceEl();
+  if(el && zoomSource && zoomCanvas.width > 0 && zoomCanvas.height > 0){
+    const ctx = zoomCanvas.getContext('2d');
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    try{
+      ctx.drawImage(el, zoomSource.sx, zoomSource.sy, zoomSource.sw, zoomSource.sh, 0, 0, zoomCanvas.width, zoomCanvas.height);
+    }catch(e){}
+  }
+  zoomRafId = requestAnimationFrame(renderZoomFrame);
+}
+
+function showActiveSourceElement(){
+  video.style.display = (activeSource === 'video') ? 'block' : 'none';
+  testImg.style.display = (activeSource === 'image') ? 'block' : 'none';
+}
+
+function enterZoomedMode(){
+  const dr = getDisplayRect();
+  if(!dr || !outerRect) return;
+
+  let sx = (outerRect.x - dr.ox) / dr.scale;
+  let sy = (outerRect.y - dr.oy) / dr.scale;
+  let sw = outerRect.w / dr.scale;
+  let sh = outerRect.h / dr.scale;
+  sx = Math.max(0, Math.min(sx, dr.sw));
+  sy = Math.max(0, Math.min(sy, dr.sh));
+  sw = Math.max(1, Math.min(sw, dr.sw - sx));
+  sh = Math.max(1, Math.min(sh, dr.sh - sy));
+  zoomSource = { sx, sy, sw, sh };
+
+  // une nouvelle zone large efface l'ancien recadrage fin
+  innerRect = null;
+
+  zoomedMode = true;
+  video.style.display = 'none';
+  testImg.style.display = 'none';
+  zoomCanvas.style.display = 'block';
+
+  redrawSelection();
+  updateCropInfo();
+  renderZoomFrame();
+}
+
+function exitZoomedMode(){
+  zoomedMode = false;
+  zoomCanvas.style.display = 'none';
+  showActiveSourceElement();
+  redrawSelection();
+  updateCropInfo();
+}
+
+btnResetCrop.addEventListener('click', () => {
+  outerRect = null;
+  innerRect = null;
+  zoomSource = null;
+  if(zoomedMode) exitZoomedMode();
+  redrawSelection();
+  cropInfoEl.innerHTML = 'Aucune zone définie — dessine un rectangle sur la source ci-dessus pour délimiter la zone des signatures radar.';
+});
+
+// ---------------------------------------------------------------------
+// Settings sliders
+// ---------------------------------------------------------------------
+intervalSlider.addEventListener('input', () => {
+  settings.interval = parseFloat(intervalSlider.value);
+  intervalVal.textContent = settings.interval + ' s';
+  saveSettings();
+});
+scaleSlider.addEventListener('input', () => {
+  settings.scale = parseFloat(scaleSlider.value);
+  scaleVal.textContent = '×' + settings.scale;
+  saveSettings();
+});
+threshSlider.addEventListener('input', () => {
+  settings.threshold = parseFloat(threshSlider.value);
+  threshVal.textContent = settings.threshold;
+  saveSettings();
+});
+invertChk.addEventListener('change', () => {
+  settings.invert = invertChk.checked;
+  saveSettings();
+});
+multiThreshChk.addEventListener('change', () => {
+  settings.multiThreshold = multiThreshChk.checked;
+  saveSettings();
+});
+spreadSlider.addEventListener('input', () => {
+  settings.thresholdSpread = parseFloat(spreadSlider.value);
+  spreadVal.textContent = '±' + settings.thresholdSpread;
+  saveSettings();
+});
+
+// ---------------------------------------------------------------------
+// Rules table UI
+// ---------------------------------------------------------------------
+function renderRules(){
+  rulesListEl.innerHTML = '';
+  rules.forEach((rule, i) => {
+    const row = document.createElement('div');
+    row.className = 'rule' + (rule.enabled ? '' : ' disabled');
+
+    // enabled checkbox
+    const chk = document.createElement('input');
+    chk.type = 'checkbox';
+    chk.checked = rule.enabled;
+    chk.addEventListener('change', () => { rule.enabled = chk.checked; saveRules(); renderRules(); });
+
+    // type select
+    const typeSel = document.createElement('select');
+    [['signature','Signature (×1)'],['contains','Contient'],['range','Plage']].forEach(([t,label]) => {
+      const opt = document.createElement('option');
+      opt.value = t; opt.textContent = label;
+      if(rule.type === t) opt.selected = true;
+      typeSel.appendChild(opt);
+    });
+    typeSel.addEventListener('change', () => {
+      rule.type = typeSel.value;
+      if(rule.type === 'range'){ rule.min = rule.min ?? 0; rule.max = rule.max ?? 100; }
+      else if(rule.type === 'signature'){ rule.base = rule.base ?? 1000; rule.maxN = rule.maxN ?? 10; }
+      else { rule.pattern = rule.pattern ?? ''; }
+      saveRules(); renderRules();
+    });
+
+    // pattern / range / signature inputs
+    const patternWrap = document.createElement('div');
+    patternWrap.style.display = 'flex';
+    patternWrap.style.gap = '4px';
+    if(rule.type === 'contains'){
+      const inp = document.createElement('input');
+      inp.type = 'text';
+      inp.placeholder = 'ex. QUANTAINIUM';
+      inp.value = rule.pattern || '';
+      inp.addEventListener('input', () => { rule.pattern = inp.value; saveRules(); });
+      patternWrap.appendChild(inp);
+    } else if(rule.type === 'signature'){
+      const base = document.createElement('input');
+      base.type = 'number'; base.placeholder = 'valeur ×1'; base.value = rule.base ?? 0;
+      base.title = 'Valeur de signature pour 1 roche/objet';
+      base.addEventListener('input', () => { rule.base = parseFloat(base.value); saveRules(); });
+
+      const maxN = document.createElement('input');
+      maxN.type = 'number'; maxN.min = '1'; maxN.max = '10'; maxN.style.maxWidth = '54px';
+      maxN.placeholder = 'max';
+      maxN.title = 'Nombre maximum de roches/objets pour ce minéral (limite le ×N testé)';
+      maxN.value = rule.maxN ?? 10;
+      maxN.addEventListener('input', () => {
+        rule.maxN = Math.max(1, Math.min(10, parseInt(maxN.value, 10) || 10));
+        saveRules();
+      });
+
+      patternWrap.appendChild(base);
+      patternWrap.appendChild(maxN);
+    } else {
+      const min = document.createElement('input');
+      min.type = 'number'; min.placeholder = 'min'; min.value = rule.min ?? 0;
+      min.addEventListener('input', () => { rule.min = parseFloat(min.value); saveRules(); });
+      const max = document.createElement('input');
+      max.type = 'number'; max.placeholder = 'max'; max.value = rule.max ?? 100;
+      max.addEventListener('input', () => { rule.max = parseFloat(max.value); saveRules(); });
+      patternWrap.appendChild(min);
+      patternWrap.appendChild(max);
+    }
+
+    // mineral name
+    const mineralInp = document.createElement('input');
+    mineralInp.type = 'text';
+    mineralInp.placeholder = 'Minéral';
+    mineralInp.value = rule.mineral || '';
+    mineralInp.addEventListener('input', () => { rule.mineral = mineralInp.value; saveRules(); });
+
+    // color
+    const colorInp = document.createElement('input');
+    colorInp.type = 'color';
+    colorInp.value = rule.color || '#5be3ff';
+    colorInp.addEventListener('input', () => { rule.color = colorInp.value; saveRules(); });
+
+    // delete
+    const del = document.createElement('button');
+    del.className = 'del';
+    del.textContent = '✕';
+    del.title = 'Supprimer cette ligne';
+    del.addEventListener('click', () => { rules.splice(i,1); saveRules(); renderRules(); });
+
+    row.appendChild(chk);
+    row.appendChild(typeSel);
+    row.appendChild(patternWrap);
+    row.appendChild(mineralInp);
+    row.appendChild(colorInp);
+    row.appendChild(del);
+    rulesListEl.appendChild(row);
+  });
+}
+renderRules();
+
+btnAddRule.addEventListener('click', () => {
+  rules.push({ enabled:true, type:'signature', base:1000, maxN:10, mineral:'', color:'#5be3ff' });
+  saveRules(); renderRules();
+});
+btnResetRules.addEventListener('click', () => {
+  if(confirm('Réinitialiser la table de correspondance avec les valeurs par défaut ?')){
+    rules = JSON.parse(JSON.stringify(DEFAULT_RULES));
+    saveRules(); renderRules();
+  }
+});
+
+// ---------------------------------------------------------------------
+// Matching logic
+// ---------------------------------------------------------------------
+function matchText(text){
+  const upper = (text || '').toUpperCase();
+  // numbers can appear with thousands separators (space, comma, dot) e.g. "3 170" or "3,170"
+  const numbers = upper.match(/\d[\d.,\s]*\d|\d/g) || [];
+  // Tolérance fixe pour le rapprochement signature ↔ table (en unités RS).
+  const tolerance = 6;
+  const out = [];
+
+  for(const raw of numbers){
+    const cleaned = raw.replace(/[.,\s]/g, '');
+    const v = parseFloat(cleaned);
+    if(isNaN(v) || v <= 0) continue;
+
+    // On collecte tous les candidats dans la tolérance, puis on garde
+    // ceux à l'écart minimal — plusieurs minéraux/multiplicateurs peuvent
+    // produire exactement la même signature (ex. Savrilium ×6 = Aslarite ×5
+    // = 19200) : dans ce cas on les affiche tous au lieu d'en choisir un
+    // arbitrairement.
+    const candidates = [];
+    for(const rule of rules){
+      if(!rule.enabled || rule.type !== 'signature' || !rule.base) continue;
+      const maxN = rule.maxN || 10;
+      for(let n = 1; n <= maxN; n++){
+        const predicted = rule.base * n;
+        const diff = Math.abs(v - predicted);
+        if(diff <= tolerance){
+          candidates.push({ rule, n, diff, value:v, predicted });
+        }
+      }
+    }
+    if(candidates.length){
+      const minDiff = Math.min(...candidates.map(c => c.diff));
+      for(const c of candidates){
+        if(c.diff === minDiff) out.push(c);
+      }
+    }
+  }
+
+  // contains / range rules (independent of detected numbers)
+  for(const rule of rules){
+    if(!rule.enabled) continue;
+    if(rule.type === 'contains'){
+      if(rule.pattern && upper.includes(rule.pattern.toUpperCase())){
+        out.push({ rule });
+      }
+    } else if(rule.type === 'range'){
+      for(const n of numbers){
+        const v = parseFloat(n.replace(/[.,\s]/g, ''));
+        if(!isNaN(v) && v >= rule.min && v <= rule.max){
+          out.push({ rule });
+          break;
+        }
+      }
+    }
+  }
+  return out;
+}
+
+// ---------------------------------------------------------------------
+// OCR loop
+// ---------------------------------------------------------------------
+let worker = null;
+let busy = false;
+let lastRun = 0;
+
+async function getWorker(){
+  if(worker) return worker;
+  if(typeof Tesseract === 'undefined'){
+    throw new Error('Moteur OCR non chargé (vérifie ta connexion internet)');
+  }
+  setStatus('Chargement du moteur OCR…', '');
+  worker = await Tesseract.createWorker('eng');
+  // La zone ne contient que la valeur de signature (chiffres uniquement, sans espace)
+  await worker.setParameters({
+    tessedit_char_whitelist: '0123456789',
+    tessedit_pageseg_mode: '7' // ligne unique de texte
+  });
+  setStatus('Moteur OCR prêt.', 'ok');
+  return worker;
+}
+
+const ocrCanvas = document.createElement('canvas');
+const ocrCtx = ocrCanvas.getContext('2d');
+
+function getDisplayRect(){
+  const size = getSourceSize();
+  if(!size || !size.w || !size.h) return null;
+  const cw = videoWrap.clientWidth, ch = videoWrap.clientHeight;
+  const scale = Math.min(cw/size.w, ch/size.h);
+  const dw = size.w*scale, dh = size.h*scale;
+  const ox = (cw-dw)/2, oy = (ch-dh)/2;
+  return { ox, oy, scale, sw: size.w, sh: size.h };
+}
+
+let cropDilGray = null, cropW = 0, cropH = 0;
+
+function drawCropToCanvas(){
+  const final = getFinalSourceRect();
+  const el = getSourceEl();
+  if(!final || !el) return false;
+
+  const { sx, sy, sw, sh } = final;
+
+  // 1. Agrandissement — la police du HUD est petite et condensée,
+  // un upscale ×3 à ×5 aide énormément Tesseract.
+  const upscale = settings.scale || 1;
+  ocrCanvas.width = Math.max(1, Math.round(sw * upscale));
+  ocrCanvas.height = Math.max(1, Math.round(sh * upscale));
+  ocrCtx.imageSmoothingEnabled = true;
+  ocrCtx.imageSmoothingQuality = 'high';
+  ocrCtx.drawImage(el, sx, sy, sw, sh, 0, 0, ocrCanvas.width, ocrCanvas.height);
+
+  computeDilatedGray();
+  return true;
+}
+
+// 2-4. Niveaux de gris, étirement de contraste, dilatation horizontale ±1px
+// (épaissit les traits fins de la police condensée) — calculé une seule
+// fois par image source. La binarisation finale (qui dépend du seuil)
+// est appliquée séparément par applyThreshold(), pour pouvoir tester
+// plusieurs seuils sur la même capture sans tout recalculer.
+function computeDilatedGray(){
+  const w = ocrCanvas.width, h = ocrCanvas.height;
+  cropW = w; cropH = h;
+  if(w < 1 || h < 1){ cropDilGray = null; return; }
+
+  const imgData = ocrCtx.getImageData(0, 0, w, h);
+  const d = imgData.data;
+  const n = w * h;
+  const gray = new Float32Array(n);
+
+  let min = 255, max = 0;
+  for(let i = 0; i < n; i++){
+    const o = i * 4;
+    const lum = 0.299*d[o] + 0.587*d[o+1] + 0.114*d[o+2];
+    gray[i] = lum;
+    if(lum < min) min = lum;
+    if(lum > max) max = lum;
+  }
+
+  // étirement de contraste [min..max] -> [0..255]
+  const range = Math.max(1, max - min);
+  for(let i = 0; i < n; i++){
+    gray[i] = (gray[i] - min) * 255 / range;
+  }
+
+  // dilatation horizontale ±1px (max des voisins) — épaissit les traits fins
+  const dil = new Float32Array(n);
+  for(let y = 0; y < h; y++){
+    const row = y * w;
+    for(let x = 0; x < w; x++){
+      const i = row + x;
+      let v = gray[i];
+      if(x > 0) v = Math.max(v, gray[i-1]);
+      if(x < w-1) v = Math.max(v, gray[i+1]);
+      dil[i] = v;
+    }
+  }
+  cropDilGray = dil;
+}
+
+// 5. Binarisation + inversion (texte clair → noir, fond sombre → blanc) à
+// partir du niveau de gris pré-calculé. Écrit le résultat dans ocrCanvas
+// (prêt pour Tesseract) et met à jour l'aperçu de calibration si demandé.
+function applyThreshold(threshold, updatePreview){
+  if(!cropDilGray) return;
+  const w = cropW, h = cropH;
+  const n = w * h;
+  const invert = settings.invert !== false;
+
+  const imgData = ocrCtx.createImageData(w, h);
+  const d = imgData.data;
+  for(let i = 0; i < n; i++){
+    const isText = cropDilGray[i] >= threshold;
+    const out = invert ? (isText ? 0 : 255) : (isText ? 255 : 0);
+    const o = i * 4;
+    d[o] = d[o+1] = d[o+2] = out;
+    d[o+3] = 255;
+  }
+  ocrCtx.putImageData(imgData, 0, 0);
+
+  if(updatePreview){
+    ocrPreview.width = w;
+    ocrPreview.height = h;
+    ocrPreview.getContext('2d').putImageData(imgData, 0, 0);
+  }
+}
+
+async function ocrLoop(timestamp){
+  requestAnimationFrame(ocrLoop);
+  if(busy) return;
+  if(!activeSource || !outerRect || outerRect.w < 5 || outerRect.h < 5) return;
+  if(timestamp - lastRun < settings.interval * 1000) return;
+  lastRun = timestamp;
+
+  busy = true;
+  try{
+    const w = await getWorker();
+    if(!drawCropToCanvas()){ busy = false; return; }
+
+    const baseThreshold = settings.threshold ?? 205;
+    let text, matches;
+    let rawDisplay;
+
+    if(settings.multiThreshold){
+      // Trois passes OCR avec des seuils de binarisation différents
+      // (seuil - écart, seuil, seuil + écart). Chacune des trois lectures
+      // est testée séparément contre la table des minéraux (matchText),
+      // puis on combine par vote majoritaire sur le minéral/multiplicateur
+      // trouvé — plus robuste qu'un simple vote sur les chiffres bruts.
+      // Plus fiable mais ~3x plus lent.
+      const spread = settings.thresholdSpread ?? 30;
+      const thresholds = [
+        Math.max(0, baseThreshold - spread),
+        baseThreshold,
+        Math.min(255, baseThreshold + spread)
+      ];
+      const results = [];
+      const matchesPerResult = [];
+      for(let i = 0; i < thresholds.length; i++){
+        applyThreshold(thresholds[i], i === 1 /* aperçu = seuil principal */);
+        const { data } = await w.recognize(ocrCanvas);
+        const t = (data.text || '').trim();
+        results.push(t);
+        matchesPerResult.push(matchText(t));
+      }
+      const picked = pickBestOcrResult(results, matchesPerResult, 1);
+      text = picked.text;
+      matches = picked.matches;
+      // Affiche les trois lectures (une par seuil testé), séparées par "/",
+      // pour voir d'un coup d'œil si elles concordent ou divergent.
+      rawDisplay = results.map(r => r || '—').join(' / ');
+    } else {
+      applyThreshold(baseThreshold, true);
+      const { data } = await w.recognize(ocrCanvas);
+      text = (data.text || '').trim();
+      matches = matchText(text);
+      rawDisplay = text;
+    }
+
+    // Si rien n'est lu cette fois, on garde le dernier résultat affiché
+    // (évite que l'overlay clignote/se vide entre deux lectures).
+    if(text){
+      rawTextEl.textContent = rawDisplay;
+      overlayRawEl.textContent = rawDisplay;
+      lastRawOcrText = rawDisplay;
+      renderBadges(matches);
+      updateSignatureDisplay(text, matches);
+      syncDocPip();
+    }
+  }catch(e){
+    setStatus('Erreur OCR : ' + e.message, 'err');
+  }finally{
+    busy = false;
+  }
+}
+requestAnimationFrame(ocrLoop);
+
+// Combine les 3 lectures OCR (une par seuil testé) : dès qu'une des
+// lectures donne une correspondance dans la table des minéraux
+// (matchText), elle est retenue — en priorité celle du seuil central
+// (preferredIndex). À défaut de toute correspondance, on retombe sur un
+// vote sur les chiffres bruts, puis sur la lecture du seuil principal,
+// puis sur la première lecture non vide.
+function pickBestOcrResult(results, matchesPerResult, preferredIndex){
+  const hasMatch = ms => ms.some(m => m.n);
+
+  // 1) Le seuil central a une correspondance → on le retient directement.
+  if(hasMatch(matchesPerResult[preferredIndex])){
+    return { text: results[preferredIndex], matches: matchesPerResult[preferredIndex] };
+  }
+  // 2) Sinon, la première autre lecture qui a une correspondance.
+  const firstMatchIdx = matchesPerResult.findIndex(ms => hasMatch(ms));
+  if(firstMatchIdx !== -1){
+    return { text: results[firstMatchIdx], matches: matchesPerResult[firstMatchIdx] };
+  }
+
+  // Aucune correspondance dans aucune des 3 lectures : on retombe sur un
+  // vote sur les chiffres bruts reconnus.
+  const digits = results.map(t => (t.match(/\d+/g) || []).join(''));
+  const digitCounts = new Map();
+  digits.forEach(d => { if(d) digitCounts.set(d, (digitCounts.get(d) || 0) + 1); });
+
+  let digitBestIndex = null, digitBestCount = 0;
+  digits.forEach((d, i) => {
+    if(!d) return;
+    const c = digitCounts.get(d);
+    if(c > digitBestCount || (c === digitBestCount && i === preferredIndex)){
+      digitBestCount = c;
+      digitBestIndex = i;
+    }
+  });
+  if(digitBestIndex !== null && digitBestCount >= 2){
+    return { text: results[digitBestIndex], matches: matchesPerResult[digitBestIndex] };
+  }
+
+  if(results[preferredIndex]){
+    return { text: results[preferredIndex], matches: matchesPerResult[preferredIndex] };
+  }
+  const firstNonEmpty = results.findIndex(t => t);
+  if(firstNonEmpty !== -1){
+    return { text: results[firstNonEmpty], matches: matchesPerResult[firstNonEmpty] };
+  }
+  return { text: '', matches: [] };
+}
+
+function updateSignatureDisplay(text, matches){
+  const bests = matches.filter(m => m.n);
+  // On ne met à jour l'encadré "signature" que si une correspondance a été
+  // trouvée — sinon on garde affichée la dernière valeur qui a matché.
+  if(!bests.length) return;
+
+  let line;
+  if(bests.length === 1){
+    line = `${bests[0].value}  →  ${bests[0].rule.mineral} (×${bests[0].n})`;
+    overlaySignatureEl.style.color = bests[0].rule.color;
+  } else {
+    // Plusieurs minéraux/multiplicateurs donnent exactement la même valeur —
+    // on les affiche tous, l'utilisateur tranche selon le nombre de roches visibles.
+    const options = bests.map(m => `${m.rule.mineral} (×${m.n})`).join(' / ');
+    line = `${bests[0].value}  →  ${options}`;
+    overlaySignatureEl.style.color = '';
+  }
+  overlaySignatureEl.classList.remove('stale');
+  overlaySignatureEl.innerHTML = '<span class="label">Dernière signature reconnue</span>' + line;
+  lastSignatureText = line;
+  lastSignatureColor = overlaySignatureEl.style.color || '#f1f2f3';
+}
+
+function renderBadges(matches){
+  lastMatches = matches;
+  badgesEl.innerHTML = '';
+  if(!matches.length){
+    const span = document.createElement('span');
+    span.className = 'badges-empty';
+    span.textContent = 'Aucune correspondance pour l\'instant';
+    badgesEl.appendChild(span);
+    return;
+  }
+  // dedupe by mineral name + multiplier
+  const seen = new Set();
+  matches.forEach(m => {
+    const rule = m.rule;
+    const key = rule.mineral + '|' + rule.color + '|' + (m.n || '');
+    if(seen.has(key)) return;
+    seen.add(key);
+    const b = document.createElement('div');
+    b.className = 'badge';
+    b.style.color = rule.color;
+    let label = rule.mineral || '(sans nom)';
+    if(m.n){
+      label += ` <span style="opacity:.65">(×${m.n} • ${m.value})</span>`;
+    }
+    b.innerHTML = `<span class="dot"></span>${label}`;
+    badgesEl.appendChild(b);
+  });
+}
+
+// ---------------------------------------------------------------------
+// Signature panel: réduire / opacité
+// ---------------------------------------------------------------------
+btnMin.addEventListener('click', () => {
+  overlayPanel.classList.toggle('minimized');
+});
+btnOpaque.addEventListener('click', () => {
+  if(overlayPanel.classList.contains('transparent')){
+    overlayPanel.classList.remove('transparent');
+    overlayPanel.classList.add('opaque');
+    btnOpaque.textContent = '●';
+    btnOpaque.title = 'Fond opaque (clic = fond verre dépoli)';
+  } else if(overlayPanel.classList.contains('opaque')){
+    overlayPanel.classList.remove('opaque');
+    btnOpaque.textContent = '◐';
+    btnOpaque.title = 'Fond verre dépoli (clic = fond transparent)';
+  } else {
+    overlayPanel.classList.add('transparent');
+    btnOpaque.textContent = '○';
+    btnOpaque.title = 'Fond transparent (clic = fond opaque)';
+  }
+});
+
+// ---------------------------------------------------------------------
+// Document Picture-in-Picture : fenêtre flottante minuscule contenant
+// directement le HTML (pas de vidéo, pas de barre de lecture, taille
+// libre). Disponible sur Chrome/Edge 116+. Fallback plus bas si absent.
+// ---------------------------------------------------------------------
+let docPipWindow = null;
+let docPipEls = null;
+
+function buildDocPipDocument(pipWindow){
+  const doc = pipWindow.document;
+  doc.title = 'Signatures';
+
+  const style = doc.createElement('style');
+  style.textContent = `
+    :root{ color-scheme: dark; }
+    *{ box-sizing:border-box; }
+    html,body{ margin:0; padding:0; }
+    body{
+      background:#0c0c0d; color:#f1f2f3;
+      font-family:'Share Tech Mono', monospace;
+      padding:6px 8px;
+      overflow:auto;
+    }
+    #pip-sig{
+      font-weight:700; font-size:16px;
+      padding-bottom:4px; margin-bottom:4px;
+      border-bottom:1px solid #33363b;
+      white-space:nowrap;
+    }
+    #pip-row{ display:flex; align-items:flex-start; gap:8px; }
+    #pip-badges{ display:flex; flex-direction:column; gap:2px; flex:none; }
+    .pip-badge{ display:flex; align-items:center; gap:6px; font-size:13px; font-weight:700; white-space:nowrap; }
+    .pip-dot{ width:8px; height:8px; border-radius:50%; flex:none; display:inline-block; }
+    .pip-empty{ color:#8b8d92; font-size:12px; white-space:nowrap; }
+    #pip-raw{
+      flex:1; min-width:0;
+      color:#8b8d92; font-size:11px;
+      padding-top:2px;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+  `;
+  doc.head.appendChild(style);
+
+  const sig = doc.createElement('div');
+  sig.id = 'pip-sig';
+
+  const row = doc.createElement('div');
+  row.id = 'pip-row';
+
+  const raw = doc.createElement('div');
+  raw.id = 'pip-raw';
+
+  const badges = doc.createElement('div');
+  badges.id = 'pip-badges';
+
+  row.appendChild(raw);
+  row.appendChild(badges);
+
+  doc.body.appendChild(sig);
+  doc.body.appendChild(row);
+
+  return { sig, badges, raw };
+}
+
+function syncDocPip(){
+  if(!docPipWindow || docPipWindow.closed || !docPipEls) return;
+  const doc = docPipWindow.document;
+
+  docPipEls.sig.textContent = lastSignatureText || '—';
+  docPipEls.sig.style.color = lastSignatureColor || '#f1f2f3';
+
+  const matches = getUniqueMatches();
+  docPipEls.badges.innerHTML = '';
+  if(!matches.length){
+    const span = doc.createElement('span');
+    span.className = 'pip-empty';
+    span.textContent = 'Aucun match';
+    docPipEls.badges.appendChild(span);
+  } else {
+    for(const m of matches){
+      const rule = m.rule;
+      const row = doc.createElement('div');
+      row.className = 'pip-badge';
+
+      const dot = doc.createElement('span');
+      dot.className = 'pip-dot';
+      dot.style.background = rule.color;
+
+      let label = rule.mineral || '(sans nom)';
+      if(m.n) label += `  (×${m.n} • ${m.value})`;
+
+      const text = doc.createElement('span');
+      text.style.color = rule.color;
+      text.textContent = label;
+
+      row.appendChild(dot);
+      row.appendChild(text);
+      docPipEls.badges.appendChild(row);
+    }
+  }
+
+  // Lecture OCR brute en direct (texte tel que reconnu sur l'image)
+  docPipEls.raw.textContent = lastRawOcrText ? ('OCR : ' + lastRawOcrText) : '';
+}
+
+async function toggleDocPip(){
+  if(docPipWindow && !docPipWindow.closed){
+    docPipWindow.close();
+    return;
+  }
+
+  const pipWindow = await documentPictureInPicture.requestWindow({
+    width: 190,
+    height: 64,
+    disallowReturnToOpener: true
+  });
+
+  docPipWindow = pipWindow;
+  docPipEls = buildDocPipDocument(pipWindow);
+  syncDocPip();
+  btnPip.classList.add('active');
+
+  pipWindow.addEventListener('pagehide', () => {
+    docPipWindow = null;
+    docPipEls = null;
+    btnPip.classList.remove('active');
+  }, { once:true });
+}
+
+// ---------------------------------------------------------------------
+// Picture-in-Picture (fallback canvas + <video>) : utilisé seulement si
+// le navigateur ne supporte pas Document Picture-in-Picture.
+// ---------------------------------------------------------------------
+let lastMatches = [];
+let lastSignatureText = '';
+let lastSignatureColor = '#f1f2f3';
+let lastRawOcrText = '';
+let pipCanvas = null;
+let pipRunning = false;
+
+function getUniqueMatches(){
+  const seen = new Set();
+  const out = [];
+  for(const m of lastMatches){
+    const rule = m.rule;
+    const key = rule.mineral + '|' + rule.color + '|' + (m.n || '');
+    if(seen.has(key)) continue;
+    seen.add(key);
+    out.push(m);
+  }
+  return out;
+}
+
+function drawPipFrame(){
+  if(!pipRunning) return;
+
+  // Dimensions calculées d'après le contenu réel — pas d'espace vide.
+  const W = 190;
+  const padX = 5;
+  const rowH = 16;
+  const matches = getUniqueMatches();
+  const badgesH = matches.length ? matches.length * rowH : 14;
+  const badgesX = padX + 80;
+  const H = 5 /*top*/ + 17 /*signature*/ + 3 /*sep*/ + Math.max(13, badgesH) + 4 /*bottom*/;
+
+  if(pipCanvas.width !== W || pipCanvas.height !== H){
+    pipCanvas.width = W;
+    pipCanvas.height = H;
+  }
+
+  const ctx = pipCanvas.getContext('2d');
+
+  // fond
+  ctx.fillStyle = '#0c0c0d';
+  ctx.fillRect(0, 0, W, H);
+  ctx.strokeStyle = '#2e2e30';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(1, 1, W-2, H-2);
+
+  let y = 5;
+  ctx.textBaseline = 'top';
+
+  // dernière signature lue
+  ctx.fillStyle = lastSignatureColor || '#f1f2f3';
+  ctx.font = 'bold 16px "Share Tech Mono", monospace';
+  ctx.fillText(lastSignatureText || '—', padX, y);
+  y += 17;
+  ctx.strokeStyle = '#33363b';
+  ctx.beginPath();
+  ctx.moveTo(padX, y);
+  ctx.lineTo(W-padX, y);
+  ctx.stroke();
+  y += 3;
+
+  // colonne gauche : lecture OCR brute en direct
+  ctx.fillStyle = '#8b8d92';
+  ctx.font = '10px "Share Tech Mono", monospace';
+  let rawLine = lastRawOcrText ? ('OCR : ' + lastRawOcrText) : '';
+  const maxRawW = badgesX - padX - 6;
+  while(rawLine && ctx.measureText(rawLine).width > maxRawW){
+    rawLine = rawLine.slice(0, -1);
+  }
+  ctx.fillText(rawLine, padX, y + 2);
+
+  // colonne droite : badges détectés / message "aucune correspondance"
+  if(!matches.length){
+    ctx.fillStyle = '#8b8d92';
+    ctx.font = '11px "Share Tech Mono", monospace';
+    ctx.fillText('Aucun match', badgesX, y+2);
+  } else {
+    for(const m of matches){
+      const rule = m.rule;
+      // pastille couleur
+      ctx.fillStyle = rule.color;
+      ctx.beginPath();
+      ctx.arc(badgesX+3, y+rowH/2, 3, 0, Math.PI*2);
+      ctx.fill();
+
+      // texte
+      ctx.font = 'bold 13px "Share Tech Mono", monospace';
+      ctx.fillStyle = rule.color;
+      let label = rule.mineral || '(sans nom)';
+      if(m.n) label += `  (×${m.n} • ${m.value})`;
+      ctx.fillText(label, badgesX+10, y+1);
+
+      y += rowH;
+    }
+  }
+
+  requestAnimationFrame(drawPipFrame);
+}
+
+async function togglePip(){
+  if('documentPictureInPicture' in window){
+    try{
+      await toggleDocPip();
+    }catch(e){
+      setStatus('Picture-in-Picture indisponible : ' + e.name + ' — ' + e.message, 'err');
+    }
+    return;
+  }
+  await toggleVideoPip();
+}
+
+async function toggleVideoPip(){
+  try{
+    if(document.pictureInPictureElement){
+      await document.exitPictureInPicture();
+      return;
+    }
+
+    if(!pipCanvas){
+      pipCanvas = document.createElement('canvas');
+      pipCanvas.width = 280;
+      pipCanvas.height = 90;
+    }
+
+    pipRunning = true;
+    drawPipFrame();
+
+    const pipStream = pipCanvas.captureStream(15);
+    pipVideo.srcObject = pipStream;
+    await pipVideo.play();
+
+    // Masque la barre de contrôle "lecture/pause" natives de la fenêtre PiP :
+    // en désactivant ces actions via la Media Session, Chrome n'affiche plus
+    // le bouton play/pause par-dessus la fenêtre flottante.
+    if('mediaSession' in navigator){
+      try{
+        navigator.mediaSession.setActionHandler('play', null);
+        navigator.mediaSession.setActionHandler('pause', null);
+        navigator.mediaSession.setActionHandler('seekbackward', null);
+        navigator.mediaSession.setActionHandler('seekforward', null);
+        navigator.mediaSession.setActionHandler('seekto', null);
+        navigator.mediaSession.setActionHandler('previoustrack', null);
+        navigator.mediaSession.setActionHandler('nexttrack', null);
+        navigator.mediaSession.setActionHandler('stop', null);
+        navigator.mediaSession.playbackState = 'playing';
+      }catch(e){}
+    }
+    // Filet de sécurité : si la vidéo est quand même mise en pause
+    // (clic accidentel), on relance immédiatement la lecture pour ne
+    // pas figer l'image dans le PiP.
+    pipVideo.addEventListener('pause', () => {
+      if(pipRunning) pipVideo.play().catch(()=>{});
+    });
+
+    // attendre que la vidéo ait des données avant de demander le PiP
+    if(pipVideo.readyState < 2){
+      await new Promise(resolve => pipVideo.addEventListener('canplay', resolve, { once:true }));
+    }
+
+    await pipVideo.requestPictureInPicture();
+
+    pipVideo.addEventListener('leavepictureinpicture', () => {
+      pipRunning = false;
+    }, { once:true });
+
+    btnPip.classList.add('active');
+  }catch(e){
+    setStatus('Picture-in-Picture indisponible : ' + e.name + ' — ' + e.message, 'err');
+    pipRunning = false;
+  }
+}
+
+if('documentPictureInPicture' in window || document.pictureInPictureEnabled){
+  btnPip.addEventListener('click', togglePip);
+} else {
+  btnPip.style.display = 'none';
+}
+
+document.addEventListener('leavepictureinpicture', () => {
+  pipRunning = false;
+  btnPip.classList.remove('active');
+});
+
+})();
+
+</script>
+</body>
+</html>
