@@ -1108,7 +1108,12 @@ body.overlay .fiche.mode-raff > .f-part, body.overlay .fiche.attente > .f-part {
 .bp-preleve { font-size: 12px; color: var(--os-doux); }
 .bp-stock-res summary { cursor: pointer; padding: 4px 0; }
 .bp-stock-res[open] summary { border-bottom: 1px solid var(--trait); }
-.bp-crafter { font-size: 16px; padding: 10px 34px; }
+.bp-crafter { font-size: 16px; padding: 10px 34px; width: 100%; margin-top: 14px; }
+.bp-stock tr.bp-pris td { background: rgba(232,134,42,.12); }
+.bp-stock tr.bp-pris td:first-child { box-shadow: inset 3px 0 0 var(--orange); }
+.bp-apres { color: var(--orange); font-weight: 600; white-space: nowrap; margin-left: 4px; }
+.bp-stock tr.bp-flash td { animation: bpFlash 1.6s ease-out; }
+@keyframes bpFlash { from { background: rgba(111,208,140,.35); } to { background: transparent; } }
 .bp-crafter:disabled { opacity: .45; cursor: not-allowed; }
 .bp-recette li { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--trait); padding: 3px 0; }
 .home-mes .mes-bp { display: block; text-align: center; margin-top: 10px; }
@@ -1480,6 +1485,8 @@ body.overlay .fiche.mode-raff > .f-part, body.overlay .fiche.attente > .f-part {
         <div class="bp-aspects" id="dbp-aspects"></div>
         <h3>Modifications des statistiques</h3>
         <ul class="bp-stats" id="dbp-stats"></ul>
+        <button class="btn principal bp-crafter" type="button" id="dbp-crafter">Crafter</button>
+        <p class="note" id="dbp-craft-info"></p>
       </div>
       <div>
         <h3>Stock des ressources</h3>
@@ -1487,8 +1494,7 @@ body.overlay .fiche.mode-raff > .f-part, body.overlay .fiche.attente > .f-part {
         <div class="bp-stock" id="dbp-stock"></div>
       </div>
     </div>
-    <p class="note" id="dbp-craft-info"></p>
-    <div class="pied"><button class="btn" type="submit">Fermer</button><button class="btn principal bp-crafter" type="button" id="dbp-crafter">Crafter</button></div>
+    <div class="pied"><button class="btn" type="submit">Fermer</button></div>
   </form>
 </dialog>
 <dialog id="d-visibilite">
@@ -6850,15 +6856,18 @@ function renderPopBlueprint(partiel = false) {
   }));
   $("dbp-stats").innerHTML = tot.size ? [...tot.values()].map((e) => { const v = e.f - 1; return `<li><span>${esc(e.label)}</span><b class="${Math.abs(v) < 1e-6 ? "" : (v > 0) === (e.better !== "lower") ? "bon" : "mauvais"}">${Math.abs(v) < 1e-6 ? "sans changement" : fmtPct(v)}</b></li>`; }).join("") : `<li class="note">Aucune statistique modifiée par la qualité.</li>`;
   majCraft();
-  if (partiel) return cible;
   $("dbp-portee").innerHTML = Object.entries({ moi: "Perso", corpo: "Corporation", alliance: "Alliance" }).map(([k, v]) => `<button type="button" class="bp-puce" data-portee="${k}" aria-pressed="${bpPop.portee.has(k)}">${v}</button>`).join("");
+  // caisses perso qui seront prélevées au craft : quantité retirée par caisse
+  const prise = new Map(); as.forEach((_, i) => { for (const p of prelevement(i).pris) prise.set(p.it.id, (prise.get(p.it.id) || 0) + p.n); });
   const noms = [...new Set(as.map((a) => a.input?.name).filter(Boolean))];
   $("dbp-stock").innerHTML = noms.map((n) => {
     const l = stockRessource(n), idx = as.map((a, i) => a.input?.name === n ? i : -1).filter((i) => i >= 0);
     const scu = l.reduce((s, c) => s + (Number(c.quantite_scu) || 0), 0);
     return `<details class="bp-stock-res" ${bpPop.fermes.has(n) ? "" : "open"} data-res="${esc(n)}"><summary class="bp-stock-tete"><b>${esc(n)}</b> <small>${l.length ? `${l.length} caisse${l.length > 1 ? "s" : ""} · ${fmtScu(scu)} SCU` : "aucun stock"}</small></summary>` +
-      (l.length ? `<table><tbody>${l.slice(0, 30).map((c) => `<tr><td class="num">Q${c.qualite ?? "?"}</td><td class="num">${fmtScu(c.quantite_scu ?? 0)} SCU</td><td>${esc(c.station || "")}</td><td>${esc(c.joueur || "")}</td><td><button type="button" class="btn petit" data-utiliser="${idx.join(",")}" data-q="${c.qualite ?? ""}" title="Régler la glissière sur cette qualité">Utiliser</button></td></tr>`).join("")}</tbody></table>` : "") + `</details>`;
+      (l.length ? `<table><tbody>${l.slice(0, 30).map((c) => { const pr = prise.get(c.id), kind = as.find((a) => a.input?.name === n)?.input?.kind, apres = pr == null ? null : kind === "item" ? 0 : Math.max(0, Math.round(((Number(c.quantite_scu) || 0) - pr) * 1000) / 1000);
+        return `<tr data-ligne="${esc(c.id)}" class="${pr != null ? "bp-pris" : ""}"><td class="num">Q${c.qualite ?? "?"}</td><td class="num">${fmtScu(c.quantite_scu ?? 0)} SCU${pr != null ? ` <span class="bp-apres" title="Après le craft">→ ${apres > 0 ? `${fmtScu(apres)} SCU` : "vide"}</span>` : ""}</td><td>${esc(c.station || "")}</td><td>${esc(c.joueur || "")}</td><td><button type="button" class="btn petit" data-utiliser="${idx.join(",")}" data-q="${c.qualite ?? ""}" title="Régler la glissière sur cette qualité">Utiliser</button></td></tr>`; }).join("")}</tbody></table>` : "") + `</details>`;
   }).join("") || `<p class="note">Aucune ressource.</p>`;
+  if (partiel) return cible;
 }
 /* Bornes de qualité de la glissière : celles du blueprint, et jamais sous la qualité minimale exigée pour le matériau */
 function bornesAspect(a) {
@@ -6930,7 +6939,9 @@ $("dbp-crafter").addEventListener("click", () => {
     else { p.it.quantite_scu = Math.round((Number(p.it.quantite_scu) - p.n) * 1000) / 1000; delete p.it.sync; }
   }
   if (suppr.length) { noterSuppressions(suppr); items = base.items = items.filter((it) => !suppr.includes(it.id)); }
+  const touches = ps.flatMap((x) => x.pris.map((p) => p.it.id));
   sauver(); planifierSync(); render(); renderPopBlueprint();
+  for (const id of touches) $("dbp-stock").querySelector(`[data-ligne="${id}"]`)?.classList.add("bp-flash");
   toast(`« ${bpPop.c.nom} » crafté : stock mis à jour.`);
 });
 $("d-blueprint").addEventListener("click", (e) => {
