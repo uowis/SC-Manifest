@@ -3,6 +3,17 @@
    Ajoute ou corrige des lignes librement ; un texte absent reste en français. */
 window.TRAD_EN = {
   textes: {
+    "Recette et qualité des matériaux": "Recipe and material quality", "Modifications des statistiques": "Stat changes", "Stock des ressources": "Resource stock",
+    "Perso": "Personal", "Utiliser": "Use", "sans changement": "no change", "aucun stock": "no stock", "Chargement de la recette…": "Loading recipe…",
+    "Aucune statistique modifiée par la qualité.": "No stat affected by quality.", "Régler la glissière sur cette qualité": "Set the slider to this quality",
+    "Possession": "Ownership", "Réalisable avec le stock de": "Craftable with stock from", "Je possède": "I own", "Je ne possède pas": "I don't own",
+    "Je les possède": "I own them", "Je ne les possède pas": "I don't own them", "Aucun blueprint sélectionné": "No blueprint selected",
+    "Possédé": "Owned", "Ingrédients": "Ingredients", "Possédé par": "Owned by", "Recette": "Recipe", "Personne pour l'instant.": "Nobody yet.",
+    "Détails de la recette à venir.": "Recipe details coming soon.", "Aucune recette réalisable avec ce stock.": "No craftable recipe with this stock.", "Fermer": "Close",
+    "Blueprints": "Blueprints", "Armure": "Armour", "Arme": "Weapon", "Composant": "Component", "Arme vaisseau": "Ship weapon",
+    "Stock": "Stock", "Stations": "Stations", "Joueurs": "Players", "Recherche": "Search", "Nom du blueprint": "Blueprint name",
+    "Possédé par": "Owned by", "Je l'ai": "I have it", "Retirer": "Remove", "par défaut": "default", "Toutes": "All", "Tous": "All",
+    "Aucun blueprint pour ces filtres.": "No blueprint for these filters.", "Moi": "Me",
     "Signatures radar": "Radar signatures",
     "Lit les signatures radar du jeu et affiche dans un overlay le minerai correspondant.": "Reads in-game radar signatures and shows the matching ore in an overlay.",
     "Ouvrir l'outil": "Open the tool",
