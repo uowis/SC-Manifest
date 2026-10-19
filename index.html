@@ -1071,6 +1071,15 @@ body.overlay .fiche.mode-raff > .f-part, body.overlay .fiche.attente > .f-part {
 .bp-actions { margin: 0 0 8px; }
 .bp-nom { text-align: left; }
 .bp-moi { color: #6fd08c; }
+.bp-table tr.bp-possede .bp-nom, .bp-table tr.bp-possede td { color: #6fd08c; }
+.bp-tags { white-space: normal; }
+.bp-tag { display: inline-flex; align-items: center; gap: 4px; margin: 1px 4px 1px 0; padding: 1px 8px; border: 1px solid var(--trait); border-radius: 999px; background: none; color: var(--os-doux); font: inherit; font-size: 11px; cursor: pointer; }
+.bp-tag:hover { color: inherit; border-color: var(--orange); }
+.bp-tag.actif { background: #2a3640; color: inherit; border-color: var(--orange); }
+.bp-tags-actifs { display: flex; flex-wrap: wrap; gap: 6px; margin: -6px 0 12px; }
+.bp-tags-actifs .bp-tag { font-size: 12px; padding: 3px 4px 3px 10px; cursor: default; }
+.bp-tags-actifs button { background: none; border: 0; color: inherit; cursor: pointer; font-size: 15px; line-height: 1; padding: 0 4px; }
+.bp-tags-actifs button:hover { color: #e5484d; }
 .bp-ing { color: var(--os-doux); font-size: 12px; }
 .bp-pop { min-width: min(460px, 92vw); }
 .bp-pop h3 { margin: 14px 0 6px; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--os-doux); }
@@ -1235,12 +1244,13 @@ body.overlay .fiche.mode-raff > .f-part, body.overlay .fiche.attente > .f-part {
       <div class="bp-groupe"><span>Joueurs</span><details class="bp-multi" id="bp-joueurs"><summary>Tous</summary><div></div></details></div>
       <div class="bp-groupe bp-recherche"><span>Recherche</span><input id="bp-q" type="search" placeholder="Nom du blueprint" autocomplete="off"></div>
     </div>
+    <div class="bp-tags-actifs" id="bp-tags-actifs" hidden></div>
     <div class="actions-groupe bp-actions">
       <span id="bp-sel">Aucun blueprint sélectionné</span>
       <button class="btn" type="button" id="bp-oui" disabled>Je les possède</button>
       <button class="btn" type="button" id="bp-non" disabled>Je ne les possède pas</button>
     </div>
-    <div class="tableau-wrap"><table class="bp-table"><thead><tr><th class="coche"><input type="checkbox" id="bp-tout" aria-label="Tout sélectionner"></th><th>Blueprint</th><th>Type</th><th>Possédé</th><th>Ingrédients</th></tr></thead><tbody id="bp-lignes"></tbody></table></div>
+    <div class="tableau-wrap"><table class="bp-table"><thead><tr><th class="coche"><input type="checkbox" id="bp-tout" aria-label="Tout sélectionner"></th><th>Blueprint</th><th>Type</th><th>Détail</th><th>Possédé</th><th>Ingrédients</th></tr></thead><tbody id="bp-lignes"></tbody></table></div>
     <p class="vide" id="bp-vide" hidden></p>
   </section>
 
@@ -6657,7 +6667,7 @@ majBoutonsMode();
    ===================================================================== */
 var BP_TYPES = { armure: "Armure", arme: "Arme", composant: "Composant", vaisseau: "Arme vaisseau" };
 var bp = { catalogue: null, charge: false, erreur: "", partages: [], tableOk: true, sel: new Set(),
-  f: { types: new Set(), poss: new Set(), stock: new Set(), stations: new Set(), joueurs: new Set(), q: "" } };
+  f: { tags: new Set(), types: new Set(), poss: new Set(), stock: new Set(), stations: new Set(), joueurs: new Set(), q: "" } };
 function typeBlueprint(o) {
   const s = `${o?.type || ""} ${o?.type_label || ""} ${o?.sub_type || o?.subtype || ""}`.toLowerCase();
   if (/armor|armour|undersuit|helmet|backpack|char_/.test(s)) return "armure";
@@ -6665,22 +6675,38 @@ function typeBlueprint(o) {
   if (/fps|personal|weaponpersonal|grenade|knife|melee|magazine|attachment|weaponattachment/.test(s)) return "arme";
   return "composant";
 }
+/* Tags de détail (vrac) : libellé du type, sous-type, grade, taille (S1, S2…) */
+function tagsBlueprint(b) {
+  const o = b.output || {}, l = [];
+  const ajoute = (x) => { x = String(x || "").trim(); if (x && x.toLowerCase() !== "undefined" && !l.some((y) => y.toLowerCase() === x.toLowerCase())) l.push(x); };
+  ajoute(o.type_label);
+  if (o.sub_type && !/^(undefined|unknown|none)$/i.test(o.sub_type)) ajoute(o.sub_type.replace(/([a-z])([A-Z])/g, "$1 $2"));
+  if (o.grade) ajoute(/^\d+$/.test(o.grade) ? "Grade " + o.grade : o.grade);
+  const s = /_S(\d{1,2})(?:_|$)/i.exec(b.key || "") || /(?:^|_)S(\d{1,2})(?:_|$)/i.exec(o.class || "");
+  if (s) ajoute("S" + +s[1]);
+  return l;
+}
 async function chargerBlueprints() {
   if (bp.catalogue || bp.charge) { renderBlueprints(); return; }
-  try { const c = JSON.parse(localStorage.getItem("sm-blueprints2") || "null"); if (c && Date.now() - c.t < 864e5 && c.l?.length) { bp.catalogue = c.l; renderBlueprints(); return; } } catch {}
+  try { const c = JSON.parse(localStorage.getItem("sm-blueprints4") || "null"); if (c && Date.now() - c.t < 864e5 && c.l?.length) { bp.catalogue = c.l; bp.totalApi = c.total ?? null; renderBlueprints(); return; } } catch {}
   bp.charge = true; bp.erreur = ""; renderBlueprints();
   try {
-    const l = []; let url = "https://api.star-citizen.wiki/api/blueprints?limit=200&page=1", n = 0;
-    while (url && n++ < 60) {
+    // pagination robuste : lien « next », sinon page suivante tant que la page n'est pas vide (jusqu'à 300 pages)
+    const l = []; let page = 1, n = 0, url = "https://api.star-citizen.wiki/api/blueprints?limit=200&page[size]=200&page=1";
+    bp.totalApi = null;
+    while (url && n++ < 300) {
       const r = await fetch(url, { headers: { Accept: "application/json" } }); if (!r.ok) throw new Error("HTTP " + r.status);
       const j = await r.json(), d = j.data || [];
-      for (const b of d) l.push({ id: b.uuid, nom: b.output?.name || b.output_name || b.key, type: typeBlueprint(b.output), label: b.output?.type_label || "", defaut: !!b.is_available_by_default,
+      for (const b of d) l.push({ id: b.uuid, nom: b.output?.name || b.output_name || b.key, type: typeBlueprint(b.output), label: b.output?.type_label || "", defaut: !!b.is_available_by_default, tags: tagsBlueprint(b),
         ing: (b.ingredients || []).map((x) => ({ n: x.name, k: x.kind === "item" ? "item" : "res", q: x.kind === "item" ? Number(x.quantity) || 0 : Number(x.quantity_scu) || 0 })) });
-      url = j.links?.next || (j.meta && j.meta.current_page < j.meta.last_page ? url.replace(/page=\d+/, "page=" + (j.meta.current_page + 1)) : null);
+      if (j.meta?.total != null) bp.totalApi = j.meta.total;
       if (!d.length) break;
+      page++;
+      url = j.links?.next || (j.meta?.last_page != null ? (page <= j.meta.last_page ? url.replace(/([?&])page=\d+/, "$1page=" + page) : null) : url.replace(/([?&])page=\d+/, "$1page=" + page));
+      bp.etatCharge = `${l.length} chargés${bp.totalApi ? ` / ${bp.totalApi}` : ""}…`; renderBlueprints();
     }
     const vus = new Set(); bp.catalogue = l.filter((b) => !vus.has(b.id) && vus.add(b.id)).sort((a, b) => a.nom.localeCompare(b.nom, "fr"));
-    try { localStorage.setItem("sm-blueprints2", JSON.stringify({ t: Date.now(), l: bp.catalogue })); } catch {}
+    try { localStorage.setItem("sm-blueprints4", JSON.stringify({ t: Date.now(), l: bp.catalogue, total: bp.totalApi })); } catch {}
   } catch (e) { bp.erreur = "Catalogue des blueprints injoignable (api.star-citizen.wiki) : " + (e.message || e); }
   bp.charge = false; renderBlueprints();
 }
@@ -6744,20 +6770,22 @@ function renderBlueprints() {
   if (filtreStock) for (const c of stockFiltre()) { const k = sansAccents(c.nom || ""), e = parNom.get(k) || { scu: 0, n: 0 }; e.scu += Number(c.quantite_scu) || 0; e.n++; parNom.set(k, e); }
   const aMoi = new Set(mesBlueprints().map((x) => x.bp)), q = sansAccents(f.q.trim());
   const cat = bp.catalogue || [];
-  const lignes = cat.filter((c) => (!f.types.size || f.types.has(c.type)) && (!q || sansAccents(c.nom).includes(q))
+  const lignes = cat.filter((c) => (!f.types.size || f.types.has(c.type)) && [...f.tags].every((g) => (c.tags || []).includes(g)) && (!q || sansAccents(c.nom).includes(q))
     && (!f.poss.size || (f.poss.has("oui") && aMoi.has(c.id)) || (f.poss.has("non") && !aMoi.has(c.id)))
     && (!filtreStock || realisable(c, parNom)));
   bpVisibles = lignes.slice(0, 600).map((c) => c.id);
   for (const id of [...bp.sel]) if (!bpVisibles.includes(id)) bp.sel.delete(id);
-  $("bp-etat").textContent = bp.charge ? "Chargement du catalogue…" : bp.erreur || `${lignes.length} blueprint${lignes.length > 1 ? "s" : ""}${filtreStock ? " réalisables" : ""}${bp.catalogue ? ` sur ${bp.catalogue.length}` : ""}` + (compte && !bp.tableOk ? " · partage en ligne indisponible (table « blueprints » absente)" : "");
+  $("bp-etat").textContent = bp.charge ? `Chargement du catalogue… ${bp.etatCharge || ""}` : bp.erreur || `${lignes.length} blueprint${lignes.length > 1 ? "s" : ""}${filtreStock ? " réalisables" : ""}${bp.catalogue ? ` sur ${bp.catalogue.length}` : ""}${bp.totalApi != null ? ` (l'API en annonce ${bp.totalApi})` : ""}` + (compte && !bp.tableOk ? " · partage en ligne indisponible (table « blueprints » absente)" : "");
   $("bp-lignes").innerHTML = lignes.slice(0, 600).map((c) => {
     const n = proprietaires(c.id).length;
-    return `<tr class="${bp.sel.has(c.id) ? "selectionne" : ""}"><td class="coche"><input type="checkbox" data-bp-sel="${esc(c.id)}" ${bp.sel.has(c.id) ? "checked" : ""} aria-label="Sélectionner ${esc(c.nom)}"></td>` +
-      `<td class="nom-cell"><button type="button" class="lien bp-nom" data-bp-ouvrir="${esc(c.id)}">${esc(c.nom)}</button>${c.defaut ? ` <small class="bp-defaut">par défaut</small>` : ""}</td><td>${esc(BP_TYPES[c.type] || "")}</td>` +
+    return `<tr class="${bp.sel.has(c.id) ? "selectionne" : ""}${aMoi.has(c.id) ? " bp-possede" : ""}"><td class="coche"><input type="checkbox" data-bp-sel="${esc(c.id)}" ${bp.sel.has(c.id) ? "checked" : ""} aria-label="Sélectionner ${esc(c.nom)}"></td>` +
+      `<td class="nom-cell"><button type="button" class="lien bp-nom" data-bp-ouvrir="${esc(c.id)}">${esc(c.nom)}</button>${c.defaut ? ` <small class="bp-defaut">par défaut</small>` : ""}</td><td>${esc(BP_TYPES[c.type] || "")}</td><td class="bp-tags">${(c.tags || []).map((g) => `<button type="button" class="bp-tag${f.tags.has(g) ? " actif" : ""}" data-tag="${esc(g)}">${esc(g)}</button>`).join("")}</td>` +
       `<td>${aMoi.has(c.id) ? `<span class="bp-moi">✓ moi</span>` : ""}${n - (aMoi.has(c.id) ? 1 : 0) > 0 ? ` <small>+${n - (aMoi.has(c.id) ? 1 : 0)}</small>` : ""}</td>` +
       `<td class="bp-ing">${(c.ing || []).map((x) => esc(x.n)).join(", ")}</td></tr>`;
   }).join("");
   $("bp-vide").hidden = !!lignes.length || bp.charge; $("bp-vide").textContent = filtreStock ? "Aucune recette réalisable avec ce stock." : "Aucun blueprint pour ces filtres.";
+  $("bp-tags-actifs").hidden = !f.tags.size;
+  $("bp-tags-actifs").innerHTML = [...f.tags].map((g) => `<span class="bp-tag actif">${esc(g)}<button type="button" data-tag-retirer="${esc(g)}" aria-label="Retirer le filtre ${esc(g)}">×</button></span>`).join("");
   const ns = bp.sel.size;
   $("bp-sel").textContent = ns ? `${ns} blueprint${ns > 1 ? "s" : ""} sélectionné${ns > 1 ? "s" : ""}` : "Aucun blueprint sélectionné";
   $("bp-oui").disabled = $("bp-non").disabled = !ns;
@@ -6860,6 +6888,8 @@ $("v-blueprints").addEventListener("click", (e) => {
   const pu = e.target.closest(".bp-puce");
   if (pu) { const set = { "bp-types": bp.f.types, "bp-poss": bp.f.poss, "bp-stock": bp.f.stock }[pu.parentElement.id], k = pu.dataset.k; set.has(k) ? set.delete(k) : set.add(k); renderBlueprints(); return; }
   const o = e.target.closest("[data-bp-ouvrir]"); if (o) { ouvrirBlueprint(o.dataset.bpOuvrir); return; }
+  const tg = e.target.closest("[data-tag]"); if (tg) { const g = tg.dataset.tag; bp.f.tags.has(g) ? bp.f.tags.delete(g) : bp.f.tags.add(g); renderBlueprints(); return; }
+  const tr = e.target.closest("[data-tag-retirer]"); if (tr) { bp.f.tags.delete(tr.dataset.tagRetirer); renderBlueprints(); return; }
   if (e.target.id === "bp-oui") possederBlueprints([...bp.sel], true);
   if (e.target.id === "bp-non") possederBlueprints([...bp.sel], false);
 });
