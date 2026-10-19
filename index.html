@@ -1076,7 +1076,24 @@ body.overlay .fiche.mode-raff > .f-part, body.overlay .fiche.attente > .f-part {
 .bp-pop h3 { margin: 14px 0 6px; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--os-doux); }
 .bp-joueurs-liste, .bp-recette { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
 .bp-joueurs-liste small { color: var(--os-doux); margin-left: 6px; }
+.bp-aspects { display: grid; gap: 10px; }
+.bp-aspect { border: 1px solid var(--trait); border-radius: 4px; padding: 8px 10px; display: grid; gap: 6px; }
+.bp-aspect-tete { display: flex; gap: 6px; align-items: baseline; flex-wrap: wrap; }
+.bp-aspect-tete small { color: var(--os-doux); }
+.bp-q { margin-left: auto; background: #2a3640; padding: 1px 8px; border-radius: 999px; font-variant-numeric: tabular-nums; }
+.bp-aspect input[type=range] { width: 100%; accent-color: var(--orange); }
+.bp-bornes { display: flex; justify-content: space-between; font-size: 11px; color: var(--os-doux); margin-top: -4px; }
+.bp-mods { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: var(--os-doux); }
+.bp-stats { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.bp-stats li { display: flex; justify-content: space-between; border-bottom: 1px solid var(--trait); padding: 3px 0; }
+.bon { color: #6fd08c !important; } .mauvais { color: #e5484d !important; }
+.bp-stock { display: grid; gap: 10px; margin-top: 8px; }
+.bp-stock table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.bp-stock td { padding: 2px 6px; border-bottom: 1px solid var(--trait); }
+.bp-stock-tete small { color: var(--os-doux); margin-left: 6px; }
+.bp-pop { width: min(620px, 94vw); max-height: 90vh; }
 .bp-recette li { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--trait); padding: 3px 0; }
+.home-mes .mes-bp { display: block; text-align: center; margin-top: 10px; }
 </style>
 </head>
 <body>
@@ -1126,6 +1143,7 @@ body.overlay .fiche.mode-raff > .f-part, body.overlay .fiche.attente > .f-part {
           <a class="btn" href="#/minerais">Mes stocks</a>
           <button type="button" class="btn principal" data-ouvrir-nav>+ Scanner</button>
         </div>
+        <a class="btn mes-bp" href="#/blueprints">Blueprints</a>
       </div>
     </div>
     <div class="home-trois">
@@ -1437,8 +1455,13 @@ body.overlay .fiche.mode-raff > .f-part, body.overlay .fiche.attente > .f-part {
     <p class="note" id="dbp-type"></p>
     <h3>Possédé par</h3>
     <ul class="bp-joueurs-liste" id="dbp-joueurs"></ul>
-    <h3>Recette</h3>
-    <ul class="bp-recette" id="dbp-recette"></ul>
+    <h3>Recette et qualité des matériaux</h3>
+    <div class="bp-aspects" id="dbp-aspects"></div>
+    <h3>Modifications des statistiques</h3>
+    <ul class="bp-stats" id="dbp-stats"></ul>
+    <h3>Stock des ressources</h3>
+    <div class="bp-puces" id="dbp-portee"></div>
+    <div class="bp-stock" id="dbp-stock"></div>
     <div class="pied"><button class="btn" type="submit">Fermer</button></div>
   </form>
 </dialog>
@@ -6740,15 +6763,93 @@ function renderBlueprints() {
   $("bp-oui").disabled = $("bp-non").disabled = !ns;
   $("bp-tout").checked = ns > 0 && ns === bpVisibles.length; $("bp-tout").indeterminate = ns > 0 && ns < bpVisibles.length;
 }
-function ouvrirBlueprint(id) {
+const bpDetails = new Map();
+let bpPop = null;   // { c, d, q: [qualités], portee: Set }
+async function detailBlueprint(id) {
+  if (bpDetails.has(id)) return bpDetails.get(id);
+  const r = await fetch(`https://api.star-citizen.wiki/api/blueprints/${encodeURIComponent(id)}`, { headers: { Accept: "application/json" } });
+  if (!r.ok) throw new Error("HTTP " + r.status);
+  const d = (await r.json()).data; bpDetails.set(id, d); return d;
+}
+/* Modificateur linéaire d'un aspect pour une qualité (ex. 0,95 à Q0 → 1,05 à Q1000) */
+function valeurModif(m, q) {
+  const qr = m.quality_range || { min: 0, max: 1000 }, mr = m.modifier_range || { at_min_quality: 1, at_max_quality: 1 };
+  const x = Math.min(1, Math.max(0, (q - qr.min) / ((qr.max - qr.min) || 1)));
+  return mr.at_min_quality + (mr.at_max_quality - mr.at_min_quality) * x;
+}
+const fmtPct = (v) => (v >= 0 ? "+" : "") + (v * 100).toFixed(2).replace(".", ",") + " %";
+function stockRessource(nom) {
+  const k = sansAccents(nom || ""), P = bpPop.portee;
+  const moi = items.map((it) => ({ ...it, joueur: moiPseudo(), portee: "moi" }));
+  const autres = (partage.caisses || []).map((c) => ({ ...c, portee: c.groupe === "Allié" ? "alliance" : "corpo" }));
+  return [...moi, ...autres].filter((c) => sansAccents(c.nom || "") === k && P.has(c.portee)).sort((a, b) => (b.qualite || 0) - (a.qualite || 0));
+}
+function renderPopBlueprint(partiel = false) {
+  const { d } = bpPop, as = d?.aspects?.aspects || [];
+  if (!d) return;
+  const cible = partiel ? document.createElement("div") : $("dbp-aspects");
+  cible.innerHTML = as.length ? as.map((a, i) => {
+    const q = bpPop.q[i], inp = a.input || {}, [qmin, qmax] = bornesAspect(a);
+    const mods = (a.modifiers || []).map((m) => { const v = valeurModif(m, q) / valeurModif(m, a.initial_quality ?? 500) - 1; return `<span class="${Math.abs(v) < 1e-6 ? "" : (v > 0) === (m.better_when !== "lower") ? "bon" : "mauvais"}">${esc(m.label)} ${Math.abs(v) < 1e-6 ? "sans changement" : fmtPct(v)}</span>`; }).join("");
+    return `<div class="bp-aspect"><div class="bp-aspect-tete"><b>${esc(a.name)}</b> · ${esc(inp.name || "")} <small>${inp.kind === "item" ? `× ${inp.quantity}` : `${fmtScu(inp.quantity_scu)} SCU`}</small><span class="bp-q">Q${q}</span></div>
+      <input type="range" min="${qmin}" max="${qmax}" value="${q}" data-aspect="${i}" aria-label="Qualité ${esc(inp.name || "")}">
+      <div class="bp-bornes"><span>${qmin}</span><span>Base ${a.initial_quality ?? 500}</span><span>${qmax}</span></div>
+      <div class="bp-mods">${mods || `<span>aucun effet</span>`}</div></div>`;
+  }).join("") : `<p class="note">Pas de détail de recette pour ce blueprint.</p>`;
+  // total par statistique : produit des modificateurs de chaque aspect, comparé à la qualité de base
+  const tot = new Map();
+  as.forEach((a, i) => (a.modifiers || []).forEach((m) => {
+    const k = m.property_key || m.label, e = tot.get(k) || { label: m.label, better: m.better_when, f: 1 };
+    e.f *= valeurModif(m, bpPop.q[i]) / valeurModif(m, a.initial_quality ?? 500); tot.set(k, e);
+  }));
+  $("dbp-stats").innerHTML = tot.size ? [...tot.values()].map((e) => { const v = e.f - 1; return `<li><span>${esc(e.label)}</span><b class="${Math.abs(v) < 1e-6 ? "" : (v > 0) === (e.better !== "lower") ? "bon" : "mauvais"}">${Math.abs(v) < 1e-6 ? "sans changement" : fmtPct(v)}</b></li>`; }).join("") : `<li class="note">Aucune statistique modifiée par la qualité.</li>`;
+  if (partiel) return cible;
+  $("dbp-portee").innerHTML = Object.entries({ moi: "Perso", corpo: "Corporation", alliance: "Alliance" }).map(([k, v]) => `<button type="button" class="bp-puce" data-portee="${k}" aria-pressed="${bpPop.portee.has(k)}">${v}</button>`).join("");
+  const noms = [...new Set(as.map((a) => a.input?.name).filter(Boolean))];
+  $("dbp-stock").innerHTML = noms.map((n) => {
+    const l = stockRessource(n), idx = as.map((a, i) => a.input?.name === n ? i : -1).filter((i) => i >= 0);
+    const scu = l.reduce((s, c) => s + (Number(c.quantite_scu) || 0), 0);
+    return `<div class="bp-stock-res"><div class="bp-stock-tete"><b>${esc(n)}</b> <small>${l.length ? `${l.length} caisse${l.length > 1 ? "s" : ""} · ${fmtScu(scu)} SCU` : "aucun stock"}</small></div>` +
+      (l.length ? `<table><tbody>${l.slice(0, 30).map((c) => `<tr><td class="num">Q${c.qualite ?? "?"}</td><td class="num">${fmtScu(c.quantite_scu ?? 0)} SCU</td><td>${esc(c.station || "")}</td><td>${esc(c.joueur || "")}</td><td><button type="button" class="btn petit" data-utiliser="${idx.join(",")}" data-q="${c.qualite ?? ""}" title="Régler la glissière sur cette qualité">Utiliser</button></td></tr>`).join("")}</tbody></table>` : "") + `</div>`;
+  }).join("") || `<p class="note">Aucune ressource.</p>`;
+}
+/* Bornes de qualité de la glissière : celles du blueprint, et jamais sous la qualité minimale exigée pour le matériau */
+function bornesAspect(a) {
+  const lo = Math.max(a.slider_min ?? 1, a.input?.min_quality ?? 1, ...(a.modifiers || []).map((m) => m.quality_range?.min ?? 0));
+  const hi = Math.min(a.slider_max ?? 1000, ...(a.modifiers || []).map((m) => m.quality_range?.max ?? 1000));
+  return [lo, Math.max(lo, hi)];
+}
+const borner = (a, q) => { const [lo, hi] = bornesAspect(a); return Math.min(hi, Math.max(lo, q)); };
+async function ouvrirBlueprint(id) {
   const c = (bp.catalogue || []).find((x) => x.id === id); if (!c) return;
   $("dbp-titre").textContent = c.nom;
   $("dbp-type").textContent = [BP_TYPES[c.type], c.label, c.defaut ? "disponible par défaut" : ""].filter(Boolean).join(" · ");
   const pr = proprietaires(id);
   $("dbp-joueurs").innerHTML = pr.length ? pr.map((p) => `<li><b>${esc(p.joueur)}</b> <small>${esc(p.groupe)}</small></li>`).join("") : `<li class="note">Personne pour l'instant.</li>`;
-  $("dbp-recette").innerHTML = c.ing?.length ? c.ing.map((x) => `<li>${esc(x.n)} <span>${x.k === "item" ? `× ${x.q}` : `${fmtScu(x.q)} SCU`}</span></li>`).join("") : `<li class="note">Détails de la recette à venir.</li>`;
+  bpPop = { c, d: null, q: [], portee: bpPop?.portee || new Set(["moi"]) };
+  $("dbp-aspects").innerHTML = `<p class="note">Chargement de la recette…</p>`; $("dbp-stats").innerHTML = ""; $("dbp-stock").innerHTML = ""; $("dbp-portee").innerHTML = "";
   $("d-blueprint").showModal();
+  try {
+    const d = await detailBlueprint(id); if (bpPop?.c !== c) return;
+    bpPop.d = d; bpPop.q = (d.aspects?.aspects || []).map((a) => borner(a, a.initial_quality ?? 500));
+    renderPopBlueprint();
+  } catch (e) { $("dbp-aspects").innerHTML = `<p class="note">Recette injoignable (api.star-citizen.wiki) : ${esc(e.message || e)}</p>`; }
 }
+$("d-blueprint").addEventListener("input", (e) => {
+  if (!bpPop || e.target.dataset.aspect == null) return;
+  bpPop.q[+e.target.dataset.aspect] = +e.target.value;
+  // glissière en cours de déplacement : on ne remplace que les textes (reconstruire la couperait)
+  const html = renderPopBlueprint(true);
+  const ancien = $("dbp-aspects").querySelectorAll(".bp-aspect"), neuf = html.querySelectorAll(".bp-aspect");
+  ancien.forEach((el, i) => { el.querySelector(".bp-q").textContent = neuf[i].querySelector(".bp-q").textContent; el.querySelector(".bp-mods").innerHTML = neuf[i].querySelector(".bp-mods").innerHTML; });
+});
+$("d-blueprint").addEventListener("click", (e) => {
+  if (!bpPop) return;
+  const p = e.target.closest("[data-portee]");
+  if (p) { e.preventDefault(); const k = p.dataset.portee; bpPop.portee.has(k) ? bpPop.portee.delete(k) : bpPop.portee.add(k); renderPopBlueprint(); return; }
+  const u = e.target.closest("[data-utiliser]");
+  if (u && u.dataset.q !== "") { e.preventDefault(); for (const i of u.dataset.utiliser.split(",")) if (i !== "") bpPop.q[+i] = borner(bpPop.d.aspects.aspects[+i], +u.dataset.q); renderPopBlueprint(); }
+});
 function possederBlueprints(ids, oui) {
   const l = mesBlueprints();
   if (oui) { for (const id of ids) if (!l.some((x) => x.bp === id)) { const c = (bp.catalogue || []).find((x) => x.id === id) || {}; l.push({ id: uid(), bp: id, nom: c.nom || "", type: c.type || "composant", ts: Date.now() / 1000 }); } }
