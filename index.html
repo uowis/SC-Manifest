@@ -1100,7 +1100,16 @@ body.overlay .fiche.mode-raff > .f-part, body.overlay .fiche.attente > .f-part {
 .bp-stock table { width: 100%; border-collapse: collapse; font-size: 12px; }
 .bp-stock td { padding: 2px 6px; border-bottom: 1px solid var(--trait); }
 .bp-stock-tete small { color: var(--os-doux); margin-left: 6px; }
-.bp-pop { width: min(620px, 94vw); max-height: 90vh; }
+.bp-pop { width: min(1040px, 96vw); max-height: 92vh; }
+.bp-cols { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 22px; align-items: start; }
+@media (max-width: 760px) { .bp-cols { grid-template-columns: 1fr; } }
+.bp-paliers { position: relative; height: 6px; margin: -2px 8px 0; }
+.bp-paliers i { position: absolute; top: 0; width: 2px; height: 6px; background: var(--os-doux); transform: translateX(-1px); }
+.bp-preleve { font-size: 12px; color: var(--os-doux); }
+.bp-stock-res summary { cursor: pointer; padding: 4px 0; }
+.bp-stock-res[open] summary { border-bottom: 1px solid var(--trait); }
+.bp-crafter { font-size: 16px; padding: 10px 34px; }
+.bp-crafter:disabled { opacity: .45; cursor: not-allowed; }
 .bp-recette li { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--trait); padding: 3px 0; }
 .home-mes .mes-bp { display: block; text-align: center; margin-top: 10px; }
 </style>
@@ -1465,14 +1474,21 @@ body.overlay .fiche.mode-raff > .f-part, body.overlay .fiche.attente > .f-part {
     <p class="note" id="dbp-type"></p>
     <h3>Possédé par</h3>
     <ul class="bp-joueurs-liste" id="dbp-joueurs"></ul>
-    <h3>Recette et qualité des matériaux</h3>
-    <div class="bp-aspects" id="dbp-aspects"></div>
-    <h3>Modifications des statistiques</h3>
-    <ul class="bp-stats" id="dbp-stats"></ul>
-    <h3>Stock des ressources</h3>
-    <div class="bp-puces" id="dbp-portee"></div>
-    <div class="bp-stock" id="dbp-stock"></div>
-    <div class="pied"><button class="btn" type="submit">Fermer</button></div>
+    <div class="bp-cols">
+      <div>
+        <h3>Recette et qualité des matériaux</h3>
+        <div class="bp-aspects" id="dbp-aspects"></div>
+        <h3>Modifications des statistiques</h3>
+        <ul class="bp-stats" id="dbp-stats"></ul>
+      </div>
+      <div>
+        <h3>Stock des ressources</h3>
+        <div class="bp-puces" id="dbp-portee"></div>
+        <div class="bp-stock" id="dbp-stock"></div>
+      </div>
+    </div>
+    <p class="note" id="dbp-craft-info"></p>
+    <div class="pied"><button class="btn" type="submit">Fermer</button><button class="btn principal bp-crafter" type="button" id="dbp-crafter">Crafter</button></div>
   </form>
 </dialog>
 <dialog id="d-visibilite">
@@ -6822,6 +6838,8 @@ function renderPopBlueprint(partiel = false) {
     return `<div class="bp-aspect"><div class="bp-aspect-tete"><b>${esc(a.name)}</b> · ${esc(inp.name || "")} <small>${inp.kind === "item" ? `× ${inp.quantity}` : `${fmtScu(inp.quantity_scu)} SCU`}</small><span class="bp-q">Q${q}</span></div>
       <input type="range" min="${qmin}" max="${qmax}" value="${q}" data-aspect="${i}" aria-label="Qualité ${esc(inp.name || "")}">
       <div class="bp-bornes"><span>${qmin}</span><span>Base ${a.initial_quality ?? 500}</span><span>${qmax}</span></div>
+      ${paliersAspect(a).length ? `<div class="bp-paliers">${paliersAspect(a).map((v) => `<i style="left:${((v - qmin) / ((qmax - qmin) || 1)) * 100}%"></i>`).join("")}</div>` : ""}
+      <div class="bp-preleve">${prelevement(i).texte}</div>
       <div class="bp-mods">${mods || `<span>aucun effet</span>`}</div></div>`;
   }).join("") : `<p class="note">Pas de détail de recette pour ce blueprint.</p>`;
   // total par statistique : produit des modificateurs de chaque aspect, comparé à la qualité de base
@@ -6831,14 +6849,15 @@ function renderPopBlueprint(partiel = false) {
     e.f *= valeurModif(m, bpPop.q[i]) / valeurModif(m, a.initial_quality ?? 500); tot.set(k, e);
   }));
   $("dbp-stats").innerHTML = tot.size ? [...tot.values()].map((e) => { const v = e.f - 1; return `<li><span>${esc(e.label)}</span><b class="${Math.abs(v) < 1e-6 ? "" : (v > 0) === (e.better !== "lower") ? "bon" : "mauvais"}">${Math.abs(v) < 1e-6 ? "sans changement" : fmtPct(v)}</b></li>`; }).join("") : `<li class="note">Aucune statistique modifiée par la qualité.</li>`;
+  majCraft();
   if (partiel) return cible;
   $("dbp-portee").innerHTML = Object.entries({ moi: "Perso", corpo: "Corporation", alliance: "Alliance" }).map(([k, v]) => `<button type="button" class="bp-puce" data-portee="${k}" aria-pressed="${bpPop.portee.has(k)}">${v}</button>`).join("");
   const noms = [...new Set(as.map((a) => a.input?.name).filter(Boolean))];
   $("dbp-stock").innerHTML = noms.map((n) => {
     const l = stockRessource(n), idx = as.map((a, i) => a.input?.name === n ? i : -1).filter((i) => i >= 0);
     const scu = l.reduce((s, c) => s + (Number(c.quantite_scu) || 0), 0);
-    return `<div class="bp-stock-res"><div class="bp-stock-tete"><b>${esc(n)}</b> <small>${l.length ? `${l.length} caisse${l.length > 1 ? "s" : ""} · ${fmtScu(scu)} SCU` : "aucun stock"}</small></div>` +
-      (l.length ? `<table><tbody>${l.slice(0, 30).map((c) => `<tr><td class="num">Q${c.qualite ?? "?"}</td><td class="num">${fmtScu(c.quantite_scu ?? 0)} SCU</td><td>${esc(c.station || "")}</td><td>${esc(c.joueur || "")}</td><td><button type="button" class="btn petit" data-utiliser="${idx.join(",")}" data-q="${c.qualite ?? ""}" title="Régler la glissière sur cette qualité">Utiliser</button></td></tr>`).join("")}</tbody></table>` : "") + `</div>`;
+    return `<details class="bp-stock-res" ${bpPop.fermes.has(n) ? "" : "open"} data-res="${esc(n)}"><summary class="bp-stock-tete"><b>${esc(n)}</b> <small>${l.length ? `${l.length} caisse${l.length > 1 ? "s" : ""} · ${fmtScu(scu)} SCU` : "aucun stock"}</small></summary>` +
+      (l.length ? `<table><tbody>${l.slice(0, 30).map((c) => `<tr><td class="num">Q${c.qualite ?? "?"}</td><td class="num">${fmtScu(c.quantite_scu ?? 0)} SCU</td><td>${esc(c.station || "")}</td><td>${esc(c.joueur || "")}</td><td><button type="button" class="btn petit" data-utiliser="${idx.join(",")}" data-q="${c.qualite ?? ""}" title="Régler la glissière sur cette qualité">Utiliser</button></td></tr>`).join("")}</tbody></table>` : "") + `</details>`;
   }).join("") || `<p class="note">Aucune ressource.</p>`;
 }
 /* Bornes de qualité de la glissière : celles du blueprint, et jamais sous la qualité minimale exigée pour le matériau */
@@ -6847,14 +6866,19 @@ function bornesAspect(a) {
   const hi = Math.min(a.slider_max ?? 1000, ...(a.modifiers || []).map((m) => m.quality_range?.max ?? 1000));
   return [lo, Math.max(lo, hi)];
 }
-const borner = (a, q) => { const [lo, hi] = bornesAspect(a); return Math.min(hi, Math.max(lo, q)); };
+/* Paliers de qualité du matériau (tableau des minerais) compris dans les bornes ; vide = pas de palier connu */
+function paliersAspect(a) { const [lo, hi] = bornesAspect(a), p = valeursDe(a.input?.name || "").filter((v) => v >= lo && v <= hi); return p; }
+const borner = (a, q) => {
+  const [lo, hi] = bornesAspect(a); q = Math.min(hi, Math.max(lo, q));
+  const p = paliersAspect(a); return p.length ? p.reduce((x, y) => (Math.abs(y - q) < Math.abs(x - q) ? y : x)) : q;
+};
 async function ouvrirBlueprint(id) {
   const c = (bp.catalogue || []).find((x) => x.id === id); if (!c) return;
   $("dbp-titre").textContent = c.nom;
   $("dbp-type").textContent = [BP_TYPES[c.type], c.label, c.defaut ? "disponible par défaut" : ""].filter(Boolean).join(" · ");
   const pr = proprietaires(id);
   $("dbp-joueurs").innerHTML = pr.length ? pr.map((p) => `<li><b>${esc(p.joueur)}</b> <small>${esc(p.groupe)}</small></li>`).join("") : `<li class="note">Personne pour l'instant.</li>`;
-  bpPop = { c, d: null, q: [], portee: bpPop?.portee || new Set(["moi"]) };
+  bpPop = { c, d: null, q: [], portee: bpPop?.portee || new Set(["moi"]), fermes: bpPop?.fermes || new Set() };
   $("dbp-aspects").innerHTML = `<p class="note">Chargement de la recette…</p>`; $("dbp-stats").innerHTML = ""; $("dbp-stock").innerHTML = ""; $("dbp-portee").innerHTML = "";
   $("d-blueprint").showModal();
   try {
@@ -6865,11 +6889,49 @@ async function ouvrirBlueprint(id) {
 }
 $("d-blueprint").addEventListener("input", (e) => {
   if (!bpPop || e.target.dataset.aspect == null) return;
-  bpPop.q[+e.target.dataset.aspect] = +e.target.value;
+  const ia = +e.target.dataset.aspect, qa = borner(bpPop.d.aspects.aspects[ia], +e.target.value);
+  bpPop.q[ia] = qa; e.target.value = qa;   // glissière aimantée sur les paliers de qualité
   // glissière en cours de déplacement : on ne remplace que les textes (reconstruire la couperait)
   const html = renderPopBlueprint(true);
   const ancien = $("dbp-aspects").querySelectorAll(".bp-aspect"), neuf = html.querySelectorAll(".bp-aspect");
   ancien.forEach((el, i) => { el.querySelector(".bp-q").textContent = neuf[i].querySelector(".bp-q").textContent; el.querySelector(".bp-mods").innerHTML = neuf[i].querySelector(".bp-mods").innerHTML; });
+});
+$("d-blueprint").addEventListener("toggle", (e) => { const d = e.target.closest?.("details[data-res]"); if (d && bpPop) d.open ? bpPop.fermes.delete(d.dataset.res) : bpPop.fermes.add(d.dataset.res); }, true);
+/* Prélèvement dans MON stock pour un aspect : caisses de la qualité la plus proche de la glissière d'abord.
+   Qualité obtenue = moyenne pondérée par la quantité (le jeu fait une moyenne quand on mélange des qualités). */
+function prelevement(i) {
+  const a = bpPop.d.aspects.aspects[i], inp = a.input || {}, k = sansAccents(inp.name || ""), q = bpPop.q[i];
+  const besoin = inp.kind === "item" ? Number(inp.quantity) || 0 : Number(inp.quantity_scu) || 0;
+  const dispo = items.filter((it) => sansAccents(it.nom || "") === k && (it.qualite ?? 0) >= (inp.min_quality ?? 0))
+    .sort((x, y) => Math.abs((x.qualite ?? 0) - q) - Math.abs((y.qualite ?? 0) - q) || (y.qualite ?? 0) - (x.qualite ?? 0));
+  const pris = []; let reste = besoin;
+  for (const it of dispo) { if (reste <= 1e-9) break; const n = inp.kind === "item" ? 1 : Math.min(reste, Number(it.quantite_scu) || 0); if (n <= 0) continue; pris.push({ it, n }); reste -= n; }
+  const tot = pris.reduce((s, p) => s + p.n, 0), moy = tot ? Math.round(pris.reduce((s, p) => s + p.n * (p.it.qualite ?? 0), 0) / tot) : null;
+  const ok = reste <= 1e-9;
+  const texte = !besoin ? "" : ok ? `Mon stock : ${pris.length} caisse${pris.length > 1 ? "s" : ""}, qualité moyenne <b>Q${moy}</b>${moy !== q ? ` <span class="mauvais">≠ Q${q}</span>` : ""}`
+    : `<span class="mauvais">Mon stock : il manque ${inp.kind === "item" ? `${Math.ceil(reste)}` : `${fmtScu(reste)} SCU`}</span>`;
+  return { pris, ok, moy, texte };
+}
+function majCraft() {
+  const as = bpPop?.d?.aspects?.aspects || [], b = $("dbp-crafter"); if (!b) return;
+  const ps = as.map((_, i) => prelevement(i)), ok = as.length > 0 && ps.every((p) => p.ok);
+  b.disabled = !ok;
+  $("dbp-craft-info").textContent = !as.length ? "" : ok ? "Crafter retire ces matériaux de votre stock perso." : "Stock perso insuffisant pour crafter.";
+}
+$("dbp-crafter").addEventListener("click", () => {
+  if (!bpPop?.d) return;
+  const as = bpPop.d.aspects.aspects, ps = as.map((_, i) => prelevement(i));
+  if (!ps.every((p) => p.ok)) return;
+  const resume = as.map((a, i) => `${a.input?.name} : ${ps[i].pris.map((p) => `${a.input?.kind === "item" ? "1" : fmtScu(p.n) + " SCU"} Q${p.it.qualite} (${p.it.station})`).join(", ")}`).join("\n");
+  if (!confirm(`Crafter « ${bpPop.c.nom} » ?\n\nRetiré de votre stock :\n${resume}`)) return;
+  const suppr = [];
+  for (const p of ps.flatMap((x) => x.pris)) {
+    if (p.it.quantite_scu == null || Number(p.it.quantite_scu) - p.n <= 1e-6) suppr.push(p.it.id);
+    else { p.it.quantite_scu = Math.round((Number(p.it.quantite_scu) - p.n) * 1000) / 1000; delete p.it.sync; }
+  }
+  if (suppr.length) { noterSuppressions(suppr); items = base.items = items.filter((it) => !suppr.includes(it.id)); }
+  sauver(); planifierSync(); render(); renderPopBlueprint();
+  toast(`« ${bpPop.c.nom} » crafté : stock mis à jour.`);
 });
 $("d-blueprint").addEventListener("click", (e) => {
   if (!bpPop) return;
