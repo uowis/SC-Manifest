@@ -1051,6 +1051,32 @@ body.overlay .fiche.mode-raff > .f-part, body.overlay .fiche.attente > .f-part {
 .home-trois > .home-param { align-self: stretch; }
 .home-outil h2 { margin: 0; color: var(--orange); text-transform: uppercase; letter-spacing: .06em; font-size: 14px; }
 .home-outil p { margin: 0; line-height: 1.5; }
+
+/* v167 : page Blueprints */
+.bp-filtres { display: flex; flex-wrap: wrap; gap: 14px 22px; align-items: flex-end; margin: 6px 0 16px; }
+.bp-groupe { display: grid; gap: 6px; }
+.bp-groupe > span { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--os-doux); }
+.bp-puces { display: flex; flex-wrap: wrap; gap: 6px; }
+.bp-puce { border: 1px solid var(--trait); background: none; color: inherit; padding: 5px 12px; border-radius: 999px; cursor: pointer; font: inherit; font-size: 13px; }
+.bp-puce[aria-pressed="true"] { background: var(--orange); border-color: var(--orange); color: #111; }
+.bp-multi { position: relative; }
+.bp-multi summary { list-style: none; cursor: pointer; border: 1px solid var(--trait); padding: 5px 12px; border-radius: 4px; min-width: 9em; max-width: 18em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
+.bp-multi summary::-webkit-details-marker { display: none; }
+.bp-multi > div { position: absolute; z-index: 20; top: calc(100% + 4px); left: 0; min-width: 14em; max-height: 280px; overflow: auto; background: #151b21; border: 1px solid var(--trait); border-radius: 4px; padding: 6px; display: grid; gap: 2px; }
+.bp-multi label { display: flex; gap: 6px; align-items: center; font-size: 13px; padding: 3px 4px; cursor: pointer; white-space: nowrap; }
+.bp-recherche input { padding: 5px 10px; min-width: 14em; }
+.bp-table td { vertical-align: middle; }
+.bp-act { text-align: right; white-space: nowrap; }
+.bp-defaut { color: var(--os-doux); }
+.bp-actions { margin: 0 0 8px; }
+.bp-nom { text-align: left; }
+.bp-moi { color: #6fd08c; }
+.bp-ing { color: var(--os-doux); font-size: 12px; }
+.bp-pop { min-width: min(460px, 92vw); }
+.bp-pop h3 { margin: 14px 0 6px; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--os-doux); }
+.bp-joueurs-liste, .bp-recette { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.bp-joueurs-liste small { color: var(--os-doux); margin-left: 6px; }
+.bp-recette li { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--trait); padding: 3px 0; }
 </style>
 </head>
 <body>
@@ -1179,6 +1205,25 @@ body.overlay .fiche.mode-raff > .f-part, body.overlay .fiche.attente > .f-part {
         <ul class="raff-liste grille" id="a-raff"></ul>
       </aside>
     </div>
+  </section>
+
+  <section id="v-blueprints" hidden>
+    <div class="entete"><div><h1>Blueprints</h1><p class="sous-titre" id="bp-etat"></p></div></div>
+    <div class="bp-filtres">
+      <div class="bp-groupe"><span>Type</span><div class="bp-puces" id="bp-types"></div></div>
+      <div class="bp-groupe"><span>Possession</span><div class="bp-puces" id="bp-poss"></div></div>
+      <div class="bp-groupe"><span>Réalisable avec le stock de</span><div class="bp-puces" id="bp-stock"></div></div>
+      <div class="bp-groupe"><span>Stations</span><details class="bp-multi" id="bp-stations"><summary>Toutes</summary><div></div></details></div>
+      <div class="bp-groupe"><span>Joueurs</span><details class="bp-multi" id="bp-joueurs"><summary>Tous</summary><div></div></details></div>
+      <div class="bp-groupe bp-recherche"><span>Recherche</span><input id="bp-q" type="search" placeholder="Nom du blueprint" autocomplete="off"></div>
+    </div>
+    <div class="actions-groupe bp-actions">
+      <span id="bp-sel">Aucun blueprint sélectionné</span>
+      <button class="btn" type="button" id="bp-oui" disabled>Je les possède</button>
+      <button class="btn" type="button" id="bp-non" disabled>Je ne les possède pas</button>
+    </div>
+    <div class="tableau-wrap"><table class="bp-table"><thead><tr><th class="coche"><input type="checkbox" id="bp-tout" aria-label="Tout sélectionner"></th><th>Blueprint</th><th>Type</th><th>Possédé</th><th>Ingrédients</th></tr></thead><tbody id="bp-lignes"></tbody></table></div>
+    <p class="vide" id="bp-vide" hidden></p>
   </section>
 
   <section id="v-station" hidden>
@@ -1386,6 +1431,17 @@ body.overlay .fiche.mode-raff > .f-part, body.overlay .fiche.attente > .f-part {
   </div>
 </dialog>
 
+<dialog id="d-blueprint" class="bp-pop">
+  <form method="dialog">
+    <h2 id="dbp-titre"></h2>
+    <p class="note" id="dbp-type"></p>
+    <h3>Possédé par</h3>
+    <ul class="bp-joueurs-liste" id="dbp-joueurs"></ul>
+    <h3>Recette</h3>
+    <ul class="bp-recette" id="dbp-recette"></ul>
+    <div class="pied"><button class="btn" type="submit">Fermer</button></div>
+  </form>
+</dialog>
 <dialog id="d-visibilite">
   <form method="dialog">
     <h2>Modifier la visibilité</h2>
@@ -2036,10 +2092,11 @@ function route() {
   }
   else if (h === "/minerais") { vue = "accueil"; stationCourante = null; }
   else if (h === "/admin") { vue = "admin"; stationCourante = null; }
+  else if (h === "/blueprints") { vue = "blueprints"; stationCourante = null; setTimeout(chargerBlueprints, 0); }
   else { vue = "home"; stationCourante = null; }
   if (session && session.station !== stationCourante) arreterSession();
   if (ancienne !== stationCourante || vueAvant !== vue) selection.clear();
-  for (const v of ["home", "accueil", "station", "nouvelle", "corpo", "compte", "admin"]) $(`v-${v}`).hidden = v !== vue;
+  for (const v of ["home", "accueil", "station", "nouvelle", "corpo", "compte", "admin", "blueprints"]) $(`v-${v}`).hidden = v !== vue;
   if (vue === "home" && compte && Date.now() - partage.maj > 30000) chargerPartage().then(render).catch(() => {});
   if (vue === "corpo" && compte && Date.now() - partage.maj > 30000) chargerPartage().then(render).catch(() => {});
   if (vue === "nouvelle") $("n-station").innerHTML = optionsStations(Object.values(catalogue).flat().sort((a, b) => a.localeCompare(b, "fr")), { avecVide: true });
@@ -2185,6 +2242,7 @@ function renderTable(table, lignes, { station, cocher, joueur = false, visibilit
   }
 }
 function render() {
+  if (vue === "blueprints" && window.bp) renderBlueprints();
   renderDerniers();
   renderNav();
   if (vue === "home") renderHome();
@@ -4037,6 +4095,7 @@ async function synchroniser() {
     sauver();
   } finally {
     syncEnCours = false;
+    await syncBlueprints().catch(() => {});
     if (vue !== "compte") render(); else renderCompte();
   }
 }
@@ -4052,6 +4111,7 @@ async function chargerPartage() {
   partage.caisses = data.map((c) => ({ ...depuisCloud(c), user_id: c.user_id, joueur: compte.pseudos[c.user_id] || "Joueur",
     groupe: (compte.membreDe[c.user_id] || []).filter(Boolean).join(", ") || "Allié" }));
   partage.maj = Date.now();
+  await chargerBlueprintsPartages().catch(() => {});
   renderChoixGroupe();
 }
 let groupeDemande = null;
@@ -4615,6 +4675,7 @@ function renderNavCta() {
   const allies = corpos.some((c) => (c.partagentAvecNous || []).length);
   html += lienCta("#/corpo/allies", "Alliance", !compte ? "Connexion nécessaire" : !corpos.length ? "Aucune corporation" : "", h === "/corpo/allies", !compte || !corpos.length, compte ? "Aucune corporation alliée ne partage avec vous" : "Connecte-toi pour voir tes alliés");
   html += lienCta("#/minerais", "Mes ressources", "", vue === "accueil", false, "", true);
+  html += lienCta("#/blueprints", "Blueprints", "", vue === "blueprints");
   if (compte?.superAdmin) html += lienCta("#/admin", "Administration", "", vue === "admin");
   $("dn-cta").innerHTML = html;
 }
@@ -6567,6 +6628,148 @@ function arreterRaffIntegre() {
   const f = R$("dr-fermer"); if (f) f.textContent = "Fermer";
 }
 majBoutonsMode();
+
+/* =====================================================================
+   v167 : Blueprints — catalogue (API star-citizen.wiki) + blueprints possédés (moi, corpo, alliés)
+   ===================================================================== */
+var BP_TYPES = { armure: "Armure", arme: "Arme", composant: "Composant", vaisseau: "Arme vaisseau" };
+var bp = { catalogue: null, charge: false, erreur: "", partages: [], tableOk: true, sel: new Set(),
+  f: { types: new Set(), poss: new Set(), stock: new Set(), stations: new Set(), joueurs: new Set(), q: "" } };
+function typeBlueprint(o) {
+  const s = `${o?.type || ""} ${o?.type_label || ""} ${o?.sub_type || o?.subtype || ""}`.toLowerCase();
+  if (/armor|armour|undersuit|helmet|backpack|char_/.test(s)) return "armure";
+  if (/weapongun|weapon gun|missile|torpedo|turret|weaponmount|bomb|weapondefensive/.test(s)) return "vaisseau";
+  if (/fps|personal|weaponpersonal|grenade|knife|melee|magazine|attachment|weaponattachment/.test(s)) return "arme";
+  return "composant";
+}
+async function chargerBlueprints() {
+  if (bp.catalogue || bp.charge) { renderBlueprints(); return; }
+  try { const c = JSON.parse(localStorage.getItem("sm-blueprints2") || "null"); if (c && Date.now() - c.t < 864e5 && c.l?.length) { bp.catalogue = c.l; renderBlueprints(); return; } } catch {}
+  bp.charge = true; bp.erreur = ""; renderBlueprints();
+  try {
+    const l = []; let url = "https://api.star-citizen.wiki/api/blueprints?limit=200&page=1", n = 0;
+    while (url && n++ < 60) {
+      const r = await fetch(url, { headers: { Accept: "application/json" } }); if (!r.ok) throw new Error("HTTP " + r.status);
+      const j = await r.json(), d = j.data || [];
+      for (const b of d) l.push({ id: b.uuid, nom: b.output?.name || b.output_name || b.key, type: typeBlueprint(b.output), label: b.output?.type_label || "", defaut: !!b.is_available_by_default,
+        ing: (b.ingredients || []).map((x) => ({ n: x.name, k: x.kind === "item" ? "item" : "res", q: x.kind === "item" ? Number(x.quantity) || 0 : Number(x.quantity_scu) || 0 })) });
+      url = j.links?.next || (j.meta && j.meta.current_page < j.meta.last_page ? url.replace(/page=\d+/, "page=" + (j.meta.current_page + 1)) : null);
+      if (!d.length) break;
+    }
+    const vus = new Set(); bp.catalogue = l.filter((b) => !vus.has(b.id) && vus.add(b.id)).sort((a, b) => a.nom.localeCompare(b.nom, "fr"));
+    try { localStorage.setItem("sm-blueprints2", JSON.stringify({ t: Date.now(), l: bp.catalogue })); } catch {}
+  } catch (e) { bp.erreur = "Catalogue des blueprints injoignable (api.star-citizen.wiki) : " + (e.message || e); }
+  bp.charge = false; renderBlueprints();
+}
+const mesBlueprints = () => (base.blueprints = base.blueprints || []);
+async function syncBlueprints() {
+  if (!sb || !compte || !bp.tableOk) return;
+  try {
+    const l = mesBlueprints(), env = l.filter((x) => !x.sync);
+    if (env.length) { verifier(await sb.from("blueprints").upsert(env.map((x) => ({ id: x.id, blueprint: x.bp, nom: x.nom, type: x.type, station: "", visibilite: "allies", ts: x.ts })))); env.forEach((x) => (x.sync = 1)); }
+    if (base.bpSuppr?.length) { verifier(await sb.from("blueprints").delete().in("id", base.bpSuppr)); base.bpSuppr = []; }
+    const enLigne = verifier(await sb.from("blueprints").select("*").eq("user_id", compte.id));
+    const att = l.filter((x) => !x.sync);
+    base.blueprints = enLigne.map((c) => ({ id: c.id, bp: c.blueprint, nom: c.nom, type: c.type, ts: c.ts, sync: 1 })).filter((c) => !att.some((a) => a.id === c.id)).concat(att);
+    sauver();
+  } catch (e) { if (/relation|does not exist|schema cache|404/i.test(String(e?.message || e))) bp.tableOk = false; }
+}
+async function chargerBlueprintsPartages() {
+  if (!sb || !compte || !bp.tableOk) return;
+  try {
+    const d = verifier(await sb.from("blueprints").select("*").neq("user_id", compte.id));
+    bp.partages = d.map((c) => ({ id: c.id, bp: c.blueprint, user_id: c.user_id, joueur: compte.pseudos[c.user_id] || "Joueur",
+      groupe: (compte.membreDe[c.user_id] || []).filter(Boolean).join(", ") || "Allié" }));
+  } catch (e) { if (/relation|does not exist|schema cache|404/i.test(String(e?.message || e))) bp.tableOk = false; }
+}
+const moiPseudo = () => compte?.pseudo || "Moi";
+/* Stock retenu par les filtres : mes caisses, celles de la corpo, des alliés ; puis stations / joueurs cochés */
+function stockFiltre() {
+  const f = bp.f, moi = items.map((it) => ({ ...it, joueur: moiPseudo(), portee: "moi" }));
+  const autres = (partage.caisses || []).map((c) => ({ ...c, portee: c.groupe === "Allié" ? "alliance" : "corpo" }));
+  return [...moi, ...autres].filter((c) => (!f.stock.size || f.stock.has(c.portee)) && (!f.stations.size || f.stations.has(c.station)) && (!f.joueurs.size || f.joueurs.has(c.joueur)));
+}
+/* Recette réalisable avec ce stock ? ressource : somme des SCU ; objet (gemmes…) : nombre de caisses/objets */
+function realisable(c, parNom) {
+  if (!c.ing?.length) return false;
+  return c.ing.every((x) => { const s = parNom.get(sansAccents(x.n)); return s && (x.k === "item" ? s.n >= x.q : s.scu >= x.q - 1e-9); });
+}
+function puces(el, valeurs, set) {
+  el.innerHTML = Object.entries(valeurs).map(([k, v]) => `<button type="button" class="bp-puce" data-k="${esc(k)}" aria-pressed="${set.has(k)}">${esc(v)}</button>`).join("");
+}
+function multi(det, valeurs, set, tous) {
+  det.querySelector("summary").textContent = set.size ? [...set].join(", ") : tous;
+  det.querySelector("div").innerHTML = valeurs.length ? valeurs.map((v) => `<label><input type="checkbox" value="${esc(v)}" ${set.has(v) ? "checked" : ""}> ${esc(v)}</label>`).join("") : `<small>Aucun</small>`;
+}
+function proprietaires(id) {
+  const l = bp.partages.filter((p) => p.bp === id).map((p) => ({ joueur: p.joueur, groupe: p.groupe }));
+  if (mesBlueprints().some((x) => x.bp === id)) l.unshift({ joueur: moiPseudo(), groupe: "Moi" });
+  return l;
+}
+let bpVisibles = [];
+function renderBlueprints() {
+  if (!$("bp-lignes")) return;
+  const f = bp.f;
+  puces($("bp-types"), BP_TYPES, f.types);
+  puces($("bp-poss"), { oui: "Je possède", non: "Je ne possède pas" }, f.poss);
+  puces($("bp-stock"), { moi: "Moi", corpo: "Corporation", alliance: "Alliance" }, f.stock);
+  const tout = [...items.map((it) => ({ ...it, joueur: moiPseudo() })), ...(partage.caisses || [])];
+  multi($("bp-stations"), [...new Set(tout.map((c) => c.station).filter(Boolean))].sort(), f.stations, "Toutes");
+  multi($("bp-joueurs"), [...new Set(tout.map((c) => c.joueur))].sort(), f.joueurs, "Tous");
+  const filtreStock = f.stock.size || f.stations.size || f.joueurs.size;
+  const parNom = new Map();
+  if (filtreStock) for (const c of stockFiltre()) { const k = sansAccents(c.nom || ""), e = parNom.get(k) || { scu: 0, n: 0 }; e.scu += Number(c.quantite_scu) || 0; e.n++; parNom.set(k, e); }
+  const aMoi = new Set(mesBlueprints().map((x) => x.bp)), q = sansAccents(f.q.trim());
+  const cat = bp.catalogue || [];
+  const lignes = cat.filter((c) => (!f.types.size || f.types.has(c.type)) && (!q || sansAccents(c.nom).includes(q))
+    && (!f.poss.size || (f.poss.has("oui") && aMoi.has(c.id)) || (f.poss.has("non") && !aMoi.has(c.id)))
+    && (!filtreStock || realisable(c, parNom)));
+  bpVisibles = lignes.slice(0, 600).map((c) => c.id);
+  for (const id of [...bp.sel]) if (!bpVisibles.includes(id)) bp.sel.delete(id);
+  $("bp-etat").textContent = bp.charge ? "Chargement du catalogue…" : bp.erreur || `${lignes.length} blueprint${lignes.length > 1 ? "s" : ""}${filtreStock ? " réalisables" : ""}${bp.catalogue ? ` sur ${bp.catalogue.length}` : ""}` + (compte && !bp.tableOk ? " · partage en ligne indisponible (table « blueprints » absente)" : "");
+  $("bp-lignes").innerHTML = lignes.slice(0, 600).map((c) => {
+    const n = proprietaires(c.id).length;
+    return `<tr class="${bp.sel.has(c.id) ? "selectionne" : ""}"><td class="coche"><input type="checkbox" data-bp-sel="${esc(c.id)}" ${bp.sel.has(c.id) ? "checked" : ""} aria-label="Sélectionner ${esc(c.nom)}"></td>` +
+      `<td class="nom-cell"><button type="button" class="lien bp-nom" data-bp-ouvrir="${esc(c.id)}">${esc(c.nom)}</button>${c.defaut ? ` <small class="bp-defaut">par défaut</small>` : ""}</td><td>${esc(BP_TYPES[c.type] || "")}</td>` +
+      `<td>${aMoi.has(c.id) ? `<span class="bp-moi">✓ moi</span>` : ""}${n - (aMoi.has(c.id) ? 1 : 0) > 0 ? ` <small>+${n - (aMoi.has(c.id) ? 1 : 0)}</small>` : ""}</td>` +
+      `<td class="bp-ing">${(c.ing || []).map((x) => esc(x.n)).join(", ")}</td></tr>`;
+  }).join("");
+  $("bp-vide").hidden = !!lignes.length || bp.charge; $("bp-vide").textContent = filtreStock ? "Aucune recette réalisable avec ce stock." : "Aucun blueprint pour ces filtres.";
+  const ns = bp.sel.size;
+  $("bp-sel").textContent = ns ? `${ns} blueprint${ns > 1 ? "s" : ""} sélectionné${ns > 1 ? "s" : ""}` : "Aucun blueprint sélectionné";
+  $("bp-oui").disabled = $("bp-non").disabled = !ns;
+  $("bp-tout").checked = ns > 0 && ns === bpVisibles.length; $("bp-tout").indeterminate = ns > 0 && ns < bpVisibles.length;
+}
+function ouvrirBlueprint(id) {
+  const c = (bp.catalogue || []).find((x) => x.id === id); if (!c) return;
+  $("dbp-titre").textContent = c.nom;
+  $("dbp-type").textContent = [BP_TYPES[c.type], c.label, c.defaut ? "disponible par défaut" : ""].filter(Boolean).join(" · ");
+  const pr = proprietaires(id);
+  $("dbp-joueurs").innerHTML = pr.length ? pr.map((p) => `<li><b>${esc(p.joueur)}</b> <small>${esc(p.groupe)}</small></li>`).join("") : `<li class="note">Personne pour l'instant.</li>`;
+  $("dbp-recette").innerHTML = c.ing?.length ? c.ing.map((x) => `<li>${esc(x.n)} <span>${x.k === "item" ? `× ${x.q}` : `${fmtScu(x.q)} SCU`}</span></li>`).join("") : `<li class="note">Détails de la recette à venir.</li>`;
+  $("d-blueprint").showModal();
+}
+function possederBlueprints(ids, oui) {
+  const l = mesBlueprints();
+  if (oui) { for (const id of ids) if (!l.some((x) => x.bp === id)) { const c = (bp.catalogue || []).find((x) => x.id === id) || {}; l.push({ id: uid(), bp: id, nom: c.nom || "", type: c.type || "composant", ts: Date.now() / 1000 }); } }
+  else { const suppr = l.filter((x) => ids.includes(x.bp)).map((x) => x.id); base.bpSuppr = [...(base.bpSuppr || []), ...suppr]; base.blueprints = l.filter((x) => !suppr.includes(x.id)); }
+  bp.sel.clear(); sauver(); planifierSync(); renderBlueprints();
+}
+$("v-blueprints").addEventListener("click", (e) => {
+  const pu = e.target.closest(".bp-puce");
+  if (pu) { const set = { "bp-types": bp.f.types, "bp-poss": bp.f.poss, "bp-stock": bp.f.stock }[pu.parentElement.id], k = pu.dataset.k; set.has(k) ? set.delete(k) : set.add(k); renderBlueprints(); return; }
+  const o = e.target.closest("[data-bp-ouvrir]"); if (o) { ouvrirBlueprint(o.dataset.bpOuvrir); return; }
+  if (e.target.id === "bp-oui") possederBlueprints([...bp.sel], true);
+  if (e.target.id === "bp-non") possederBlueprints([...bp.sel], false);
+});
+$("v-blueprints").addEventListener("change", (e) => {
+  if (e.target.id === "bp-tout") { if (e.target.checked) bpVisibles.forEach((id) => bp.sel.add(id)); else bp.sel.clear(); renderBlueprints(); return; }
+  if (e.target.dataset.bpSel) { e.target.checked ? bp.sel.add(e.target.dataset.bpSel) : bp.sel.delete(e.target.dataset.bpSel); renderBlueprints(); return; }
+  const det = e.target.closest(".bp-multi"); if (!det) return;
+  const set = det.id === "bp-stations" ? bp.f.stations : bp.f.joueurs; e.target.checked ? set.add(e.target.value) : set.delete(e.target.value); renderBlueprints();
+  det.open = true;
+});
+$("bp-q").addEventListener("input", (e) => { bp.f.q = e.target.value; renderBlueprints(); });
 </script>
 </body>
 </html>
