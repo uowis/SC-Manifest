@@ -1109,7 +1109,18 @@ body.overlay .fiche.mode-raff > .f-part, body.overlay .fiche.attente > .f-part {
 .bp-cols { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 22px; align-items: start; }
 @media (max-width: 760px) { .bp-cols { grid-template-columns: 1fr; } }
 .bp-paliers { position: relative; height: 6px; margin: -2px 8px 0; }
-.bp-paliers i { position: absolute; top: 0; width: 2px; height: 6px; background: var(--os-doux); transform: translateX(-1px); }
+.bp-paliers { height: 10px; }
+.bp-paliers i { position: absolute; top: 0; width: 3px; height: 10px; background: var(--os-doux); transform: translateX(-1.5px); border-radius: 1px; cursor: pointer; }
+.bp-paliers i.dispo { background: #6fd08c; }
+.bp-paliers i.partiel { background: #e8a33a; }
+.bp-paliers i.absent { background: #e5484d; opacity: .75; }
+.bp-paliers i.courant { outline: 2px solid #fff; outline-offset: 1px; }
+.bp-craft-ligne { display: flex; gap: 8px; margin-top: 14px; align-items: stretch; }
+.bp-craft-ligne .bp-crafter { margin-top: 0; flex: 1; }
+.bp-mult { display: flex; align-items: center; gap: 2px; border: 1px solid var(--trait); border-radius: 4px; padding: 0 6px; font-size: 16px; color: var(--os-doux); }
+.bp-mult input { width: 2.4em; background: none !important; border: 0 !important; outline: none; box-shadow: none !important; padding: 0 !important; font: inherit; font-size: 16px; text-align: center; color: #e6edf0; -moz-appearance: textfield; }
+.bp-mult input::-webkit-inner-spin-button, .bp-mult input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.bp-mult:focus-within { border-color: var(--orange); }
 .bp-preleve { font-size: 12px; color: var(--os-doux); }
 .bp-stock-res summary { cursor: pointer; padding: 4px 0; }
 .bp-stock-res[open] summary { border-bottom: 1px solid var(--trait); }
@@ -1119,7 +1130,7 @@ body.overlay .fiche.mode-raff > .f-part, body.overlay .fiche.attente > .f-part {
 .bp-apres { color: var(--orange); font-weight: 600; white-space: nowrap; margin-left: 4px; }
 .bp-stock tr.bp-flash td { animation: bpFlash 1.6s ease-out; }
 @keyframes bpFlash { from { background: rgba(111,208,140,.35); } to { background: transparent; } }
-.bp-crafter:disabled { opacity: .45; cursor: not-allowed; }
+.bp-crafter:disabled, .bp-crafter:disabled:hover { background: #3a4249 !important; border-color: #3a4249 !important; color: #8a959b !important; opacity: 1; cursor: not-allowed; filter: none; }
 .bp-recette li { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--trait); padding: 3px 0; }
 .home-mes .mes-bp { display: block; text-align: center; margin-top: 10px; }
 </style>
@@ -1491,7 +1502,7 @@ body.overlay .fiche.mode-raff > .f-part, body.overlay .fiche.attente > .f-part {
         <div class="bp-aspects" id="dbp-aspects"></div>
         <h3>Modifications des statistiques</h3>
         <ul class="bp-stats" id="dbp-stats"></ul>
-        <button class="btn principal bp-crafter" type="button" id="dbp-crafter">Crafter</button>
+        <div class="bp-craft-ligne"><label class="bp-mult" title="Nombre de crafts">×<input type="number" id="dbp-mult" min="1" max="99" value="1" inputmode="numeric" aria-label="Nombre de crafts"></label><button class="btn principal bp-crafter" type="button" id="dbp-crafter">Crafter</button></div>
         <p class="note" id="dbp-craft-info"></p>
       </div>
       <div>
@@ -6709,13 +6720,19 @@ function tagsBlueprint(b) {
   ajoute(o.type_label);
   if (o.sub_type && !/^(undefined|unknown|none)$/i.test(o.sub_type)) ajoute(o.sub_type.replace(/([a-z])([A-Z])/g, "$1 $2"));
   if (o.grade) ajoute(/^\d+$/.test(o.grade) ? "Grade " + o.grade : o.grade);
+  // type de dégâts / technologie, déduit du code de l'objet (ex. amrs_lasercannon_s1 → Laser)
+  const code = `${b.key || ""} ${o.class || ""} ${b.output_class || ""}`.toLowerCase();
+  for (const [re, tag] of [[/laser/, "Laser"], [/ballistic|gatling|massdriver|mass_driver|autocannon|scattergun|ballisticcannon|repeater_ball|_bal_/, "Balistique"], [/distortion/, "Distorsion"],
+    [/neutron/, "Neutron"], [/tachyon/, "Tachyon"], [/plasma/, "Plasma"], [/electron/, "Électron"], [/railgun/, "Railgun"], [/shotgun/, "Fusil à pompe"], [/sniper/, "Sniper"],
+    [/smg/, "SMG"], [/lmg/, "LMG"], [/pistol/, "Pistolet"], [/rifle/, "Fusil"], [/stealth/, "Stealth"], [/military|_mil_/, "Militaire"], [/civilian|_civ_/, "Civil"], [/industrial|_ind_/, "Industriel"], [/competition|_comp_/, "Compétition"]])
+    if (re.test(code)) ajoute(tag);
   const s = /_S(\d{1,2})(?:_|$)/i.exec(b.key || "") || /(?:^|_)S(\d{1,2})(?:_|$)/i.exec(o.class || "");
   if (s) ajoute("S" + +s[1]);
   return l;
 }
 async function chargerBlueprints() {
-  if (bp.catalogue || bp.charge) { renderBlueprints(); return; }
-  try { const c = JSON.parse(localStorage.getItem("sm-blueprints4") || "null"); if (c && Date.now() - c.t < 864e5 && c.l?.length) { bp.catalogue = c.l; bp.totalApi = c.total ?? null; renderBlueprints(); return; } } catch {}
+  if (bp.catalogue || bp.charge) { renderBlueprints(); enrichirBlueprints(); return; }
+  try { const c = JSON.parse(localStorage.getItem("sm-blueprints6") || "null"); if (c && Date.now() - c.t < 864e5 && c.l?.length) { bp.catalogue = c.l; bp.totalApi = c.total ?? null; renderBlueprints(); enrichirBlueprints(); return; } } catch {}
   bp.charge = true; bp.erreur = ""; renderBlueprints();
   try {
     // pagination robuste : lien « next », sinon page suivante tant que la page n'est pas vide (jusqu'à 300 pages)
@@ -6724,7 +6741,7 @@ async function chargerBlueprints() {
     while (url && n++ < 300) {
       const r = await fetch(url, { headers: { Accept: "application/json" } }); if (!r.ok) throw new Error("HTTP " + r.status);
       const j = await r.json(), d = j.data || [];
-      for (const b of d) l.push({ id: b.uuid, nom: b.output?.name || b.output_name || b.key, type: typeBlueprint(b.output), label: b.output?.type_label || "", defaut: !!b.is_available_by_default, tags: tagsBlueprint(b),
+      for (const b of d) l.push({ id: b.uuid, nom: b.output?.name || b.output_name || b.key, type: typeBlueprint(b.output), label: b.output?.type_label || "", defaut: !!b.is_available_by_default, tags: tagsBlueprint(b), oi: b.output_item_uuid || b.output?.uuid || null,
         ing: (b.ingredients || []).map((x) => ({ n: x.name, k: x.kind === "item" ? "item" : "res", q: x.kind === "item" ? Number(x.quantity) || 0 : Number(x.quantity_scu) || 0 })) });
       if (j.meta?.total != null) bp.totalApi = j.meta.total;
       if (!d.length) break;
@@ -6733,10 +6750,48 @@ async function chargerBlueprints() {
       bp.etatCharge = `${l.length} chargés${bp.totalApi ? ` / ${bp.totalApi}` : ""}…`; renderBlueprints();
     }
     const vus = new Set(); bp.catalogue = l.filter((b) => !vus.has(b.id) && vus.add(b.id)).sort((a, b) => a.nom.localeCompare(b.nom, "fr"));
-    try { localStorage.setItem("sm-blueprints4", JSON.stringify({ t: Date.now(), l: bp.catalogue, total: bp.totalApi })); } catch {}
+    try { localStorage.setItem("sm-blueprints6", JSON.stringify({ t: Date.now(), l: bp.catalogue, total: bp.totalApi })); } catch {}
   } catch (e) { bp.erreur = "Catalogue des blueprints injoignable (api.star-citizen.wiki) : " + (e.message || e); }
-  bp.charge = false; renderBlueprints();
+  bp.charge = false; renderBlueprints(); enrichirBlueprints();
 }
+/* Détails de l'objet produit (classe Military/Stealth…, grade, fabricant, type d'objet, type de dégâts, taille) :
+   chargés en arrière-plan, quelques requêtes à la fois, et gardés 7 jours dans le navigateur */
+const BP_DEGATS = { physical: "Balistique", energy: "Énergie", distortion: "Distorsion", thermal: "Thermique", biochemical: "Biochimique", stun: "Étourdissant" };
+bp.objets = (() => { try { const c = JSON.parse(localStorage.getItem("sm-bp-objets") || "null"); return c && Date.now() - c.t < 6048e5 ? c.m : {}; } catch { return {}; } })();
+function tagsObjet(o) {
+  const l = [], aj = (x) => { x = String(x ?? "").trim(); if (x && !/^(null|undefined|unknown|none|0)$/i.test(x) && !l.includes(x)) l.push(x); };
+  aj(o.class);
+  aj((o.description_data || []).find((d) => /item type|type/i.test(d.name))?.value);
+  if (o.grade) aj("Grade " + o.grade);
+  aj(o.manufacturer?.name);
+  const w = o.vehicle_weapon || o.personal_weapon || o.weapon || {}, dps = w.damage?.dps || w.damage?.alpha || null;
+  if (dps) for (const [k, v] of Object.entries(dps)) if (v > 0 && BP_DEGATS[k]) aj(BP_DEGATS[k]);
+  for (const d of w.damages || []) if (BP_DEGATS[(d.name || "").toLowerCase()]) aj(BP_DEGATS[d.name.toLowerCase()]);
+  if (o.size != null && o.type && !/^char_/i.test(o.type)) aj("S" + o.size);
+  return l;
+}
+let bpEnrichi = false;
+async function enrichirBlueprints() {
+  if (bpEnrichi || !bp.catalogue) return; bpEnrichi = true;
+  const file = bp.catalogue.filter((c) => c.oi && !bp.objets[c.oi]);
+  let maj = 0, dernier = Date.now();
+  const sauverObjets = () => { try { localStorage.setItem("sm-bp-objets", JSON.stringify({ t: Date.now(), m: bp.objets })); } catch {} };
+  const ouvrier = async () => {
+    while (file.length) {
+      const c = file.shift();
+      try { const r = await fetch(`https://api.star-citizen.wiki/api/items/${encodeURIComponent(c.oi)}`, { headers: { Accept: "application/json" } }); if (!r.ok) continue; bp.objets[c.oi] = tagsObjet((await r.json()).data || {}); maj++; }
+      catch { }
+      if (Date.now() - dernier > 1500) { dernier = Date.now(); bp.etatObjets = `détails ${bp.catalogue.length - file.length} / ${bp.catalogue.length}`; renderBlueprints(); sauverObjets(); }
+    }
+  };
+  await Promise.all(Array.from({ length: 6 }, ouvrier));
+  bp.etatObjets = ""; sauverObjets(); renderBlueprints();
+}
+const tagsDe = (c) => {
+  const o = bp.objets[c.oi]; if (!o) return c.tags || [];
+  // le grade de l'objet remplace celui du blueprint ; doublons et variantes (Laser / Laser Cannon) écartés
+  return [...o, ...(c.tags || []).filter((x) => !/^grade /i.test(x) && !/^[A-Z0-9]$/.test(x) && !o.some((y) => y.toLowerCase().includes(x.toLowerCase())))];
+};
 const mesBlueprints = () => (base.blueprints = base.blueprints || []);
 async function syncBlueprints() {
   if (!sb || !compte || !bp.tableOk) return;
@@ -6797,16 +6852,16 @@ function renderBlueprints() {
   if (filtreStock) for (const c of stockFiltre()) { const k = sansAccents(c.nom || ""), e = parNom.get(k) || { scu: 0, n: 0 }; e.scu += Number(c.quantite_scu) || 0; e.n++; parNom.set(k, e); }
   const aMoi = new Set(mesBlueprints().map((x) => x.bp)), q = sansAccents(f.q.trim());
   const cat = bp.catalogue || [];
-  const lignes = cat.filter((c) => (!f.types.size || f.types.has(c.type)) && [...f.tags].every((g) => (c.tags || []).includes(g)) && (!q || sansAccents(c.nom).includes(q))
+  const lignes = cat.filter((c) => (!f.types.size || f.types.has(c.type)) && [...f.tags].every((g) => tagsDe(c).includes(g)) && (!q || sansAccents(c.nom).includes(q))
     && (!f.poss.size || (f.poss.has("oui") && aMoi.has(c.id)) || (f.poss.has("non") && !aMoi.has(c.id)))
     && (!filtreStock || realisable(c, parNom)));
   bpVisibles = lignes.slice(0, 600).map((c) => c.id);
   for (const id of [...bp.sel]) if (!bpVisibles.includes(id)) bp.sel.delete(id);
-  $("bp-etat").textContent = bp.charge ? `Chargement du catalogue… ${bp.etatCharge || ""}` : bp.erreur || `${lignes.length} blueprint${lignes.length > 1 ? "s" : ""}${filtreStock ? " réalisables" : ""}${bp.catalogue ? ` sur ${bp.catalogue.length}` : ""}${bp.totalApi != null ? ` (l'API en annonce ${bp.totalApi})` : ""}` + (compte && !bp.tableOk ? " · partage en ligne indisponible (table « blueprints » absente)" : "");
+  $("bp-etat").textContent = bp.charge ? `Chargement du catalogue… ${bp.etatCharge || ""}` : bp.erreur || `${lignes.length} blueprint${lignes.length > 1 ? "s" : ""}${filtreStock ? " réalisables" : ""}${bp.catalogue ? ` sur ${bp.catalogue.length}` : ""}${bp.totalApi != null ? ` (l'API en annonce ${bp.totalApi})` : ""}${bp.etatObjets ? ` · ${bp.etatObjets}` : ""}` + (compte && !bp.tableOk ? " · partage en ligne indisponible (table « blueprints » absente)" : "");
   $("bp-lignes").innerHTML = lignes.slice(0, 600).map((c) => {
     const n = proprietaires(c.id).length;
     return `<tr class="${bp.sel.has(c.id) ? "selectionne" : ""}${aMoi.has(c.id) ? " bp-possede" : ""}"><td class="coche"><input type="checkbox" data-bp-sel="${esc(c.id)}" ${bp.sel.has(c.id) ? "checked" : ""} aria-label="Sélectionner ${esc(c.nom)}"></td>` +
-      `<td class="nom-cell"><button type="button" class="lien bp-nom" data-bp-ouvrir="${esc(c.id)}">${esc(c.nom)}</button>${c.defaut ? ` <small class="bp-defaut">par défaut</small>` : ""}</td><td>${esc(BP_TYPES[c.type] || "")}</td><td class="bp-tags">${(c.tags || []).map((g) => `<button type="button" class="bp-tag${f.tags.has(g) ? " actif" : ""}" data-tag="${esc(g)}">${esc(g)}</button>`).join("")}</td>` +
+      `<td class="nom-cell"><button type="button" class="lien bp-nom" data-bp-ouvrir="${esc(c.id)}">${esc(c.nom)}</button>${c.defaut ? ` <small class="bp-defaut">par défaut</small>` : ""}</td><td>${esc(BP_TYPES[c.type] || "")}</td><td class="bp-tags">${tagsDe(c).map((g) => `<button type="button" class="bp-tag${f.tags.has(g) ? " actif" : ""}" data-tag="${esc(g)}">${esc(g)}</button>`).join("")}</td>` +
       `<td>${aMoi.has(c.id) ? `<span class="bp-moi">✓ moi</span>` : ""}${n - (aMoi.has(c.id) ? 1 : 0) > 0 ? ` <small>+${n - (aMoi.has(c.id) ? 1 : 0)}</small>` : ""}</td>` +
       `<td class="bp-ing">${(c.ing || []).map((x) => esc(x.n)).join(", ")}</td></tr>`;
   }).join("");
@@ -6849,7 +6904,7 @@ function renderPopBlueprint(partiel = false) {
     return `<div class="bp-aspect"><div class="bp-aspect-tete"><b>${esc(a.name)}</b> · ${esc(inp.name || "")} <small>${inp.kind === "item" ? `× ${inp.quantity}` : `${fmtScu(inp.quantity_scu)} SCU`}</small><span class="bp-q">Q${q}</span></div>
       <input type="range" min="${qmin}" max="${qmax}" value="${q}" data-aspect="${i}" aria-label="Qualité ${esc(inp.name || "")}">
       <div class="bp-bornes"><span>${qmin}</span><span>Base ${a.initial_quality ?? 500}</span><span>${qmax}</span></div>
-      ${paliersAspect(a).length ? `<div class="bp-paliers">${paliersAspect(a).map((v) => `<i style="left:${((v - qmin) / ((qmax - qmin) || 1)) * 100}%"></i>`).join("")}</div>` : ""}
+      ${paliersAspect(a).length ? `<div class="bp-paliers">${paliersAspect(a).map((v) => { const d = dispoPalier(a, v); return `<i class="${d.ok ? "dispo" : d.q > 0 ? "partiel" : "absent"}${v === q ? " courant" : ""}" style="left:${((v - qmin) / ((qmax - qmin) || 1)) * 100}%" title="Q${v} : ${d.q > 0 ? (d.kind === "item" ? `${d.q} en stock` : `${fmtScu(d.q)} SCU en stock`) : "pas en stock"}" data-palier="${i}:${v}"></i>`; }).join("")}</div>` : ""}
       <div class="bp-preleve">${prelevement(i).texte}</div>
       <div class="bp-mods">${mods || `<span>aucun effet</span>`}</div></div>`;
   }).join("") : `<p class="note">Pas de détail de recette pour ce blueprint.</p>`;
@@ -6908,14 +6963,15 @@ $("d-blueprint").addEventListener("input", (e) => {
   // glissière en cours de déplacement : on ne remplace que les textes (reconstruire la couperait)
   const html = renderPopBlueprint(true);
   const ancien = $("dbp-aspects").querySelectorAll(".bp-aspect"), neuf = html.querySelectorAll(".bp-aspect");
-  ancien.forEach((el, i) => { el.querySelector(".bp-q").textContent = neuf[i].querySelector(".bp-q").textContent; el.querySelector(".bp-mods").innerHTML = neuf[i].querySelector(".bp-mods").innerHTML; });
+  ancien.forEach((el, i) => { el.querySelector(".bp-q").textContent = neuf[i].querySelector(".bp-q").textContent; el.querySelector(".bp-mods").innerHTML = neuf[i].querySelector(".bp-mods").innerHTML;
+    for (const k of [".bp-paliers", ".bp-preleve"]) { const a = el.querySelector(k), b = neuf[i].querySelector(k); if (a && b) a.innerHTML = b.innerHTML; } });
 });
 $("d-blueprint").addEventListener("toggle", (e) => { const d = e.target.closest?.("details[data-res]"); if (d && bpPop) d.open ? bpPop.fermes.delete(d.dataset.res) : bpPop.fermes.add(d.dataset.res); }, true);
 /* Prélèvement dans MON stock pour un aspect : caisses de la qualité la plus proche de la glissière d'abord.
    Qualité obtenue = moyenne pondérée par la quantité (le jeu fait une moyenne quand on mélange des qualités). */
 function prelevement(i) {
   const a = bpPop.d.aspects.aspects[i], inp = a.input || {}, k = sansAccents(inp.name || ""), q = bpPop.q[i];
-  const besoin = inp.kind === "item" ? Number(inp.quantity) || 0 : Number(inp.quantity_scu) || 0;
+  const besoin = (inp.kind === "item" ? Number(inp.quantity) || 0 : Number(inp.quantity_scu) || 0) * multCraft();
   const dispo = items.filter((it) => sansAccents(it.nom || "") === k && (it.qualite ?? 0) >= (inp.min_quality ?? 0))
     .sort((x, y) => Math.abs((x.qualite ?? 0) - q) - Math.abs((y.qualite ?? 0) - q) || (y.qualite ?? 0) - (x.qualite ?? 0));
   const pris = []; let reste = besoin;
@@ -6926,18 +6982,26 @@ function prelevement(i) {
     : `<span class="mauvais">Mon stock : il manque ${inp.kind === "item" ? `${Math.ceil(reste)}` : `${fmtScu(reste)} SCU`}</span>`;
   return { pris, ok, moy, texte };
 }
+const multCraft = () => Math.min(99, Math.max(1, parseInt($("dbp-mult")?.value, 10) || 1));
+/* Disponibilité d'un palier : quantité de la ressource à cette qualité dans le stock choisi (Perso / Corpo / Alliance) */
+function dispoPalier(a, v) {
+  const inp = a.input || {}, besoin = (inp.kind === "item" ? Number(inp.quantity) || 0 : Number(inp.quantity_scu) || 0) * multCraft();
+  const l = stockRessource(inp.name).filter((c) => c.qualite === v), q = inp.kind === "item" ? l.length : l.reduce((s, c) => s + (Number(c.quantite_scu) || 0), 0);
+  return { q, ok: q >= besoin - 1e-9 && q > 0, kind: inp.kind };
+}
 function majCraft() {
   const as = bpPop?.d?.aspects?.aspects || [], b = $("dbp-crafter"); if (!b) return;
   const ps = as.map((_, i) => prelevement(i)), ok = as.length > 0 && ps.every((p) => p.ok);
-  b.disabled = !ok;
+  b.disabled = !ok; b.textContent = multCraft() > 1 ? `Crafter × ${multCraft()}` : "Crafter";
   $("dbp-craft-info").textContent = !as.length ? "" : ok ? "Crafter retire ces matériaux de votre stock perso." : "Stock perso insuffisant pour crafter.";
 }
+$("dbp-mult").addEventListener("input", () => { if (bpPop?.d) renderPopBlueprint(); });
 $("dbp-crafter").addEventListener("click", () => {
   if (!bpPop?.d) return;
   const as = bpPop.d.aspects.aspects, ps = as.map((_, i) => prelevement(i));
   if (!ps.every((p) => p.ok)) return;
   const resume = as.map((a, i) => `${a.input?.name} : ${ps[i].pris.map((p) => `${a.input?.kind === "item" ? "1" : fmtScu(p.n) + " SCU"} Q${p.it.qualite} (${p.it.station})`).join(", ")}`).join("\n");
-  if (!confirm(`Crafter « ${bpPop.c.nom} » ?\n\nRetiré de votre stock :\n${resume}`)) return;
+  if (!confirm(`Crafter « ${bpPop.c.nom} »${multCraft() > 1 ? ` × ${multCraft()}` : ""} ?\n\nRetiré de votre stock :\n${resume}`)) return;
   const suppr = [];
   for (const p of ps.flatMap((x) => x.pris)) {
     if (p.it.quantite_scu == null || Number(p.it.quantite_scu) - p.n <= 1e-6) suppr.push(p.it.id);
@@ -6953,6 +7017,8 @@ $("d-blueprint").addEventListener("click", (e) => {
   if (!bpPop) return;
   const p = e.target.closest("[data-portee]");
   if (p) { e.preventDefault(); const k = p.dataset.portee; bpPop.portee.has(k) ? bpPop.portee.delete(k) : bpPop.portee.add(k); renderPopBlueprint(); return; }
+  const pl = e.target.closest("[data-palier]");
+  if (pl) { e.preventDefault(); const [i, v] = pl.dataset.palier.split(":").map(Number); bpPop.q[i] = v; renderPopBlueprint(); return; }
   const u = e.target.closest("[data-utiliser]");
   if (u && u.dataset.q !== "") { e.preventDefault(); for (const i of u.dataset.utiliser.split(",")) if (i !== "") bpPop.q[+i] = borner(bpPop.d.aspects.aspects[+i], +u.dataset.q); renderPopBlueprint(); }
 });
