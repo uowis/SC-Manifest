@@ -3,6 +3,7 @@
    Ajoute ou corrige des lignes librement ; un texte absent reste en français. */
 window.TRAD_EN = {
   textes: {
+    "Après le craft": "After crafting", "vide": "empty",
     "Crafter": "Craft", "Crafter retire ces matériaux de votre stock perso.": "Crafting removes these materials from your personal stock.", "Stock perso insuffisant pour crafter.": "Not enough personal stock to craft.",
     "Détail": "Detail",
     "Recette et qualité des matériaux": "Recipe and material quality", "Modifications des statistiques": "Stat changes", "Stock des ressources": "Resource stock",
