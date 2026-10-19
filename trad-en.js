@@ -3,6 +3,8 @@
    Ajoute ou corrige des lignes librement ; un texte absent reste en français. */
 window.TRAD_EN = {
   textes: {
+    "Crafter": "Craft", "Crafter retire ces matériaux de votre stock perso.": "Crafting removes these materials from your personal stock.", "Stock perso insuffisant pour crafter.": "Not enough personal stock to craft.",
+    "Détail": "Detail",
     "Recette et qualité des matériaux": "Recipe and material quality", "Modifications des statistiques": "Stat changes", "Stock des ressources": "Resource stock",
     "Perso": "Personal", "Utiliser": "Use", "sans changement": "no change", "aucun stock": "no stock", "Chargement de la recette…": "Loading recipe…",
     "Aucune statistique modifiée par la qualité.": "No stat affected by quality.", "Régler la glissière sur cette qualité": "Set the slider to this quality",
