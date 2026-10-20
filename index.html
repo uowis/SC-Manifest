@@ -1106,6 +1106,9 @@ body.overlay .fiche.mode-raff > .f-part, body.overlay .fiche.attente > .f-part {
 .bp-fermer { position: absolute; top: -4px; right: -4px; width: 34px; height: 34px; display: grid; place-items: center; background: none; border: 0; border-radius: 50%; color: var(--os-doux); cursor: pointer; }
 .bp-fermer:hover { color: inherit; background: rgba(255,255,255,.08); }
 .bp-fermer svg { width: 20px; height: 20px; }
+.bp-aspect.bp-off { opacity: .45; }
+.bp-choix { display: inline-flex; margin-right: 2px; }
+.bp-choix input { accent-color: var(--orange); }
 .bp-cols { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 22px; align-items: start; }
 @media (max-width: 760px) { .bp-cols { grid-template-columns: 1fr; } }
 .bp-paliers { position: relative; height: 6px; margin: -2px 8px 0; }
@@ -6889,10 +6892,10 @@ function valeurModif(m, q) {
   if (segs?.length) {
     const pts = [];
     for (const s of segs) {
-      const qs = [s.quality, s.q, s.at_quality, s.start_quality, s.min_quality, s.start, s.min, s.from].map(nb).find(Number.isFinite);
-      const vs = [s.value, s.modifier, s.multiplier, s.start_value, s.start_modifier, s.at_start].map(nb).find(Number.isFinite);
+      const qs = [s.quality_min, s.quality, s.q, s.at_quality, s.start_quality, s.min_quality, s.start, s.min, s.from].map(nb).find(Number.isFinite);
+      const vs = [s.modifier_at_start, s.value, s.modifier, s.multiplier, s.start_value, s.start_modifier, s.at_start].map(nb).find(Number.isFinite);
       if (Number.isFinite(qs) && Number.isFinite(vs)) pts.push([qs, vs]);
-      const qe = [s.end_quality, s.max_quality, s.end, s.max, s.to].map(nb).find(Number.isFinite), ve = [s.end_value, s.end_modifier, s.at_end].map(nb).find(Number.isFinite);
+      const qe = [s.quality_max, s.end_quality, s.max_quality, s.end, s.max, s.to].map(nb).find(Number.isFinite), ve = [s.modifier_at_end, s.end_value, s.end_modifier, s.at_end].map(nb).find(Number.isFinite);
       if (Number.isFinite(qe) && Number.isFinite(ve)) pts.push([qe, ve]);
     }
     pts.sort((a, b) => a[0] - b[0]);
@@ -6911,6 +6914,30 @@ function valeurModif(m, q) {
   return a + (b - a) * x;
 }
 /* Écart d'un modificateur par rapport à la qualité de base : relatif, ou absolu si la base vaut 0 */
+/* Effets « additifs entiers » (ex. Power Pips −2…+2) : les vraies valeurs sont dans tiers[].requirements (additive_at_start) */
+function preparerAdditifs(d) {
+  const trouver = (n, key) => { if (!n) return null; if (n.key === key && n.kind === "group") return n; for (const c of n.children || []) { const r = trouver(c, key); if (r) return r; } return null; };
+  const racine = d.tiers?.[0]?.requirements;
+  for (const a of d.aspects?.aspects || []) for (const m of a.modifiers || []) {
+    if (!/additive/i.test(m.value_range_type || "")) continue;
+    const g = trouver(racine, a.key), tm = (g?.modifiers || []).find((x) => x.key === m.property_key);
+    m.additifs = (tm?.value_segments || []).map((s) => ({ a: +s.quality_min, b: +s.quality_max, v: +(s.additive_at_start ?? s.additive_at_end ?? 0) })).filter((s) => Number.isFinite(s.v));
+  }
+}
+const estAdditif = (m) => /additive/i.test(m.value_range_type || "");
+function valeurAdditive(m, q) {
+  const l = m.additifs || []; if (!l.length) return 0;
+  const s = l.find((x) => q >= x.a && q <= x.b) || l.reduce((x, y) => (Math.min(Math.abs(q - y.a), Math.abs(q - y.b)) < Math.min(Math.abs(q - x.a), Math.abs(q - x.b)) ? y : x));
+  return s.v;
+}
+/* écart d'un modificateur à la qualité q par rapport à la base : { v, add } (add = valeur entière ajoutée) */
+function ecartDe(m, q, base) {
+  if (estAdditif(m)) return { v: valeurAdditive(m, q) - valeurAdditive(m, base), add: true };
+  return { v: ecartModif(valeurModif(m, q), valeurModif(m, base)), add: false };
+}
+const fmtEcart = (e) => Math.abs(e.v) < 1e-6 ? "sans changement" : e.add ? (e.v > 0 ? "+" : "") + e.v : fmtPct(e.v);
+const classeEcart = (e, better) => Math.abs(e.v) < 1e-6 || better === "neutral" ? "" : (e.v > 0) === (better !== "lower") ? "bon" : "mauvais";
+const aspectActif = (i) => !bpPop?.sel || bpPop.sel[i] !== false;
 function ecartModif(v, base) { if (!Number.isFinite(v) || !Number.isFinite(base)) return 0; return Math.abs(base) < 1e-9 ? v - base : v / base - 1; }
 const fmtPct = (v) => (v >= 0 ? "+" : "") + (v * 100).toFixed(2).replace(".", ",") + " %";
 function stockRessource(nom) {
@@ -6925,8 +6952,9 @@ function renderPopBlueprint(partiel = false) {
   const cible = partiel ? document.createElement("div") : $("dbp-aspects");
   cible.innerHTML = as.length ? as.map((a, i) => {
     const q = bpPop.q[i], inp = a.input || {}, [qmin, qmax] = bornesAspect(a);
-    const mods = (a.modifiers || []).map((m) => { const v = ecartModif(valeurModif(m, q), valeurModif(m, a.initial_quality ?? 500)); return `<span class="${Math.abs(v) < 1e-6 ? "" : (v > 0) === (m.better_when !== "lower") ? "bon" : "mauvais"}">${esc(m.label)} ${Math.abs(v) < 1e-6 ? "sans changement" : fmtPct(v)}</span>`; }).join("");
-    return `<div class="bp-aspect"><div class="bp-aspect-tete"><b>${esc(a.name)}</b> · ${esc(inp.name || "")} <small>${inp.kind === "item" ? `× ${inp.quantity}` : `${fmtScu(inp.quantity_scu)} SCU`}</small><span class="bp-q">Q${q}</span></div>
+    const mods = (a.modifiers || []).filter((m) => m.value_range_type || m.value_segments || m.modifier_range?.at_min_quality != null).map((m) => { const e = ecartDe(m, q, a.initial_quality ?? 500); return `<span class="${classeEcart(e, m.better_when)}">${esc(m.label)} ${fmtEcart(e)}</span>`; }).join("");
+    const choix = a.selection_group ? `<label class="bp-choix" title="Matériau au choix : ${a.selection_group.required_count} sur ${a.selection_group.option_count}"><input type="checkbox" data-choix="${i}" ${aspectActif(i) ? "checked" : ""}></label>` : "";
+    return `<div class="bp-aspect${aspectActif(i) ? "" : " bp-off"}"><div class="bp-aspect-tete">${choix}<b>${esc(a.name)}</b> · ${esc(inp.name || "")} <small>${inp.kind === "item" ? `× ${inp.quantity}` : `${fmtScu(inp.quantity_scu)} SCU`}</small><span class="bp-q">Q${q}</span></div>
       <input type="range" min="${qmin}" max="${qmax}" value="${q}" data-aspect="${i}" aria-label="Qualité ${esc(inp.name || "")}">
       <div class="bp-bornes"><span>${qmin}</span><span>Base ${a.initial_quality ?? 500}</span><span>${qmax}</span></div>
       ${paliersAspect(a).length ? `<div class="bp-paliers">${paliersAspect(a).map((v) => { const d = dispoPalier(a, v); return `<i class="${d.ok ? "dispo" : d.q > 0 ? "partiel" : "absent"}${v === q ? " courant" : ""}" style="left:${((v - qmin) / ((qmax - qmin) || 1)) * 100}%" title="Q${v} : ${d.q > 0 ? (d.kind === "item" ? `${d.q} en stock` : `${fmtScu(d.q)} SCU en stock`) : "pas en stock"}" data-palier="${i}:${v}"></i>`; }).join("")}</div>` : ""}
@@ -6935,11 +6963,13 @@ function renderPopBlueprint(partiel = false) {
   }).join("") : `<p class="note">Pas de détail de recette pour ce blueprint.</p>`;
   // total par statistique : produit des modificateurs de chaque aspect, comparé à la qualité de base
   const tot = new Map();
-  as.forEach((a, i) => (a.modifiers || []).forEach((m) => {
-    const k = m.property_key || m.label, e = tot.get(k) || { label: m.label, better: m.better_when, f: 1 };
-    e.f *= 1 + ecartModif(valeurModif(m, bpPop.q[i]), valeurModif(m, a.initial_quality ?? 500)); tot.set(k, e);
-  }));
-  $("dbp-stats").innerHTML = tot.size ? [...tot.values()].map((e) => { const v = e.f - 1; return `<li><span>${esc(e.label)}</span><b class="${Math.abs(v) < 1e-6 ? "" : (v > 0) === (e.better !== "lower") ? "bon" : "mauvais"}">${Math.abs(v) < 1e-6 ? "sans changement" : fmtPct(v)}</b></li>`; }).join("") : `<li class="note">Aucune statistique modifiée par la qualité.</li>`;
+  // multiplicatifs : produit des facteurs ; additifs entiers : somme
+  as.forEach((a, i) => { if (!aspectActif(i)) return; (a.modifiers || []).forEach((m) => {
+    if (!(m.value_range_type || m.value_segments || m.modifier_range?.at_min_quality != null)) return;
+    const k = m.property_key || m.label, x = ecartDe(m, bpPop.q[i], a.initial_quality ?? 500), e = tot.get(k) || { label: m.label, better: m.better_when, f: 1, s: 0, add: x.add };
+    if (x.add) e.s += x.v; else e.f *= 1 + x.v; tot.set(k, e);
+  }); });
+  $("dbp-stats").innerHTML = tot.size ? [...tot.values()].map((e) => { const x = { v: e.add ? e.s : e.f - 1, add: e.add }; return `<li><span>${esc(e.label)}</span><b class="${classeEcart(x, e.better)}">${fmtEcart(x)}</b></li>`; }).join("") : `<li class="note">Aucune statistique modifiée par la qualité.</li>`;
   majCraft();
   $("dbp-portee").innerHTML = Object.entries({ moi: "Perso", corpo: "Corporation", alliance: "Alliance" }).map(([k, v]) => `<button type="button" class="bp-puce" data-portee="${k}" aria-pressed="${bpPop.portee.has(k)}">${v}</button>`).join("");
   // caisses perso qui seront prélevées au craft : quantité retirée par caisse
@@ -6979,6 +7009,8 @@ async function ouvrirBlueprint(id) {
   try {
     const d = await detailBlueprint(id); if (bpPop?.c !== c) return;
     // qualité de départ : le meilleur palier disponible en quantité suffisante dans mon stock, sinon la base
+    preparerAdditifs(d);
+    bpPop.sel = (d.aspects?.aspects || []).map((a) => a.is_selected !== false);
     bpPop.d = d; bpPop.q = (d.aspects?.aspects || []).map((a) => {
       const ok = paliersAspect(a).filter((v) => { const inp = a.input || {}, besoin = inp.kind === "item" ? Number(inp.quantity) || 0 : Number(inp.quantity_scu) || 0;
         const l = items.filter((it) => sansAccents(it.nom || "") === sansAccents(inp.name || "") && it.qualite === v); return (inp.kind === "item" ? l.length : l.reduce((s, c) => s + (Number(c.quantite_scu) || 0), 0)) >= besoin - 1e-9 && l.length; });
@@ -6997,10 +7029,27 @@ $("d-blueprint").addEventListener("input", (e) => {
   ancien.forEach((el, i) => { el.querySelector(".bp-q").textContent = neuf[i].querySelector(".bp-q").textContent; el.querySelector(".bp-mods").innerHTML = neuf[i].querySelector(".bp-mods").innerHTML;
     for (const k of [".bp-paliers", ".bp-preleve"]) { const a = el.querySelector(k), b = neuf[i].querySelector(k); if (a && b) a.innerHTML = b.innerHTML; } });
 });
+$("d-blueprint").addEventListener("change", (e) => {
+  const ch = e.target.dataset?.choix; if (ch == null || !bpPop?.d) return;
+  const as = bpPop.d.aspects.aspects, i = +ch, g = as[i].selection_group;
+  if (e.target.checked) {
+    // groupe au choix : on garde « required_count » matériaux ; le plus ancien coché est retiré
+    const memes = as.map((a, k) => k).filter((k) => as[k].selection_group?.key === g.key && bpPop.sel[k] && k !== i);
+    bpPop.ordre = (bpPop.ordre || []).filter((k) => k !== i).concat(i);
+    while (memes.length >= (g.required_count || 1)) { const vieux = (bpPop.ordre.find((k) => memes.includes(k)) ?? memes[0]); bpPop.sel[vieux] = false; memes.splice(memes.indexOf(vieux), 1); bpPop.ordre = bpPop.ordre.filter((k) => k !== vieux); }
+    bpPop.sel[i] = true;
+  } else {
+    const n = as.filter((a, k) => a.selection_group?.key === g.key && bpPop.sel[k]).length;
+    if (n <= (g.required_count || 1)) { e.target.checked = true; toast(`Choisissez ${g.required_count} matériaux sur ${g.option_count} : cochez-en un autre pour le remplacer.`); return; }
+    bpPop.sel[i] = false;
+  }
+  renderPopBlueprint();
+});
 $("d-blueprint").addEventListener("toggle", (e) => { const d = e.target.closest?.("details[data-res]"); if (d && bpPop) d.open ? bpPop.fermes.delete(d.dataset.res) : bpPop.fermes.add(d.dataset.res); }, true);
 /* Prélèvement dans MON stock pour un aspect : caisses de la qualité la plus proche de la glissière d'abord.
    Qualité obtenue = moyenne pondérée par la quantité (le jeu fait une moyenne quand on mélange des qualités). */
 function prelevement(i) {
+  if (!aspectActif(i)) return { pris: [], ok: true, moy: null, texte: `<span class="note">Non utilisé</span>` };
   const a = bpPop.d.aspects.aspects[i], inp = a.input || {}, k = sansAccents(inp.name || ""), q = bpPop.q[i];
   const besoin = (inp.kind === "item" ? Number(inp.quantity) || 0 : Number(inp.quantity_scu) || 0) * multCraft();
   const dispo = items.filter((it) => sansAccents(it.nom || "") === k && (it.qualite ?? 0) >= (inp.min_quality ?? 0))
@@ -7031,7 +7080,7 @@ $("dbp-crafter").addEventListener("click", () => {
   if (!bpPop?.d) return;
   const as = bpPop.d.aspects.aspects, ps = as.map((_, i) => prelevement(i));
   if (!ps.every((p) => p.ok)) return;
-  const resume = as.map((a, i) => `${a.input?.name} : ${ps[i].pris.map((p) => `${a.input?.kind === "item" ? "1" : fmtScu(p.n) + " SCU"} Q${p.it.qualite} (${p.it.station})`).join(", ")}`).join("\n");
+  const resume = as.map((a, i) => aspectActif(i) ? `${a.input?.name} : ${ps[i].pris.map((p) => `${a.input?.kind === "item" ? "1" : fmtScu(p.n) + " SCU"} Q${p.it.qualite} (${p.it.station})`).join(", ")}` : "").filter(Boolean).join("\n");
   if (!confirm(`Crafter « ${bpPop.c.nom} »${multCraft() > 1 ? ` × ${multCraft()}` : ""} ?\n\nRetiré de votre stock :\n${resume}`)) return;
   const suppr = [];
   for (const p of ps.flatMap((x) => x.pris)) {
