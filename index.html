@@ -6883,10 +6883,35 @@ async function detailBlueprint(id) {
 }
 /* Modificateur linéaire d'un aspect pour une qualité (ex. 0,95 à Q0 → 1,05 à Q1000) */
 function valeurModif(m, q) {
-  const qr = m.quality_range || { min: 0, max: 1000 }, mr = m.modifier_range || { at_min_quality: 1, at_max_quality: 1 };
-  const x = Math.min(1, Math.max(0, (q - qr.min) / ((qr.max - qr.min) || 1)));
-  return mr.at_min_quality + (mr.at_max_quality - mr.at_min_quality) * x;
+  const nb = (x) => (x == null || x === "" ? NaN : Number(x));
+  // modificateur par paliers (value_segments) : interpolation entre les points connus
+  const segs = Array.isArray(m.value_segments) ? m.value_segments : Array.isArray(m.value_segments?.segments) ? m.value_segments.segments : null;
+  if (segs?.length) {
+    const pts = [];
+    for (const s of segs) {
+      const qs = [s.quality, s.q, s.at_quality, s.start_quality, s.min_quality, s.start, s.min, s.from].map(nb).find(Number.isFinite);
+      const vs = [s.value, s.modifier, s.multiplier, s.start_value, s.start_modifier, s.at_start].map(nb).find(Number.isFinite);
+      if (Number.isFinite(qs) && Number.isFinite(vs)) pts.push([qs, vs]);
+      const qe = [s.end_quality, s.max_quality, s.end, s.max, s.to].map(nb).find(Number.isFinite), ve = [s.end_value, s.end_modifier, s.at_end].map(nb).find(Number.isFinite);
+      if (Number.isFinite(qe) && Number.isFinite(ve)) pts.push([qe, ve]);
+    }
+    pts.sort((a, b) => a[0] - b[0]);
+    if (pts.length) {
+      if (q <= pts[0][0]) return pts[0][1];
+      for (let k = 1; k < pts.length; k++) if (q <= pts[k][0]) { const [q0, v0] = pts[k - 1], [q1, v1] = pts[k]; return q1 === q0 ? v1 : v0 + (v1 - v0) * (q - q0) / (q1 - q0); }
+      return pts[pts.length - 1][1];
+    }
+  }
+  const qr = m.quality_range || {}, mr = m.modifier_range || {};
+  const qmin = Number.isFinite(nb(qr.min)) ? nb(qr.min) : 0, qmax = Number.isFinite(nb(qr.max)) ? nb(qr.max) : 1000;
+  let a = nb(mr.at_min_quality ?? mr.min), b = nb(mr.at_max_quality ?? mr.max);
+  if (!Number.isFinite(a) && !Number.isFinite(b)) return 1;
+  if (!Number.isFinite(a)) a = b; if (!Number.isFinite(b)) b = a;
+  const x = Math.min(1, Math.max(0, (q - qmin) / ((qmax - qmin) || 1)));
+  return a + (b - a) * x;
 }
+/* Écart d'un modificateur par rapport à la qualité de base : relatif, ou absolu si la base vaut 0 */
+function ecartModif(v, base) { if (!Number.isFinite(v) || !Number.isFinite(base)) return 0; return Math.abs(base) < 1e-9 ? v - base : v / base - 1; }
 const fmtPct = (v) => (v >= 0 ? "+" : "") + (v * 100).toFixed(2).replace(".", ",") + " %";
 function stockRessource(nom) {
   const k = sansAccents(nom || ""), P = bpPop.portee;
@@ -6900,7 +6925,7 @@ function renderPopBlueprint(partiel = false) {
   const cible = partiel ? document.createElement("div") : $("dbp-aspects");
   cible.innerHTML = as.length ? as.map((a, i) => {
     const q = bpPop.q[i], inp = a.input || {}, [qmin, qmax] = bornesAspect(a);
-    const mods = (a.modifiers || []).map((m) => { const v = valeurModif(m, q) / valeurModif(m, a.initial_quality ?? 500) - 1; return `<span class="${Math.abs(v) < 1e-6 ? "" : (v > 0) === (m.better_when !== "lower") ? "bon" : "mauvais"}">${esc(m.label)} ${Math.abs(v) < 1e-6 ? "sans changement" : fmtPct(v)}</span>`; }).join("");
+    const mods = (a.modifiers || []).map((m) => { const v = ecartModif(valeurModif(m, q), valeurModif(m, a.initial_quality ?? 500)); return `<span class="${Math.abs(v) < 1e-6 ? "" : (v > 0) === (m.better_when !== "lower") ? "bon" : "mauvais"}">${esc(m.label)} ${Math.abs(v) < 1e-6 ? "sans changement" : fmtPct(v)}</span>`; }).join("");
     return `<div class="bp-aspect"><div class="bp-aspect-tete"><b>${esc(a.name)}</b> · ${esc(inp.name || "")} <small>${inp.kind === "item" ? `× ${inp.quantity}` : `${fmtScu(inp.quantity_scu)} SCU`}</small><span class="bp-q">Q${q}</span></div>
       <input type="range" min="${qmin}" max="${qmax}" value="${q}" data-aspect="${i}" aria-label="Qualité ${esc(inp.name || "")}">
       <div class="bp-bornes"><span>${qmin}</span><span>Base ${a.initial_quality ?? 500}</span><span>${qmax}</span></div>
@@ -6912,7 +6937,7 @@ function renderPopBlueprint(partiel = false) {
   const tot = new Map();
   as.forEach((a, i) => (a.modifiers || []).forEach((m) => {
     const k = m.property_key || m.label, e = tot.get(k) || { label: m.label, better: m.better_when, f: 1 };
-    e.f *= valeurModif(m, bpPop.q[i]) / valeurModif(m, a.initial_quality ?? 500); tot.set(k, e);
+    e.f *= 1 + ecartModif(valeurModif(m, bpPop.q[i]), valeurModif(m, a.initial_quality ?? 500)); tot.set(k, e);
   }));
   $("dbp-stats").innerHTML = tot.size ? [...tot.values()].map((e) => { const v = e.f - 1; return `<li><span>${esc(e.label)}</span><b class="${Math.abs(v) < 1e-6 ? "" : (v > 0) === (e.better !== "lower") ? "bon" : "mauvais"}">${Math.abs(v) < 1e-6 ? "sans changement" : fmtPct(v)}</b></li>`; }).join("") : `<li class="note">Aucune statistique modifiée par la qualité.</li>`;
   majCraft();
@@ -6931,8 +6956,9 @@ function renderPopBlueprint(partiel = false) {
 }
 /* Bornes de qualité de la glissière : celles du blueprint, et jamais sous la qualité minimale exigée pour le matériau */
 function bornesAspect(a) {
-  const lo = Math.max(a.slider_min ?? 1, a.input?.min_quality ?? 1, ...(a.modifiers || []).map((m) => m.quality_range?.min ?? 0));
-  const hi = Math.min(a.slider_max ?? 1000, ...(a.modifiers || []).map((m) => m.quality_range?.max ?? 1000));
+  // la plage des modificateurs (quality_range) dit seulement où l'effet plafonne, pas les qualités possibles
+  const lo = Math.max(a.slider_min ?? 1, a.input?.min_quality ?? 1);
+  const hi = a.slider_max ?? 1000;
   return [lo, Math.max(lo, hi)];
 }
 /* Paliers de qualité du matériau (tableau des minerais) compris dans les bornes ; vide = pas de palier connu */
@@ -6952,7 +6978,12 @@ async function ouvrirBlueprint(id) {
   $("d-blueprint").showModal();
   try {
     const d = await detailBlueprint(id); if (bpPop?.c !== c) return;
-    bpPop.d = d; bpPop.q = (d.aspects?.aspects || []).map((a) => borner(a, a.initial_quality ?? 500));
+    // qualité de départ : le meilleur palier disponible en quantité suffisante dans mon stock, sinon la base
+    bpPop.d = d; bpPop.q = (d.aspects?.aspects || []).map((a) => {
+      const ok = paliersAspect(a).filter((v) => { const inp = a.input || {}, besoin = inp.kind === "item" ? Number(inp.quantity) || 0 : Number(inp.quantity_scu) || 0;
+        const l = items.filter((it) => sansAccents(it.nom || "") === sansAccents(inp.name || "") && it.qualite === v); return (inp.kind === "item" ? l.length : l.reduce((s, c) => s + (Number(c.quantite_scu) || 0), 0)) >= besoin - 1e-9 && l.length; });
+      return ok.length ? ok[ok.length - 1] : borner(a, a.initial_quality ?? 500);
+    });
     renderPopBlueprint();
   } catch (e) { $("dbp-aspects").innerHTML = `<p class="note">Recette injoignable (api.star-citizen.wiki) : ${esc(e.message || e)}</p>`; }
 }
