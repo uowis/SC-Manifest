@@ -1136,6 +1136,44 @@ body.overlay .fiche.mode-raff > .f-part, body.overlay .fiche.attente > .f-part {
 .bp-crafter:disabled, .bp-crafter:disabled:hover { background: #3a4249 !important; border-color: #3a4249 !important; color: #8a959b !important; opacity: 1; cursor: not-allowed; filter: none; }
 .bp-recette li { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--trait); padding: 3px 0; }
 .home-mes .mes-bp { display: block; text-align: center; margin-top: 10px; }
+
+/* v186 : popin blueprint — barre du haut collante (titre, bonus, craft, fermer) */
+.bp-pop { padding: 0; overflow: auto; }
+.bp-pop form { position: static; }
+.bp-tete { position: sticky; top: 0; z-index: 5; display: grid; grid-template-columns: minmax(0, auto) minmax(max-content, 1fr) auto auto; align-items: center; gap: 8px 22px;
+  padding: 16px 22px 12px; background: var(--panneau); border-bottom: 1px solid var(--trait); box-shadow: 0 6px 14px rgba(0,0,0,.25); }
+.bp-tete-titre h2#dbp-titre { margin: 0; padding: 0; font-size: 26px; line-height: 1.1; }
+.bp-possede { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; margin-top: 8px; font-size: 12px; }
+.bp-possede > span { color: var(--os-doux); text-transform: uppercase; letter-spacing: .06em; font-size: 10px; }
+.bp-possede .bp-joueurs-liste { display: flex; flex-wrap: wrap; gap: 2px 10px; }
+.bp-possede .bp-joueurs-liste li { font-size: 12px; }
+.bp-possede .bp-joueurs-liste b { font-weight: 600; }
+.bp-tete-titre p { margin: 2px 0 0; font-size: 13px; color: var(--os-doux); }
+.bp-stats-tete { display: grid; gap: 2px; justify-content: start; }
+
+.bp-stats-tete li { border: 0; padding: 0; display: inline-flex; gap: 6px; font-size: 13px; white-space: nowrap; }
+.bp-stats-tete li span { color: var(--os-doux); }
+.bp-stats-tete { display: grid !important; grid-template-columns: max-content max-content max-content; column-gap: 16px; row-gap: 2px; align-items: baseline; justify-content: start; min-width: 0; }
+.bp-stats-tete li { display: contents !important; }
+.bp-stats-tete li em { font-style: normal; color: var(--os); font-variant-numeric: tabular-nums; font-size: 13px; white-space: nowrap; }
+.bp-stats-tete li em:empty { display: block; }
+.bp-stats-tete li b { text-align: right; font-size: 13px; white-space: nowrap; }
+.bp-tete .bp-craft-ligne { margin: 0; }
+.bp-tete .bp-crafter { width: auto; min-width: 140px; margin: 0; }
+.bp-tete .bp-fermer { position: static; width: auto; height: auto; padding: 6px 10px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; font: inherit; font-size: 13px; }
+.bp-craft-info { grid-column: 1 / -1; margin: 0 !important; font-size: 12px; }
+.bp-corps { padding: 6px 22px 20px; }
+@media (max-width: 860px) { .bp-tete { grid-template-columns: 1fr auto; } .bp-stats-tete { grid-column: 1 / -1; order: 3; } .bp-tete .bp-craft-ligne { order: 4; grid-column: 1 / -1; } .bp-tete .bp-crafter { flex: 1; } }
+
+/* v189 : barre du haut en flex — titre à gauche, modificateurs et actions poussés à droite */
+.bp-tete { display: flex !important; align-items: end; gap: 3em; flex-wrap: wrap; }
+.bp-tete-titre { flex: 1 1 220px; min-width: 0; align-self: center; }
+.bp-stats-tete { flex: 0 0 auto; margin-left: auto !important; }
+.bp-actions-tete { flex: 0 0 auto; display: grid; gap: 4px; justify-items: stretch; }
+.bp-actions-ligne { display: flex; align-items: stretch; gap: 10px; }
+.bp-craft-info { grid-column: auto; text-align: left; }
+.bp-actions-tete > .bp-fermer { justify-self: end; padding: 2px 6px !important; }
+@media (max-width: 860px) { .bp-stats-tete { margin-left: 0 !important; } .bp-actions-tete { flex: 1 1 100%; } .bp-actions-ligne .bp-craft-ligne { flex: 1; } }
 </style>
 </head>
 <body>
@@ -1494,24 +1532,29 @@ body.overlay .fiche.mode-raff > .f-part, body.overlay .fiche.attente > .f-part {
 
 <dialog id="d-blueprint" class="bp-pop">
   <form method="dialog">
-    <button class="bp-fermer" type="submit" aria-label="Fermer" title="Fermer"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
-    <h2 id="dbp-titre"></h2>
-    <p class="note" id="dbp-type"></p>
-    <h3>Possédé par</h3>
-    <ul class="bp-joueurs-liste" id="dbp-joueurs"></ul>
-    <div class="bp-cols">
-      <div>
-        <h3>Recette et qualité des matériaux</h3>
-        <div class="bp-aspects" id="dbp-aspects"></div>
-        <h3>Modifications des statistiques</h3>
-        <ul class="bp-stats" id="dbp-stats"></ul>
-        <div class="bp-craft-ligne"><label class="bp-mult" title="Nombre de crafts">×<input type="number" id="dbp-mult" min="1" max="99" value="1" inputmode="numeric" aria-label="Nombre de crafts"></label><button class="btn principal bp-crafter" type="button" id="dbp-crafter">Crafter</button></div>
-        <p class="note" id="dbp-craft-info"></p>
+    <div class="bp-tete">
+      <div class="bp-tete-titre"><h2 id="dbp-titre"></h2><p id="dbp-type"></p><div class="bp-possede"><span>Possédé par</span><ul class="bp-joueurs-liste" id="dbp-joueurs"></ul></div></div>
+      <ul class="bp-stats bp-stats-tete" id="dbp-stats"></ul>
+      <div class="bp-actions-tete">
+        <button class="bp-fermer" type="submit" title="Fermer"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg><span>Fermer</span></button>
+        <div class="bp-actions-ligne">
+          <div class="bp-craft-ligne"><label class="bp-mult" title="Nombre de crafts">×<input type="number" id="dbp-mult" min="1" max="99" value="1" inputmode="numeric" aria-label="Nombre de crafts"></label><button class="btn principal bp-crafter" type="button" id="dbp-crafter">Crafter</button></div>
+
+        </div>
+        <p class="note bp-craft-info" id="dbp-craft-info"></p>
       </div>
-      <div>
-        <h3>Stock des ressources</h3>
-        <div class="bp-puces" id="dbp-portee"></div>
-        <div class="bp-stock" id="dbp-stock"></div>
+    </div>
+    <div class="bp-corps">
+      <div class="bp-cols">
+        <div>
+          <h3>Recette et qualité des matériaux</h3>
+          <div class="bp-aspects" id="dbp-aspects"></div>
+        </div>
+        <div>
+          <h3>Stock des ressources</h3>
+          <div class="bp-puces" id="dbp-portee"></div>
+          <div class="bp-stock" id="dbp-stock"></div>
+        </div>
       </div>
     </div>
   </form>
@@ -6969,7 +7012,10 @@ function renderPopBlueprint(partiel = false) {
     const k = m.property_key || m.label, x = ecartDe(m, bpPop.q[i], a.initial_quality ?? 500), e = tot.get(k) || { label: m.label, better: m.better_when, f: 1, s: 0, add: x.add };
     if (x.add) e.s += x.v; else e.f *= 1 + x.v; tot.set(k, e);
   }); });
-  $("dbp-stats").innerHTML = tot.size ? [...tot.values()].map((e) => { const x = { v: e.add ? e.s : e.f - 1, add: e.add }; return `<li><span>${esc(e.label)}</span><b class="${classeEcart(x, e.better)}">${fmtEcart(x)}</b></li>`; }).join("") : `<li class="note">Aucune statistique modifiée par la qualité.</li>`;
+  $("dbp-stats").innerHTML = tot.size ? [...tot.entries()].map(([k, e]) => { const x = { v: e.add ? e.s : e.f - 1, add: e.add };
+    const b = valeurObjet(k), fm = formatStat(k);
+    const val = `<em>${b == null ? "" : `${fm(b)} → ${fm(e.add ? b + e.s : b * e.f)}`}</em>`;
+    return `<li><span>${esc(e.label)}</span>${val}<b class="${classeEcart(x, e.better)}">${fmtEcart(x)}</b></li>`; }).join("") : `<li class="note">Aucune statistique modifiée par la qualité.</li>`;
   majCraft();
   $("dbp-portee").innerHTML = Object.entries({ moi: "Perso", corpo: "Corporation", alliance: "Alliance" }).map(([k, v]) => `<button type="button" class="bp-puce" data-portee="${k}" aria-pressed="${bpPop.portee.has(k)}">${v}</button>`).join("");
   // caisses perso qui seront prélevées au craft : quantité retirée par caisse
@@ -6997,6 +7043,37 @@ const borner = (a, q) => {
   const [lo, hi] = bornesAspect(a); q = Math.min(hi, Math.max(lo, q));
   const p = paliersAspect(a); return p.length ? p.reduce((x, y) => (Math.abs(y - q) < Math.abs(x - q) ? y : x)) : q;
 };
+/* Valeur de base de la statistique dans la fiche de l'objet produit (chemins connus, sinon recherche par mots du nom) */
+const bpFiches = new Map();
+async function ficheObjet(uuid) {
+  if (!uuid) return null; if (bpFiches.has(uuid)) return bpFiches.get(uuid);
+  try { const r = await fetch(`https://api.star-citizen.wiki/api/items/${encodeURIComponent(uuid)}`, { headers: { Accept: "application/json" } }); const d = r.ok ? (await r.json()).data : null; bpFiches.set(uuid, d); return d; } catch { return null; }
+}
+const CHEMINS_STAT = { health_maxhealth: ["durability.health"], weapon_damage: ["vehicle_weapon.damage_per_shot", "personal_weapon.damage_per_shot", "weapon.damage_per_shot", "vehicle_weapon.damage.alpha_total"],
+  itemresource_powergeneration: ["resource_network.generation.power"] };
+function valeurObjet(k) {
+  const o = bpPop?.objet; if (!o) return null;
+  const lire = (ch) => ch.split(".").reduce((x, y) => (x == null ? x : x[y]), o);
+  for (const ch of CHEMINS_STAT[k] || []) { const v = Number(lire(ch)); if (Number.isFinite(v) && v !== 0) return v; }
+  // recherche : chemin numérique qui contient tous les mots de la clé (ex. quantum_speed → quantum_drive.…speed)
+  const mots = k.toLowerCase().split("_").filter((m) => m && !["item", "itemresource"].includes(m));
+  let best = null;
+  const voir = (x, ch) => {
+    if (x == null || ch.split(".").length > 5) return;
+    if (typeof x === "number") { const c = ch.toLowerCase().replace(/[^a-z.]/g, ""); if (x !== 0 && mots.every((m) => c.includes(m)) && (!best || ch.length < best[0].length)) best = [ch, x]; return; }
+    if (Array.isArray(x)) return; if (typeof x === "object") for (const [kk, v] of Object.entries(x)) voir(v, ch ? ch + "." + kk : kk);
+  };
+  voir(o, ""); return best ? best[1] : null;
+}
+/* Format de la statistique : unit_format / display_scale des « tiers » de l'API (ex. « %.2f Mm/s », échelle 1e-6) */
+function formatStat(k) {
+  let mod = null; const voir = (n) => { if (!n || mod) return; for (const m of n.modifiers || []) if (m.key === k) { mod = m; return; } (n.children || []).forEach(voir); };
+  voir(bpPop?.d?.tiers?.[0]?.requirements);
+  const ech = Number(mod?.display_scale) || 1, uf = mod?.unit_format || "";
+  const unite = uf.replace(/%[+]?\.?\d*f/, "").replace(/%%/g, "%").trim();
+  const dec = /\.(\d)f/.exec(uf)?.[1];
+  return (v) => (v * ech).toLocaleString(LOCALE, { maximumFractionDigits: dec != null ? +dec : 2 }) + (unite && !/^%/.test(unite) ? " " + unite : "");
+}
 async function ouvrirBlueprint(id) {
   const c = (bp.catalogue || []).find((x) => x.id === id); if (!c) return;
   $("dbp-titre").textContent = c.nom;
@@ -7010,6 +7087,7 @@ async function ouvrirBlueprint(id) {
     const d = await detailBlueprint(id); if (bpPop?.c !== c) return;
     // qualité de départ : le meilleur palier disponible en quantité suffisante dans mon stock, sinon la base
     preparerAdditifs(d);
+    ficheObjet(d.output_item_uuid || d.output?.uuid).then((o) => { if (bpPop?.d === d && o) { bpPop.objet = o; renderPopBlueprint(); } });
     bpPop.sel = (d.aspects?.aspects || []).map((a) => a.is_selected !== false);
     bpPop.d = d; bpPop.q = (d.aspects?.aspects || []).map((a) => {
       const ok = paliersAspect(a).filter((v) => { const inp = a.input || {}, besoin = inp.kind === "item" ? Number(inp.quantity) || 0 : Number(inp.quantity_scu) || 0;
@@ -7029,6 +7107,7 @@ $("d-blueprint").addEventListener("input", (e) => {
   ancien.forEach((el, i) => { el.querySelector(".bp-q").textContent = neuf[i].querySelector(".bp-q").textContent; el.querySelector(".bp-mods").innerHTML = neuf[i].querySelector(".bp-mods").innerHTML;
     for (const k of [".bp-paliers", ".bp-preleve"]) { const a = el.querySelector(k), b = neuf[i].querySelector(k); if (a && b) a.innerHTML = b.innerHTML; } });
 });
+$("d-blueprint").addEventListener("click", (e) => { if (e.target === $("d-blueprint")) $("d-blueprint").close(); });   // clic hors de la popin
 $("d-blueprint").addEventListener("change", (e) => {
   const ch = e.target.dataset?.choix; if (ch == null || !bpPop?.d) return;
   const as = bpPop.d.aspects.aspects, i = +ch, g = as[i].selection_group;
@@ -7052,15 +7131,15 @@ function prelevement(i) {
   if (!aspectActif(i)) return { pris: [], ok: true, moy: null, texte: `<span class="note">Non utilisé</span>` };
   const a = bpPop.d.aspects.aspects[i], inp = a.input || {}, k = sansAccents(inp.name || ""), q = bpPop.q[i];
   const besoin = (inp.kind === "item" ? Number(inp.quantity) || 0 : Number(inp.quantity_scu) || 0) * multCraft();
-  const dispo = items.filter((it) => sansAccents(it.nom || "") === k && (it.qualite ?? 0) >= (inp.min_quality ?? 0))
-    .sort((x, y) => Math.abs((x.qualite ?? 0) - q) - Math.abs((y.qualite ?? 0) - q) || (y.qualite ?? 0) - (x.qualite ?? 0));
+  // uniquement les caisses de la qualité choisie : une qualité absente du stock désactive le craft
+  const dispo = items.filter((it) => sansAccents(it.nom || "") === k && it.qualite === q);
   const pris = []; let reste = besoin;
   for (const it of dispo) { if (reste <= 1e-9) break; const n = inp.kind === "item" ? 1 : Math.min(reste, Number(it.quantite_scu) || 0); if (n <= 0) continue; pris.push({ it, n }); reste -= n; }
   const tot = pris.reduce((s, p) => s + p.n, 0), moy = tot ? Math.round(pris.reduce((s, p) => s + p.n * (p.it.qualite ?? 0), 0) / tot) : null;
   const ok = reste <= 1e-9;
-  const texte = !besoin ? "" : ok ? `Mon stock : ${pris.length} caisse${pris.length > 1 ? "s" : ""}, qualité moyenne <b>Q${moy}</b>${moy !== q ? ` <span class="mauvais">≠ Q${q}</span>` : ""}`
-    : `<span class="mauvais">Mon stock : il manque ${inp.kind === "item" ? `${Math.ceil(reste)}` : `${fmtScu(reste)} SCU`}</span>`;
-  return { pris, ok, moy, texte };
+  const texte = !besoin ? "" : ok ? `Mon stock : ${pris.length} caisse${pris.length > 1 ? "s" : ""} Q${q}`
+    : `<span class="mauvais">${pris.length ? `Mon stock Q${q} : il manque ${inp.kind === "item" ? `${Math.ceil(reste)}` : `${fmtScu(reste)} SCU`}` : `Pas de Q${q} dans mon stock`}</span>`;
+  return { pris: ok ? pris : [], ok, moy, texte };
 }
 const multCraft = () => Math.min(99, Math.max(1, parseInt($("dbp-mult")?.value, 10) || 1));
 /* Disponibilité d'un palier : quantité de la ressource à cette qualité dans le stock choisi (Perso / Corpo / Alliance) */
