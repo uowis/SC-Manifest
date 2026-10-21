@@ -1210,7 +1210,7 @@ body.overlay .fiche.mode-raff > .f-part, body.overlay .fiche.attente > .f-part {
 body:not(.overlay) main > section > .entete { margin-bottom: var(--e3); }
 
 /* tableaux : lignes plus hautes, fond alterné au lieu des traits, colonnes secondaires discrètes */
-body:not(.overlay) th, body:not(.overlay) td { padding: 6px 14px; }
+body:not(.overlay) th, body:not(.overlay) td { padding: 6.6px 14px; }
 body:not(.overlay) .carte { padding: var(--e3); }
 body:not(.overlay) tbody td { border-bottom-color: transparent; }
 body:not(.overlay) thead th { border-bottom: 1px solid var(--trait); padding-bottom: 10px; }
@@ -1252,7 +1252,7 @@ body:not(.overlay) { --fmin: calc(.75rem / .9); }
 #v-blueprints td.bp-ing { min-width: 10rem; }
 /* v219 : tout à 90 %, sauf le contenu principal (nom de matériau, qualité, quantité) qui garde sa taille */
 body:not(.overlay) { zoom: .9; min-height: calc(100vh / .9); }
-body:not(.overlay) :is(td.nom-cell, td.num, .bp-stock-res td) { zoom: calc(1 / .9); }
+
 body:not(.overlay) .bp-pop { max-height: calc(92vh / .9) !important; }
 body:not(.overlay) .bp-col-recette { max-height: calc(92vh / .9 - var(--bp-tete-h, 90px) - 24px) !important; }
 /* Call to action : 11 px à l'écran */
@@ -1322,6 +1322,16 @@ button, .btn, a.btn, [role="button"] { box-shadow: none !important; }
 /* v244 : listes de stock — nom en gras, case à cocher collée au nom */
 :is(#t-station, #t-accueil) td.nom-cell { font-weight: 700; }
 body:not(.overlay) :is(#t-station, #t-accueil) :is(td, th).coche { width: 1%; padding-right: 0; }
+/* v246 : jamais de scroll horizontal dans les listes — le texte passe à la ligne, les colonnes secondaires se masquent sur petit écran */
+body:not(.overlay) :is(td, th) { white-space: normal; }
+body:not(.overlay) :is(td.num, td.date, th.num, td.coche, th.coche) { white-space: nowrap; }
+.tableau-wrap table { width: 100%; }
+@media (max-width: 900px) { .col-ts { display: none; } }
+@media (max-width: 760px) { .col-visibilite { display: none; } #v-blueprints :is(td.bp-ing, th:last-child) { display: none; } }
+@media (max-width: 600px) { .col-station { display: none; } #v-blueprints :is(td:nth-child(3), th:nth-child(3)) { display: none; } #v-blueprints td.bp-tags { min-width: 0; } }
+@media (max-width: 480px) { body:not(.overlay) :is(th, td) { padding-left: 4px; padding-right: 4px; } #v-blueprints :is(td:nth-child(4), th:nth-child(4), td:nth-child(5), th:nth-child(5)) { display: none; } }
+/* v247 : une seule taille de police dans les cellules des tableaux (celle du contenu principal : 15 px à l'écran) */
+body:not(.overlay) td, body:not(.overlay) td :not(svg):not(path):not(.btn) { font-size: calc(0.9375rem / .9) !important; }
 </style>
 </head>
 <body>
@@ -2466,9 +2476,9 @@ function ligneItem(it, { station, cocher, joueur, enfant = false, visibilite = f
     `<td class="nom-cell">${esc(it.nom)}</td>` +
     `<td class="num"><span class="q">${it.qualite ?? "?"}</span></td>` +
     `<td class="num"><span class="scu">${it.quantite_scu != null ? fmtScu(it.quantite_scu) : "?"}</span> SCU${items.some((x) => x.id === it.id) ? `<button type="button" class="b-editer-scu" data-editer-scu="${it.id}" title="Modifier la quantité" aria-label="Modifier la quantité">${ICO_CRAYON}</button>` : cocher ? `<span class="b-editer-scu vide"></span>` : ""}</td>` +
-    (station ? `<td><a href="#/station/${encodeURIComponent(it.station)}">${esc(it.station)}</a></td>` : "") +
-    (visibilite ? `<td>${visibiliteCellule(it.visibilite || "corporation")}</td>` : "") +
-    `<td class="date" title="${esc(it.heure || "")}">${ilYa(it.ts)}</td>` +
+    (station ? `<td class="col-station"><a href="#/station/${encodeURIComponent(it.station)}">${esc(it.station)}</a></td>` : "") +
+    (visibilite ? `<td class="col-visibilite">${visibiliteCellule(it.visibilite || "corporation")}</td>` : "") +
+    `<td class="date col-ts" title="${esc(it.heure || "")}">${ilYa(it.ts)}</td>` +
     (joueur ? `<td class="joueur">${esc(it.joueur)}${it.groupe ? `<small>${esc(it.groupe)}</small>` : ""}</td>` : "") +
     `</tr>`;
 }
@@ -2479,9 +2489,9 @@ function ligneGroupe(g, { station, cocher, joueur, visibilite = false }) {
     `<td class="nom-cell"><button type="button" class="ouvrir" data-ouvrir="${esc(g.cle)}" aria-expanded="${ouvert}"><span class="chevron" aria-hidden="true">▸</span>${esc(g.nom)} <span class="compte">${g.items.length} caisses</span></button></td>` +
     `<td class="num"><span class="q">${g.qualite ?? "?"}</span></td>` +
     `<td class="num"><span class="scu">${fmtScu(g.quantite_scu)}</span> SCU${cocher ? `<span class="b-editer-scu vide"></span>` : ""}</td>` +
-    (station ? `<td>${g.stations.size === 1 ? `<a href="#/station/${encodeURIComponent(g.station)}">${esc(g.station)}</a>` : esc(g.station)}</td>` : "") +
-    (visibilite ? `<td>${visibiliteCellule(g.visibilite)}</td>` : "") +
-    `<td class="date">${ilYa(g.ts)}</td>` +
+    (station ? `<td class="col-station">${g.stations.size === 1 ? `<a href="#/station/${encodeURIComponent(g.station)}">${esc(g.station)}</a>` : esc(g.station)}</td>` : "") +
+    (visibilite ? `<td class="col-visibilite">${visibiliteCellule(g.visibilite)}</td>` : "") +
+    `<td class="date col-ts">${ilYa(g.ts)}</td>` +
     (joueur ? `<td class="joueur">${esc(g.joueur)}</td>` : "") +
     `</tr>` +
     (ouvert ? g.items.map((it) => ligneItem(it, { station, cocher, joueur, visibilite, enfant: true })).join("") : "");
@@ -2506,7 +2516,7 @@ function renderTable(table, lignes, { station, cocher, joueur = false, visibilit
     (cocher ? `<th class="coche"><span class="sr">Sélection</span></th>` : "") +
     cols.map((c) => {
       const actif = t.col === c.col;
-      return `<th class="${c.num ? "num" : ""}" ${actif ? `aria-sort="${t.dir === "asc" ? "ascending" : "descending"}"` : ""}>` +
+      return `<th class="${c.num ? "num" : ""} col-${c.col}" ${actif ? `aria-sort="${t.dir === "asc" ? "ascending" : "descending"}"` : ""}>` +
         `<button type="button" data-tri="${c.col}">${c.titre}<span class="fleche" aria-hidden="true">${actif ? (t.dir === "asc" ? "▲" : "▼") : ""}</span></button></th>`;
     }).join("") + `</tr></thead><tbody>${corps}</tbody>`;
   const tout = table.querySelector("#tout");
@@ -7287,7 +7297,16 @@ $("d-blueprint").addEventListener("input", (e) => {
   ancien.forEach((el, i) => { el.className = neuf[i].className; { const r = el.querySelector("input[type=range]"), rn = neuf[i].querySelector("input[type=range]"); if (r && rn) r.style.cssText = rn.style.cssText; } el.querySelector(".bp-cartouches").innerHTML = neuf[i].querySelector(".bp-cartouches").innerHTML; el.querySelector(".bp-mods").innerHTML = neuf[i].querySelector(".bp-mods").innerHTML;
     for (const k of [".bp-paliers", ".bp-preleve"]) { const a = el.querySelector(k), b = neuf[i].querySelector(k); if (a && b) a.innerHTML = b.innerHTML; } });
 });
-$("d-blueprint").addEventListener("click", (e) => { if (e.target === $("d-blueprint")) $("d-blueprint").close(); });   // clic hors de la popin
+/* v245 : toutes les popups se ferment par un clic à l'extérieur (même chemin que la touche Échap) */
+{ let debutDehors = false;
+  const dehors = (d, e) => { const r = d.getBoundingClientRect(); return e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom; };
+  document.addEventListener("pointerdown", (e) => { const d = e.target; debutDehors = d instanceof HTMLDialogElement && d.open && dehors(d, e); }, true);
+  document.addEventListener("click", (e) => {
+    const d = e.target; if (!(d instanceof HTMLDialogElement) || !d.open || !debutDehors || !dehors(d, e)) return;
+    debutDehors = false;
+    const ev = new Event("cancel", { cancelable: true }); d.dispatchEvent(ev); if (!ev.defaultPrevented) d.close();
+  }, true);
+}
 $("d-blueprint").addEventListener("change", (e) => {
   const ch = e.target.dataset?.choix; if (ch == null || !bpPop?.d) return;
   const as = bpPop.d.aspects.aspects, i = +ch, g = as[i].selection_group;
