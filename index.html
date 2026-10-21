@@ -7210,13 +7210,30 @@ function dispoPalier(a, v) {
   const l = stockRessource(inp.name).filter((c) => c.qualite === v), q = inp.kind === "item" ? l.length : l.reduce((s, c) => s + (Number(c.quantite_scu) || 0), 0);
   return { q, ok: q >= besoin - 1e-9 && q > 0, kind: inp.kind };
 }
+/* Nombre maximum de crafts possibles avec mon stock, à la qualité choisie pour chaque matériau */
+function maxCrafts() {
+  const as = bpPop?.d?.aspects?.aspects || []; let m = Infinity;
+  as.forEach((a, i) => {
+    if (!aspectActif(i)) return;
+    const inp = a.input || {}, besoin = inp.kind === "item" ? Number(inp.quantity) || 0 : Number(inp.quantity_scu) || 0; if (!besoin) return;
+    const l = items.filter((it) => sansAccents(it.nom || "") === sansAccents(inp.name || "") && it.qualite === bpPop.q[i]);
+    const dispo = inp.kind === "item" ? l.length : l.reduce((s, c) => s + (Number(c.quantite_scu) || 0), 0);
+    m = Math.min(m, Math.floor(dispo / besoin + 1e-9));
+  });
+  return Number.isFinite(m) ? m : 99;
+}
 function majCraft() {
   const as = bpPop?.d?.aspects?.aspects || [], b = $("dbp-crafter"); if (!b) return;
+  // multiplicateur bloqué au maximum que permet le stock (minimum 1 : à 0, le bouton reste grisé)
+  const mx = Math.min(99, maxCrafts()), inpM = $("dbp-mult");
+  inpM.max = String(Math.max(1, mx));
+  if (+inpM.value > Math.max(1, mx)) inpM.value = String(Math.max(1, mx));
+  inpM.title = mx > 0 ? `Maximum possible avec votre stock : ${mx}` : "Stock insuffisant pour un craft";
   const ps = as.map((_, i) => prelevement(i)), ok = as.length > 0 && ps.every((p) => p.ok);
   b.disabled = !ok; b.textContent = multCraft() > 1 ? `Crafter × ${multCraft()}` : "Crafter";
   $("dbp-craft-info").textContent = !as.length ? "" : ok ? "Crafter retire ces matériaux de votre stock perso." : "Stock perso insuffisant pour crafter.";
 }
-$("dbp-mult").addEventListener("input", () => { if (bpPop?.d) renderPopBlueprint(); });
+$("dbp-mult").addEventListener("input", (e) => { if (!bpPop?.d) return; const mx = Math.max(1, Math.min(99, maxCrafts())); if (+e.target.value > mx) e.target.value = String(mx); renderPopBlueprint(); });
 $("dbp-crafter").addEventListener("click", () => {
   if (!bpPop?.d) return;
   const as = bpPop.d.aspects.aspects, ps = as.map((_, i) => prelevement(i));
