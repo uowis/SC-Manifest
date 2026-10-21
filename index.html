@@ -1082,6 +1082,9 @@ body.overlay .fiche.mode-raff > .f-part, body.overlay .fiche.attente > .f-part {
 .bp-tags-actifs .bp-tag { font-size: 12px; padding: 3px 4px 3px 10px; cursor: default; }
 .bp-tags-actifs button { background: none; border: 0; color: inherit; cursor: pointer; font-size: 15px; line-height: 1; padding: 0 4px; }
 .bp-tags-actifs button:hover { color: #e5484d; }
+.bp-th-num { text-align: right; }
+.bp-pct { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.bp-pct.pct-plein { color: #6fd08c; } .bp-pct.pct-partiel { color: #e8a33a; } .bp-pct.pct-vide { color: var(--os-doux); }
 .bp-ing { color: var(--os-doux); font-size: 12px; }
 .bp-pop { min-width: min(460px, 92vw); }
 .bp-pop h3 { margin: 14px 0 6px; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--os-doux); }
@@ -1145,11 +1148,11 @@ body.overlay .fiche.mode-raff > .f-part, body.overlay .fiche.attente > .f-part {
 .bp-tete { position: sticky; top: 0; z-index: 5; display: grid; grid-template-columns: minmax(0, auto) minmax(max-content, 1fr) auto auto; align-items: center; gap: 8px 22px;
   padding: 16px 22px 12px; background: var(--panneau); border-bottom: 1px solid var(--trait); box-shadow: 0 6px 14px rgba(0,0,0,.25); }
 .bp-tete-titre h2#dbp-titre { margin: 0; padding: 0; font-size: 26px; line-height: 1.1; }
-.bp-possede { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; margin-top: 8px; font-size: 12px; }
-.bp-possede > span { color: var(--os-doux); text-transform: uppercase; letter-spacing: .06em; font-size: 10px; }
-.bp-possede .bp-joueurs-liste { display: flex; flex-wrap: wrap; gap: 2px 10px; }
-.bp-possede .bp-joueurs-liste li { font-size: 12px; }
-.bp-possede .bp-joueurs-liste b { font-weight: 600; }
+.bp-possede-par { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; margin-top: 8px; font-size: 12px; }
+.bp-possede-par > span { color: var(--os-doux); text-transform: uppercase; letter-spacing: .06em; font-size: 10px; }
+.bp-possede-par .bp-joueurs-liste { display: flex; flex-wrap: wrap; gap: 2px 10px; }
+.bp-possede-par .bp-joueurs-liste li { font-size: 12px; }
+.bp-possede-par .bp-joueurs-liste b { font-weight: 600; }
 .bp-tete-titre p { margin: 2px 0 0; font-size: 13px; color: var(--os-doux); }
 .bp-stats-tete { display: grid; gap: 2px; justify-content: start; }
 
@@ -1322,11 +1325,12 @@ body.overlay .fiche.mode-raff > .f-part, body.overlay .fiche.attente > .f-part {
     </div>
     <div class="bp-tags-actifs" id="bp-tags-actifs" hidden></div>
     <div class="actions-groupe bp-actions">
+      <button class="btn btn-tout" type="button" id="bp-tout" role="checkbox" aria-checked="false" disabled><span class="case" aria-hidden="true"></span><span class="txt">Tout sélectionner</span></button>
       <span id="bp-sel">Aucun blueprint sélectionné</span>
       <button class="btn" type="button" id="bp-oui" disabled>Je les possède</button>
       <button class="btn" type="button" id="bp-non" disabled>Je ne les possède pas</button>
     </div>
-    <div class="tableau-wrap"><table class="bp-table"><thead><tr><th class="coche"><input type="checkbox" id="bp-tout" aria-label="Tout sélectionner"></th><th>Blueprint</th><th>Type</th><th>Détail</th><th>Possédé</th><th>Ingrédients</th></tr></thead><tbody id="bp-lignes"></tbody></table></div>
+    <div class="tableau-wrap"><table class="bp-table"><thead id="bp-tete"></thead><tbody id="bp-lignes"></tbody></table></div>
     <p class="vide" id="bp-vide" hidden></p>
   </section>
 
@@ -1538,7 +1542,7 @@ body.overlay .fiche.mode-raff > .f-part, body.overlay .fiche.attente > .f-part {
 <dialog id="d-blueprint" class="bp-pop">
   <form method="dialog">
     <div class="bp-tete">
-      <div class="bp-tete-titre"><h2 id="dbp-titre"></h2><p id="dbp-type"></p><div class="bp-possede"><span>Possédé par</span><ul class="bp-joueurs-liste" id="dbp-joueurs"></ul></div></div>
+      <div class="bp-tete-titre"><h2 id="dbp-titre"></h2><p id="dbp-type"></p><div class="bp-possede-par"><span>Possédé par</span><ul class="bp-joueurs-liste" id="dbp-joueurs"></ul></div></div>
       <ul class="bp-stats bp-stats-tete" id="dbp-stats"></ul>
       <div class="bp-actions-tete">
         <button class="bp-fermer" type="submit" title="Fermer"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg><span>Fermer</span></button>
@@ -6756,7 +6760,7 @@ majBoutonsMode();
    ===================================================================== */
 var BP_TYPES = { armure: "Armure", arme: "Arme", composant: "Composant", vaisseau: "Arme vaisseau" };
 var bp = { catalogue: null, charge: false, erreur: "", partages: [], tableOk: true, sel: new Set(),
-  f: { tags: new Set(), types: new Set(), poss: new Set(), stock: new Set(), stations: new Set(), joueurs: new Set(), q: "" } };
+  tri: { col: "nom", dir: "asc" }, f: { tags: new Set(), types: new Set(), poss: new Set(), stock: new Set(), stations: new Set(), joueurs: new Set(), q: "" } };
 function typeBlueprint(o) {
   const s = `${o?.type || ""} ${o?.type_label || ""} ${o?.sub_type || o?.subtype || ""}`.toLowerCase();
   if (/armor|armour|undersuit|helmet|backpack|char_/.test(s)) return "armure";
@@ -6808,13 +6812,12 @@ async function chargerBlueprints() {
 /* Détails de l'objet produit (classe Military/Stealth…, grade, fabricant, type d'objet, type de dégâts, taille) :
    chargés en arrière-plan, quelques requêtes à la fois, et gardés 7 jours dans le navigateur */
 const BP_DEGATS = { physical: "Balistique", energy: "Énergie", distortion: "Distorsion", thermal: "Thermique", biochemical: "Biochimique", stun: "Étourdissant" };
-bp.objets = (() => { try { const c = JSON.parse(localStorage.getItem("sm-bp-objets") || "null"); return c && Date.now() - c.t < 6048e5 ? c.m : {}; } catch { return {}; } })();
+bp.objets = (() => { try { const c = JSON.parse(localStorage.getItem("sm-bp-objets2") || "null"); return c && Date.now() - c.t < 6048e5 ? c.m : {}; } catch { return {}; } })();
 function tagsObjet(o) {
   const l = [], aj = (x) => { x = String(x ?? "").trim(); if (x && !/^(null|undefined|unknown|none|0)$/i.test(x) && !l.includes(x)) l.push(x); };
   aj(o.class);
   aj((o.description_data || []).find((d) => /item type|type/i.test(d.name))?.value);
   if (o.grade) aj("Grade " + o.grade);
-  aj(o.manufacturer?.name);
   const w = o.vehicle_weapon || o.personal_weapon || o.weapon || {}, dps = w.damage?.dps || w.damage?.alpha || null;
   if (dps) for (const [k, v] of Object.entries(dps)) if (v > 0 && BP_DEGATS[k]) aj(BP_DEGATS[k]);
   for (const d of w.damages || []) if (BP_DEGATS[(d.name || "").toLowerCase()]) aj(BP_DEGATS[d.name.toLowerCase()]);
@@ -6826,7 +6829,7 @@ async function enrichirBlueprints() {
   if (bpEnrichi || !bp.catalogue) return; bpEnrichi = true;
   const file = bp.catalogue.filter((c) => c.oi && !bp.objets[c.oi]);
   let maj = 0, dernier = Date.now();
-  const sauverObjets = () => { try { localStorage.setItem("sm-bp-objets", JSON.stringify({ t: Date.now(), m: bp.objets })); } catch {} };
+  const sauverObjets = () => { try { localStorage.setItem("sm-bp-objets2", JSON.stringify({ t: Date.now(), m: bp.objets })); } catch {} };
   const ouvrier = async () => {
     while (file.length) {
       const c = file.shift();
@@ -6872,6 +6875,12 @@ function stockFiltre() {
   return [...moi, ...autres].filter((c) => (!f.stock.size || f.stock.has(c.portee)) && (!f.stations.size || f.stations.has(c.station)) && (!f.joueurs.size || f.joueurs.has(c.joueur)));
 }
 /* Recette réalisable avec ce stock ? ressource : somme des SCU ; objet (gemmes…) : nombre de caisses/objets */
+/* Part des ingrédients couverte par le stock : moyenne, par ingrédient, de min(1, stock / besoin) */
+function pctStock(c, parNom) {
+  if (!c.ing?.length) return null;
+  const s = c.ing.reduce((t, x) => { const e = parNom.get(sansAccents(x.n)), dispo = e ? (x.k === "item" ? e.n : e.scu) : 0; return t + (x.q > 0 ? Math.min(1, dispo / x.q) : 1); }, 0);
+  return Math.floor((s / c.ing.length) * 100);
+}
 function realisable(c, parNom) {
   if (!c.ing?.length) return false;
   return c.ing.every((x) => { const s = parNom.get(sansAccents(x.n)); return s && (x.k === "item" ? s.n >= x.q : s.scu >= x.q - 1e-9); });
@@ -6900,12 +6909,17 @@ function renderBlueprints() {
   multi($("bp-joueurs"), [...new Set(tout.map((c) => c.joueur))].sort(), f.joueurs, "Tous");
   const filtreStock = f.stock.size || f.stations.size || f.joueurs.size;
   const parNom = new Map();
+  // stock de la colonne « Stock » : celui des filtres, sinon le stock perso
+  const parNomPct = new Map();
+  for (const c of filtreStock ? stockFiltre() : items) { const k = sansAccents(c.nom || ""), e = parNomPct.get(k) || { scu: 0, n: 0 }; e.scu += Number(c.quantite_scu) || 0; e.n++; parNomPct.set(k, e); }
   if (filtreStock) for (const c of stockFiltre()) { const k = sansAccents(c.nom || ""), e = parNom.get(k) || { scu: 0, n: 0 }; e.scu += Number(c.quantite_scu) || 0; e.n++; parNom.set(k, e); }
   const aMoi = new Set(mesBlueprints().map((x) => x.bp)), q = sansAccents(f.q.trim());
   const cat = bp.catalogue || [];
   const lignes = cat.filter((c) => (!f.types.size || f.types.has(c.type)) && [...f.tags].every((g) => tagsDe(c).includes(g)) && (!q || sansAccents(c.nom).includes(q))
     && (!f.poss.size || (f.poss.has("oui") && aMoi.has(c.id)) || (f.poss.has("non") && !aMoi.has(c.id)))
     && (!filtreStock || realisable(c, parNom)));
+  { const T = bp.tri, s = T.dir === "asc" ? 1 : -1, cle = (c) => T.col === "type" ? (BP_TYPES[c.type] || "") : T.col === "possede" ? (aMoi.has(c.id) ? 2 : 0) + (proprietaires(c.id).length ? 1 : 0) : T.col === "stock" ? (pctStock(c, parNomPct) ?? -1) : c.nom;
+    lignes.sort((a, b) => { const x = cle(a), y = cle(b); return (typeof x === "number" ? x - y : String(x).localeCompare(String(y), "fr")) * s || a.nom.localeCompare(b.nom, "fr"); }); }
   bpVisibles = lignes.slice(0, 600).map((c) => c.id);
   for (const id of [...bp.sel]) if (!bpVisibles.includes(id)) bp.sel.delete(id);
   $("bp-etat").textContent = bp.charge ? `Chargement du catalogue… ${bp.etatCharge || ""}` : bp.erreur || `${lignes.length} blueprint${lignes.length > 1 ? "s" : ""}${filtreStock ? " réalisables" : ""}${bp.catalogue ? ` sur ${bp.catalogue.length}` : ""}${bp.totalApi != null ? ` (l'API en annonce ${bp.totalApi})` : ""}${bp.etatObjets ? ` · ${bp.etatObjets}` : ""}` + (compte && !bp.tableOk ? " · partage en ligne indisponible (table « blueprints » absente)" : "");
@@ -6914,6 +6928,7 @@ function renderBlueprints() {
     return `<tr class="${bp.sel.has(c.id) ? "selectionne" : ""}${aMoi.has(c.id) ? " bp-possede" : ""}"><td class="coche"><input type="checkbox" data-bp-sel="${esc(c.id)}" ${bp.sel.has(c.id) ? "checked" : ""} aria-label="Sélectionner ${esc(c.nom)}"></td>` +
       `<td class="nom-cell"><button type="button" class="lien bp-nom" data-bp-ouvrir="${esc(c.id)}">${esc(c.nom)}</button>${c.defaut ? ` <small class="bp-defaut">par défaut</small>` : ""}</td><td>${esc(BP_TYPES[c.type] || "")}</td><td class="bp-tags">${tagsDe(c).map((g) => `<button type="button" class="bp-tag${f.tags.has(g) ? " actif" : ""}" data-tag="${esc(g)}">${esc(g)}</button>`).join("")}</td>` +
       `<td>${aMoi.has(c.id) ? `<span class="bp-moi">✓ moi</span>` : ""}${n - (aMoi.has(c.id) ? 1 : 0) > 0 ? ` <small>+${n - (aMoi.has(c.id) ? 1 : 0)}</small>` : ""}</td>` +
+      (() => { const p = pctStock(c, parNomPct); return `<td class="bp-pct ${p == null ? "" : p >= 100 ? "pct-plein" : p > 0 ? "pct-partiel" : "pct-vide"}" title="Ingrédients disponibles">${p == null ? "—" : p + " %"}</td>`; })() +
       `<td class="bp-ing">${(c.ing || []).map((x) => esc(x.n)).join(", ")}</td></tr>`;
   }).join("");
   $("bp-vide").hidden = !!lignes.length || bp.charge; $("bp-vide").textContent = filtreStock ? "Aucune recette réalisable avec ce stock." : "Aucun blueprint pour ces filtres.";
@@ -6922,7 +6937,13 @@ function renderBlueprints() {
   const ns = bp.sel.size;
   $("bp-sel").textContent = ns ? `${ns} blueprint${ns > 1 ? "s" : ""} sélectionné${ns > 1 ? "s" : ""}` : "Aucun blueprint sélectionné";
   $("bp-oui").disabled = $("bp-non").disabled = !ns;
-  $("bp-tout").checked = ns > 0 && ns === bpVisibles.length; $("bp-tout").indeterminate = ns > 0 && ns < bpVisibles.length;
+  // même bouton que la liste des minerais : rien coché → tout sélectionner ; sinon → tout désélectionner
+  const bt = $("bp-tout"); bt.setAttribute("aria-checked", !ns ? "false" : ns < bpVisibles.length ? "mixed" : "true");
+  bt.querySelector(".txt").textContent = ns ? "Tout désélectionner" : "Tout sélectionner"; bt.disabled = !bpVisibles.length && !ns;
+  // en-têtes triables (même présentation que la liste des minerais)
+  const T = bp.tri;
+  $("bp-tete").innerHTML = `<tr><th class="coche"><span class="sr">Sélection</span></th>` + [["nom", "Blueprint"], ["type", "Type"], [null, "Détail"], ["possede", "Possédé"], ["stock", "Stock", true], [null, "Ingrédients"]].map(([col, titre, num]) =>
+    !col ? `<th>${titre}</th>` : `<th class="${num ? "bp-th-num" : ""}" ${T.col === col ? `aria-sort="${T.dir === "asc" ? "ascending" : "descending"}"` : ""}><button type="button" data-bp-tri="${col}">${titre}<span class="fleche" aria-hidden="true">${T.col === col ? (T.dir === "asc" ? "▲" : "▼") : ""}</span></button></th>`).join("") + `</tr>`;
 }
 const bpDetails = new Map();
 let bpPop = null;   // { c, d, q: [qualités], portee: Set }
@@ -7198,11 +7219,14 @@ $("v-blueprints").addEventListener("click", (e) => {
   const o = e.target.closest("[data-bp-ouvrir]"); if (o) { ouvrirBlueprint(o.dataset.bpOuvrir); return; }
   const tg = e.target.closest("[data-tag]"); if (tg) { const g = tg.dataset.tag; bp.f.tags.has(g) ? bp.f.tags.delete(g) : bp.f.tags.add(g); renderBlueprints(); return; }
   const tr = e.target.closest("[data-tag-retirer]"); if (tr) { bp.f.tags.delete(tr.dataset.tagRetirer); renderBlueprints(); return; }
+  if (e.target.closest("#bp-tout")) { if (bp.sel.size) bp.sel.clear(); else bpVisibles.forEach((id) => bp.sel.add(id)); renderBlueprints(); return; }
+  const tb = e.target.closest("[data-bp-tri]");
+  if (tb) { const T = bp.tri, c = tb.dataset.bpTri; if (T.col === c) T.dir = T.dir === "asc" ? "desc" : "asc"; else { T.col = c; T.dir = ["possede", "stock"].includes(c) ? "desc" : "asc"; } renderBlueprints(); return; }
   if (e.target.id === "bp-oui") possederBlueprints([...bp.sel], true);
   if (e.target.id === "bp-non") possederBlueprints([...bp.sel], false);
 });
 $("v-blueprints").addEventListener("change", (e) => {
-  if (e.target.id === "bp-tout") { if (e.target.checked) bpVisibles.forEach((id) => bp.sel.add(id)); else bp.sel.clear(); renderBlueprints(); return; }
+
   if (e.target.dataset.bpSel) { e.target.checked ? bp.sel.add(e.target.dataset.bpSel) : bp.sel.delete(e.target.dataset.bpSel); renderBlueprints(); return; }
   const det = e.target.closest(".bp-multi"); if (!det) return;
   const set = det.id === "bp-stations" ? bp.f.stations : bp.f.joueurs; e.target.checked ? set.add(e.target.value) : set.delete(e.target.value); renderBlueprints();
