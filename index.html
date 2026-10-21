@@ -1183,6 +1183,8 @@ body.overlay .fiche.mode-raff > .f-part, body.overlay .fiche.attente > .f-part {
 .marque { display: inline-flex !important; align-items: center; gap: 9px; }
 .marque-picto { width: 34px; height: 36px; flex: none; }
 .marque-nom { display: grid; line-height: .95; text-align: left; }
+.bp-col-recette { position: sticky; top: calc(var(--bp-tete-h, 90px) + 8px); align-self: start; max-height: calc(92vh - var(--bp-tete-h, 90px) - 24px); overflow-y: auto; padding-right: 4px; }
+@media (max-width: 760px) { .bp-col-recette { position: static; max-height: none; overflow: visible; } }
 </style>
 </head>
 <body>
@@ -1556,11 +1558,11 @@ body.overlay .fiche.mode-raff > .f-part, body.overlay .fiche.attente > .f-part {
     </div>
     <div class="bp-corps">
       <div class="bp-cols">
-        <div>
+        <div class="bp-col-recette">
           <h3>Recette et qualité des matériaux</h3>
           <div class="bp-aspects" id="dbp-aspects"></div>
         </div>
-        <div>
+        <div class="bp-col-stock">
           <h3>Stock des ressources</h3>
           <div class="bp-puces" id="dbp-portee"></div>
           <div class="bp-stock" id="dbp-stock"></div>
@@ -7102,6 +7104,9 @@ function formatStat(k) {
   const dec = /\.(\d)f/.exec(uf)?.[1];
   return (v) => (v * ech).toLocaleString(LOCALE, { maximumFractionDigits: dec != null ? +dec : 2 }) + (unite && !/^%/.test(unite) ? " " + unite : "");
 }
+/* hauteur de la barre du haut → décalage de la colonne collante des glissières */
+function majHauteurTete() { const d = $("d-blueprint"), h = d?.querySelector(".bp-tete")?.offsetHeight || 0; if (d) d.style.setProperty("--bp-tete-h", h + "px"); }
+if (window.ResizeObserver) new ResizeObserver(majHauteurTete).observe(document.querySelector("#d-blueprint .bp-tete"));
 async function ouvrirBlueprint(id) {
   const c = (bp.catalogue || []).find((x) => x.id === id); if (!c) return;
   $("dbp-titre").textContent = c.nom;
@@ -7110,7 +7115,7 @@ async function ouvrirBlueprint(id) {
   $("dbp-joueurs").innerHTML = pr.length ? pr.map((p) => `<li><b>${esc(p.joueur)}</b> <small>${esc(p.groupe)}</small></li>`).join("") : `<li class="note">Personne pour l'instant.</li>`;
   bpPop = { c, d: null, q: [], portee: bpPop?.portee || new Set(["moi"]), fermes: bpPop?.fermes || new Set() };
   $("dbp-aspects").innerHTML = `<p class="note">Chargement de la recette…</p>`; $("dbp-stats").innerHTML = ""; $("dbp-stock").innerHTML = ""; $("dbp-portee").innerHTML = "";
-  $("d-blueprint").showModal();
+  $("d-blueprint").showModal(); majHauteurTete();
   try {
     const d = await detailBlueprint(id); if (bpPop?.c !== c) return;
     // qualité de départ : le meilleur palier disponible en quantité suffisante dans mon stock, sinon la base
