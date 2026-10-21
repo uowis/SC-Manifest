@@ -1085,6 +1085,7 @@ body.overlay .fiche.mode-raff > .f-part, body.overlay .fiche.attente > .f-part {
 .bp-th-num { text-align: right; }
 .bp-pct { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .bp-pct.pct-plein { color: #6fd08c; } .bp-pct.pct-partiel { color: #e8a33a; } .bp-pct.pct-vide { color: var(--os-doux); }
+.bp-ing .ing-ok { color: #6fd08c; } .bp-ing .ing-partiel { color: #e8a33a; } .bp-ing .ing-non { color: #e6edf0; }
 .bp-ing { color: var(--os-doux); font-size: 12px; }
 .bp-pop { min-width: min(460px, 92vw); }
 .bp-pop h3 { margin: 14px 0 6px; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--os-doux); }
@@ -6929,7 +6930,8 @@ function renderBlueprints() {
       `<td class="nom-cell"><button type="button" class="lien bp-nom" data-bp-ouvrir="${esc(c.id)}">${esc(c.nom)}</button>${c.defaut ? ` <small class="bp-defaut">par défaut</small>` : ""}</td><td>${esc(BP_TYPES[c.type] || "")}</td><td class="bp-tags">${tagsDe(c).map((g) => `<button type="button" class="bp-tag${f.tags.has(g) ? " actif" : ""}" data-tag="${esc(g)}">${esc(g)}</button>`).join("")}</td>` +
       `<td>${aMoi.has(c.id) ? `<span class="bp-moi">✓ moi</span>` : ""}${n - (aMoi.has(c.id) ? 1 : 0) > 0 ? ` <small>+${n - (aMoi.has(c.id) ? 1 : 0)}</small>` : ""}</td>` +
       (() => { const p = pctStock(c, parNomPct); return `<td class="bp-pct ${p == null ? "" : p >= 100 ? "pct-plein" : p > 0 ? "pct-partiel" : "pct-vide"}" title="Ingrédients disponibles">${p == null ? "—" : p + " %"}</td>`; })() +
-      `<td class="bp-ing">${(c.ing || []).map((x) => esc(x.n)).join(", ")}</td></tr>`;
+      `<td class="bp-ing">${(c.ing || []).map((x) => { const e = parNomPct.get(sansAccents(x.n)), d = e ? (x.k === "item" ? e.n : e.scu) : 0, cl = d >= x.q - 1e-9 && d > 0 ? "ing-ok" : d > 0 ? "ing-partiel" : "ing-non";
+        return `<span class="${cl}" title="${x.k === "item" ? `${d} / ${x.q}` : `${fmtScu(d)} / ${fmtScu(x.q)} SCU`}">${esc(x.n)}</span>`; }).join(", ")}</td></tr>`;
   }).join("");
   $("bp-vide").hidden = !!lignes.length || bp.charge; $("bp-vide").textContent = filtreStock ? "Aucune recette réalisable avec ce stock." : "Aucun blueprint pour ces filtres.";
   $("bp-tags-actifs").hidden = !f.tags.size;
