@@ -1185,6 +1185,25 @@ body.overlay .fiche.mode-raff > .f-part, body.overlay .fiche.attente > .f-part {
 .marque-nom { display: grid; line-height: .95; text-align: left; }
 .bp-col-recette { position: sticky; top: calc(var(--bp-tete-h, 90px) + 8px); align-self: start; max-height: calc(92vh - var(--bp-tete-h, 90px) - 24px); overflow-y: auto; padding-right: 4px; }
 @media (max-width: 760px) { .bp-col-recette { position: static; max-height: none; overflow: visible; } }
+
+/* v214 : recherche + menu « + Détail » */
+.bp-rech-ligne { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 14px; }
+.bp-rech { position: relative; display: flex; align-items: center; flex: 0 1 340px; }
+.bp-rech svg { position: absolute; left: 10px; width: 18px; height: 18px; color: var(--os-doux); pointer-events: none; }
+.bp-rech input { width: 100%; padding: 8px 12px 8px 36px; background: #0e151d; border: 1px solid var(--trait); border-radius: 4px; color: var(--os); font: inherit; font-size: 14px; }
+.bp-rech input::placeholder { color: var(--os-doux); }
+.bp-rech input:focus, .bp-detail-pop input:focus { outline: none; border-color: var(--orange); }
+.bp-detail-menu { position: relative; }
+.bp-btn-detail { border: 1px solid var(--trait); background: none; color: inherit; padding: 7px 14px; border-radius: 999px; font: inherit; font-size: 13px; cursor: pointer; white-space: nowrap; }
+.bp-btn-detail:hover, .bp-btn-detail[aria-expanded="true"] { border-color: var(--orange); }
+.bp-detail-pop { position: absolute; z-index: 30; top: calc(100% + 6px); left: 0; width: 280px; background: #151b21; border: 1px solid var(--trait); border-radius: 6px; padding: 8px; box-shadow: 0 8px 24px rgba(0,0,0,.45); }
+.bp-detail-pop[hidden] { display: none; }
+.bp-detail-pop input { width: 100%; box-sizing: border-box; padding: 6px 10px; margin-bottom: 6px; background: #0e151d; border: 1px solid var(--trait); border-radius: 4px; color: var(--os); font: inherit; font-size: 13px; }
+.bp-detail-liste { max-height: 300px; overflow-y: auto; display: grid; }
+.bp-detail-liste button { display: flex; justify-content: space-between; gap: 10px; background: none; border: 0; color: inherit; text-align: left; padding: 5px 8px; border-radius: 4px; font: inherit; font-size: 13px; cursor: pointer; }
+.bp-detail-liste button:hover { background: rgba(255,255,255,.06); }
+.bp-detail-liste small { color: var(--os-doux); }
+.bp-rech-ligne .bp-tags-actifs { margin: 0; }
 </style>
 </head>
 <body>
@@ -1324,9 +1343,19 @@ body.overlay .fiche.mode-raff > .f-part, body.overlay .fiche.attente > .f-part {
       <div class="bp-groupe"><span>Réalisable avec le stock de</span><div class="bp-puces" id="bp-stock"></div></div>
       <div class="bp-groupe"><span>Stations</span><details class="bp-multi" id="bp-stations"><summary>Toutes</summary><div></div></details></div>
       <div class="bp-groupe"><span>Joueurs</span><details class="bp-multi" id="bp-joueurs"><summary>Tous</summary><div></div></details></div>
-      <div class="bp-groupe bp-recherche"><span>Recherche</span><input id="bp-q" type="search" placeholder="Nom du blueprint" autocomplete="off"></div>
+
     </div>
-    <div class="bp-tags-actifs" id="bp-tags-actifs" hidden></div>
+    <div class="bp-rech-ligne">
+      <label class="bp-rech"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg><input id="bp-q" type="search" placeholder="Rechercher un blueprint" autocomplete="off" aria-label="Rechercher un blueprint"></label>
+      <div class="bp-detail-menu">
+        <button type="button" class="bp-btn-detail" id="bp-btn-detail" aria-expanded="false">+ Détail</button>
+        <div class="bp-detail-pop" id="bp-detail-pop" hidden>
+          <input type="search" id="bp-detail-q" placeholder="Filtrer les détails" autocomplete="off">
+          <div class="bp-detail-liste" id="bp-detail-liste"></div>
+        </div>
+      </div>
+      <div class="bp-tags-actifs" id="bp-tags-actifs"></div>
+    </div>
     <div class="actions-groupe bp-actions">
       <button class="btn btn-tout" type="button" id="bp-tout" role="checkbox" aria-checked="false" disabled><span class="case" aria-hidden="true"></span><span class="txt">Tout sélectionner</span></button>
       <span id="bp-sel">Aucun blueprint sélectionné</span>
@@ -6936,7 +6965,7 @@ function renderBlueprints() {
         return `<span class="${cl}" title="${x.k === "item" ? `${d} / ${x.q}` : `${fmtScu(d)} / ${fmtScu(x.q)} SCU`}">${esc(x.n)}</span>`; }).join(", ")}</td></tr>`;
   }).join("");
   $("bp-vide").hidden = !!lignes.length || bp.charge; $("bp-vide").textContent = filtreStock ? "Aucune recette réalisable avec ce stock." : "Aucun blueprint pour ces filtres.";
-  $("bp-tags-actifs").hidden = !f.tags.size;
+  renderMenuDetail();
   $("bp-tags-actifs").innerHTML = [...f.tags].map((g) => `<span class="bp-tag actif">${esc(g)}<button type="button" data-tag-retirer="${esc(g)}" aria-label="Retirer le filtre ${esc(g)}">×</button></span>`).join("");
   const ns = bp.sel.size;
   $("bp-sel").textContent = ns ? `${ns} blueprint${ns > 1 ? "s" : ""} sélectionné${ns > 1 ? "s" : ""}` : "Aucun blueprint sélectionné";
@@ -7240,6 +7269,17 @@ $("v-blueprints").addEventListener("change", (e) => {
   det.open = true;
 });
 $("bp-q").addEventListener("input", (e) => { bp.f.q = e.target.value; renderBlueprints(); });
+/* Menu « + Détail » : tous les tags du catalogue (avec leur nombre), filtrables ; un clic ajoute le filtre */
+function renderMenuDetail() {
+  const el = $("bp-detail-liste"); if (!el || $("bp-detail-pop").hidden) return;
+  const n = new Map(); for (const c of bp.catalogue || []) for (const g of tagsDe(c)) n.set(g, (n.get(g) || 0) + 1);
+  const q = sansAccents($("bp-detail-q").value.trim());
+  const l = [...n].filter(([g]) => !bp.f.tags.has(g) && (!q || sansAccents(g).includes(q))).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "fr")).slice(0, 200);
+  el.innerHTML = l.length ? l.map(([g, k]) => `<button type="button" data-tag="${esc(g)}">${esc(g)}<small>${k}</small></button>`).join("") : `<p class="note">Aucun détail.</p>`;
+}
+$("bp-btn-detail").addEventListener("click", () => { const p = $("bp-detail-pop"); p.hidden = !p.hidden; $("bp-btn-detail").setAttribute("aria-expanded", String(!p.hidden)); if (!p.hidden) { $("bp-detail-q").value = ""; renderMenuDetail(); $("bp-detail-q").focus(); } });
+$("bp-detail-q").addEventListener("input", renderMenuDetail);
+document.addEventListener("click", (e) => { const p = $("bp-detail-pop"); if (p && !p.hidden && !e.target.closest(".bp-detail-menu")) { p.hidden = true; $("bp-btn-detail").setAttribute("aria-expanded", "false"); } });
 </script>
 </body>
 </html>
