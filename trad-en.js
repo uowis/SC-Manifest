@@ -3,6 +3,8 @@
    Ajoute ou corrige des lignes librement ; un texte absent reste en français. */
 window.TRAD_EN = {
   textes: {
+    "+ Détail": "+ Detail", "Rechercher un blueprint": "Search a blueprint", "Filtrer les détails": "Filter details", "Aucun détail.": "No detail.",
+    "Nombre de crafts": "Number of crafts", "pas en stock": "not in stock",
     "Après le craft": "After crafting", "vide": "empty",
     "Crafter": "Craft", "Crafter retire ces matériaux de votre stock perso.": "Crafting removes these materials from your personal stock.", "Stock perso insuffisant pour crafter.": "Not enough personal stock to craft.",
     "Détail": "Detail",
