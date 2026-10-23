@@ -5568,6 +5568,14 @@ function nomFlou(t) {
   for (const n of Object.keys(valeurs)) { const k = sansAccents(n).replace(/[^a-z]/g, ""), dd = lev(s, k); if (dd < bd) { bd = dd; best = n; } }
   return bd <= Math.max(1, Math.floor(s.length / 4)) ? best : null;
 }
+/* Empreinte grossière d'une zone (luminance moyenne sur une grille) : détecte qu'un contenu a changé (défilement) */
+function empreinteZone(im, nx = 16, ny = 3) {
+  const { w, h, d } = im, e = new Float32Array(nx * ny), n = new Float32Array(nx * ny);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const k = (y * w + x) * 4, c = Math.min(ny - 1, (y * ny / h) | 0) * nx + Math.min(nx - 1, (x * nx / w) | 0); e[c] += 0.299 * d[k] + 0.587 * d[k + 1] + 0.114 * d[k + 2]; n[c]++; }
+  for (let i = 0; i < e.length; i++) e[i] /= n[i] || 1;
+  return e;
+}
+const ecartEmpreintes = (a, b) => { if (!a || !b || a.length !== b.length) return 999; let s = 0; for (let i = 0; i < a.length; i++) s += Math.abs(a[i] - b[i]); return s / a.length; };
 async function lireLevski(S, src) {
   const barres = barresDorees(S);
   if (!barres.length) return null;
@@ -5579,32 +5587,53 @@ async function lireLevski(S, src) {
     const Rb = { x0: b.x, y0: b.y, span: b.w }, P = { ...Pid, R: Rb };
     const z = (u, v, w, h, seuil, haut = 40) => zoneTerminal(S, P, u, v, w, h, seuil, haut);
     let C = levCache[k];
-    if (!C || Math.abs(C.x - b.x) > 6 || Math.abs(C.y - b.y) > 6 || Math.abs(C.w - b.w) > 6) {
+    const empTitre = empreinteZone(z(0.55, 0.0, 0.43, 0.075, null, 30));
+    if (!C || Math.abs(C.x - b.x) > 6 || Math.abs(C.y - b.y) > 6 || Math.abs(C.w - b.w) > 6 || ecartEmpreintes(C.empTitre, empTitre) > 10) {
       const T = G.titre; let ok = false;
       // barre dorée = ordre en cours ; le texte ne sert qu'à écarter un ordre terminé (lu « COMPLETED »)
       ok = true;
       for (const se of [110, 80]) { const txt = sansAccents(await lireTexte(z(T[0], T[1], T[2], T[3], se, 30), "ABCDEFGHIJKLMNOPQRSTUVWXYZ ", 3000, 3)); if (/(proces|traitement|cours)/.test(txt)) break; if (/(complet|termin|done)/.test(txt)) { ok = false; break; } }
       if (!ok) continue;   // pas (encore) lu « PROCESSING » : réessayé au scan suivant
-      C = levCache[k] = { x: b.x, y: b.y, w: b.w, processing: ok, noms: {} };
+      C = levCache[k] = { x: b.x, y: b.y, w: b.w, processing: ok, noms: {}, empTitre, nomsVus: [] };
       // numéro du « WORK ORDER n » (à droite de la barre) : identifie l'ordre même si la liste défile horizontalement
-      for (const se of [110, 80, 140, null]) { const tx = await lireTexte(z(0.55, 0.0, 0.43, 0.075, se, 30), "WORKDEIL0123456789 ", 3000, 3); const m = tx.replace(/O(?=\s*$)/, "0").replace(/[IL|](?=\s*$)/, "1").match(/ORDE?R?\s*(\d{1,3})\s*$/) || tx.match(/(?:^|\s)(\d{1,3})\s*$/); if (m) { C.num = +m[1]; break; } }
+      C.num = null;
+    }
+    if (C.processing && C.num == null) {   // numéro « WORK ORDER n » : vote sur plusieurs lectures (au moins 2 concordantes)
+      const votes = new Map();
+      for (const se of [110, 80, 140, null]) for (const hh of [30, 40, 24]) {
+        const tx = (await lireTexte(z(0.55, 0.0, 0.43, 0.075, se, hh), "WORKDEIL0123456789 ", 3000, 3)).replace(/[IL|](?=\s*$)/, "1");
+        const m = tx.match(/(?:^|[\sR])(\d{1,3})\s*$/); if (m) votes.set(+m[1], (votes.get(+m[1]) || 0) + 1);
+      }
+      let best = null; for (const [n, c] of votes) if (c >= 2 && (best == null || c > votes.get(best))) best = n;
+      C.num = best;
     }
     if (!C.processing) continue;
-    s = C.num != null ? C.num : 100 + k;   // clé de l'ordre : son numéro de work order (sinon sa position)
+    if (C.num == null) continue;   // numéro « WORK ORDER n » pas encore lu : colonne ignorée (jamais rangée au hasard)
+    s = C.num;   // clé de l'ordre = son numéro de work order
     Pid.cs[s] = { R: Rb };
     const nombre = async (img) => ({ ...lireNombreLev(img), src: "modele" });   // Tesseract ne lit pas des chiffres aussi petits
     const lignes = [], boites = [];
-    for (let i = 0; ; i++) {
-      const v = G.ligne0 + (C.decal || 0) + i * G.pasLigne - G.hLigne / 2;
-      if (v > G.vMax) break;
-      const zc = (k, seuil) => z(G.cols[k][0], v, G.cols[k][1] - G.cols[k][0], G.hLigne, seuil, k === "nom" ? 40 : Math.round(G.hLigne * b.w * 4));
-      if (!(i in C.noms)) {   // nom lu une fois par cadrage (texte gris : seuil bas d'abord)
-        C.noms[i] = null;
-        for (const [se, ech] of [[80, 4], [80, 6], [110, 3], [140, 5], [65, 5]]) { const tx = await lireTexte(zc("nom", se), "ABCDEFGHIJKLMNOPQRSTUVWXYZ() ", 3000, ech); C.noms[i] = nomMinerai(tx) || nomFlou(tx); if (C.noms[i]) break; }
-        if (!C.noms[i] && i === 0 && !C.decal) { C.decal = G.pasLigne / 2; C.noms = {}; i = -1; continue; }   // liste défilée : lignes décalées d'une demi-ligne
-        if (!C.noms[i] && i > 0) break;   // première ligne vide après le tableau : fin
+    // lignes du tableau repérées par leurs bandes de texte (la liste peut être défilée d'une valeur quelconque)
+    const haut0 = G.ligne0 - G.pasLigne / 2, hautZ = G.vMax - haut0, pxu = Math.round(hautZ * b.w);
+    const imL = z(G.cols.nom[0], haut0, G.cols.nom[1] - G.cols.nom[0], hautZ, null, pxu), bandes = [];
+    { let deb = -1, trou = 0;
+      for (let y = 0; y <= imL.h; y++) {
+        let n = 0; if (y < imL.h) for (let x = 0; x < imL.w; x++) { const q = (y * imL.w + x) * 4; if (0.299 * imL.d[q] + 0.587 * imL.d[q + 1] + 0.114 * imL.d[q + 2] > 75) n++; }
+        if (n > 0) { if (deb < 0) deb = y; trou = 0; } else if (deb >= 0 && ++trou > 2) { bandes.push([deb, y - trou]); deb = -1; trou = 0; }
       }
-      const nom = C.noms[i];
+    }
+    const centres = bandes.filter(([a, e]) => a > 1 && e < imL.h - 2 && (e - a) >= 0.018 * b.w && (e - a) <= G.hLigne * b.w).map(([a, e]) => haut0 + ((a + e) / 2) / b.w);
+    for (const vc of centres) {
+      const v = vc - G.hLigne / 2;
+      const zc = (k2, seuil) => z(G.cols[k2][0], v, G.cols[k2][1] - G.cols[k2][0], G.hLigne, seuil, k2 === "nom" ? 40 : Math.round(G.hLigne * b.w * 4));
+      const emp = empreinteZone(zc("nom", null), 48, 4);
+      let vu = C.nomsVus.find((x) => ecartEmpreintes(x.emp, emp) < 1.2);
+      if (!vu || (!vu.nom && vu.essais < 3)) {   // nouveau nom à l'écran (ou liste défilée) : lu une fois (3 essais si illisible)
+        let nm = null;
+        for (const [se, ech] of [[80, 4], [80, 6], [110, 3], [140, 5], [65, 5]]) { const tx = await lireTexte(zc("nom", se), "ABCDEFGHIJKLMNOPQRSTUVWXYZ() ", 3000, ech); nm = nomMinerai(tx) || nomFlou(tx); if (nm) break; }
+        if (vu) { vu.nom = nm; vu.essais++; } else { vu = { emp, nom: nm, essais: 1 }; C.nomsVus.push(vu); if (C.nomsVus.length > 60) C.nomsVus.shift(); }
+      }
+      const nom = vu.nom;
       if (!nom) continue;
       boites.push(zc("nom", null).box, zc("qualite", null).box, zc("rend", null).box);
       const rq = await nombre(zc("qualite", null)); let rr = await nombre(zc("rend", null));
@@ -5652,9 +5681,26 @@ async function lireLevski(S, src) {
       let fin = deb, trou = 0; for (let x = deb; x < w && trou < 8; x++) { if (clair(x)) { fin = x + 1; trou = 0; } else trou++; }
       C.progression = w && deb < w * 0.1 ? fin / w : 0;
     }
+    // ascenseur vertical du tableau (liste de minerais plus longue que la zone) : position du curseur haut / bas
+    let defile = null;
+    { const imA = z(0.955, haut0, 0.04, hautZ, null, pxu); let bx = -1, bn = 0;
+      for (let x = 0; x < imA.w * 0.7; x++) { let n = 0; for (let y = 0; y < imA.h; y++) { const q = (y * imA.w + x) * 4, g = 0.299 * imA.d[q] + 0.587 * imA.d[q + 1] + 0.114 * imA.d[q + 2]; if (g > 65 && g < 125) n++; } if (n > bn) { bn = n; bx = x; } }
+      if (bx >= 0 && bn > imA.h * 0.25 && bn < imA.h * 0.97) {
+        let h0 = -1, h1 = -1; for (let y = 0; y < imA.h; y++) { const q = (y * imA.w + bx) * 4, g = 0.299 * imA.d[q] + 0.587 * imA.d[q + 1] + 0.114 * imA.d[q + 2]; if (g > 65 && g < 125) { if (h0 < 0) h0 = y; h1 = y; } }
+        defile = { haut: h0 <= imA.h * 0.06, bas: h1 >= imA.h * 0.96 };
+      }
+    }
     if (!lignes.length) { delete levCache[k]; continue; }   // barre dorée sans tableau dessous : pas un ordre
-    colonnes.push({ s, num: C.num, lignes, temps: C.temps, tempsLuA: C.tempsLuA, boites, progression: C.progression });
+    colonnes.push({ s, k, num: C.num, defile, lignes, temps: C.temps, tempsLuA: C.tempsLuA, boites, progression: C.progression });
   }
+  // contrôle des numéros : de gauche à droite ils doivent croître, sans doublon ; sinon lecture douteuse → position
+  let dernier = -1;
+  for (const c of colonnes) {
+    if (c.num == null) continue;
+    if (c.num <= dernier) { if (levCache[c.k]) levCache[c.k].num = null; c.rejete = true; continue; }   // relu au scan suivant
+    dernier = c.num;
+  }
+  for (let i = colonnes.length - 1; i >= 0; i--) if (colonnes[i].rejete) colonnes.splice(i, 1);
   return colonnes.length ? { colonnes, P: Pid } : null;
 }
 async function lireProcessing(S, P) {
@@ -5787,8 +5833,10 @@ function cleLigne(l) { return `${l.nom}|${l.qualite}`; }
 function totauxOrdre(ord) {
   const ok = ord.lignes.filter((l) => l.connue || l.force);
   const rend = ok.reduce((s, l) => s + (l.rend || 0), 0);
-  const egal = !ord.enregistre && ok.length > 0 && ord.complet !== false && !!ord.temps && ord.stable >= 2;
-  return { ok, rend, egal };
+  // liste défilante : toutes les lignes ne sont lues qu'après avoir vu le haut ET le bas de la liste
+  const totalOk = !ord.defile || (ord.vuHaut && ord.vuBas);
+  const egal = !ord.enregistre && ok.length > 0 && ord.complet !== false && !!ord.temps && ord.stable >= 2 && totalOk;
+  return { ok, rend, egal, totalOk };
 }
 const totauxRaff = () => totauxOrdre(O());
 function renderRaff() {
@@ -5833,6 +5881,7 @@ function fusionnerLignes(nouvelles, ord = O()) {
 function etatOrdre(ord) {
   if (ord.enregistre) return "Enregistré.";
   const t = totauxOrdre(ord);
+  if (!t.totalOk) return `Liste plus longue que l'écran : faites-la défiler doucement jusqu'${ord.vuBas ? "en haut" : "en bas"} dans le jeu (les lignes s'ajoutent au fur et à mesure).`;
   return t.egal ? "Lecture stable." : ord.complet ? "Vérification…" : "Tableau incomplet : relecture…";
 }
 /* Miniature réduite : la colonne de l'ordre affiché (ou tout le terminal tant qu'aucun ordre n'est trouvé) */
@@ -5866,7 +5915,7 @@ async function scannerRaff() {
     for (const c of r.colonnes) {
       const ord = (raff.ordres[c.s] = raff.ordres[c.s] || nouvelOrdre());
       if (ord.enregistre || ord.fige) continue;   // ordre modifié à la main : plus relu (les autres continuent)
-      ord.boites = c.boites; if (c.num != null) ord.num = c.num;
+      ord.boites = c.boites; if (c.num != null) ord.num = c.num; if (c.defile) { ord.defile = true; if (c.defile.haut) ord.vuHaut = true; if (c.defile.bas) ord.vuBas = true; }
       const sig = JSON.stringify(c.lignes.filter((l) => l.connue).map((l) => [l.nom, l.qualite, l.rend]));
       ord.stable = sig !== "[]" && sig === ord.sig ? ord.stable + 1 : 1; ord.sig = sig;
       ord.complet = c.lignes.length > 0 && c.lignes.every((l) => l.connue && Number.isFinite(l.rend)) && !!(c.temps || ord.temps);
@@ -5877,7 +5926,8 @@ async function scannerRaff() {
       ord.etat = etatOrdre(ord);
     }
     // ordres disparus de l'écran (récupérés, ou changement d'écran)
-    for (const k of Object.keys(raff.ordres)) if (!r.colonnes.some((c) => c.s === +k) && !raff.ordres[k].enregistre && !raff.ordres[k].fige && (+k >= 100 || !r.colonnes.some((c) => c.num != null))) delete raff.ordres[k];
+    // ordre sorti de l'écran (défilement horizontal) : gardé, il sera retrouvé par son numéro
+    if (!r.P?.levski) for (const k of Object.keys(raff.ordres)) if (!r.colonnes.some((c) => c.s === +k) && !raff.ordres[k].enregistre && !raff.ordres[k].fige) delete raff.ordres[k];
     if (!(raff.actif in raff.ordres)) raff.actif = r.colonnes[0].s;
     // tableau incomplet : toutes les 3 lectures ratées, on repart de zéro (perspective, repères, recalage, noms, temps)
     if (rate) { raff.rates = (raff.rates || 0) + 1; if (raff.rates >= 3) { raffPersp = null; raff.rates = 0; } } else raff.rates = 0;
