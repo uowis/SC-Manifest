@@ -1332,6 +1332,12 @@ body:not(.overlay) :is(td.num, td.date, th.num, td.coche, th.coche) { white-spac
 @media (max-width: 480px) { body:not(.overlay) :is(th, td) { padding-left: 4px; padding-right: 4px; } #v-blueprints :is(td:nth-child(4), th:nth-child(4), td:nth-child(5), th:nth-child(5)) { display: none; } }
 /* v247 : une seule taille de police dans les cellules des tableaux (celle du contenu principal : 15 px à l'écran) */
 body:not(.overlay) td, body:not(.overlay) td :not(svg):not(path):not(.btn) { font-size: calc(0.9375rem / .9) !important; }
+/* v248 : noms de minéraux et de blueprints plus contrastés */
+:is(#t-station, #t-accueil) td.nom-cell, :is(#t-station, #t-accueil) td.nom-cell .ouvrir, .bp-table tr:not(.bp-possede) .bp-nom, .bp-stock-tete b, .bp-aspect-tete { color: #f4f8fa !important; }
+.bp-table tr.bp-possede .bp-nom { color: #8fe0a6 !important; }
+/* v248 : plus de trait dégradé sous la barre de menu */
+.barre::after, .dn-tete::after { display: none !important; }
+.bp-besoin { color: var(--os-doux); margin-left: 4px; font-weight: 400; }
 </style>
 </head>
 <body>
@@ -7184,7 +7190,7 @@ function renderPopBlueprint(partiel = false) {
     const mods = (a.modifiers || []).filter((m) => m.value_range_type || m.value_segments || m.modifier_range?.at_min_quality != null).map((m) => { const e = ecartDe(m, q, a.initial_quality ?? 500); return `<span class="${classeEcart(e, m.better_when)}">${esc(m.label)} ${fmtEcart(e)}</span>`; }).join("");
     const choix = a.selection_group ? `<label class="bp-choix" title="Matériau au choix : ${a.selection_group.required_count} sur ${a.selection_group.option_count}"><input type="checkbox" data-choix="${i}" ${aspectActif(i) ? "checked" : ""}></label>` : "";
     const dq = dispoPalier(a, q), etat = dq.ok ? "s-ok" : dq.q > 0 ? "s-partiel" : "s-absent";
-    return `<div class="bp-aspect ${etat}${aspectActif(i) ? "" : " bp-off"}"><div class="bp-aspect-tete">${choix}<b>${esc(a.name)}</b> · ${esc(inp.name || "")}</div>
+    return `<div class="bp-aspect ${etat}${aspectActif(i) ? "" : " bp-off"}"><div class="bp-aspect-tete">${choix}<b>${esc(a.name)}</b> · ${esc(inp.name || "")} <small class="bp-besoin">${inp.kind === "item" ? `× ${(Number(inp.quantity) || 0) * multCraft()}` : `${fmtScu((Number(inp.quantity_scu) || 0) * multCraft())} SCU`}</small></div>
       <input type="range" min="${qmin}" max="${qmax}" value="${q}" data-aspect="${i}" style="--p:${((q - qmin) / ((qmax - qmin) || 1)) * 100}%" aria-label="Qualité ${esc(inp.name || "")}">
       <div class="bp-bornes"><span>${qmin}</span><span>${a.initial_quality ?? 500}</span><span>${qmax}</span></div>
       ${paliersAspect(a).length ? `<div class="bp-paliers">${paliersAspect(a).map((v) => { const d = dispoPalier(a, v); return `<i class="${d.ok ? "dispo" : d.q > 0 ? "partiel" : "absent"}${v === q ? " courant" : ""}" style="left:${((v - qmin) / ((qmax - qmin) || 1)) * 100}%" title="Q${v} : ${d.q > 0 ? (d.kind === "item" ? `${d.q} en stock` : `${fmtScu(d.q)} SCU en stock`) : "pas en stock"}" data-palier="${i}:${v}"></i>`; }).join("")}</div>` : ""}
@@ -7294,7 +7300,7 @@ $("d-blueprint").addEventListener("input", (e) => {
   // glissière en cours de déplacement : on ne remplace que les textes (reconstruire la couperait)
   const html = renderPopBlueprint(true);
   const ancien = $("dbp-aspects").querySelectorAll(".bp-aspect"), neuf = html.querySelectorAll(".bp-aspect");
-  ancien.forEach((el, i) => { el.className = neuf[i].className; { const r = el.querySelector("input[type=range]"), rn = neuf[i].querySelector("input[type=range]"); if (r && rn) r.style.cssText = rn.style.cssText; } el.querySelector(".bp-cartouches").innerHTML = neuf[i].querySelector(".bp-cartouches").innerHTML; el.querySelector(".bp-mods").innerHTML = neuf[i].querySelector(".bp-mods").innerHTML;
+  ancien.forEach((el, i) => { el.className = neuf[i].className; { const b = el.querySelector(".bp-besoin"), bn = neuf[i].querySelector(".bp-besoin"); if (b && bn) b.textContent = bn.textContent; } { const r = el.querySelector("input[type=range]"), rn = neuf[i].querySelector("input[type=range]"); if (r && rn) r.style.cssText = rn.style.cssText; } el.querySelector(".bp-cartouches").innerHTML = neuf[i].querySelector(".bp-cartouches").innerHTML; el.querySelector(".bp-mods").innerHTML = neuf[i].querySelector(".bp-mods").innerHTML;
     for (const k of [".bp-paliers", ".bp-preleve"]) { const a = el.querySelector(k), b = neuf[i].querySelector(k); if (a && b) a.innerHTML = b.innerHTML; } });
 });
 /* v245 : toutes les popups se ferment par un clic à l'extérieur (même chemin que la touche Échap) */
