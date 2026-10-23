@@ -5573,30 +5573,35 @@ async function lireLevski(S, src) {
   if (!barres.length) return null;
   const Pid = { Hi: [[1, 0, 0], [0, 1, 0], [0, 0, 1]], L: S.W, Hc: S.H, apercu: toileDe({ w: S.W, h: S.H, d: new Uint8ClampedArray(S.d) }), levski: true, cs: {} };
   const G = RAFF_LEV, colonnes = [];
-  let s = 0;
+  let k = -1;
   for (const b of barres) {
+    k++; let s = k;
     const Rb = { x0: b.x, y0: b.y, span: b.w }, P = { ...Pid, R: Rb };
     const z = (u, v, w, h, seuil, haut = 40) => zoneTerminal(S, P, u, v, w, h, seuil, haut);
-    let C = levCache[s];
+    let C = levCache[k];
     if (!C || Math.abs(C.x - b.x) > 6 || Math.abs(C.y - b.y) > 6 || Math.abs(C.w - b.w) > 6) {
       const T = G.titre; let ok = false;
       // barre dorée = ordre en cours ; le texte ne sert qu'à écarter un ordre terminé (lu « COMPLETED »)
       ok = true;
       for (const se of [110, 80]) { const txt = sansAccents(await lireTexte(z(T[0], T[1], T[2], T[3], se, 30), "ABCDEFGHIJKLMNOPQRSTUVWXYZ ", 3000, 3)); if (/(proces|traitement|cours)/.test(txt)) break; if (/(complet|termin|done)/.test(txt)) { ok = false; break; } }
       if (!ok) continue;   // pas (encore) lu « PROCESSING » : réessayé au scan suivant
-      C = levCache[s] = { x: b.x, y: b.y, w: b.w, processing: ok, noms: {} };
+      C = levCache[k] = { x: b.x, y: b.y, w: b.w, processing: ok, noms: {} };
+      // numéro du « WORK ORDER n » (à droite de la barre) : identifie l'ordre même si la liste défile horizontalement
+      for (const se of [110, 80, 140, null]) { const tx = await lireTexte(z(0.55, 0.0, 0.43, 0.075, se, 30), "WORKDEIL0123456789 ", 3000, 3); const m = tx.replace(/O(?=\s*$)/, "0").replace(/[IL|](?=\s*$)/, "1").match(/ORDE?R?\s*(\d{1,3})\s*$/) || tx.match(/(?:^|\s)(\d{1,3})\s*$/); if (m) { C.num = +m[1]; break; } }
     }
     if (!C.processing) continue;
+    s = C.num != null ? C.num : 100 + k;   // clé de l'ordre : son numéro de work order (sinon sa position)
     Pid.cs[s] = { R: Rb };
     const nombre = async (img) => ({ ...lireNombreLev(img), src: "modele" });   // Tesseract ne lit pas des chiffres aussi petits
     const lignes = [], boites = [];
     for (let i = 0; ; i++) {
-      const v = G.ligne0 + i * G.pasLigne - G.hLigne / 2;
+      const v = G.ligne0 + (C.decal || 0) + i * G.pasLigne - G.hLigne / 2;
       if (v > G.vMax) break;
       const zc = (k, seuil) => z(G.cols[k][0], v, G.cols[k][1] - G.cols[k][0], G.hLigne, seuil, k === "nom" ? 40 : Math.round(G.hLigne * b.w * 4));
       if (!(i in C.noms)) {   // nom lu une fois par cadrage (texte gris : seuil bas d'abord)
         C.noms[i] = null;
         for (const [se, ech] of [[80, 4], [80, 6], [110, 3], [140, 5], [65, 5]]) { const tx = await lireTexte(zc("nom", se), "ABCDEFGHIJKLMNOPQRSTUVWXYZ() ", 3000, ech); C.noms[i] = nomMinerai(tx) || nomFlou(tx); if (C.noms[i]) break; }
+        if (!C.noms[i] && i === 0 && !C.decal) { C.decal = G.pasLigne / 2; C.noms = {}; i = -1; continue; }   // liste défilée : lignes décalées d'une demi-ligne
         if (!C.noms[i] && i > 0) break;   // première ligne vide après le tableau : fin
       }
       const nom = C.noms[i];
@@ -5647,9 +5652,8 @@ async function lireLevski(S, src) {
       let fin = deb, trou = 0; for (let x = deb; x < w && trou < 8; x++) { if (clair(x)) { fin = x + 1; trou = 0; } else trou++; }
       C.progression = w && deb < w * 0.1 ? fin / w : 0;
     }
-    if (!lignes.length) { delete levCache[s]; continue; }   // barre dorée sans tableau dessous : pas un ordre
-    colonnes.push({ s, lignes, temps: C.temps, tempsLuA: C.tempsLuA, boites, progression: C.progression });
-    s++;
+    if (!lignes.length) { delete levCache[k]; continue; }   // barre dorée sans tableau dessous : pas un ordre
+    colonnes.push({ s, num: C.num, lignes, temps: C.temps, tempsLuA: C.tempsLuA, boites, progression: C.progression });
   }
   return colonnes.length ? { colonnes, P: Pid } : null;
 }
@@ -5791,7 +5795,7 @@ function renderRaff() {
   if (!raff) return;
   const cles = Object.keys(raff.ordres).map(Number).sort();
   R$("dr-ordres").innerHTML = cles.map((k) => { const o = raff.ordres[k], ok = o.enregistre || totauxOrdre(o).egal;
-    return `<button type="button" class="btn petit${k === raff.actif ? " actif" : ""}" data-ordre="${k}" aria-pressed="${k === raff.actif}">Ordre ${k + 1}${o.enregistre ? " ✓" : ok ? " ●" : ""}</button>`; }).join("");
+    return `<button type="button" class="btn petit${k === raff.actif ? " actif" : ""}" data-ordre="${k}" aria-pressed="${k === raff.actif}">Ordre ${o.num ?? (k % 100) + 1}${o.enregistre ? " ✓" : ok ? " ●" : ""}</button>`; }).join("");
   R$("dr-ordres").hidden = cles.length < 2;
   const t = totauxRaff();
   R$("dr-etat").textContent = raff.etat || "";
@@ -5862,7 +5866,7 @@ async function scannerRaff() {
     for (const c of r.colonnes) {
       const ord = (raff.ordres[c.s] = raff.ordres[c.s] || nouvelOrdre());
       if (ord.enregistre || ord.fige) continue;   // ordre modifié à la main : plus relu (les autres continuent)
-      ord.boites = c.boites;
+      ord.boites = c.boites; if (c.num != null) ord.num = c.num;
       const sig = JSON.stringify(c.lignes.filter((l) => l.connue).map((l) => [l.nom, l.qualite, l.rend]));
       ord.stable = sig !== "[]" && sig === ord.sig ? ord.stable + 1 : 1; ord.sig = sig;
       ord.complet = c.lignes.length > 0 && c.lignes.every((l) => l.connue && Number.isFinite(l.rend)) && !!(c.temps || ord.temps);
@@ -5873,7 +5877,7 @@ async function scannerRaff() {
       ord.etat = etatOrdre(ord);
     }
     // ordres disparus de l'écran (récupérés, ou changement d'écran)
-    for (const k of Object.keys(raff.ordres)) if (!r.colonnes.some((c) => c.s === +k) && !raff.ordres[k].enregistre && !raff.ordres[k].fige) delete raff.ordres[k];
+    for (const k of Object.keys(raff.ordres)) if (!r.colonnes.some((c) => c.s === +k) && !raff.ordres[k].enregistre && !raff.ordres[k].fige && (+k >= 100 || !r.colonnes.some((c) => c.num != null))) delete raff.ordres[k];
     if (!(raff.actif in raff.ordres)) raff.actif = r.colonnes[0].s;
     // tableau incomplet : toutes les 3 lectures ratées, on repart de zéro (perspective, repères, recalage, noms, temps)
     if (rate) { raff.rates = (raff.rates || 0) + 1; if (raff.rates >= 3) { raffPersp = null; raff.rates = 0; } } else raff.rates = 0;
