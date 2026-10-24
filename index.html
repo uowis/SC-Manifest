@@ -81,8 +81,8 @@
 <style>
 
 :root {
-  --rouille: #050b13; --panneau: #111922; --panneau-2: #1b252e; --trait: #28353d; --bord: #3e4e56;
-  --hachure-a: #0c151d; --hachure-b: #17212a; --accent: #36cc7f;
+  --rouille: #0a0c0e; --panneau: #17191c; --panneau-2: #212528; --trait: #2f3336; --bord: #464b4e;
+  --hachure-a: #121517; --hachure-b: #1d2124; --accent: #36cc7f;
   --os: #c6e4e9; --os-doux: #7f98a0;
   --violet: #8e3f86; --turquoise: #2f7f79; --ocre: #a8932f;
   --alerte: #ec7a55; --ok: #36cc7f;
@@ -110,8 +110,8 @@ select, input[type=number], input[type=text], input:not([type]) {
 .btn { border: 1px solid var(--trait); background: var(--panneau); border-radius: 4px; padding: 8px 14px; cursor: pointer; font-weight: 500; }
 .btn:hover { background: var(--panneau-2); }
 .btn:disabled { opacity: .45; cursor: default; }
-.btn.principal { background: #28353d; color: #e3f4f7; border-color: var(--bord); box-shadow: inset 0 -2px 0 var(--accent); font-weight: 600; }
-.btn.principal:hover { background: #3a4a53; }
+.btn.principal { background: #2f3336; color: #e3f4f7; border-color: var(--bord); box-shadow: inset 0 -2px 0 var(--accent); font-weight: 600; }
+.btn.principal:hover { background: #42484b; }
 .btn.danger { border-color: var(--alerte); color: var(--alerte); }
 .btn.grand { width: 100%; padding: 12px; font-size: max(var(--fmin), 1rem); }
 
@@ -191,7 +191,7 @@ details.reglages summary { cursor: pointer; color: var(--os-doux); font-size: ma
 
 /* Fiche de scan (overlay) */
 .fiche { display: grid; gap: 10px; }
-.fiche img { display: block; width: 100%; height: auto; border-radius: 3px; border: 1px solid var(--trait); background: #02060b; min-height: 40px; }
+.fiche img { display: block; width: 100%; height: auto; border-radius: 3px; border: 1px solid var(--trait); background: #050608; min-height: 40px; }
 .champ { display: grid; gap: 4px; }
 .champ span { font-size: max(var(--fmin), 0.8125rem); color: var(--os-doux); }
 .champ input, .champ select { width: 100%; border: 2px solid transparent; border-radius: 3px; padding: 6px 8px; font-size: max(var(--fmin), 1.1875rem); font-weight: 600; color: #fff; font-family: inherit; transition: background-color .15s, border-color .15s; }
@@ -211,7 +211,7 @@ details.reglages summary { cursor: pointer; color: var(--os-doux); font-size: ma
 .fiche .boutons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .fiche .boutons .btn { display: flex; justify-content: center; align-items: center; gap: 8px; transition: transform .08s, background-color .15s, box-shadow .15s; }
 /* Enregistrer : gris bloqué, vert quand minerai et qualité sont possibles */
-#b-enregistrer:disabled { background: #131a23; border-color: var(--trait); color: #4f646c; opacity: 1; }
+#b-enregistrer:disabled { background: #181b1e; border-color: var(--trait); color: #4f646c; opacity: 1; }
 #b-enregistrer.pret { background: #1f8a55; border-color: var(--accent); color: #fff; font-weight: 600; }
 #b-enregistrer.pret:hover { background: #26a063; }
 /* Retour visuel des touches F8 / F9 */
@@ -228,7 +228,7 @@ body.overlay { padding: 10px; min-height: 0; }
 @media (prefers-reduced-motion: reduce) { .fiche.arrivee img { animation: none; } }
 
 dialog { background: var(--panneau); color: var(--os); border: 1px solid var(--trait); border-radius: 8px; padding: 20px; width: min(460px, 92vw); }
-dialog::backdrop { background: rgba(2,5,9,.7); }
+dialog::backdrop { background: rgba(4,5,7,.7); }
 dialog h2 { margin: 0 0 12px; font-size: max(var(--fmin), 1.125rem); }
 dialog .pied { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
 .liste-mineraux { max-height: 260px; overflow-y: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; padding: 8px; border: 1px solid var(--trait); border-radius: 4px; }
@@ -248,7 +248,7 @@ dialog .pied { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
 .toast.visible { opacity: 1; }
 
 /* Bandes hachurées et trait lumineux, comme l'interface du jeu */
-.barre { position: relative; background: #070e16; border-bottom: 1px solid var(--trait); }
+.barre { position: relative; background: #0c0e11; border-bottom: 1px solid var(--trait); }
 .barre::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px;
   background: linear-gradient(90deg, transparent, var(--accent) 20%, var(--accent) 35%, transparent 60%); opacity: .7; }
 .hachures { background: repeating-linear-gradient(135deg, var(--hachure-a) 0 6px, var(--hachure-b) 6px 9px); }
@@ -257,7 +257,7 @@ dialog .pied { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   background: repeating-linear-gradient(135deg, var(--hachure-a) 0 6px, var(--hachure-b) 6px 9px); }
 .btn { color: var(--os); }
 .btn:hover { border-color: var(--bord); }
-.carte { background: linear-gradient(180deg, #131c25, #0e161e); }
+.carte { background: linear-gradient(180deg, #191c1f, #131619); }
 th { text-transform: uppercase; letter-spacing: .06em; font-size: max(var(--fmin), 0.75rem); }
 input[type=checkbox], input[type=range] { accent-color: var(--accent); }
 
@@ -273,7 +273,7 @@ dialog p { margin: 0 0 12px; color: var(--os-doux); font-size: max(var(--fmin), 
 .dc-blocs { display: grid; gap: 12px; }
 .dc-bloc { display: grid; gap: 6px; }
 .dc-bloc .tete { display: flex; justify-content: space-between; align-items: center; font-size: max(var(--fmin), 0.8125rem); color: var(--os-doux); }
-.dc-bloc textarea { width: 100%; min-height: 160px; max-height: 40vh; resize: vertical; background: #02060b; color: var(--os);
+.dc-bloc textarea { width: 100%; min-height: 160px; max-height: 40vh; resize: vertical; background: #050608; color: var(--os);
   border: 1px solid var(--trait); border-radius: 4px; padding: 8px; font: max(var(--fmin), 0.8125rem)/1.35 ui-monospace, Consolas, monospace; }
 /* Pictogramme « enregistré » sur la miniature */
 .miniature { position: relative; }
@@ -281,7 +281,7 @@ dialog p { margin: 0 0 12px; color: var(--os-doux); font-size: max(var(--fmin), 
   background: #1f8a55; color: #fff; border-radius: 12px; padding: 2px 8px 2px 4px; font-size: max(var(--fmin), 0.75rem); font-weight: 600;
   box-shadow: 0 1px 4px rgba(0,0,0,.5); }
 .sauve svg { width: 16px; height: 16px; background: rgba(255,255,255,.2); border-radius: 50%; }
-.sauve.deja { background: #28353d; }
+.sauve.deja { background: #2f3336; }
 @media (prefers-reduced-motion: no-preference) { .sauve:not([hidden]) { animation: apparait .25s ease-out; } }
 @keyframes apparait { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 body.overlay .sauve { font-size: max(var(--fmin), 0.6875rem); padding: 1px 6px 1px 3px; }
@@ -300,7 +300,7 @@ body.overlay .f-position { font-size: max(var(--fmin), 0.6875rem); }
 .barre-sauve { display: flex; align-items: center; gap: 6px; padding: 3px 4px; background: rgba(0,0,0,.5); border-radius: 2px; }
 .barre-sauve span { font-size: max(var(--fmin), 0.75rem); line-height: 1.25; padding: 1px 6px; border-radius: 1px; color: #eef6f7; white-space: nowrap; }
 .barre-sauve .b-nom { background: #6a2b63; min-width: 48px; }
-.barre-sauve .b-q { background: #2a645f; }
+.barre-sauve .b-q { background: #3d514f; }
 .barre-sauve .b-scu { background: #4b4a1c; color: #f3eecb; margin-left: auto; }
 .barre-sauve.deja { opacity: .75; }
 /* Filtre des minerais : blocs à allumer, sur 3 colonnes */
@@ -406,7 +406,7 @@ body.overlay .f-etat { font-size: max(var(--fmin), 0.6875rem); display: -webkit-
 .home-col { display: grid; gap: 20px; }
 .home-intro h1 { font-size: max(var(--fmin), 1.5rem); }
 .home-lead { font-size: max(var(--fmin), 0.9375rem) !important; color: var(--os) !important; line-height: 1.5; }
-.video { position: relative; aspect-ratio: 16 / 9; border-radius: 4px; overflow: hidden; border: 1px solid var(--trait); background: #02060b; }
+.video { position: relative; aspect-ratio: 16 / 9; border-radius: 4px; overflow: hidden; border: 1px solid var(--trait); background: #050608; }
 .video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
 .video-lien { position: absolute; inset: 0; display: grid; place-items: center; color: #fff; text-decoration: none; font-weight: 600; }
 .video-lien img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .7; }
@@ -707,10 +707,10 @@ body.overlay-raff { margin: 0; background: var(--rouille); }
 /* ---------- v44 : titre du site */
 .marque-bloc .marque, .marque { font-family: "Orbitron", "Chakra Petch", sans-serif; font-weight: 900; text-transform: uppercase; font-size: max(var(--fmin), 1.125rem); letter-spacing: .04em; }
 /* ---------- v46 : contrastes adoucis, bouton actif lisible, actions de l'accueil à droite */
-:root { --rouille: #0b131c; --panneau: #16202a; --panneau-2: #202b35; --trait: #2c3a43; --bord: #42525b;
+:root { --rouille: #111316; --panneau: #1d2023; --panneau-2: #272b2e; --trait: #34383b; --bord: #42525b;
   --os: #b9d4d9; --os-doux: #7b939b; }
-.barre { background: #0e1720 !important; }
-.carte { background: linear-gradient(180deg, #18222c, #131c25) !important; }
+.barre { background: #14171a !important; }
+.carte { background: linear-gradient(180deg, #1f2225, #191c1f) !important; }
 .btn[aria-pressed="true"]:not(.principal) { background: var(--orange) !important; border-color: var(--orange) !important; color: #fff !important; }
 .home-haut { grid-template-columns: minmax(0, 1fr) 220px; }
 .home-haut.avec-raff { grid-template-columns: minmax(0, 1fr) 300px 220px; }
@@ -725,7 +725,7 @@ body.overlay-raff { margin: 0; background: var(--rouille); }
 .ligne-filtres { justify-content: flex-end; gap: 6px; }
 .ligne-filtres .filtre-actif { margin-left: 0; margin-right: 6px; }
 .ligne-filtres .btn { background: var(--panneau-2) !important; border: 0 !important; padding: 5px 10px; font-size: max(var(--fmin), 0.8125rem); display: inline-flex; align-items: center; gap: 4px; }
-.ligne-filtres .btn:hover { background: #2a3641 !important; }
+.ligne-filtres .btn:hover { background: #323639 !important; }
 .ligne-filtres .btn[aria-pressed="true"] { background: var(--orange) !important; color: #fff !important; }
 .ligne-filtres .ico-reg { width: 18px; height: 18px; }
 .ligne-filtres [data-regrouper] .ico-plus { display: none; }
@@ -776,7 +776,7 @@ span.scu, td .scu, #dr-rend, .raff-liste .ro-l b { color: var(--scu); }
 .actions-groupe span :is(.nb-caisses, .scu) { margin: 0; font-size: inherit; }
 .actions-groupe span .nb-caisses, span.nb-caisses { color: #e3704a; }
 span.scu, td .scu, #dr-rend, .raff-liste .ro-l b, .nb-caisses, .actions-groupe span .nb-caisses { font-weight: 700; }
-.video-facade { position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; border: 0; background: #02060b; cursor: pointer; display: grid; place-items: center; }
+.video-facade { position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; border: 0; background: #050608; cursor: pointer; display: grid; place-items: center; }
 .video-facade img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .video-facade .vf-play { position: relative; width: 68px; height: 48px; filter: drop-shadow(0 2px 6px rgba(0,0,0,.5)); opacity: .9; transition: opacity .15s, transform .15s; }
 .video-facade:hover .vf-play, .video-facade:focus-visible .vf-play { opacity: 1; transform: scale(1.08); }
@@ -785,25 +785,25 @@ span.scu, td .scu, #dr-rend, .raff-liste .ro-l b, .nb-caisses, .actions-groupe s
 .f-attente { display: grid; gap: 10px; padding: 12px; }
 .f-attente p { margin: 0; font-size: max(var(--fmin), 0.8125rem); color: var(--os); }
 .invite-overlay[hidden] { display: none; }
-.invite-overlay { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; background: rgba(4,7,10,.72); cursor: pointer; }
-.invite-overlay > div { display: grid; gap: 8px; text-align: center; padding: 28px 40px; background: var(--panneau, #1a2430); border: 1px solid var(--cta, #66742a); border-radius: 8px; }
+.invite-overlay { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; background: rgba(6,7,8,.72); cursor: pointer; }
+.invite-overlay > div { display: grid; gap: 8px; text-align: center; padding: 28px 40px; background: var(--panneau, #212529); border: 1px solid var(--cta, #66742a); border-radius: 8px; }
 .invite-overlay strong { font-size: max(var(--fmin), 1.25rem); color: var(--orange); text-transform: uppercase; letter-spacing: .06em; }
 .invite-overlay span { font-size: max(var(--fmin), 0.9375rem); color: var(--os); }
 .invite-flux { cursor: default; }
 .invite-flux > div { min-width: 320px; }
 .home-corpo { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0; margin-top: 28px;
-  background: var(--panneau, #1a2430); border: 1px solid var(--trait); border-radius: 6px; overflow: hidden; }
-.hc-image { position: relative; min-height: 260px; background: linear-gradient(135deg, #2a3a2a, #1a2430 60%, #3a2a20); }
+  background: var(--panneau, #212529); border: 1px solid var(--trait); border-radius: 6px; overflow: hidden; }
+.hc-image { position: relative; min-height: 260px; background: linear-gradient(135deg, #2a3a2a, #212529 60%, #3a2a20); }
 .hc-image img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .hc-image.vide img { display: none; }
-.hc-image::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent 55%, var(--panneau, #1a2430)); pointer-events: none; }
+.hc-image::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent 55%, var(--panneau, #212529)); pointer-events: none; }
 .hc-texte { padding: 32px 36px; display: grid; gap: 12px; align-content: center; }
 .hc-texte h2 { margin: 0; color: var(--orange); text-transform: uppercase; letter-spacing: .06em; font-size: max(var(--fmin), 0.9375rem); display: flex; align-items: center; gap: 10px; }
 .hc-texte h2::before { content: ""; flex: none; width: 34px; height: 9px; background: repeating-linear-gradient(-55deg, var(--strie, #9e3a30) 0 3px, transparent 3px 6px); }
 .hc-texte p { margin: 0; color: var(--os-doux); line-height: 1.55; }
 .hc-texte .hc-lead { color: var(--os); font-size: max(var(--fmin), 1.125rem); font-weight: 600; }
 .hc-cta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
-@media (max-width: 800px) { .home-corpo { grid-template-columns: 1fr; } .hc-image { min-height: 180px; } .hc-image::after { background: linear-gradient(180deg, transparent 55%, var(--panneau, #1a2430)); } .hc-texte { padding: 22px; } }
+@media (max-width: 800px) { .home-corpo { grid-template-columns: 1fr; } .hc-image { min-height: 180px; } .hc-image::after { background: linear-gradient(180deg, transparent 55%, var(--panneau, #212529)); } .hc-texte { padding: 22px; } }
 .btn-langue { background: none; border: 1px solid var(--trait); color: var(--os-doux); border-radius: 4px; padding: 5px 8px; font: inherit; font-size: max(var(--fmin), 0.75rem); font-weight: 700; letter-spacing: .06em; cursor: pointer; }
 .btn-langue:hover { color: var(--os); border-color: var(--os-doux); }
 .ad-recherche { margin: 0 0 14px; }
@@ -847,21 +847,21 @@ span.scu, td .scu, #dr-rend, .raff-liste .ro-l b, .nb-caisses, .actions-groupe s
   -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgba(0,0,0,.55) 45%, transparent 100%);
   mask-image: linear-gradient(to bottom, #000 0%, rgba(0,0,0,.55) 45%, transparent 100%); }
 #v-home::after { content: ""; position: absolute; z-index: 0; pointer-events: none; top: -24px; left: 50%; width: 100vw; transform: translateX(-50%);
-  height: 560px; background: linear-gradient(180deg, rgba(5,11,19,.25) 0%, rgba(5,11,19,.6) 50%, rgba(5,11,19,0) 100%); }
+  height: 560px; background: linear-gradient(180deg, rgba(10,12,14,.25) 0%, rgba(10,12,14,.6) 50%, rgba(10,12,14,0) 100%); }
 #v-home > * { position: relative; z-index: 1; }
-.home-activite { background: rgba(14, 22, 30, .72) !important; -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
+.home-activite { background: rgba(19,22,25, .72) !important; -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
 .act-cta { display: grid; gap: 10px; }
 .act-cta p { margin: 0; color: var(--os-doux); line-height: 1.5; }
 .act-cta .hc-lead { color: var(--os); font-size: max(var(--fmin), 1.0625rem); font-weight: 600; }
 .act-cta .hc-cta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
 /* contraste adouci : fonds plus clairs, textes clairs un peu plus sombres */
-:root { --rouille: #121b25; --panneau: #1a2530; --panneau-2: #24303b; --trait: #34434d; --bord: #4a5a62;
+:root { --rouille: #181b1f; --panneau: #212529; --panneau-2: #2c3033; --trait: #3c4145; --bord: #4a5a62;
   --os: #aec6cb; --os-doux: #7c9299; }
-.barre { background: #141e28 !important; }
-.carte { background: linear-gradient(180deg, #1c2732, #18222c) !important; }
-.home-activite { background: rgba(26, 37, 48, .74) !important; }
-.video, .video-facade, .fiche img, .dc-bloc textarea { background: #0c131a; }
-#v-home::after { background: linear-gradient(180deg, rgba(18,27,37,.25) 0%, rgba(18,27,37,.6) 50%, rgba(18,27,37,0) 100%) !important; }
+.barre { background: #1b1e21 !important; }
+.carte { background: linear-gradient(180deg, #23272b, #1f2225) !important; }
+.home-activite { background: rgba(33,37,41, .74) !important; }
+.video, .video-facade, .fiche img, .dc-bloc textarea { background: #111315; }
+#v-home::after { background: linear-gradient(180deg, rgba(24,27,31,.25) 0%, rgba(24,27,31,.6) 50%, rgba(24,27,31,0) 100%) !important; }
 /* accueil : description étroite | vidéo inventaire + étapes | vidéo raffinage + étapes */
 .home-trois { grid-template-columns: minmax(0, .62fr) minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "intro v1 v2" "param param param"; }
 .home-trois > .home-intro { padding: 0 8px 0 0; }
@@ -927,15 +927,15 @@ span.scu, td .scu, #dr-rend, .raff-liste .ro-l b, .nb-caisses, .actions-groupe s
 .champ.qualite #f-q-txt { margin-top: 0; }
 .combo { position: relative; }
 .combo-liste { position: absolute; left: 0; right: 0; top: 100%; z-index: 50; margin: 2px 0 0; padding: 3px 0; list-style: none; max-height: 14em; overflow-y: auto;
-  background: #0d141c; border: 1px solid var(--trait); border-radius: 3px; box-shadow: 0 6px 18px #000a; }
+  background: #121417; border: 1px solid var(--trait); border-radius: 3px; box-shadow: 0 6px 18px #000a; }
 .combo-liste[hidden] { display: none; }
 .combo-liste li { padding: 4px 9px; cursor: pointer; white-space: nowrap; }
-.combo-liste li:hover, .combo-liste li.actif { background: #1d2a36; }
-.miniature { background: #1c232b; border-radius: 3px; min-height: 60px; }
+.combo-liste li:hover, .combo-liste li.actif { background: #252a2e; }
+.miniature { background: #212326; border-radius: 3px; min-height: 60px; }
 #f-capture:not([src]), #f-capture[src=""] { visibility: hidden; }
 
 /* v104 : « Terminer » commun aux trois modes, toujours visible en bas de l'overlay */
-#f-fin { position: sticky; bottom: 0; padding: 8px 0; background: rgb(18, 27, 37); z-index: 5; }
+#f-fin { position: sticky; bottom: 0; padding: 8px 0; background: var(--rouille); z-index: 5; }
 .fiche.attente #f-fin { display: none; }
 #f-raff-place #dr-fermer { display: none; }
 
@@ -943,7 +943,7 @@ span.scu, td .scu, #dr-rend, .raff-liste .ro-l b, .nb-caisses, .actions-groupe s
 .f-etat-ligne { display: flex; align-items: flex-start; gap: 8px; }
 .f-etat-ligne .f-etat { flex: 1; }
 .f-auto { margin-left: auto; flex: none; display: inline-flex; align-items: center; gap: 5px; background: none; border: 0; padding: 0; cursor: pointer; color: var(--os-doux); font: 600 max(var(--fmin), 0.6875rem) var(--police); }
-.f-auto-piste { width: 26px; height: 14px; border-radius: 7px; background: #2a3640; position: relative; transition: background .15s; }
+.f-auto-piste { width: 26px; height: 14px; border-radius: 7px; background: #313539; position: relative; transition: background .15s; }
 .f-auto-piste span { position: absolute; top: 2px; left: 2px; width: 10px; height: 10px; border-radius: 50%; background: #8aa0a8; transition: left .15s, background .15s; }
 .f-auto[aria-checked="true"] { color: var(--accent); }
 .f-auto[aria-checked="true"] .f-auto-piste { background: #1f6b45; }
@@ -981,7 +981,7 @@ body.overlay .fiche.mode-raff > .f-part, body.overlay .fiche.attente > .f-part {
 
 /* v127 : champ « Pile » à côté de la quantité */
 .f-qte { display: grid; grid-template-columns: 1fr 3.4em; gap: 6px; align-items: end; }
-.champ.pile input { background: #9aa6ab; color: #142028; text-align: center; }
+.champ.pile input { background: #9aa6ab; color: #1b1f21; text-align: center; }
 .champ.pile input:focus { background: #fff; }
 
 /* v136 : interrupteur Auto et son coupés en rouge */
@@ -1042,14 +1042,14 @@ body.overlay .fiche.mode-raff > .f-part, body.overlay .fiche.attente > .f-part {
 .f-derniers tr:hover .b-suppr-ligne, .f-derniers tr:hover .b-editer-scu { opacity: 1; }
 .b-suppr-ligne:hover { color: #e5484d; }
 .dr-suppr { width: 18px; text-align: right; }
-.f-derniers .champ-scu-table { width: 4.5em; font: inherit; padding: 0 3px; height: 17px; background: #fff; color: #142028; border: 0; border-radius: 2px; text-align: right; }
+.f-derniers .champ-scu-table { width: 4.5em; font: inherit; padding: 0 3px; height: 17px; background: #fff; color: #1b1f21; border: 0; border-radius: 2px; text-align: right; }
 
 /* v161 : bloc « Signatures radar » à droite du paramétrage, image en arrière-plan (radar.jpg) */
 .home-trois { grid-template-areas: "intro v1 v2" "param param outil"; }
 @media (max-width: 1100px) { .home-trois { grid-template-areas: "intro intro" "v1 v2" "param outil"; } }
 @media (max-width: 700px) { .home-trois { grid-template-areas: "intro" "v1" "v2" "param" "outil"; } }
 .home-trois > .home-outil { grid-area: outil; align-self: stretch; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-start; gap: 10px; padding: 28px 30px;
-  background: linear-gradient(to top, rgba(10,14,18,.92) 30%, rgba(10,14,18,.45)), url("radar.jpg") center / cover no-repeat, #1a222a !important; }
+  background: linear-gradient(to top, rgba(13,14,15,.92) 30%, rgba(13,14,15,.45)), url("radar.jpg") center / cover no-repeat, #1f2225 !important; }
 .home-trois > .home-param { align-self: stretch; }
 .home-outil h2 { margin: 0; color: var(--orange); text-transform: uppercase; letter-spacing: .06em; font-size: max(var(--fmin), 0.875rem); }
 .home-outil p { margin: 0; line-height: 1.5; }
@@ -1064,7 +1064,7 @@ body.overlay .fiche.mode-raff > .f-part, body.overlay .fiche.attente > .f-part {
 .bp-multi { position: relative; }
 .bp-multi summary { list-style: none; cursor: pointer; border: 1px solid var(--trait); padding: 5px 12px; border-radius: 4px; min-width: 9em; max-width: 18em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: max(var(--fmin), 0.8125rem); }
 .bp-multi summary::-webkit-details-marker { display: none; }
-.bp-multi > div { position: absolute; z-index: 20; top: calc(100% + 4px); left: 0; min-width: 14em; max-height: 280px; overflow: auto; background: #151b21; border: 1px solid var(--trait); border-radius: 4px; padding: 6px; display: grid; gap: 2px; }
+.bp-multi > div { position: absolute; z-index: 20; top: calc(100% + 4px); left: 0; min-width: 14em; max-height: 280px; overflow: auto; background: #191b1d; border: 1px solid var(--trait); border-radius: 4px; padding: 6px; display: grid; gap: 2px; }
 .bp-multi label { display: flex; gap: 6px; align-items: center; font-size: max(var(--fmin), 0.8125rem); padding: 3px 4px; cursor: pointer; white-space: nowrap; }
 .bp-recherche input { padding: 5px 10px; min-width: 14em; }
 .bp-table td { vertical-align: middle; }
@@ -1077,7 +1077,7 @@ body.overlay .fiche.mode-raff > .f-part, body.overlay .fiche.attente > .f-part {
 .bp-tags { white-space: normal; }
 .bp-tag { display: inline-flex; align-items: center; gap: 4px; margin: 1px 4px 1px 0; padding: 1px 8px; border: 1px solid var(--trait); border-radius: 999px; background: none; color: var(--os-doux); font: inherit; font-size: max(var(--fmin), 0.6875rem); cursor: pointer; }
 .bp-tag:hover { color: inherit; border-color: var(--orange); }
-.bp-tag.actif { background: #2a3640; color: inherit; border-color: var(--orange); }
+.bp-tag.actif { background: #313539; color: inherit; border-color: var(--orange); }
 .bp-tags-actifs { display: flex; flex-wrap: wrap; gap: 6px; margin: -6px 0 12px; }
 .bp-tags-actifs .bp-tag { font-size: max(var(--fmin), 0.75rem); padding: 3px 4px 3px 10px; cursor: default; }
 .bp-tags-actifs button { background: none; border: 0; color: inherit; cursor: pointer; font-size: max(var(--fmin), 0.9375rem); line-height: 1; padding: 0 4px; }
@@ -1095,7 +1095,7 @@ body.overlay .fiche.mode-raff > .f-part, body.overlay .fiche.attente > .f-part {
 .bp-aspect { border: 1px solid var(--trait); border-radius: 4px; padding: 8px 10px; display: grid; gap: 6px; }
 .bp-aspect-tete { display: flex; gap: 6px; align-items: baseline; flex-wrap: wrap; }
 .bp-aspect-tete small { color: var(--os-doux); }
-.bp-q { margin-left: auto; background: #2a3640; padding: 1px 8px; border-radius: 999px; font-variant-numeric: tabular-nums; }
+.bp-q { margin-left: auto; background: #313539; padding: 1px 8px; border-radius: 999px; font-variant-numeric: tabular-nums; }
 .bp-aspect input[type=range] { width: 100%; accent-color: var(--orange); }
 .bp-bornes { display: flex; justify-content: space-between; font-size: max(var(--fmin), 0.6875rem); color: var(--os-doux); margin-top: -4px; }
 .bp-mods { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: max(var(--fmin), 0.75rem); color: var(--os-doux); }
@@ -1139,7 +1139,7 @@ body.overlay .fiche.mode-raff > .f-part, body.overlay .fiche.attente > .f-part {
 .bp-apres { color: var(--orange); font-weight: 600; white-space: nowrap; margin-left: 4px; }
 .bp-stock tr.bp-flash td { animation: bpFlash 1.6s ease-out; }
 @keyframes bpFlash { from { background: rgba(111,208,140,.35); } to { background: transparent; } }
-.bp-crafter:disabled, .bp-crafter:disabled:hover { background: #3a4249 !important; border-color: #3a4249 !important; color: #8a959b !important; opacity: 1; cursor: not-allowed; filter: none; }
+.bp-crafter:disabled, .bp-crafter:disabled:hover { background: #3f4244 !important; border-color: #3f4244 !important; color: #8a959b !important; opacity: 1; cursor: not-allowed; filter: none; }
 .bp-recette li { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--trait); padding: 3px 0; }
 .home-mes .mes-bp { display: block; text-align: center; }
 
@@ -1190,15 +1190,15 @@ body.overlay .fiche.mode-raff > .f-part, body.overlay .fiche.attente > .f-part {
 .bp-rech-ligne { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 14px; }
 .bp-rech { position: relative; display: flex; align-items: center; flex: 0 1 340px; }
 .bp-rech svg { position: absolute; left: 10px; width: 18px; height: 18px; color: var(--os-doux); pointer-events: none; }
-.bp-rech input { width: 100%; padding: 8px 12px 8px 36px; background: #0e151d; border: 1px solid var(--trait); border-radius: 4px; color: var(--os); font: inherit; font-size: max(var(--fmin), 0.875rem); }
+.bp-rech input { width: 100%; padding: 8px 12px 8px 36px; background: #131518; border: 1px solid var(--trait); border-radius: 4px; color: var(--os); font: inherit; font-size: max(var(--fmin), 0.875rem); }
 .bp-rech input::placeholder { color: var(--os-doux); }
 .bp-rech input:focus, .bp-detail-pop input:focus { outline: none; border-color: var(--orange); }
 .bp-detail-menu { position: relative; }
 .bp-btn-detail { border: 1px solid var(--trait); background: none; color: inherit; padding: 7px 14px; border-radius: 999px; font: inherit; font-size: max(var(--fmin), 0.8125rem); cursor: pointer; white-space: nowrap; }
 .bp-btn-detail:hover, .bp-btn-detail[aria-expanded="true"] { border-color: var(--orange); }
-.bp-detail-pop { position: absolute; z-index: 30; top: calc(100% + 6px); left: 0; width: 280px; background: #151b21; border: 1px solid var(--trait); border-radius: 6px; padding: 8px; box-shadow: 0 8px 24px rgba(0,0,0,.45); }
+.bp-detail-pop { position: absolute; z-index: 30; top: calc(100% + 6px); left: 0; width: 280px; background: #191b1d; border: 1px solid var(--trait); border-radius: 6px; padding: 8px; box-shadow: 0 8px 24px rgba(0,0,0,.45); }
 .bp-detail-pop[hidden] { display: none; }
-.bp-detail-pop input { width: 100%; box-sizing: border-box; padding: 6px 10px; margin-bottom: 6px; background: #0e151d; border: 1px solid var(--trait); border-radius: 4px; color: var(--os); font: inherit; font-size: max(var(--fmin), 0.8125rem); }
+.bp-detail-pop input { width: 100%; box-sizing: border-box; padding: 6px 10px; margin-bottom: 6px; background: #131518; border: 1px solid var(--trait); border-radius: 4px; color: var(--os); font: inherit; font-size: max(var(--fmin), 0.8125rem); }
 .bp-detail-liste { max-height: 300px; overflow-y: auto; display: grid; }
 .bp-detail-liste button { display: flex; justify-content: space-between; gap: 10px; background: none; border: 0; color: inherit; text-align: left; padding: 5px 8px; border-radius: 4px; font: inherit; font-size: max(var(--fmin), 0.8125rem); cursor: pointer; }
 .bp-detail-liste button:hover { background: rgba(255,255,255,.06); }
@@ -1268,7 +1268,7 @@ body:not(.overlay) .btn { font-size: max(var(--fmin), 0.6875rem); }
 .bp-preleve-l .bp-q { margin-left: auto; }
 /* v229 : cartouches quantité / SCU / qualité sous les sliders */
 .bp-cartouches { margin-left: auto; display: flex; gap: 6px; flex: none; }
-.bp-cart { background: #2a3640; padding: 1px 8px; border-radius: 999px; font-variant-numeric: tabular-nums; font-weight: 700; white-space: nowrap; }
+.bp-cart { background: #313539; padding: 1px 8px; border-radius: 999px; font-variant-numeric: tabular-nums; font-weight: 700; white-space: nowrap; }
 .bp-cartouches .bp-q { margin: 0; color: #6fd0c4; }
 .bp-cart-n { color: #e3704a; }
 .bp-cart-scu { color: var(--scu); }
@@ -1300,8 +1300,8 @@ body:not(.overlay) dialog.plein { width: calc(100vw / .9 - 32px); height: calc(1
 .dn-cta { grid-auto-rows: 7.5rem; }
 .dn-cta .btn { height: 100%; box-sizing: border-box; }
 .dn-cta .btn[aria-current="page"] { background: var(--panneau-2) !important; }
-.dn-lieu { background: #1a2632 !important; }
-.dn-lieu:hover { background: #223040 !important; }
+.dn-lieu { background: #22262a !important; }
+.dn-lieu:hover { background: #2c3136 !important; }
 /* v236 : hachures de la page Blueprints en bleu blueprint */
 #v-blueprints { --strie: #2f6fc0; }
 /* v237 : aucun box-shadow sur les boutons */
@@ -1338,6 +1338,59 @@ body:not(.overlay) td, body:not(.overlay) td :not(svg):not(path):not(.btn) { fon
 /* v248 : plus de trait dégradé sous la barre de menu */
 .barre::after, .dn-tete::after { display: none !important; }
 .bp-besoin { color: var(--os-doux); margin-left: 4px; font-weight: 400; }
+.dr-ajout { display: flex; gap: 6px; align-items: center; margin-top: 6px; }
+.dr-ajout select { flex: 1; min-width: 0; padding: 4px 6px; background: var(--rouille); color: var(--os); border: 1px solid var(--trait); border-radius: 3px; font: inherit; }
+/* v252 : tableau de l'ordre de raffinage toujours dans son cadre (croix de suppression comprise) */
+.pr-table { table-layout: fixed; width: 100%; }
+.pr-table th:nth-child(1), .pr-table td:nth-child(1) { width: auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pr-table th:nth-child(2), .pr-table td:nth-child(2) { width: 26%; }
+.pr-table th:nth-child(3), .pr-table td:nth-child(3) { width: 30%; }
+.pr-table th:nth-child(5), .pr-table td:nth-child(5) { width: 24px; text-align: center; }
+.pr-table th:nth-child(3) { white-space: normal; }
+.pr-table input { width: 100% !important; box-sizing: border-box; }
+.pr-table th:nth-child(4), .pr-table td:nth-child(4) { display: none; width: 0; }
+.pr-table th:nth-child(1), .pr-table td:nth-child(1) { width: 34%; }
+/* v256 : overlay raffinerie — seule la liste des minerais défile, le reste reste en place */
+.pr-liste { overflow-y: auto; overflow-x: hidden; }
+.pr-liste thead th { position: sticky; top: 0; background: var(--rouille); z-index: 1; }
+body.overlay #f-raff-place .p-raff > .pr-liste { flex: 1 1 auto; min-height: 90px; }
+body.overlay #f-raff-place .pr-apercu { flex: 0 1 auto; min-height: 40px; max-height: 16vh; }
+body.overlay, html:has(body.overlay) { overflow: hidden !important; }
+/* v257 : panneau raffinerie compact — la liste des minerais gagne la hauteur */
+.pr-ecran { position: relative; display: flex; }
+.pr-ecran .pr-apercu { width: 100%; }
+.pr-ecran .pr-aide { position: absolute; inset: auto 6px 6px 6px; padding: 4px 8px; background: rgba(10,12,14, .82); border-radius: 3px; }
+.pr-aide[hidden] { display: none !important; }
+body.overlay #f-raff-place .p-raff > .pr-ecran { flex: 0 1 auto; min-height: 40px; max-height: 16vh; overflow: hidden; }
+body.overlay #f-raff-place .pr-ecran .pr-apercu { max-height: 16vh; min-height: 40px; object-fit: contain; }
+.dr-ajout { margin-top: 0; }
+.dr-plus { width: 26px; height: 26px; flex: none; border-radius: 50%; border: 0; background: var(--cta); color: var(--cta-texte); font-size: 18px; line-height: 1; cursor: pointer; padding: 0; }
+.dr-plus:hover { background: var(--cta-2); }
+.dr-ajout select[hidden] { display: none; }
+.p-raff .dr-pied { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 8px; }
+.p-raff .dr-pied .pr-temps { flex: 1; min-width: 0; text-align: left; }
+.p-raff .pr-tete { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; font-size: max(var(--fmin), 0.75rem); }
+.p-raff .pr-tete .dr-etat { text-align: right; color: var(--os-doux); }
+#dr-enregistrer:disabled { opacity: .45; cursor: default; }
+/* v258 : ajout de ligne = petit rond gris centré sur un liseré ; timer étroit ; légendes réduites */
+.p-raff .dr-ajout { position: relative; display: flex; justify-content: center; align-items: center; gap: 6px; margin: 0 0 6px; min-height: 18px; }
+.p-raff .dr-ajout::before { content: ""; position: absolute; left: 0; right: 0; top: 9px; height: 1px; background: var(--trait); }
+.p-raff .dr-plus { position: relative; width: 18px; height: 18px; border-radius: 50%; background: var(--rouille) !important; border: 1px solid var(--os-doux) !important; color: var(--os-doux); font-size: 14px; line-height: 16px; padding: 0; }
+.p-raff .dr-plus:hover { color: var(--os); border-color: var(--os) !important; }
+.p-raff .dr-ajout select { position: relative; flex: 1; }
+.p-raff .dr-timer { display: inline-flex; align-items: center; gap: 4px; width: 9.5em; padding: 2px 6px; border: 1px solid var(--trait); border-radius: 3px; background: transparent; }
+.p-raff .dr-timer span { color: var(--os-doux); white-space: nowrap; font-size: max(var(--fmin), 0.75rem); }
+.p-raff .dr-timer input { flex: 1; min-width: 0; border: 0 !important; background: none; padding: 0; color: var(--os); font: inherit; outline: none; }
+.p-raff .dr-tot span { color: var(--os-doux); font-size: max(var(--fmin), 0.75rem); }
+.p-raff .dr-pied { justify-content: space-between; }
+.pr-table th { font-size: max(var(--fmin), 0.625rem) !important; letter-spacing: .03em; }
+/* le « + » suit directement les lignes ; l'espace libre passe sous lui, le pied reste en bas */
+body.overlay #f-raff-place .p-raff > .pr-liste { flex: 0 1 auto !important; min-height: 60px; }
+body.overlay #f-raff-place .p-raff > .dr-pied { margin-top: auto; }
+/* v260 : scan fini (plus rien d'autre à afficher) : « Terminer » au centre de la fenêtre */
+body.overlay .fiche.mode-raff > #f-raff-place:not(:has(.p-raff:not([hidden]))) { flex: 0 0 0 !important; min-height: 0; }
+body.overlay .fiche.mode-raff:not(:has(#f-raff-place .p-raff:not([hidden]))) > #f-fin { margin: auto 0; padding: 0 12px; display: flex; justify-content: center; }
+body.overlay .fiche.mode-raff:not(:has(#f-raff-place .p-raff:not([hidden]))) > #f-fin .btn { width: 100%; max-width: 260px; }
 </style>
 </head>
 <body>
@@ -1385,7 +1438,7 @@ body:not(.overlay) td, body:not(.overlay) td :not(svg):not(path):not(.btn) { fon
         <ul class="mes-stations" id="mes-stations"></ul>
         <div class="mes-cta">
           <a class="btn" href="#/minerais">Mes stocks</a>
-          <button type="button" class="btn principal" data-ouvrir-nav>+ Scanner</button>
+          <button type="button" class="btn principal" data-ouvrir-nav>+ Ajout stock</button>
           <a class="btn mes-bp" href="#/blueprints">Blueprints</a>
         </div>
       </div>
@@ -1639,22 +1692,18 @@ body:not(.overlay) td, body:not(.overlay) td :not(svg):not(path):not(.btn) { fon
 </form>
 
 <div id="p-raff" class="p-raff" hidden>
-  <p class="pr-aide">Dans le terminal de raffinerie, affichez l'ordre lancé (« Processing »).</p>
-  <div class="pr-tete"><strong id="dr-station"></strong><span class="dr-etat" id="dr-etat"></span></div>
+  <div class="pr-ecran"><canvas id="dr-apercu" class="pr-apercu" width="16" height="9"></canvas><p class="pr-aide" id="dr-aide">Dans le terminal de raffinerie, affichez l'ordre lancé (« Processing »).</p></div>
   <div class="pr-ordres" id="dr-ordres" hidden></div>
-  <canvas id="dr-apercu" class="pr-apercu" width="16" height="9"></canvas>
-  <table class="pr-table">
-    <thead><tr><th>Minerai</th><th>Qualité</th><th>Rendement (cSCU)</th><th></th><th></th></tr></thead>
+  <div class="pr-liste"><table class="pr-table">
+    <thead><tr><th>Minerai</th><th>Qualité</th><th title="Rendement (cSCU)">Qté</th><th></th><th></th></tr></thead>
     <tbody id="dr-lignes"></tbody>
-  </table>
-  <div class="dr-pied">
-    <div><span>Temps restant</span><input id="dr-temps" class="pr-temps" placeholder="ex. 1h 9m" autocomplete="off"></div>
-    <div><span>Rendement</span><strong id="dr-rend">—</strong></div>
-    <div><span>Lecture</span><strong id="dr-total" class="dr-total">—</strong></div>
-  </div>
-  <p class="note" id="dr-attente">« Enregistrer » apparaît quand la lecture est stable.</p>
+  </table></div>
+  <div class="dr-ajout"><button type="button" class="dr-plus" id="dr-ajout" title="Ajouter une ligne" aria-label="Ajouter une ligne">+</button><select id="dr-ajout-nom" aria-label="Minerai à ajouter" hidden></select></div>
+  <div class="dr-pied"><label class="dr-timer"><span>Timer :</span><input id="dr-temps" class="pr-temps" placeholder="1h 9m" title="Temps restant" aria-label="Temps restant" autocomplete="off"></label><span class="dr-tot"><span>Tot :</span> <strong id="dr-rend" title="Rendement total">—</strong></span></div>
+  <div class="pr-tete"><strong id="dr-station"></strong><span class="dr-etat" id="dr-etat"></span><strong id="dr-total" class="dr-total" hidden>—</strong></div>
+  <p class="note" id="dr-attente" hidden></p>
   <div class="pr-actions">
-    <button type="button" class="btn principal" id="dr-enregistrer" hidden>Enregistrer</button>
+    <button type="button" class="btn principal" id="dr-enregistrer" disabled>Enregistrer</button>
     <button type="button" class="btn" id="dr-relire">Relire</button>
     <button type="button" class="btn" id="dr-fermer">Fermer</button>
   </div>
@@ -5467,10 +5516,14 @@ async function colonnesProcessing(S, P) {
    Lu sur l'image brute (écran vu de face) ; toutes les positions sont en largeurs de barre depuis son coin haut-gauche. */
 const RAFF_LEV = { pasChiffre: 0.78, titre: [0.02, 0.0, 0.40, 0.075], ligne0: 0.282, pasLigne: 0.119, hLigne: 0.055, vMax: 1.10,
   cols: { nom: [0.10, 0.50], qualite: [0.50, 0.60], rend: [0.63, 0.73] }, temps: [0.55, 1.38, 0.43, 0.065], barre: [0.04, 1.454, 0.92] };
+// ordre terminé (barre verte « COMPLETED ») : colonnes QUALITY / YIELD placées plus à droite, pas de temps
+const RAFF_LEV_FIN = { ...RAFF_LEV, cols: { ...RAFF_LEV.cols, qualite: [0.59, 0.69], rend: [0.79, 0.89] } };
 let levCache = [];
 function barresDorees(S) {
   const { W, H, d } = S, enBarre = (x, y) => { const i = (y * W + x) * 4, r = d[i], g = d[i + 1], b = d[i + 2], mx = r, mn = b;
-    return r > g && g > b && mx > 70 && mx < 140 && r - b > 30 && (mx - mn) * 255 / mx > 90; };
+    return (r > g && g > b && mx > 70 && mx < 140 && r - b > 30 && (mx - mn) * 255 / mx > 90)
+      || (g > r + 12 && g > b + 10 && g > 52 && g < 115);   // barre verte : ordre terminé (« COMPLETED »)
+  }, vert = (x, y) => { const i = (y * W + x) * 4; return d[i + 1] > d[i] + 12; };
   const out = [];
   for (let y = Math.round(H * 0.08); y < H * 0.6; y += 2) {
     let x = 0;
@@ -5492,7 +5545,7 @@ function barresDorees(S) {
       }
       if (xb - xa > W * 0.25) continue;
       if (out.some((o) => Math.abs(o.x - xa) < W * 0.02)) continue;
-      out.push({ x: xa, y: y0, w: xb - xa + 1 });
+      out.push({ x: xa, y: y0, w: xb - xa + 1, termine: vert(Math.round((xa + xb) / 2), y0 + 3) && vert(xa + 6, y0 + 3) });
     }
   }
   return out.sort((p, q) => p.x - q.x);
@@ -5584,6 +5637,7 @@ async function lireLevski(S, src) {
   let k = -1;
   for (const b of barres) {
     k++; let s = k;
+    const G = b.termine ? RAFF_LEV_FIN : RAFF_LEV;
     const Rb = { x0: b.x, y0: b.y, span: b.w }, P = { ...Pid, R: Rb };
     const z = (u, v, w, h, seuil, haut = 40) => zoneTerminal(S, P, u, v, w, h, seuil, haut);
     let C = levCache[k];
@@ -5592,9 +5646,10 @@ async function lireLevski(S, src) {
       const T = G.titre; let ok = false;
       // barre dorée = ordre en cours ; le texte ne sert qu'à écarter un ordre terminé (lu « COMPLETED »)
       ok = true;
-      for (const se of [110, 80]) { const txt = sansAccents(await lireTexte(z(T[0], T[1], T[2], T[3], se, 30), "ABCDEFGHIJKLMNOPQRSTUVWXYZ ", 3000, 3)); if (/(proces|traitement|cours)/.test(txt)) break; if (/(complet|termin|done)/.test(txt)) { ok = false; break; } }
+      if (!b.termine) for (const se of [110, 80]) { const txt = sansAccents(await lireTexte(z(T[0], T[1], T[2], T[3], se, 30), "ABCDEFGHIJKLMNOPQRSTUVWXYZ ", 3000, 3)); if (/(proces|traitement|cours)/.test(txt)) break; if (/(complet|termin|done)/.test(txt)) { ok = false; break; } }
       if (!ok) continue;   // pas (encore) lu « PROCESSING » : réessayé au scan suivant
-      C = levCache[k] = { x: b.x, y: b.y, w: b.w, processing: ok, noms: {}, empTitre, nomsVus: [] };
+      C = levCache[k] = { x: b.x, y: b.y, w: b.w, processing: ok, termine: !!b.termine, noms: {}, empTitre, nomsVus: [] };
+      if (b.termine) { C.temps = "0m"; C.tempsLuA = Date.now() / 1000; C.progression = 1; C.vBarre = RAFF_LEV.barre[1]; }   // terminé : rien à attendre
       // numéro du « WORK ORDER n » (à droite de la barre) : identifie l'ordre même si la liste défile horizontalement
       C.num = null;
     }
@@ -5835,7 +5890,7 @@ function totauxOrdre(ord) {
   const rend = ok.reduce((s, l) => s + (l.rend || 0), 0);
   // liste défilante : toutes les lignes ne sont lues qu'après avoir vu le haut ET le bas de la liste
   const totalOk = !ord.defile || (ord.vuHaut && ord.vuBas);
-  const egal = !ord.enregistre && ok.length > 0 && ord.complet !== false && !!ord.temps && ord.stable >= 2 && totalOk;
+  const egal = !ord.enregistre && ok.length > 0 && (ord.fige || (ord.complet !== false && !!ord.temps && ord.stable >= 2 && totalOk));   // ordre modifié à la main : stable d'office
   return { ok, rend, egal, totalOk };
 }
 const totauxRaff = () => totauxOrdre(O());
@@ -5848,7 +5903,7 @@ function renderRaff() {
   const t = totauxRaff();
   R$("dr-etat").textContent = raff.etat || "";
   const tb = R$("dr-lignes");
-  if (!tb.contains(tb.ownerDocument.activeElement)) tb.innerHTML = O().lignes.length ? O().lignes.map((l, i) => `<tr class="${l.connue || l.force ? "" : "ignoree"}${l.neuve ? " neuve" : ""}">
+  if (!tb.contains(tb.ownerDocument.activeElement) && Date.now() - (raff.saisieA || 0) > 600) tb.innerHTML = O().lignes.length ? O().lignes.map((l, i) => `<tr class="${l.connue || l.force ? "" : "ignoree"}${l.neuve ? " neuve" : ""}">
       <td>${esc(l.nom)}</td>
       <td><input type="number" data-i="${i}" data-k="qualite" value="${Number.isFinite(l.qualite) ? l.qualite : ""}" min="0" max="1000"></td>
       <td><input type="number" data-i="${i}" data-k="rend" value="${Number.isFinite(l.rend) ? l.rend : ""}" min="0"></td>
@@ -5859,8 +5914,47 @@ function renderRaff() {
   R$("dr-rend").textContent = `${fmtScu(t.rend / 100)} SCU`;
   R$("dr-total").textContent = O().enregistre ? "enregistré" : t.egal ? "stable" : "en cours…";
   R$("dr-total").classList.toggle("ok", t.egal);
-  R$("dr-enregistrer").hidden = !t.egal;
-  R$("dr-attente").hidden = t.egal;
+  R$("dr-enregistrer").hidden = false; R$("dr-enregistrer").disabled = !t.egal || !!O().enregistre;   // toujours visible, grisé tant que non stable
+  R$("dr-attente").hidden = true;
+  R$("dr-aide").hidden = Object.keys(raff.ordres).length > 0;   // consigne seulement tant qu'aucun ordre n'est trouvé
+}
+/* Levski : raccord de la fenêtre visible avec la liste connue de l'ordre (comme un panorama).
+   Dans un ordre, un couple minerai + qualité est unique : il sert de repère. La fenêtre W (lignes visibles, de haut en bas)
+   doit retrouver au moins 2 repères de la liste L (1 si la fenêtre ou la liste n'a qu'une ligne), tous au même décalage,
+   sans ligne connue contradictoire dans la zone recouverte. Sinon la fenêtre est ignorée (relue au scan suivant).
+   Renvoie le décalage trouvé, ou null. */
+const cleSeq = (l) => l.nom + "|" + l.qualite;
+function raccordSequence(L, W) {   // W : [{ i, l }] lignes reconnues avec leur rang dans la fenêtre (les illisibles font des trous)
+  if (!L.length || !W.length) return null;
+  const pos = new Map(L.map((l, j) => [cleSeq(l), j]));
+  let d = null, n = 0;
+  for (const { i, l } of W) { const j = pos.get(cleSeq(l)); if (j == null) continue; if (d == null) d = j - i; else if (j - i !== d) return null; n++; }
+  if (d == null || n < Math.min(2, W.length, L.length)) return null;
+  for (const { i, l } of W) { const j = i + d; if (j >= 0 && j < L.length && cleSeq(L[j]) !== cleSeq(l)) return null; }   // ligne différente à la même place : lecture douteuse
+  return d;
+}
+const fenetreSeq = (lignes) => lignes.map((l, i) => ({ i, l })).filter((x) => x.l.connue);
+function fusionnerSequence(c, ord) {
+  // repères = minerai + qualité uniquement (la quantité, souvent mal lue, n'entre pas dans le raccord)
+  const W = fenetreSeq(c.lignes), n = c.lignes.length;
+  if (!W.length) return false;
+  const L = ord.lignes, garde = (w, l) => (l && !Number.isFinite(w.rend) ? { ...w, rend: l.rend, qte: l.qte } : w);   // quantité illisible : l'ancienne est gardée
+  for (const l of L) l.neuve = false;
+  let d = raccordSequence(L, W);
+  if (d == null) {
+    if (!L.length) d = 0;
+    else if (!c.defile && W.length === n) { ord.lignes = W.map(({ l: w }) => ({ ...w, neuve: true })); return true; }   // pas d'ascenseur et tout lu : la fenêtre est la liste entière
+    else return false;   // aucun raccord sûr : fenêtre ignorée, relue au scan suivant
+  }
+  if (!L.length && W.length !== n) return false;   // première lecture : on attend que toutes les lignes soient reconnues
+  const deb = c.defile ? Math.min(0, d) : d, fin = c.defile ? Math.max(L.length, d + n) : d + n, res = [];
+  const parRang = new Map(W.map(({ i, l }) => [i, l]));
+  for (let j = deb; j < fin; j++) {
+    const w = parRang.get(j - d), l = j >= 0 && j < L.length ? L[j] : null;
+    if (w) res.push({ ...garde(w, l), neuve: !l }); else if (l) res.push(l);
+  }
+  ord.lignes = res;
+  return true;
 }
 /* Fusion des lectures successives. Une même ligne du jeu peut d'abord être mal lue (qualité « 33 » au lieu de 330) :
    on reconnaît la ligne par son minerai + quantité + rendement, et une lecture valide remplace la lecture ratée.
@@ -5920,7 +6014,12 @@ async function scannerRaff() {
       ord.stable = sig !== "[]" && sig === ord.sig ? ord.stable + 1 : 1; ord.sig = sig;
       ord.complet = c.lignes.length > 0 && c.lignes.every((l) => l.connue && Number.isFinite(l.rend)) && !!(c.temps || ord.temps);
       if (!ord.complet) rate = true;
-      fusionnerLignes(c.lignes, ord);
+      if (r.P?.levski) {
+        // identité : la fenêtre doit se raccorder à SON ordre, pas mieux à un autre (sinon numéro douteux → ignorée)
+        const W = fenetreSeq(c.lignes);
+        const autre = Object.entries(raff.ordres).some(([k, o]) => +k !== c.s && o.lignes.length >= 2 && W.length >= 2 && raccordSequence(o.lignes, W) != null && (!ord.lignes.length || raccordSequence(ord.lignes, W) == null));
+        if (autre || !fusionnerSequence(c, ord)) { rate = true; ord.etat = etatOrdre(ord); continue; }
+      } else fusionnerLignes(c.lignes, ord);
       if (c.temps && !ord.tempsManuel) { ord.temps = c.temps; ord.tempsLuA = c.tempsLuA; }
       if (c.progression != null) ord.progression = c.progression;
       ord.etat = etatOrdre(ord);
@@ -6054,7 +6153,17 @@ R$("dr-relire").addEventListener("click", () => { if (raff && O().fige) { const 
 R$("dr-ordres").addEventListener("click", (e) => { const b = e.target.closest("[data-ordre]"); if (!b || !raff) return; raff.actif = +b.dataset.ordre; raff.etat = O().etat || ""; if (raff.P) dessinerApercu(raff.P, raff.actif); renderRaff(); });
 R$("dr-temps").addEventListener("change", (e) => { if (!raff) return; O().temps = e.target.value.trim(); O().tempsManuel = true;
   { const gs = levCache[raff.actif]?.glyphesTemps, ch = O().temps.replace(/\s+/g, ""); if (gs && gs.length === ch.length) { base.tempsLev = [...(base.tempsLev || []), ...gs.map((v, i) => [ch[i], Array.from(v, (x) => Math.round(x * 1e4) / 1e4)])].slice(-300); sauver(); } } O().tempsLuA = Date.now() / 1000; figerOrdre(); renderRaff(); });
-function figerOrdre() { const o = O(); if (!raff || o.fige) return; o.fige = true; o.stable = Math.max(o.stable, 2); o.complet = true; o.etat = "Modifié : lecture arrêtée pour cet ordre (Relire pour reprendre)."; raff.etat = o.etat; }
+function figerOrdre() { const o = O(); if (!raff || o.fige) return; o.fige = true; o.stable = Math.max(o.stable, 2); o.complet = true; o.etat = "Lecture stable (modifié à la main : Relire pour reprendre la lecture)."; raff.etat = o.etat; renderRaff(); }
+/* Ajout manuel d'une ligne : minerai choisi dans la liste, qualité et rendement à saisir */
+{ const sel = R$("dr-ajout-nom"); sel.innerHTML = `<option value="">Minerai…</option>` + Object.keys(valeurs).sort((a, b) => a.localeCompare(b, "fr")).map((n) => `<option>${esc(n)}</option>`).join(""); }
+R$("dr-ajout").addEventListener("click", () => { const se = R$("dr-ajout-nom"); se.hidden = !se.hidden; if (!se.hidden) { se.value = ""; se.focus(); try { se.showPicker?.(); } catch {} } });
+R$("dr-ajout-nom").addEventListener("change", () => {
+  if (!raff) return; const nom = R$("dr-ajout-nom").value; if (!nom) return; R$("dr-ajout-nom").hidden = true;
+  const ord = O(); if (!raff.ordres[raff.actif]) return;
+  ord.lignes.push({ nom, qualite: NaN, qte: NaN, rend: NaN, connue: false, force: true, edite: true, neuve: true });
+  figerOrdre(); renderRaff();
+  const ins = R$("dr-lignes").querySelectorAll(`input[data-i="${ord.lignes.length - 1}"]`); ins[0]?.focus();
+});
 // pointerdown (et non click) : quitter un champ redessine le tableau avant que le clic n'arrive
 R$("dr-lignes").addEventListener("pointerdown", (e) => {
   const b = e.target.closest("[data-suppr-i]"); if (!b || !raff) return;
@@ -6062,11 +6171,13 @@ R$("dr-lignes").addEventListener("pointerdown", (e) => {
   b.ownerDocument.activeElement?.blur?.();   // valide d'abord la saisie en cours
   ord.lignes.splice(i, 1); figerOrdre(); renderRaff();
 });
+R$("dr-lignes").addEventListener("click", (e) => { if (e.target.closest("[data-suppr-i]")) e.preventDefault(); });
 // activer un champ (ligne ou temps) arrête la lecture de cet ordre : la saisie n'est pas écrasée
 for (const id of ["dr-lignes", "dr-temps"]) R$(id).addEventListener("focusin", () => { figerOrdre(); const e = R$("dr-etat"); if (e) e.textContent = O().etat; });
 R$("dr-lignes").addEventListener("change", (e) => {
   const inp = e.target.closest("input[data-i]"); if (!inp || !raff) return;
   const l = O().lignes[+inp.dataset.i]; if (!l.cleLue) l.cleLue = cleLigne(l);   // clé lue à l'écran : la relecture retrouve cette ligne
+  raff.saisieA = Date.now();   // passage d'un champ à l'autre (Tab) : le tableau n'est pas redessiné sous le curseur
   l[inp.dataset.k] = parseInt(inp.value, 10); l.edite = true; figerOrdre();
   if (Number.isFinite(l[inp.dataset.k])) { apprendreNombre(l.glyphes?.[inp.dataset.k], l[inp.dataset.k], !!l.lev); sauver(); }
   if (inp.dataset.k === "qualite") l.connue = valeursDe(l.nom).includes(l.qualite);
