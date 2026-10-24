@@ -4,7 +4,7 @@
 window.TRAD_EN = {
   textes: {
     "Stock insuffisant pour un craft": "Not enough stock for one craft",
-    "+ Détail": "+ Detail", "+ Caractéristique": "+ Characteristic", "Corp.": "Corp.", "All.": "All.", "Filtrer les caractéristiques": "Filter characteristics", "Aucune caractéristique.": "No characteristic.", "Caractéristique": "Characteristic", "Rechercher un blueprint": "Search a blueprint", "Filtrer les détails": "Filter details", "Aucun détail.": "No detail.",
+    "+ Détail": "+ Detail", "+ Caractéristique": "+ Characteristic", "+ Ajout stock": "+ Add stock", "Qté": "Qty", "Timer :": "Timer:", "Tot :": "Tot:", "Corp.": "Corp.", "All.": "All.", "Filtrer les caractéristiques": "Filter characteristics", "Aucune caractéristique.": "No characteristic.", "Caractéristique": "Characteristic", "Rechercher un blueprint": "Search a blueprint", "Filtrer les détails": "Filter details", "Aucun détail.": "No detail.",
     "Nombre de crafts": "Number of crafts", "pas en stock": "not in stock",
     "Après le craft": "After crafting", "vide": "empty",
     "Crafter": "Craft", "Crafter retire ces matériaux de votre stock perso.": "Crafting removes these materials from your personal stock.", "Stock perso insuffisant pour crafter.": "Not enough personal stock to craft.",
