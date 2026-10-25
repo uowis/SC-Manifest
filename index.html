@@ -1440,6 +1440,32 @@ body.overlay .fiche > #f-fin { margin-top: auto; }
 body.overlay .fiche:not(.mode-raff) > .f-part:first-of-type > .f-diag { flex: none; order: 0; }
 .b-diag { margin-left: 4px; padding: 0 6px; height: 18px; border-radius: 9px; border: 1px solid var(--trait); background: none; color: var(--os-doux); font: inherit; font-size: var(--fmin); text-transform: none; letter-spacing: 0; cursor: pointer; }
 .b-diag[aria-pressed="true"] { background: var(--panneau-2); color: var(--os); border-color: var(--os-doux); }
+/* v302 : étiquettes du stock sous les sliders plus petites */
+.bp-cartouches { gap: 3px !important; }
+.bp-cart { padding: 0 5px !important; font-size: var(--fmin) !important; line-height: 1.5; }
+/* v304 : bouton Max par matériau */
+.bp-aspect-tete { display: flex; align-items: baseline; gap: 4px; flex-wrap: wrap; }
+.bp-max { order: 9; margin-left: auto; padding: 0 8px; height: 20px; border-radius: 10px; border: 1px solid var(--trait); background: none; color: var(--os); font: inherit; font-size: var(--fmin); cursor: pointer; }
+.bp-max:hover { border-color: var(--cta-2); color: #fff; }
+.bp-suite td { text-align: center; color: var(--os-doux); font-style: italic; }
+.bp-max.actif { background: color-mix(in srgb, var(--cta-2) 35%, transparent); border-color: var(--cta-2); color: #fff; }
+/* v307 : boutons − / + du multiplicateur */
+.bp-mult { gap: 2px; }
+.bp-mult-pas { width: 22px; height: 22px; flex: none; border-radius: 50%; border: 1px solid var(--trait); background: none; color: var(--os); font: inherit; font-size: 16px; line-height: 1; padding: 0; cursor: pointer; }
+.bp-mult-pas:hover { border-color: var(--cta-2); color: #fff; }
+/* v308 : groupe replié = seules les caisses utilisées restent visibles */
+.bp-stock-tete { cursor: pointer; display: flex; align-items: baseline; gap: 6px; padding: 6px 0; user-select: none; }
+.bp-stock-tete::before { content: "▾"; color: var(--os-doux); width: 10px; }
+.bp-stock-res.ferme .bp-stock-tete::before { content: "▸"; }
+.bp-stock-res.ferme tr:not(.bp-pris) { display: none; }
+.bp-stock-res.ferme .note { display: none; }
+/* v311 : choix exact des caisses dans la liste */
+tr.bp-choisissable { cursor: pointer; }
+tr.bp-choisissable:hover td { background: rgba(255,255,255,.04); }
+.bp-coche { width: 22px; padding-right: 0 !important; }
+.bp-case { display: inline-block; width: 14px; height: 14px; border: 1.5px solid var(--bord); border-radius: 3px; vertical-align: middle; }
+.bp-case.on { background: var(--orange); border-color: var(--orange); box-shadow: inset 0 0 0 2px #1a1d20; }
+.bp-auto { margin-left: auto; padding: 0 8px; height: 20px; border-radius: 10px; border: 1px solid var(--trait); background: none; color: var(--os); font: inherit; font-size: var(--fmin); cursor: pointer; }
 </style>
 </head>
 <body>
@@ -1815,7 +1841,7 @@ body.overlay .fiche:not(.mode-raff) > .f-part:first-of-type > .f-diag { flex: no
       <div class="bp-actions-tete">
         <button class="bp-fermer" type="submit" title="Fermer"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg><span>Fermer</span></button>
         <div class="bp-actions-ligne">
-          <div class="bp-craft-ligne"><label class="bp-mult" title="Nombre de crafts">×<input type="number" id="dbp-mult" min="1" max="99" value="1" inputmode="numeric" aria-label="Nombre de crafts"></label><button class="btn principal bp-crafter" type="button" id="dbp-crafter">Crafter</button></div>
+          <div class="bp-craft-ligne"><label class="bp-mult" title="Nombre de crafts"><button type="button" class="bp-mult-pas" data-pas="-1" aria-label="Un craft de moins">−</button>×<input type="number" id="dbp-mult" min="1" max="99" value="1" inputmode="numeric" aria-label="Nombre de crafts"><button type="button" class="bp-mult-pas" data-pas="1" aria-label="Un craft de plus">+</button></label><button class="btn principal bp-crafter" type="button" id="dbp-crafter">Crafter</button></div>
 
         </div>
         <p class="note bp-craft-info" id="dbp-craft-info"></p>
@@ -7701,10 +7727,14 @@ function renderBlueprints() {
     && (!filtreStock || realisable(c, parNom)));
   { const T = bp.tri, s = T.dir === "asc" ? 1 : -1, cle = (c) => T.col === "type" ? (BP_TYPES[c.type] || "") : T.col === "possede" ? (aMoi.has(c.id) ? 2 : 0) + (proprietaires(c.id).length ? 1 : 0) : T.col === "stock" ? (pctStock(c, parNomPct) ?? -1) : c.nom;
     lignes.sort((a, b) => { const x = cle(a), y = cle(b); return (typeof x === "number" ? x - y : String(x).localeCompare(String(y), "fr")) * s || a.nom.localeCompare(b.nom, "fr"); }); }
-  bpVisibles = lignes.slice(0, 600).map((c) => c.id);
+  // v304 : chargement progressif (100 de plus à chaque fois qu'on atteint le bas de la liste)
+  const sig = JSON.stringify([[...f.types], [...f.tags], f.q, [...f.poss], filtreStock, bp.tri]);
+  if (sig !== bp.sigListe) { bp.sigListe = sig; bp.limite = 100; }
+  const lim = bp.limite || 100;
+  bpVisibles = lignes.slice(0, lim).map((c) => c.id);
   for (const id of [...bp.sel]) if (!bpVisibles.includes(id)) bp.sel.delete(id);
   $("bp-etat").textContent = bp.charge ? `Chargement du catalogue… ${bp.etatCharge || ""}` : bp.erreur || `${lignes.length} blueprint${lignes.length > 1 ? "s" : ""}${filtreStock ? " réalisables" : ""}${bp.catalogue ? ` sur ${bp.catalogue.length}` : ""}${bp.totalApi != null ? ` (l'API en annonce ${bp.totalApi})` : ""}${bp.etatObjets ? ` · ${bp.etatObjets}` : ""}` + (compte && !bp.tableOk ? " · partage en ligne indisponible (table « blueprints » absente)" : "");
-  $("bp-lignes").innerHTML = lignes.slice(0, 600).map((c) => {
+  $("bp-lignes").innerHTML = lignes.slice(0, lim).map((c) => {
     const n = proprietaires(c.id).length;
     return `<tr class="${bp.sel.has(c.id) ? "selectionne" : ""}${aMoi.has(c.id) ? " bp-possede" : ""}"><td class="coche"><input type="checkbox" data-bp-sel="${esc(c.id)}" ${bp.sel.has(c.id) ? "checked" : ""} aria-label="Sélectionner ${esc(c.nom)}"></td>` +
       `<td class="nom-cell"><button type="button" class="lien bp-nom" data-bp-ouvrir="${esc(c.id)}">${esc(c.nom)}</button>${c.defaut ? ` <small class="bp-defaut">par défaut</small>` : ""}</td><td>${esc(BP_TYPES[c.type] || "")}</td><td class="bp-tags">${tagsDe(c).map((g) => `<button type="button" class="bp-tag${f.tags.has(g) ? " actif" : ""}" data-tag="${esc(g)}">${esc(g)}</button>`).join("")}</td>` +
@@ -7713,6 +7743,16 @@ function renderBlueprints() {
       `<td class="bp-ing">${(c.ing || []).map((x) => { const e = parNomPct.get(sansAccents(x.n)), d = e ? (x.k === "item" ? e.n : e.scu) : 0, cl = d >= x.q - 1e-9 && d > 0 ? "ing-ok" : d > 0 ? "ing-partiel" : "ing-non";
         return `<span class="${cl}" title="${x.k === "item" ? `${d} / ${x.q}` : `${fmtScu(d)} / ${fmtScu(x.q)} SCU`}">${esc(x.n)}</span>`; }).join(", ")}</td></tr>`;
   }).join("");
+  // sentinelle en bas de liste : quand elle devient visible, on affiche 100 lignes de plus
+  if (lignes.length > lim) {
+    $("bp-lignes").insertAdjacentHTML("beforeend", `<tr class="bp-suite"><td colspan="7">${lim} sur ${lignes.length} — chargement de la suite…</td></tr>`);
+    const sent = $("bp-lignes").querySelector(".bp-suite");
+    if ("IntersectionObserver" in window) {
+      bp.obs?.disconnect();
+      bp.obs = new IntersectionObserver((ents) => { if (ents.some((e) => e.isIntersecting)) { bp.obs.disconnect(); bp.limite = lim + 100; renderBlueprints(); } }, { rootMargin: "400px" });
+      bp.obs.observe(sent);
+    }
+  }
   $("bp-vide").hidden = !!lignes.length || bp.charge; $("bp-vide").textContent = filtreStock ? "Aucune recette réalisable avec ce stock." : "Aucun blueprint pour ces filtres.";
   renderMenuDetail();
   $("bp-tags-actifs").innerHTML = [...f.tags].map((g) => `<span class="bp-tag actif">${esc(g)}<button type="button" data-tag-retirer="${esc(g)}" aria-label="Retirer le filtre ${esc(g)}">×</button></span>`).join("");
@@ -7800,13 +7840,16 @@ function stockRessource(nom) {
 function renderPopBlueprint(partiel = false) {
   const { d } = bpPop, as = d?.aspects?.aspects || [];
   if (!d) return;
+  // choix manuel : la qualité affichée = moyenne des caisses cochées
+  if (!partiel) as.forEach((a, i) => { if (bpPop.force?.[i]?.size) { const p0 = prelevement(i); if (p0.pris.length) { const [lo, hi] = bornesAspect(a); bpPop.q[i] = Math.max(lo, Math.min(hi, p0.moy)); } } });
   const cible = partiel ? document.createElement("div") : $("dbp-aspects");
   cible.innerHTML = as.length ? as.map((a, i) => {
     const q = bpPop.q[i], inp = a.input || {}, [qmin, qmax] = bornesAspect(a);
     const mods = (a.modifiers || []).filter((m) => m.value_range_type || m.value_segments || m.modifier_range?.at_min_quality != null).map((m) => { const e = ecartDe(m, q, a.initial_quality ?? 500); return `<span class="${classeEcart(e, m.better_when)}">${esc(m.label)} ${fmtEcart(e)}</span>`; }).join("");
     const choix = a.selection_group ? `<label class="bp-choix" title="Matériau au choix : ${a.selection_group.required_count} sur ${a.selection_group.option_count}"><input type="checkbox" data-choix="${i}" ${aspectActif(i) ? "checked" : ""}></label>` : "";
-    const dq = dispoPalier(a, q), etat = dq.ok ? "s-ok" : dq.q > 0 ? "s-partiel" : "s-absent";
-    return `<div class="bp-aspect ${etat}${aspectActif(i) ? "" : " bp-off"}"><div class="bp-aspect-tete">${choix}<b>${esc(a.name)}</b> · ${esc(inp.name || "")} <small class="bp-besoin">${inp.kind === "item" ? `× ${(Number(inp.quantity) || 0) * multCraft()}` : `${fmtScu((Number(inp.quantity_scu) || 0) * multCraft())} SCU`}</small></div>
+    // v305 : couleur selon le mélange possible (moyenne atteinte = vert), plus selon la seule qualité exacte
+    const pv = aspectActif(i) ? prelevement(i) : { ok: true }, etat = pv.ok ? "s-ok" : caissesPerso(a).length ? "s-partiel" : "s-absent";
+    return `<div class="bp-aspect ${etat}${aspectActif(i) ? "" : " bp-off"}"><div class="bp-aspect-tete">${choix}<button type="button" class="bp-max${bpPop.enMax?.[i] ? " actif" : ""}" data-max="${i}" title="Qualité maximale avec mon stock (qualités mélangées si nécessaire)">Max</button><b>${esc(a.name)}</b> · ${esc(inp.name || "")} <small class="bp-besoin">${inp.kind === "item" ? `× ${(Number(inp.quantity) || 0) * multCraft()}` : `${fmtScu((Number(inp.quantity_scu) || 0) * multCraft())} SCU`}</small></div>
       <input type="range" min="${qmin}" max="${qmax}" value="${q}" data-aspect="${i}" style="--p:${((q - qmin) / ((qmax - qmin) || 1)) * 100}%" aria-label="Qualité ${esc(inp.name || "")}">
       <div class="bp-bornes"><span>${qmin}</span><span>${a.initial_quality ?? 500}</span><span>${qmax}</span></div>
       ${paliersAspect(a).length ? `<div class="bp-paliers">${paliersAspect(a).map((v) => { const d = dispoPalier(a, v); return `<i class="${d.ok ? "dispo" : d.q > 0 ? "partiel" : "absent"}${v === q ? " courant" : ""}" style="left:${((v - qmin) / ((qmax - qmin) || 1)) * 100}%" title="Q${v} : ${d.q > 0 ? (d.kind === "item" ? `${d.q} en stock` : `${fmtScu(d.q)} SCU en stock`) : "pas en stock"}" data-palier="${i}:${v}"></i>`; }).join("")}</div>` : ""}
@@ -7833,9 +7876,10 @@ function renderPopBlueprint(partiel = false) {
   $("dbp-stock").innerHTML = noms.map((n) => {
     const l = stockRessource(n), idx = as.map((a, i) => a.input?.name === n ? i : -1).filter((i) => i >= 0);
     const scu = l.reduce((s, c) => s + (Number(c.quantite_scu) || 0), 0);
-    return `<details class="bp-stock-res" ${bpPop.fermes.has(n) ? "" : "open"} data-res="${esc(n)}"><summary class="bp-stock-tete"><b>${esc(n)}</b> <small>${l.length ? `${l.length} caisse${l.length > 1 ? "s" : ""} · ${fmtScu(scu)} SCU` : "aucun stock"}</small></summary>` +
+    return `<div class="bp-stock-res${bpPop.fermes.has(n) ? " ferme" : ""}" data-res="${esc(n)}"><div class="bp-stock-tete" role="button" tabindex="0" data-plier="${esc(n)}" aria-expanded="${!bpPop.fermes.has(n)}"><b>${esc(n)}</b> <small>${l.length ? `${l.length} caisse${l.length > 1 ? "s" : ""} · ${fmtScu(scu)} SCU` : "aucun stock"}</small>${idx.some((i) => bpPop.force?.[i]?.size) ? `<button type="button" class="bp-auto" data-auto="${idx.join(",")}" title="Revenir au choix automatique des caisses">Auto</button>` : ""}</div>` +
       (l.length ? `<table><tbody>${l.slice(0, 30).map((c) => { const pr = prise.get(c.id), kind = as.find((a) => a.input?.name === n)?.input?.kind, apres = pr == null ? null : kind === "item" ? 0 : Math.max(0, Math.round(((Number(c.quantite_scu) || 0) - pr) * 1000) / 1000);
-        return `<tr data-ligne="${esc(c.id)}" class="${pr != null ? "bp-pris" : ""}"><td class="num">Q${c.qualite ?? "?"}</td><td class="num">${fmtScu(c.quantite_scu ?? 0)} SCU${pr != null ? ` <span class="bp-apres" title="Après le craft">→ ${apres > 0 ? `${fmtScu(apres)} SCU` : "vide"}</span>` : ""}</td><td>${esc(c.station || "")}</td><td>${esc(c.joueur || "")}</td><td><button type="button" class="btn petit" data-utiliser="${idx.join(",")}" data-q="${c.qualite ?? ""}" title="Régler la glissière sur cette qualité">Utiliser</button></td></tr>`; }).join("")}</tbody></table>` : "") + `</details>`;
+        const perso = c.portee === "moi", coche = idx.some((i) => bpPop.force?.[i]?.has(c.id));
+        return `<tr data-ligne="${esc(c.id)}" class="${pr != null ? "bp-pris" : ""}${perso ? " bp-choisissable" : ""}"${perso ? ` data-choisir="${idx.join(",")}" data-it="${esc(c.id)}"` : ""}><td class="bp-coche">${perso ? `<span class="bp-case${coche ? " on" : ""}" aria-hidden="true"></span>` : ""}</td><td class="num">Q${c.qualite ?? "?"}</td><td class="num">${fmtScu(c.quantite_scu ?? 0)} SCU${pr != null ? ` <span class="bp-apres" title="Après le craft">→ ${apres > 0 ? `${fmtScu(apres)} SCU` : "vide"}</span>` : ""}</td><td>${esc(c.station || "")}</td><td>${esc(c.joueur || "")}</td></tr>`; }).join("")}</tbody></table>` : "") + `</div>`;
   }).join("") || `<p class="note">Aucune ressource.</p>`;
   if (partiel) return cible;
 }
@@ -7902,6 +7946,7 @@ async function ouvrirBlueprint(id) {
     ficheObjet(d.output_item_uuid || d.output?.uuid).then((o) => { if (bpPop?.d === d && o) { bpPop.objet = o; renderPopBlueprint(); } });
     bpPop.sel = (d.aspects?.aspects || []).map((a) => a.is_selected !== false);
     bpPop.d = d; bpPop.q = (d.aspects?.aspects || []).map((a) => {
+      { const [lo, hi] = bornesAspect(a), ch = choisirCaisses(caissesPerso(a), besoinAspect(a, 1), a.input?.kind, 0); if (!ch.manque && ch.max > 0) { (bpPop.enMax = bpPop.enMax || [])[bpPop.enMax.length] = true; return Math.max(lo, Math.min(hi, ch.max)); } (bpPop.enMax = bpPop.enMax || [])[bpPop.enMax.length] = false; }
       const ok = paliersAspect(a).filter((v) => { const inp = a.input || {}, besoin = inp.kind === "item" ? Number(inp.quantity) || 0 : Number(inp.quantity_scu) || 0;
         const l = items.filter((it) => sansAccents(it.nom || "") === sansAccents(inp.name || "") && it.qualite === v); return (inp.kind === "item" ? l.length : l.reduce((s, c) => s + (Number(c.quantite_scu) || 0), 0)) >= besoin - 1e-9 && l.length; });
       return ok.length ? ok[ok.length - 1] : borner(a, a.initial_quality ?? 500);
@@ -7909,10 +7954,11 @@ async function ouvrirBlueprint(id) {
     renderPopBlueprint();
   } catch (e) { $("dbp-aspects").innerHTML = `<p class="note">Recette injoignable (api.star-citizen.wiki) : ${esc(e.message || e)}</p>`; }
 }
+$("d-blueprint").addEventListener("change", (e) => { if (bpPop && e.target.dataset.aspect != null) renderPopBlueprint(); });   // v309 : au relâcher, tout est recalculé (caisses prises)
 $("d-blueprint").addEventListener("input", (e) => {
   if (!bpPop || e.target.dataset.aspect == null) return;
-  const ia = +e.target.dataset.aspect, qa = borner(bpPop.d.aspects.aspects[ia], +e.target.value);
-  bpPop.q[ia] = qa; e.target.value = qa;   // glissière aimantée sur les paliers de qualité
+  const ia = +e.target.dataset.aspect, [lo, hi] = bornesAspect(bpPop.d.aspects.aspects[ia]), qa = Math.max(lo, Math.min(hi, Math.round(+e.target.value)));
+  bpPop.q[ia] = qa; if (bpPop.enMax) bpPop.enMax[ia] = false; bpPop.force?.[ia]?.clear();   // v304 : glissière libre (toutes les valeurs) ; les petits traits donnent les paliers exacts
   // glissière en cours de déplacement : on ne remplace que les textes (reconstruire la couperait)
   const html = renderPopBlueprint(true);
   const ancien = $("dbp-aspects").querySelectorAll(".bp-aspect"), neuf = html.querySelectorAll(".bp-aspect");
@@ -7945,31 +7991,80 @@ $("d-blueprint").addEventListener("change", (e) => {
   }
   renderPopBlueprint();
 });
-$("d-blueprint").addEventListener("toggle", (e) => { const d = e.target.closest?.("details[data-res]"); if (d && bpPop) d.open ? bpPop.fermes.delete(d.dataset.res) : bpPop.fermes.add(d.dataset.res); }, true);
+// v308 : groupes de matériaux repliables ; replié, un groupe garde visibles les caisses utilisées pour le craft
+$("d-blueprint").addEventListener("click", (e) => {
+  const t = e.target.closest?.("[data-plier]"); if (!t || !bpPop) return;
+  const n = t.dataset.plier; bpPop.fermes.has(n) ? bpPop.fermes.delete(n) : bpPop.fermes.add(n);
+  const bloc = t.closest(".bp-stock-res"); bloc.classList.toggle("ferme", bpPop.fermes.has(n)); t.setAttribute("aria-expanded", String(!bpPop.fermes.has(n)));
+});
 /* Prélèvement dans MON stock pour un aspect : caisses de la qualité la plus proche de la glissière d'abord.
    Qualité obtenue = moyenne pondérée par la quantité (le jeu fait une moyenne quand on mélange des qualités). */
 /* Cartouches sous le slider : quantité (orange), SCU (vert), qualité (turquoise) — couleurs de l'appli */
 function cartouchesAspect(i, q) {
-  const inp = bpPop.d.aspects.aspects[i].input || {}, pr = prelevement(i), n = pr.pris.length;
-  // pas (assez) dans mon stock : seulement la qualité
-  if (!pr.ok || !n) return `<span class="bp-cart bp-q">Q${q}</span>`;
-  const scu = pr.pris.reduce((s, p) => s + (inp.kind === "item" ? Number(p.it.quantite_scu) || 0 : p.n), 0);
+  // v310 : uniquement les caisses UTILISÉES pour le craft : leur nombre, leur contenu total (SCU en stock) et la qualité moyenne obtenue
+  const pr = prelevement(i), l = pr.pris || [];
+  if (!l.length) return `<span class="bp-cart bp-q">Q${q}</span>`;
+  const n = l.length, scu = l.reduce((s2, p) => s2 + (Number(p.it.quantite_scu) || 0), 0);
   return `<span class="bp-cart bp-cart-n">${n} caisse${n > 1 ? "s" : ""}</span>` +
-    (scu ? `<span class="bp-cart bp-cart-scu">${fmtScu(scu)} SCU</span>` : "") + `<span class="bp-cart bp-q">Q${q}</span>`;
+    (scu ? `<span class="bp-cart bp-cart-scu">${fmtScu(scu)} SCU</span>` : "") + `<span class="bp-cart bp-q">Q${pr.moy ?? q}</span>`;
 }
+/* v304 : craft en MÉLANGEANT les qualités (le jeu fait la moyenne pondérée par la quantité).
+   choisirCaisses : caisses à prendre pour atteindre `besoin` avec une qualité moyenne ≥ q, sans gaspiller de haute qualité :
+   on part des meilleures caisses, puis on transfère vers les moins bonnes tant que la moyenne reste ≥ q. */
+function choisirCaisses(liste, besoin, kind, q) {
+  const cs = liste.map((it) => ({ it, q: Number(it.qualite) || 0, dispo: kind === "item" ? 1 : Number(it.quantite_scu) || 0, n: 0 })).filter((c) => c.dispo > 0).sort((a, b) => b.q - a.q);
+  let reste = besoin;
+  for (const c of cs) { if (reste <= 1e-9) break; c.n = kind === "item" ? 1 : Math.min(reste, c.dispo); reste -= c.n; }
+  const tot = () => cs.reduce((s2, c) => s2 + c.n, 0), moy = () => { const t = tot(); return t ? cs.reduce((s2, c) => s2 + c.n * c.q, 0) / t : 0; };
+  if (reste > 1e-9) return { pris: [], ok: false, moy: Math.round(moy()), max: Math.floor(moy()), manque: reste };
+  const max = moy();
+  if (max >= q) {   // trop bon : on remplace des hautes qualités par des basses tant que la moyenne reste ≥ q
+    for (let h = 0; h < cs.length; h++) for (let b = cs.length - 1; b > h; b--) {
+      const H = cs[h], B = cs[b]; if (H.n <= 0 || B.q >= H.q || B.n >= B.dispo) continue;
+      const m = moy(), T = tot(), marge = (m - q) * T / (H.q - B.q); if (marge <= 1e-9) continue;
+      let x = Math.min(H.n, B.dispo - B.n, marge); if (kind === "item") { x = Math.floor(x + 1e-9); if (x < 1) continue; }
+      H.n -= x; B.n += x;
+    }
+  }
+  const pris = cs.filter((c) => c.n > 1e-9).map((c) => ({ it: c.it, n: c.n }));
+  return { pris, ok: moy() >= q - 0.5, moy: Math.round(moy()), max: Math.floor(max + 1e-9) };
+}
+const besoinAspect = (a, mult = multCraft()) => { const inp = a.input || {}; return (inp.kind === "item" ? Number(inp.quantity) || 0 : Number(inp.quantity_scu) || 0) * mult; };
+const caissesPerso = (a) => items.filter((it) => sansAccents(it.nom || "") === sansAccents(a.input?.name || "") && Number.isFinite(it.qualite));
+/* qualité moyenne maximale atteignable avec mon stock (meilleures caisses d'abord) */
+function appliquerMax(i) {   // qualité moyenne max pour le multiplicateur actuel
+  const a = bpPop.d.aspects.aspects[i], [lo, hi] = bornesAspect(a), ch = choisirCaisses(caissesPerso(a), besoinAspect(a), a.input?.kind, 0);
+  if (ch.manque) return false;
+  bpPop.q[i] = Math.max(lo, Math.min(hi, ch.max)); return true;
+}
+function qualiteMax(i) { const a = bpPop.d.aspects.aspects[i]; return choisirCaisses(caissesPerso(a), besoinAspect(a), a.input?.kind, 0).max; }
 function prelevement(i) {
   if (!aspectActif(i)) return { pris: [], ok: true, moy: null, texte: `<span class="note">Non utilisé</span>` };
   const a = bpPop.d.aspects.aspects[i], inp = a.input || {}, k = sansAccents(inp.name || ""), q = bpPop.q[i];
   const besoin = (inp.kind === "item" ? Number(inp.quantity) || 0 : Number(inp.quantity_scu) || 0) * multCraft();
-  // uniquement les caisses de la qualité choisie : une qualité absente du stock désactive le craft
-  const dispo = items.filter((it) => sansAccents(it.nom || "") === k && it.qualite === q);
-  const pris = []; let reste = besoin;
-  for (const it of dispo) { if (reste <= 1e-9) break; const n = inp.kind === "item" ? 1 : Math.min(reste, Number(it.quantite_scu) || 0); if (n <= 0) continue; pris.push({ it, n }); reste -= n; }
-  const tot = pris.reduce((s, p) => s + p.n, 0), moy = tot ? Math.round(pris.reduce((s, p) => s + p.n * (p.it.qualite ?? 0), 0) / tot) : null;
-  const ok = reste <= 1e-9;
-  const texte = !besoin ? "" : ok ? `Mon stock :`
-    : `<span class="mauvais">${pris.length ? `Mon stock : il manque ${inp.kind === "item" ? `${Math.ceil(reste)}` : `${fmtScu(reste)} SCU`}` : `Pas dans mon stock`}</span>`;
-  return { pris: ok ? pris : [], ok, moy, texte };
+  // v304 : qualités mélangées (moyenne pondérée) dans MON stock
+  let ch;
+  // v312 : même matériau dans plusieurs aspects → on ne reprend pas ce que les aspects précédents ont déjà pris
+  const deja = new Map();
+  for (let j = 0; j < i; j++) if (sansAccents(bpPop.d.aspects.aspects[j].input?.name || "") === k) for (const p of prelevement(j).pris) deja.set(p.it.id, (deja.get(p.it.id) || 0) + p.n);
+  const dispo = caissesPerso(a).map((it) => !deja.has(it.id) ? it : inp.kind === "item" ? null : { ...it, quantite_scu: (Number(it.quantite_scu) || 0) - deja.get(it.id), _orig: it })
+    .filter((it) => it && (inp.kind === "item" || (Number(it.quantite_scu) || 0) > 1e-9));
+  const imp = bpPop.force?.[i]?.size ? dispo.filter((it) => bpPop.force[i].has(it.id)) : [];
+  if (imp.length) {   // caisses choisies à la main (bouton Utiliser), puis complément vers la qualité moyenne visée
+    const pr = []; let reste = besoin;
+    for (const it of imp.sort((x, y) => (y.qualite || 0) - (x.qualite || 0))) { if (reste <= 1e-9) break; const n = inp.kind === "item" ? 1 : Math.min(reste, Number(it.quantite_scu) || 0); if (n > 0) { pr.push({ it, n }); reste -= n; } }
+    const somme = pr.reduce((s2, p) => s2 + p.n * (p.it.qualite || 0), 0);
+    const T = pr.reduce((s2, p) => s2 + p.n, 0), m = T ? somme / T : 0;
+    ch = { pris: pr, ok: reste <= 1e-9, moy: Math.round(m), max: Math.floor(m + 1e-9), manque: reste > 1e-9 ? reste : 0, manuel: true };
+  } else ch = choisirCaisses(dispo, besoin, inp.kind, q);
+  const pris = ch.pris.map((p) => p.it._orig ? { ...p, it: p.it._orig } : p), moy = ch.moy, ok = ch.ok;
+  // v303 : légende = groupe(s) de stock sélectionné(s) (Perso / Corpo / Alliance), d'après le stock affiché dans les étiquettes
+  const lab = ["moi", "corpo", "alliance"].filter((k) => bpPop.portee.has(k)).map((k) => ({ moi: "Perso", corpo: "Corpo", alliance: "Alliance" })[k]).join(" + ") || "Perso";
+  const enStock = stockRessource(inp.name).length > 0;
+  const texte = !besoin ? "" : !enStock ? `<span class="mauvais">Rien en ${lab.toLowerCase()}</span>`
+    : ch.manuel ? (ok ? `Choix :` : `<span class="mauvais">Choix : il manque ${inp.kind === "item" ? Math.ceil(ch.manque) : `${fmtScu(ch.manque)} SCU`}</span>`)
+    : ok ? `${lab} :` : `<span class="mauvais">${ch.manque ? "Quantité insuffisante" : `Max Q${ch.max}`}</span>`;
+  return { pris: ok || ch.manuel ? pris : [], ok, moy, texte };   // v313 : en choix manuel, les caisses cochées restent affichées même si ça ne suffit pas
 }
 const multCraft = () => Math.min(99, Math.max(1, parseInt($("dbp-mult")?.value, 10) || 1));
 /* Disponibilité d'un palier : quantité de la ressource à cette qualité dans le stock choisi (Perso / Corpo / Alliance) */
@@ -7979,16 +8074,16 @@ function dispoPalier(a, v) {
   return { q, ok: q >= besoin - 1e-9 && q > 0, kind: inp.kind };
 }
 /* Nombre maximum de crafts possibles avec mon stock, à la qualité choisie pour chaque matériau */
-function maxCrafts() {
-  const as = bpPop?.d?.aspects?.aspects || []; let m = Infinity;
-  as.forEach((a, i) => {
-    if (!aspectActif(i)) return;
-    const inp = a.input || {}, besoin = inp.kind === "item" ? Number(inp.quantity) || 0 : Number(inp.quantity_scu) || 0; if (!besoin) return;
-    const l = items.filter((it) => sansAccents(it.nom || "") === sansAccents(inp.name || "") && it.qualite === bpPop.q[i]);
-    const dispo = inp.kind === "item" ? l.length : l.reduce((s, c) => s + (Number(c.quantite_scu) || 0), 0);
-    m = Math.min(m, Math.floor(dispo / besoin + 1e-9));
-  });
-  return Number.isFinite(m) ? m : 99;
+function maxCrafts() {   // v306 : nombre de crafts que la QUANTITÉ en stock permet (la qualité max s'adapte au multiplicateur)
+  const as = bpPop?.d?.aspects?.aspects || [];
+  let m = 0;
+  for (let k = 1; k <= 99; k++) {
+    const tot = new Map();   // v312 : besoins cumulés par matériau
+    as.forEach((a, i) => { if (aspectActif(i) && besoinAspect(a, 1)) { const n = sansAccents(a.input?.name || ""); tot.set(n, { a, b: (tot.get(n)?.b || 0) + besoinAspect(a, k) }); } });
+    const ok = [...tot.values()].every(({ a, b }) => !choisirCaisses(caissesPerso(a), b, a.input?.kind, 0).manque);
+    if (!ok) break; m = k;
+  }
+  return m;
 }
 function majCraft() {
   const as = bpPop?.d?.aspects?.aspects || [], b = $("dbp-crafter"); if (!b) return;
@@ -8001,7 +8096,12 @@ function majCraft() {
   b.disabled = !ok; b.textContent = multCraft() > 1 ? `Crafter × ${multCraft()}` : "Crafter";
   $("dbp-craft-info").textContent = !as.length ? "" : ok ? "Crafter retire ces matériaux de votre stock perso." : "Stock perso insuffisant pour crafter.";
 }
-$("dbp-mult").addEventListener("input", (e) => { if (!bpPop?.d) return; const mx = Math.max(1, Math.min(99, maxCrafts())); if (+e.target.value > mx) e.target.value = String(mx); renderPopBlueprint(); });
+$("dbp-mult").addEventListener("input", (e) => {
+  if (!bpPop?.d) return; const mx = Math.max(1, Math.min(99, maxCrafts())); if (+e.target.value > mx) e.target.value = String(mx);
+  // v306 : les matériaux réglés sur « Max » suivent le multiplicateur (meilleure moyenne possible pour N crafts)
+  (bpPop.d.aspects.aspects || []).forEach((a, i) => { if (bpPop.enMax?.[i]) appliquerMax(i); });
+  renderPopBlueprint();
+});
 $("dbp-crafter").addEventListener("click", () => {
   if (!bpPop?.d) return;
   const as = bpPop.d.aspects.aspects, ps = as.map((_, i) => prelevement(i));
@@ -8023,10 +8123,33 @@ $("d-blueprint").addEventListener("click", (e) => {
   if (!bpPop) return;
   const p = e.target.closest("[data-portee]");
   if (p) { e.preventDefault(); const k = p.dataset.portee; bpPop.portee.has(k) ? bpPop.portee.delete(k) : bpPop.portee.add(k); renderPopBlueprint(); return; }
+  const pas = e.target.closest("[data-pas]");   // v307 : boutons − / + du multiplicateur
+  if (pas) { e.preventDefault(); const inp = $("dbp-mult"), lim = Math.max(1, Math.min(99, +inp.max || 99)); inp.value = String(Math.max(1, Math.min(lim, (parseInt(inp.value, 10) || 1) + +pas.dataset.pas))); inp.dispatchEvent(new Event("input", { bubbles: true })); return; }
+  const mx = e.target.closest("[data-max]");
+  if (mx) { e.preventDefault(); const i = +mx.dataset.max, a = bpPop.d.aspects.aspects[i], [lo, hi] = bornesAspect(a);
+    const ch = choisirCaisses(caissesPerso(a), besoinAspect(a), a.input?.kind, 0);
+    if (ch.manque) toast(`Pas assez de ${a.input?.name || "matériau"} dans ton stock pour ce craft.`);
+    else { bpPop.q[i] = Math.max(lo, Math.min(hi, ch.max)); (bpPop.enMax = bpPop.enMax || [])[i] = true; bpPop.force?.[i]?.clear(); }
+    renderPopBlueprint(); return; }
   const pl = e.target.closest("[data-palier]");
-  if (pl) { e.preventDefault(); const [i, v] = pl.dataset.palier.split(":").map(Number); bpPop.q[i] = v; renderPopBlueprint(); return; }
+  if (pl) { e.preventDefault(); const [i, v] = pl.dataset.palier.split(":").map(Number); bpPop.q[i] = v; if (bpPop.enMax) bpPop.enMax[i] = false; bpPop.force?.[i]?.clear(); renderPopBlueprint(); return; }
+  const au = e.target.closest("[data-auto]");
+  if (au) { e.preventDefault(); e.stopPropagation(); for (const s0 of au.dataset.auto.split(",")) if (s0 !== "") bpPop.force?.[+s0]?.clear(); renderPopBlueprint(); return; }
+  const ch = e.target.closest("[data-choisir]");
+  if (ch) {   // v311 : caisses choisies exactement à la main ; la qualité du slider devient leur moyenne
+    e.preventDefault(); bpPop.force = bpPop.force || {};
+    for (const s0 of ch.dataset.choisir.split(",")) { if (s0 === "") continue; const i = +s0, f = (bpPop.force[i] = bpPop.force[i] || new Set());
+      f.has(ch.dataset.it) ? f.delete(ch.dataset.it) : f.add(ch.dataset.it); if (bpPop.enMax) bpPop.enMax[i] = false; }
+    renderPopBlueprint(); return;
+  }
   const u = e.target.closest("[data-utiliser]");
-  if (u && u.dataset.q !== "") { e.preventDefault(); for (const i of u.dataset.utiliser.split(",")) if (i !== "") bpPop.q[+i] = borner(bpPop.d.aspects.aspects[+i], +u.dataset.q); renderPopBlueprint(); }
+  if (u && u.dataset.q !== "") {   // v309 : la caisse choisie est prise en priorité ; le reste complète vers la qualité visée
+    e.preventDefault(); bpPop.force = bpPop.force || {};
+    for (const s0 of u.dataset.utiliser.split(",")) { if (s0 === "") continue; const i = +s0, f = (bpPop.force[i] = bpPop.force[i] || new Set());
+      if (f.has(u.dataset.it)) f.delete(u.dataset.it); else { f.add(u.dataset.it); const [lo, hi] = bornesAspect(bpPop.d.aspects.aspects[i]); bpPop.q[i] = Math.max(lo, Math.min(hi, +u.dataset.q)); }
+      if (bpPop.enMax) bpPop.enMax[i] = false; }
+    renderPopBlueprint();
+  }
 });
 function possederBlueprints(ids, oui) {
   const l = mesBlueprints();
