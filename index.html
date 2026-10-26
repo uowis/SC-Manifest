@@ -1466,6 +1466,10 @@ tr.bp-choisissable:hover td { background: rgba(255,255,255,.04); }
 .bp-case { display: inline-block; width: 14px; height: 14px; border: 1.5px solid var(--bord); border-radius: 3px; vertical-align: middle; }
 .bp-case.on { background: var(--orange); border-color: var(--orange); box-shadow: inset 0 0 0 2px #1a1d20; }
 .bp-auto { margin-left: auto; padding: 0 8px; height: 20px; border-radius: 10px; border: 1px solid var(--trait); background: none; color: var(--os); font: inherit; font-size: var(--fmin); cursor: pointer; }
+#dr-lignes .dr-q-sel { width: 100%; min-width: 0; padding: 3px 4px; background: var(--rouille, #222); color: var(--os, #ddd); border: 1px solid var(--trait, #444); border-radius: 3px; font: inherit; }
+.pr-tete .dr-spin { align-self: center; flex: 0 0 auto; width: 12px; height: 12px; border: 2px solid rgba(255,255,255,.15); border-top-color: var(--orange, #e0592a); border-radius: 50%; animation: dr-tourne .8s linear infinite; }
+.pr-tete .dr-spin[hidden] { display: inline-block; visibility: hidden; animation: none; }
+@keyframes dr-tourne { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
@@ -1779,7 +1783,7 @@ tr.bp-choisissable:hover td { background: rgba(255,255,255,.04); }
   </table></div>
   <div class="dr-ajout"><button type="button" class="dr-plus" id="dr-ajout" title="Ajouter une ligne" aria-label="Ajouter une ligne">+</button><select id="dr-ajout-nom" aria-label="Minerai à ajouter" hidden></select></div>
   <div class="dr-pied"><label class="dr-timer"><span>Timer :</span><input id="dr-temps" class="pr-temps" placeholder="1h 9m" title="Temps restant" aria-label="Temps restant" autocomplete="off"></label><span class="dr-tot"><span>Tot :</span> <strong id="dr-rend" title="Rendement total">—</strong></span></div>
-  <div class="pr-tete"><strong id="dr-station"></strong><span class="dr-etat" id="dr-etat"></span><strong id="dr-total" class="dr-total" hidden>—</strong></div>
+  <div class="pr-tete"><strong id="dr-station"></strong><span class="dr-spin" id="dr-spin" hidden aria-label="Lecture en cours"></span><span class="dr-etat" id="dr-etat"></span><strong id="dr-total" class="dr-total" hidden>—</strong></div>
   <p class="note" id="dr-attente" hidden></p>
   <div class="pr-actions">
     <button type="button" class="btn principal" id="dr-enregistrer" disabled>Enregistrer</button>
@@ -5996,7 +6000,7 @@ const RAFF_LEV = { pasChiffre: 0.78, titre: [0.02, 0.0, 0.40, 0.075], ligne0: 0.
 const RAFF_LEV_FIN = { ...RAFF_LEV, cols: { ...RAFF_LEV.cols, qualite: [0.59, 0.69], rend: [0.79, 0.89] } };
 // v314 : terminal des autres raffineries (Pyro Gateway…) : repère = barre grise « // DETAILS » de chaque ordre
 const RAFF_PYRO = { ...RAFF_LEV, pyro: true, num: [0.255, -0.075, 0.1, 0.06], ligne0: 0.167, pasLigne: 0.0845, hLigne: 0.048, vMax: 0.99,
-  cols: { nom: [0.10, 0.56], qualite: [0.565, 0.75], rend: [0.77, 0.94] } };
+  cols: { nom: [0.10, 0.53], qualite: [0.54, 0.75], rend: [0.755, 0.96] } };
 function barresPyro(S) {
   // barre plus claire que ce qu'il y a 2 % de H au-dessus et au-dessous (fonctionne aussi sous le halo orange)
   const { W, H, d } = S, e = Math.max(8, Math.round(H * 0.02)), B = (x, y) => d[(y * W + x) * 4 + 2];
@@ -6008,21 +6012,54 @@ function barresPyro(S) {
       if (!barre(x, y)) { x++; continue; }
       const a = x; let trou = 0; while (x < W && trou < 9) { if (barre(x, y)) trou = 0; else trou++; x++; }
       const b = x - trou;
-      if (b - a < W * 0.17 || b - a > W * 0.25) continue;
-      if (out.some((o) => Math.abs(o.x - a) < W * 0.04)) continue;
+      if (b - a < W * 0.12 || b - a > W * 0.25) continue;
+      if (out.some((o) => Math.abs(o.x - a) < W * 0.04 && Math.abs(o.y - y) < H * 0.04)) continue;
       // bords sur plusieurs lignes (le texte peut couper une ligne)
       let y0 = y; while (y0 > e && y - y0 < H * 0.03 && barre(a + 30, y0 - 1)) y0--;
       let xa = a, xb = b;
-      for (let yy = y0 + 2; yy < y0 + H * 0.017; yy += 2) { let l = Math.max(0, a - Math.round(W * 0.02)); while (l < xa && !barre(l, yy)) l++; let r = xb; while (r < W - 1 && (barre(r + 1, yy) || barre(r + 5, yy))) r++; xa = Math.min(xa, l); xb = Math.max(xb, r); }
+      const ls = [];
+      for (let yy = y0 + 2; yy < y0 + H * 0.017; yy += 2) {   // bord gauche = début de la plus longue suite de la ligne (médiane des lignes)
+        // premier x où la barre tient sur ~70 % des 20 px suivants
+        for (let x2 = Math.max(0, a - Math.round(W * 0.03)); x2 < a + W * 0.03; x2++) { if (!barre(x2, yy)) continue; let n = 0; for (let k2 = 0; k2 < 20; k2++) if (barre(x2 + k2, yy)) n++; if (n >= 14) { ls.push(x2); break; } }
+        let r = xb; while (r < W - 1 && (barre(r + 1, yy) || barre(r + 5, yy))) r++; xb = Math.max(xb, r);
+      }
+      if (ls.length) { ls.sort((p, q) => p - q); xa = ls[Math.floor(ls.length / 2)]; }
       if (xb - xa > W * 0.25) continue;
-      const w = Math.round(H * 0.39);   // largeur fixe de l'ordre (le bord droit varie avec le halo)
+      const w = Math.round((xb - xa) * 1.05);   // provisoire : recalé plus bas sur l'écart entre ordres
       // ordre terminé : hachures vert-jaune au-dessus (en-tête « COMPLETED »)
       let nv = 0;
       for (let yy = Math.round(y0 - w * 0.157); yy < y0 - w * 0.086; yy += 2) for (let xx = xa; xx < xa + w * 0.43; xx += 3) { if (yy < 0) continue; const i = (yy * W + xx) * 4; if (d[i + 1] > 90 && d[i + 1] > d[i + 2] + 30 && d[i + 1] >= d[i] - 15) nv++; }
+      // hauteur de la barre (plusieurs colonnes) : une vraie barre « // DETAILS » fait ~1,2 à 2,6 % de H
+      const hs = [0.25, 0.5, 0.75].map((f) => { const xc = Math.round(xa + (xb - xa) * f); let y1 = y0; while (y1 < H - e - 1 && y1 - y0 < H * 0.05 && barre(xc, y1 + 1)) y1++; return y1 - y0 + 1; }).sort((p, q) => p - q);
+      if (hs[1] < H * 0.011 || hs[1] > H * 0.028) continue;
       out.push({ x: xa, y: y0, w, termine: nv > 25, pyro: true });
     }
   }
-  return out.sort((p, q) => p.x - q.x);
+  // une rangée d'ordres : barres à la même hauteur ; on garde la rangée avec le plus d'ordres terminés puis de barres
+  let rang = [];
+  for (const o of out) { const g = out.filter((q) => Math.abs(q.y - o.y) < H * 0.013); const sc = (l) => l.filter((q) => q.termine).length * 10 + l.length; if (sc(g) > sc(rang)) rang = g; }
+  out.length = 0;
+  for (const o of rang.sort((p, q) => p.x - q.x)) if (!out.length || o.x - out[out.length - 1].x > W * 0.12) out.push(o);
+  // v317 : bord gauche recalé sur les pictos en début de ligne (projection verticale des pixels clairs, seuil relatif au fond)
+  for (const o of out) {
+    const bw = o.w / 1.05, x0 = Math.max(0, Math.round(o.x - bw * 0.06)), x1 = Math.min(W - 1, Math.round(o.x + bw * 0.14));
+    const y0 = Math.round(o.y + bw * 0.13), y1 = Math.min(H - 1, Math.round(o.y + bw * 0.6)), cols = [];
+    for (let x = x0; x <= x1; x++) {
+      let n = 0;
+      for (let y = y0; y < y1; y += 2) { const i = (y * W + x) * 4, g = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2], j = (y * W + Math.max(0, x - 14)) * 4, gf = 0.299 * d[j] + 0.587 * d[j + 1] + 0.114 * d[j + 2]; if (g > 120 && g > gf + 35) n++; }
+      cols.push(n);
+    }
+    const mx = Math.max(...cols); if (mx < 3) continue;
+    const i0 = cols.findIndex((n, i) => n >= mx * 0.4 && cols.slice(i, i + 8).filter((m) => m >= mx * 0.3).length >= 6);   // picto large (pas un filet du cadre)
+    if (i0 >= 0) o.x = Math.round(x0 + i0 - bw * 0.02);   // picto à ~2 % de la largeur après le bord de la barre
+  }
+  // ordres régulièrement espacés : un bord gauche faussé par le halo est recalé sur ses voisins
+  for (let i = 1; i < out.length - 1; i++) { const m = (out[i - 1].x + out[i + 1].x) / 2; if (Math.abs(out[i].x - m) > W * 0.01) out[i].x = Math.round(m); }
+  if (out.some((o) => o.termine)) out.forEach((o) => (o.termine = true));   // même écran : tous terminés (les ordres en cours passent par l'autre lecteur)
+  // v317 : largeur d'un ordre = écart entre deux ordres voisins × 0,905 (indépendant de la taille du terminal à l'écran)
+  const ecarts = out.slice(1).map((o, i) => o.x - out[i].x).filter((g) => g > W * 0.12 && g < W * 0.3).sort((a, b) => a - b);
+  if (ecarts.length) { const g = ecarts[Math.floor((ecarts.length - 1) / 2)]; out.forEach((o) => (o.w = Math.round(g * 0.905))); }
+  return out;
 }
 let levCache = [];
 function barresDorees(S) {
@@ -6136,7 +6173,7 @@ function empreinteZone(im, nx = 16, ny = 3) {
 }
 const ecartEmpreintes = (a, b) => { if (!a || !b || a.length !== b.length) return 999; let s = 0; for (let i = 0; i < a.length; i++) s += Math.abs(a[i] - b[i]); return s / a.length; };
 /* v314 : nombres du terminal type Pyro (chiffres nets) : vote Tesseract sur plusieurs seuils */
-async function lireNombrePyro(img, min = 2) {
+async function lireNombrePyro(img, min = 2, strict = false) {
   const votes = new Map();
   for (const se of [null, 100, 75, 130]) {
     const im = { w: img.w, h: img.h, d: new Uint8ClampedArray(img.d) };
@@ -6147,20 +6184,20 @@ async function lireNombrePyro(img, min = 2) {
     if (best && votes.get(best) >= min) break;
   }
   let best = null; for (const [k, c] of votes) if (!best || c > votes.get(best)) best = k;
-  return { n: best ? +best : NaN, gs: [], src: "tess" };
+  return { n: best && (!strict || votes.get(best) >= min) ? +best : NaN, gs: [], src: "tess" };
 }
 async function lireLevski(S, src) {
   let barres = barresDorees(S);
   {   // v314 : terminal type Pyro Gateway (en-tête hachuré, barre « // DETAILS ») ; le halo orange y crée de fausses barres dorées
     const py = barresPyro(S), pas = S.H * 0.43;
-    const pyOk = py.length && (py.some((x) => x.termine) || py.some((x, i) => i && Math.abs(x.x - py[i - 1].x - pas) < pas * 0.04));
+    const pyOk = py.some((x) => x.termine);
     const lv = []; for (const x of barres) if (!lv.length || x.x - lv[lv.length - 1].x >= lv[lv.length - 1].w * 0.9) lv.push(x);
     const levOk = lv.length >= Math.max(1, barres.length - 1);   // une barre parasite tolérée (écartée)
     if (levOk) barres = lv;
     if (pyOk || !levOk) barres = pyOk ? py : [];
   }
   if (!barres.length) return null;
-  const Pid = { Hi: [[1, 0, 0], [0, 1, 0], [0, 0, 1]], L: S.W, Hc: S.H, apercu: toileDe({ w: S.W, h: S.H, d: new Uint8ClampedArray(S.d) }), levski: true, cs: {} };
+  const Pid = { Hi: [[1, 0, 0], [0, 1, 0], [0, 0, 1]], L: S.W, Hc: S.H, apercu: toileDe({ w: S.W, h: S.H, d: new Uint8ClampedArray(S.d) }), levski: true, pyro: !!barres[0]?.pyro, cs: {} };
   const G = RAFF_LEV, colonnes = [];
   let k = -1;
   for (const b of barres) {
@@ -6183,10 +6220,10 @@ async function lireLevski(S, src) {
       C.num = null;
     }
     if (C.processing && C.num == null && b.pyro) {   // v314 : chiffre seul, police nette → Tesseract chiffres
-      const r = await lireNombrePyro(z(NZ[0], NZ[1], NZ[2], NZ[3], null, 30), 2);
-      if (Number.isFinite(r.n) && r.n > 0) C.num = r.n; else if (++C.essaisNum >= 2) C.num = k + 1;
+      const r = await lireNombrePyro(z(NZ[0], NZ[1], NZ[2], NZ[3], null, 30), 2, true);
+      if (Number.isFinite(r.n) && r.n > 0 && r.n >= k + 1 && r.n <= k + 30) C.num = r.n; else if (++C.essaisNum >= 2) C.num = k + 1;
     }
-    if (C.processing && C.num == null) {   // numéro « WORK ORDER n » : vote sur plusieurs lectures (au moins 2 concordantes)
+    if (C.processing && C.num == null && !b.pyro) {   // numéro « WORK ORDER n » : vote sur plusieurs lectures (au moins 2 concordantes)
       const votes = new Map();
       for (const se of [110, 80, 140, null]) for (const hh of [30, 40, 24]) {
         const tx = (await lireTexte(z(NZ[0], NZ[1], NZ[2], NZ[3], se, hh), "WORKDEIL0123456789 ", 3000, 3)).replace(/[IL|](?=\s*$)/, "1");
@@ -6206,7 +6243,10 @@ async function lireLevski(S, src) {
     const imL = z(G.cols.nom[0], haut0, G.cols.nom[1] - G.cols.nom[0], hautZ, null, pxu), bandes = [];
     { let deb = -1, trou = 0;
       for (let y = 0; y <= imL.h; y++) {
-        let n = 0; if (y < imL.h) for (let x = 0; x < imL.w; x++) { const q = (y * imL.w + x) * 4; if (0.299 * imL.d[q] + 0.587 * imL.d[q + 1] + 0.114 * imL.d[q + 2] > 75) n++; }
+        let n = 0; if (y < imL.h) {
+          // v317 : sous un reflet le fond s'éclaircit → seuil relatif au fond de la ligne (médiane) pour le terminal type Pyro
+          let sl = 75; if (b.pyro) { const gs = []; for (let x = 0; x < imL.w; x++) { const q = (y * imL.w + x) * 4; gs.push(0.299 * imL.d[q] + 0.587 * imL.d[q + 1] + 0.114 * imL.d[q + 2]); } gs.sort((p, q) => p - q); sl = Math.max(75, gs[gs.length >> 1] + 45); }
+          for (let x = 0; x < imL.w; x++) { const q = (y * imL.w + x) * 4; if (0.299 * imL.d[q] + 0.587 * imL.d[q + 1] + 0.114 * imL.d[q + 2] > sl) n++; } }
         if (n > 0) { if (deb < 0) deb = y; trou = 0; } else if (deb >= 0 && ++trou > 2) { bandes.push([deb, y - trou]); deb = -1; trou = 0; }
       }
     }
@@ -6239,8 +6279,10 @@ async function lireLevski(S, src) {
         if (best != null) q = best;
       }
       if (b.pyro && Number.isFinite(q) && paliers.length && !paliers.includes(q)) {   // v314 : chiffre perdu (575 lu 75) → palier qui contient la lecture
-        const c = paliers.filter((pv) => String(pv).includes(String(q)));
-        if (c.length === 1) q = c[0];
+        // v317 : palier le plus proche en chiffres (chiffre perdu, ajouté ou mal lu : 575→75, 588→5886, 547→247)
+        const lev = (a, b2) => { const m = a.length, n = b2.length, D = Array.from({ length: m + 1 }, (_, i) => [i, ...Array(n).fill(0)]); for (let j = 1; j <= n; j++) D[0][j] = j; for (let i = 1; i <= m; i++) for (let j = 1; j <= n; j++) D[i][j] = Math.min(D[i - 1][j] + 1, D[i][j - 1] + 1, D[i - 1][j - 1] + (a[i - 1] === b2[j - 1] ? 0 : 1)); return D[m][n]; };
+        const sc = paliers.map((pv) => [pv, lev(String(pv), String(q))]).sort((x, y) => x[1] - y[1] || Math.abs(x[0] - q) - Math.abs(y[0] - q));
+        if (sc[0][1] <= 1 && (sc.length < 2 || sc[1][1] > 1)) q = sc[0][0];
       }
       lignes.push({ nom, qualite: q, qte: rr.n, rend: rr.n, connue: paliers.includes(q), glyphes: { qualite: rq.gs, rend: rr.gs }, lev: true, sources: [rq.src, rr.src] });
     }
@@ -6438,11 +6480,16 @@ function renderRaff() {
     return `<button type="button" class="btn petit${k === raff.actif ? " actif" : ""}" data-ordre="${k}" aria-pressed="${k === raff.actif}">Ordre ${o.num ?? (k % 100) + 1}${o.enregistre ? " ✓" : ok ? " ●" : ""}</button>`; }).join("");
   R$("dr-ordres").hidden = cles.length < 2;
   const t = totauxRaff();
-  R$("dr-etat").textContent = raff.etat || "";
+  R$("dr-etat").textContent = raff.etat || ""; majSpin();
   const tb = R$("dr-lignes");
   if (!tb.contains(tb.ownerDocument.activeElement) && Date.now() - (raff.saisieA || 0) > 600) tb.innerHTML = O().lignes.length ? O().lignes.map((l, i) => `<tr class="${l.connue || l.force ? "" : "ignoree"}${l.neuve ? " neuve" : ""}">
       <td>${esc(l.nom)}</td>
-      <td><input type="number" data-i="${i}" data-k="qualite" value="${Number.isFinite(l.qualite) ? l.qualite : ""}" min="0" max="1000"></td>
+      <td>${(() => {   // v321 : liste déroulante des qualités connues + « Autre… » pour une qualité nouvelle
+        const vs = valeursDe(l.nom), q = l.qualite;
+        if (l.autreQ || !vs.length) return `<input type="number" data-i="${i}" data-k="qualite" value="${Number.isFinite(q) ? q : ""}" min="0" max="1000">`;
+        const tous = Number.isFinite(q) && !vs.includes(q) ? [...vs, q].sort((a, b) => a - b) : vs;
+        return `<select data-i="${i}" data-k="qualite" class="dr-q-sel"><option value=""${Number.isFinite(q) ? "" : " selected"}>Qualité…</option>${tous.map((v) => `<option value="${v}"${q === v ? " selected" : ""}>${v}</option>`).join("")}<option value="autre">Autre…</option></select>`;
+      })()}</td>
       <td><input type="number" data-i="${i}" data-k="rend" value="${Number.isFinite(l.rend) ? l.rend : ""}" min="0"></td>
       <td>${l.connue || l.force ? "" : `<small>qualité inconnue : ignorée</small>`}</td>
       <td class="dr-suppr"><button type="button" class="b-suppr-ligne" data-suppr-i="${i}" title="Supprimer la ligne" aria-label="Supprimer la ligne">${ICO_CROIX}</button></td></tr>`).join("")
@@ -6527,9 +6574,11 @@ function dessinerApercu(P, s) {
   const b = s != null && raff.ordres[s]?.boites;
   if (b) { ctx.strokeStyle = "#8fa045"; ctx.lineWidth = 2; for (const x of b) ctx.strokeRect(x[0] - zx, x[1] - zy, x[2], x[3]); }
 }
+/* v320 : petite roue au milieu de l'en-tête pendant une lecture de l'ordre affiché (pas s'il est figé ou enregistré) */
+function majSpin() { try { const e = R$("dr-spin"); if (e) e.hidden = !(raff?.enCours && !O().fige && !O().enregistre); } catch {} }
 async function scannerRaff() {
   if (!raff || raff.enCours) return;
-  raff.enCours = true;
+  raff.enCours = true; majSpin();
   try {
     const src = await imageBrute(), t0 = performance.now();
     const S = pixelsSource(src);
@@ -6551,7 +6600,7 @@ async function scannerRaff() {
       ord.stable = sig !== "[]" && sig === ord.sig ? ord.stable + 1 : 1; ord.sig = sig;
       ord.complet = c.lignes.length > 0 && c.lignes.every((l) => l.connue && Number.isFinite(l.rend)) && !!(c.temps || ord.temps);
       if (!ord.complet) rate = true;
-      if (r.P?.levski) {
+      if (r.P?.levski && !r.P?.pyro) {   // v320 : terminal type Pyro (listes courtes, sans défilement) → fusion simple
         // identité : la fenêtre doit se raccorder à SON ordre, pas mieux à un autre (sinon numéro douteux → ignorée)
         const W = fenetreSeq(c.lignes);
         const autre = Object.entries(raff.ordres).some(([k, o]) => +k !== c.s && o.lignes.length >= 2 && W.length >= 2 && raccordSequence(o.lignes, W) != null && (!ord.lignes.length || raccordSequence(ord.lignes, W) == null));
@@ -6703,10 +6752,14 @@ R$("dr-ajout-nom").addEventListener("change", () => {
   const ord = O();
   ord.lignes.push({ nom, qualite: NaN, qte: NaN, rend: NaN, connue: false, force: true, edite: true, neuve: true });
   figerOrdre(); renderRaff();
-  const ins = R$("dr-lignes").querySelectorAll(`input[data-i="${ord.lignes.length - 1}"]`); ins[0]?.focus();
+  const ins = R$("dr-lignes").querySelectorAll(`[data-i="${ord.lignes.length - 1}"]`); ins[0]?.focus();
 });
 // pointerdown (et non click) : quitter un champ redessine le tableau avant que le clic n'arrive
 R$("dr-lignes").addEventListener("pointerdown", (e) => {
+  const pq = e.target.closest("[data-palier-i]");
+  if (pq && raff) { e.preventDefault(); const i = +pq.dataset.palierI, l = O().lignes[i]; if (!l) return;
+    l.qualite = +pq.dataset.v; l.connue = true; pq.ownerDocument.activeElement?.blur?.(); raff.saisieA = 0; figerOrdre(); renderRaff();
+    R$("dr-lignes").querySelector(`input[data-i="${i}"][data-k="rend"]`)?.focus(); return; }
   const b = e.target.closest("[data-suppr-i]"); if (!b || !raff) return;
   e.preventDefault(); const i = +b.dataset.supprI, ord = O();
   b.ownerDocument.activeElement?.blur?.();   // valide d'abord la saisie en cours
@@ -6716,12 +6769,15 @@ R$("dr-lignes").addEventListener("click", (e) => { if (e.target.closest("[data-s
 // activer un champ (ligne ou temps) arrête la lecture de cet ordre : la saisie n'est pas écrasée
 for (const id of ["dr-lignes", "dr-temps"]) R$(id).addEventListener("focusin", () => { figerOrdre(); const e = R$("dr-etat"); if (e) e.textContent = O().etat; });
 R$("dr-lignes").addEventListener("change", (e) => {
-  const inp = e.target.closest("input[data-i]"); if (!inp || !raff) return;
-  const l = O().lignes[+inp.dataset.i]; if (!l.cleLue) l.cleLue = cleLigne(l);   // clé lue à l'écran : la relecture retrouve cette ligne
+  const inp = e.target.closest("input[data-i], select[data-i]"); if (!inp || !raff) return;
+  const l = O().lignes[+inp.dataset.i];
+  if (inp.value === "autre") { l.autreQ = true; raff.saisieA = 0; inp.ownerDocument.activeElement?.blur?.(); renderRaff(); R$("dr-lignes").querySelector(`input[data-i="${inp.dataset.i}"][data-k="qualite"]`)?.focus(); return; }
+  if (!l.cleLue) l.cleLue = cleLigne(l);   // clé lue à l'écran : la relecture retrouve cette ligne
   raff.saisieA = Date.now();   // passage d'un champ à l'autre (Tab) : le tableau n'est pas redessiné sous le curseur
   l[inp.dataset.k] = parseInt(inp.value, 10); l.edite = true; figerOrdre();
   if (Number.isFinite(l[inp.dataset.k])) { apprendreNombre(l.glyphes?.[inp.dataset.k], l[inp.dataset.k], !!l.lev); sauver(); }
-  if (inp.dataset.k === "qualite") l.connue = valeursDe(l.nom).includes(l.qualite);
+  if (inp.dataset.k === "qualite") { l.connue = valeursDe(l.nom).includes(l.qualite); if (Number.isFinite(l.qualite)) l.force = true; }   // v319 : qualité saisie à la main = gardée même hors des qualités connues
+  if (inp.tagName === "SELECT") { inp.ownerDocument.activeElement?.blur?.(); raff.saisieA = 0; renderRaff(); R$("dr-lignes").querySelector(`input[data-i="${inp.dataset.i}"][data-k="rend"]`)?.focus(); return; }
   renderRaff();
 });
 document.addEventListener("click", (e) => {
