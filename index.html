@@ -5994,6 +5994,36 @@ const RAFF_LEV = { pasChiffre: 0.78, titre: [0.02, 0.0, 0.40, 0.075], ligne0: 0.
   cols: { nom: [0.10, 0.50], qualite: [0.50, 0.60], rend: [0.63, 0.73] }, temps: [0.55, 1.38, 0.43, 0.065], barre: [0.04, 1.454, 0.92] };
 // ordre terminé (barre verte « COMPLETED ») : colonnes QUALITY / YIELD placées plus à droite, pas de temps
 const RAFF_LEV_FIN = { ...RAFF_LEV, cols: { ...RAFF_LEV.cols, qualite: [0.59, 0.69], rend: [0.79, 0.89] } };
+// v314 : terminal des autres raffineries (Pyro Gateway…) : repère = barre grise « // DETAILS » de chaque ordre
+const RAFF_PYRO = { ...RAFF_LEV, pyro: true, num: [0.255, -0.075, 0.1, 0.06], ligne0: 0.167, pasLigne: 0.0845, hLigne: 0.048, vMax: 0.99,
+  cols: { nom: [0.10, 0.56], qualite: [0.565, 0.75], rend: [0.77, 0.94] } };
+function barresPyro(S) {
+  // barre plus claire que ce qu'il y a 2 % de H au-dessus et au-dessous (fonctionne aussi sous le halo orange)
+  const { W, H, d } = S, e = Math.max(8, Math.round(H * 0.02)), B = (x, y) => d[(y * W + x) * 4 + 2];
+  const barre = (x, y) => B(x, y) - Math.max(B(x, y - e), B(x, y + e)) > 14;
+  const out = [];
+  for (let y = Math.round(H * 0.1); y < H * 0.45; y += 3) {
+    let x = 0;
+    while (x < W) {
+      if (!barre(x, y)) { x++; continue; }
+      const a = x; let trou = 0; while (x < W && trou < 9) { if (barre(x, y)) trou = 0; else trou++; x++; }
+      const b = x - trou;
+      if (b - a < W * 0.17 || b - a > W * 0.25) continue;
+      if (out.some((o) => Math.abs(o.x - a) < W * 0.04)) continue;
+      // bords sur plusieurs lignes (le texte peut couper une ligne)
+      let y0 = y; while (y0 > e && y - y0 < H * 0.03 && barre(a + 30, y0 - 1)) y0--;
+      let xa = a, xb = b;
+      for (let yy = y0 + 2; yy < y0 + H * 0.017; yy += 2) { let l = Math.max(0, a - Math.round(W * 0.02)); while (l < xa && !barre(l, yy)) l++; let r = xb; while (r < W - 1 && (barre(r + 1, yy) || barre(r + 5, yy))) r++; xa = Math.min(xa, l); xb = Math.max(xb, r); }
+      if (xb - xa > W * 0.25) continue;
+      const w = Math.round(H * 0.39);   // largeur fixe de l'ordre (le bord droit varie avec le halo)
+      // ordre terminé : hachures vert-jaune au-dessus (en-tête « COMPLETED »)
+      let nv = 0;
+      for (let yy = Math.round(y0 - w * 0.157); yy < y0 - w * 0.086; yy += 2) for (let xx = xa; xx < xa + w * 0.43; xx += 3) { if (yy < 0) continue; const i = (yy * W + xx) * 4; if (d[i + 1] > 90 && d[i + 1] > d[i + 2] + 30 && d[i + 1] >= d[i] - 15) nv++; }
+      out.push({ x: xa, y: y0, w, termine: nv > 25, pyro: true });
+    }
+  }
+  return out.sort((p, q) => p.x - q.x);
+}
 let levCache = [];
 function barresDorees(S) {
   const { W, H, d } = S, enBarre = (x, y) => { const i = (y * W + x) * 4, r = d[i], g = d[i + 1], b = d[i + 2], mx = r, mn = b;
@@ -6105,34 +6135,61 @@ function empreinteZone(im, nx = 16, ny = 3) {
   return e;
 }
 const ecartEmpreintes = (a, b) => { if (!a || !b || a.length !== b.length) return 999; let s = 0; for (let i = 0; i < a.length; i++) s += Math.abs(a[i] - b[i]); return s / a.length; };
+/* v314 : nombres du terminal type Pyro (chiffres nets) : vote Tesseract sur plusieurs seuils */
+async function lireNombrePyro(img, min = 2) {
+  const votes = new Map();
+  for (const se of [null, 100, 75, 130]) {
+    const im = { w: img.w, h: img.h, d: new Uint8ClampedArray(img.d) };
+    if (se != null) for (let i = 0; i < im.d.length; i += 4) { const g = 0.299 * im.d[i] + 0.587 * im.d[i + 1] + 0.114 * im.d[i + 2], v = g > se ? 255 : 0; im.d[i] = im.d[i + 1] = im.d[i + 2] = v; }
+    const t = (await lireTexte(im, "0123456789", 3000, 4)).replace(/\D/g, "");
+    if (t) votes.set(t, (votes.get(t) || 0) + 1);
+    let best = null; for (const [k, c] of votes) if (!best || c > votes.get(best)) best = k;
+    if (best && votes.get(best) >= min) break;
+  }
+  let best = null; for (const [k, c] of votes) if (!best || c > votes.get(best)) best = k;
+  return { n: best ? +best : NaN, gs: [], src: "tess" };
+}
 async function lireLevski(S, src) {
-  const barres = barresDorees(S);
+  let barres = barresDorees(S);
+  {   // v314 : terminal type Pyro Gateway (en-tête hachuré, barre « // DETAILS ») ; le halo orange y crée de fausses barres dorées
+    const py = barresPyro(S), pas = S.H * 0.43;
+    const pyOk = py.length && (py.some((x) => x.termine) || py.some((x, i) => i && Math.abs(x.x - py[i - 1].x - pas) < pas * 0.04));
+    const lv = []; for (const x of barres) if (!lv.length || x.x - lv[lv.length - 1].x >= lv[lv.length - 1].w * 0.9) lv.push(x);
+    const levOk = lv.length >= Math.max(1, barres.length - 1);   // une barre parasite tolérée (écartée)
+    if (levOk) barres = lv;
+    if (pyOk || !levOk) barres = pyOk ? py : [];
+  }
   if (!barres.length) return null;
   const Pid = { Hi: [[1, 0, 0], [0, 1, 0], [0, 0, 1]], L: S.W, Hc: S.H, apercu: toileDe({ w: S.W, h: S.H, d: new Uint8ClampedArray(S.d) }), levski: true, cs: {} };
   const G = RAFF_LEV, colonnes = [];
   let k = -1;
   for (const b of barres) {
     k++; let s = k;
-    const G = b.termine ? RAFF_LEV_FIN : RAFF_LEV;
+    const G = b.pyro ? RAFF_PYRO : b.termine ? RAFF_LEV_FIN : RAFF_LEV;
     const Rb = { x0: b.x, y0: b.y, span: b.w }, P = { ...Pid, R: Rb };
     const z = (u, v, w, h, seuil, haut = 40) => zoneTerminal(S, P, u, v, w, h, seuil, haut);
     let C = levCache[k];
-    const empTitre = empreinteZone(z(0.55, 0.0, 0.43, 0.075, null, 30));
+    const NZ = G.num || [0.55, 0.0, 0.43, 0.075];
+    const empTitre = empreinteZone(z(NZ[0], NZ[1], NZ[2], NZ[3], null, 30));
     if (!C || Math.abs(C.x - b.x) > 6 || Math.abs(C.y - b.y) > 6 || Math.abs(C.w - b.w) > 6 || ecartEmpreintes(C.empTitre, empTitre) > 10) {
       const T = G.titre; let ok = false;
       // barre dorée = ordre en cours ; le texte ne sert qu'à écarter un ordre terminé (lu « COMPLETED »)
       ok = true;
       if (!b.termine) for (const se of [110, 80]) { const txt = sansAccents(await lireTexte(z(T[0], T[1], T[2], T[3], se, 30), "ABCDEFGHIJKLMNOPQRSTUVWXYZ ", 3000, 3)); if (/(proces|traitement|cours)/.test(txt)) break; if (/(complet|termin|done)/.test(txt)) { ok = false; break; } }
       if (!ok) continue;   // pas (encore) lu « PROCESSING » : réessayé au scan suivant
-      C = levCache[k] = { x: b.x, y: b.y, w: b.w, processing: ok, termine: !!b.termine, noms: {}, empTitre, nomsVus: [] };
+      C = levCache[k] = { x: b.x, y: b.y, w: b.w, processing: ok, termine: !!b.termine, noms: {}, empTitre, nomsVus: [], essaisNum: 0 };
       if (b.termine) { C.temps = "0m"; C.tempsLuA = Date.now() / 1000; C.progression = 1; C.vBarre = RAFF_LEV.barre[1]; }   // terminé : rien à attendre
       // numéro du « WORK ORDER n » (à droite de la barre) : identifie l'ordre même si la liste défile horizontalement
       C.num = null;
     }
+    if (C.processing && C.num == null && b.pyro) {   // v314 : chiffre seul, police nette → Tesseract chiffres
+      const r = await lireNombrePyro(z(NZ[0], NZ[1], NZ[2], NZ[3], null, 30), 2);
+      if (Number.isFinite(r.n) && r.n > 0) C.num = r.n; else if (++C.essaisNum >= 2) C.num = k + 1;
+    }
     if (C.processing && C.num == null) {   // numéro « WORK ORDER n » : vote sur plusieurs lectures (au moins 2 concordantes)
       const votes = new Map();
       for (const se of [110, 80, 140, null]) for (const hh of [30, 40, 24]) {
-        const tx = (await lireTexte(z(0.55, 0.0, 0.43, 0.075, se, hh), "WORKDEIL0123456789 ", 3000, 3)).replace(/[IL|](?=\s*$)/, "1");
+        const tx = (await lireTexte(z(NZ[0], NZ[1], NZ[2], NZ[3], se, hh), "WORKDEIL0123456789 ", 3000, 3)).replace(/[IL|](?=\s*$)/, "1");
         const m = tx.match(/(?:^|[\sR])(\d{1,3})\s*$/); if (m) votes.set(+m[1], (votes.get(+m[1]) || 0) + 1);
       }
       let best = null; for (const [n, c] of votes) if (c >= 2 && (best == null || c > votes.get(best))) best = n;
@@ -6142,7 +6199,7 @@ async function lireLevski(S, src) {
     if (C.num == null) continue;   // numéro « WORK ORDER n » pas encore lu : colonne ignorée (jamais rangée au hasard)
     s = C.num;   // clé de l'ordre = son numéro de work order
     Pid.cs[s] = { R: Rb };
-    const nombre = async (img) => ({ ...lireNombreLev(img), src: "modele" });   // Tesseract ne lit pas des chiffres aussi petits
+    const nombre = b.pyro ? lireNombrePyro : async (img) => ({ ...lireNombreLev(img), src: "modele" });   // Tesseract ne lit pas des chiffres aussi petits
     const lignes = [], boites = [];
     // lignes du tableau repérées par leurs bandes de texte (la liste peut être défilée d'une valeur quelconque)
     const haut0 = G.ligne0 - G.pasLigne / 2, hautZ = G.vMax - haut0, pxu = Math.round(hautZ * b.w);
@@ -6181,6 +6238,10 @@ async function lireLevski(S, src) {
         }
         if (best != null) q = best;
       }
+      if (b.pyro && Number.isFinite(q) && paliers.length && !paliers.includes(q)) {   // v314 : chiffre perdu (575 lu 75) → palier qui contient la lecture
+        const c = paliers.filter((pv) => String(pv).includes(String(q)));
+        if (c.length === 1) q = c[0];
+      }
       lignes.push({ nom, qualite: q, qte: rr.n, rend: rr.n, connue: paliers.includes(q), glyphes: { qualite: rq.gs, rend: rr.gs }, lev: true, sources: [rq.src, rr.src] });
     }
     // barre de progression cherchée sous le tableau (sa hauteur varie selon l'écran) ; le temps est juste au-dessus
@@ -6214,7 +6275,7 @@ async function lireLevski(S, src) {
     }
     // ascenseur vertical du tableau (liste de minerais plus longue que la zone) : position du curseur haut / bas
     let defile = null;
-    { const imA = z(0.955, haut0, 0.04, hautZ, null, pxu); let bx = -1, bn = 0;
+    if (!b.pyro) { const imA = z(0.955, haut0, 0.04, hautZ, null, pxu); let bx = -1, bn = 0;
       for (let x = 0; x < imA.w * 0.7; x++) { let n = 0; for (let y = 0; y < imA.h; y++) { const q = (y * imA.w + x) * 4, g = 0.299 * imA.d[q] + 0.587 * imA.d[q + 1] + 0.114 * imA.d[q + 2]; if (g > 65 && g < 125) n++; } if (n > bn) { bn = n; bx = x; } }
       if (bx >= 0 && bn > imA.h * 0.25 && bn < imA.h * 0.97) {
         let h0 = -1, h1 = -1; for (let y = 0; y < imA.h; y++) { const q = (y * imA.w + bx) * 4, g = 0.299 * imA.d[q] + 0.587 * imA.d[q + 1] + 0.114 * imA.d[q + 2]; if (g > 65 && g < 125) { if (h0 < 0) h0 = y; h1 = y; } }
@@ -6635,7 +6696,11 @@ function figerOrdre() { const o = O(); if (!raff || o.fige) return; o.fige = tru
 R$("dr-ajout").addEventListener("click", () => { const se = R$("dr-ajout-nom"); se.hidden = !se.hidden; if (!se.hidden) { se.value = ""; se.focus(); try { se.showPicker?.(); } catch {} } });
 R$("dr-ajout-nom").addEventListener("change", () => {
   if (!raff) return; const nom = R$("dr-ajout-nom").value; if (!nom) return; R$("dr-ajout-nom").hidden = true;
-  const ord = O(); if (!raff.ordres[raff.actif]) return;
+  if (!raff.ordres[raff.actif]) {   // v314 : aucun ordre lu → ordre créé à la main
+    const k = raff.actif != null && raff.actif >= 0 ? raff.actif : Math.max(0, ...Object.keys(raff.ordres).map(Number)) + 1;
+    raff.ordres[k] = nouvelOrdre(); raff.actif = k;
+  }
+  const ord = O();
   ord.lignes.push({ nom, qualite: NaN, qte: NaN, rend: NaN, connue: false, force: true, edite: true, neuve: true });
   figerOrdre(); renderRaff();
   const ins = R$("dr-lignes").querySelectorAll(`input[data-i="${ord.lignes.length - 1}"]`); ins[0]?.focus();
