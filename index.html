@@ -876,7 +876,7 @@ span.scu, td .scu, #dr-rend, .raff-liste .ro-l b, .nb-caisses, .actions-groupe s
 /* image de corporation : seulement à hauteur du bloc d'activité, collée à gauche, fondue vers la droite */
 #v-home::before, #v-home::after { display: none !important; }
 .home-haut { position: relative; }
-.home-haut::before { content: ""; position: absolute; z-index: -1; pointer-events: none; top: -24px; bottom: -16px; left: calc(50% - 50vw); width: 50vw;
+.home-haut::before { content: ""; position: absolute; z-index: -1; pointer-events: none; top: -24px; bottom: -16px; left: calc(50% - 50vw / .9); width: calc(50vw / .9);   /* v371 : la page est zoomée à 90 % : 1vw y vaut 0,9 vw réel */
   background: url("corpo.jpg") left 40% / cover no-repeat; opacity: .6;
   -webkit-mask-image: linear-gradient(to right, #000 25%, transparent 100%), linear-gradient(to bottom, #000 70%, transparent 100%);
   -webkit-mask-composite: source-in;
