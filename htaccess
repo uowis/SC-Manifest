@@ -1,0 +1,14 @@
+# Star Manifest — hébergement OVH
+# 1) Toujours en HTTPS (le partage d'écran et l'overlay l'exigent)
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteCond %{HTTP:X-Forwarded-Proto} !https
+RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+
+# 2) Pas de liste des fichiers du dossier
+Options -Indexes
+
+# 3) Fichiers réservés au dépôt : jamais servis, même s'ils étaient envoyés par erreur
+<FilesMatch "^(admins\.txt|CODEOWNERS|README\.md)$">
+  Require all denied
+</FilesMatch>
