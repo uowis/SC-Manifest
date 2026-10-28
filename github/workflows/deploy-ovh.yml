@@ -1,0 +1,37 @@
+# Déploiement automatique de Star Manifest vers l'hébergement OVH, à chaque push sur la branche main.
+# Secrets à créer dans le dépôt GitHub (Settings → Secrets and variables → Actions → New repository secret) :
+#   OVH_FTP_SERVER    ex. ftp.clusterXXX.hosting.ovh.net   (visible dans l'espace client OVH, onglet FTP-SSH)
+#   OVH_FTP_USER      identifiant FTP principal
+#   OVH_FTP_PASSWORD  mot de passe FTP
+name: Déploiement OVH
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:        # bouton « Run workflow » pour relancer à la main
+
+concurrency:
+  group: deploy-ovh
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+
+      - name: Envoyer les fichiers sur OVH (FTP)
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.OVH_FTP_SERVER }}
+          username: ${{ secrets.OVH_FTP_USER }}
+          password: ${{ secrets.OVH_FTP_PASSWORD }}
+          protocol: ftp          # mettre « ftps » si l'hébergement l'accepte (plus sûr)
+          server-dir: ./www/     # dossier racine du site chez OVH
+          # n'envoie que les fichiers modifiés depuis le dernier déploiement ; ignore le reste du dépôt
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/.github/**
+            README.md
