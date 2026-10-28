@@ -1,7 +1,7 @@
-# Déploiement automatique de Star Manifest vers l'hébergement OVH, à chaque push sur la branche main.
+# Déploiement automatique de Star Manifest vers l'hébergement OVH (SFTP, chiffré), à chaque push sur la branche main.
 # Secrets à créer dans le dépôt GitHub (Settings → Secrets and variables → Actions → New repository secret) :
-#   OVH_FTP_SERVER    ex. ftp.clusterXXX.hosting.ovh.net   (visible dans l'espace client OVH, onglet FTP-SSH)
-#   OVH_FTP_USER      identifiant FTP principal
+#   OVH_FTP_SERVER    ftp.cluster129.hosting.ovh.net
+#   OVH_FTP_USER      identifiant FTP principal (espace client OVH → Hébergement → FTP-SSH)
 #   OVH_FTP_PASSWORD  mot de passe FTP
 name: Déploiement OVH
 
@@ -21,17 +21,19 @@ jobs:
       - name: Récupérer le dépôt
         uses: actions/checkout@v4
 
-      - name: Envoyer les fichiers sur OVH (FTP)
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.OVH_FTP_SERVER }}
-          username: ${{ secrets.OVH_FTP_USER }}
-          password: ${{ secrets.OVH_FTP_PASSWORD }}
-          protocol: ftp          # mettre « ftps » si l'hébergement l'accepte (plus sûr)
-          server-dir: ./www/     # dossier racine du site chez OVH
-          # n'envoie que les fichiers modifiés depuis le dernier déploiement ; ignore le reste du dépôt
-          exclude: |
-            **/.git*
-            **/.git*/**
-            **/.github/**
-            README.md
+      - name: Installer lftp
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+
+      - name: Envoyer les fichiers sur OVH (SFTP, port 22)
+        env:
+          SERVEUR: ${{ secrets.OVH_FTP_SERVER }}
+          UTILISATEUR: ${{ secrets.OVH_FTP_USER }}
+          MOTDEPASSE: ${{ secrets.OVH_FTP_PASSWORD }}
+        run: |
+          # mirror -R : envoie le dépôt vers le dossier www (seulement les fichiers nouveaux ou modifiés).
+          # Pas de suppression côté serveur : un fichier retiré du dépôt reste chez OVH (à effacer à la main si besoin).
+          lftp -u "$UTILISATEUR,$MOTDEPASSE" -p 22 "sftp://$SERVEUR" -e "
+            set sftp:auto-confirm yes;
+            set net:max-retries 2;
+            mirror -R --verbose --exclude-glob .git* --exclude-glob .github/ --exclude-glob README.md ./ www/;
+            quit"
