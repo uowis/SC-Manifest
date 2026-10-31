@@ -806,25 +806,25 @@ span.scu, td .scu, #dr-rend, .raff-liste .ro-l b, .nb-caisses, .actions-groupe s
 @media (max-width: 800px) { .home-corpo { grid-template-columns: 1fr; } .hc-image { min-height: 180px; } .hc-image::after { background: linear-gradient(180deg, transparent 55%, var(--panneau, #212529)); } .hc-texte { padding: 22px; } }
 .btn-langue { background: none; border: 1px solid var(--trait); color: var(--os-doux); border-radius: 4px; padding: 5px 8px; font: inherit; font-size: max(var(--fmin), 0.75rem); font-weight: 700; letter-spacing: .06em; cursor: pointer; }
 .btn-langue:hover { color: var(--os); border-color: var(--os-doux); }
-.ad-recherche { margin: 0 0 14px; }
-.ad-recherche input { width: min(420px, 100%); }
-#ad { display: grid; gap: 16px; }
-.ad-table td, .ad-table th { white-space: nowrap; }
-.ad-table tr.banni td { opacity: .6; }
-.ad-table tr.banni td.ad-actions, .ad-table tr.banni td:nth-last-child(2) { opacity: 1; }
-.ad-actions { text-align: right; display: flex; gap: 6px; justify-content: flex-end; }
-.ad-banni { color: #ff8a7a; font-weight: 700; }
-.ad-ok { color: var(--scu); }
-.ad-admin { color: var(--orange); }
-.ad-joueur { display: inline-flex; align-items: center; gap: 8px; }
-.ad-joueur img { width: 22px; height: 22px; border-radius: 50%; }
-.ad-membres td { background: rgba(0,0,0,.18); }
-.ad-membres ul { list-style: none; margin: 0; padding: 4px 0; display: grid; gap: 6px; }
-.ad-membres li { display: flex; align-items: center; gap: 10px; }
-.ad-membres li small { color: var(--os-doux); }
-.ad-membres li .btn { margin-left: auto; }
+.adm-recherche { margin: 0 0 14px; }
+.adm-recherche input { width: min(420px, 100%); }
+#adm { display: grid; gap: 16px; }
+.adm-table td, .adm-table th { white-space: nowrap; }
+.adm-table tr.banni td { opacity: .6; }
+.adm-table tr.banni td.adm-actions, .adm-table tr.banni td:nth-last-child(2) { opacity: 1; }
+.adm-actions { text-align: right; display: flex; gap: 6px; justify-content: flex-end; }
+.adm-banni { color: #ff8a7a; font-weight: 700; }
+.adm-ok { color: var(--scu); }
+.adm-admin { color: var(--orange); }
+.adm-joueur { display: inline-flex; align-items: center; gap: 8px; }
+.adm-joueur img { width: 22px; height: 22px; border-radius: 50%; }
+.adm-membres td { background: rgba(0,0,0,.18); }
+.adm-membres ul { list-style: none; margin: 0; padding: 4px 0; display: grid; gap: 6px; }
+.adm-membres li { display: flex; align-items: center; gap: 10px; }
+.adm-membres li small { color: var(--os-doux); }
+.adm-membres li .btn { margin-left: auto; }
 .id-compte { margin: 2px 0 0; font-size: max(var(--fmin), 0.625rem); color: var(--os-doux); opacity: .55; font-family: ui-monospace, monospace; user-select: all; letter-spacing: .02em; }
-.ad-detail { white-space: normal !important; color: var(--os-doux); }
+.adm-detail { white-space: normal !important; color: var(--os-doux); }
 .demandes { border: 1px solid var(--orange); border-radius: 6px; padding: 8px 12px; background: color-mix(in srgb, var(--orange) 8%, transparent); }
 .demandes h3 { color: var(--orange); margin-top: 0; }
 .mini-avatar { width: 20px; height: 20px; border-radius: 50%; vertical-align: -5px; margin-right: 6px; }
@@ -1793,9 +1793,9 @@ tr.bp-choisissable:hover td { background: rgba(255,255,255,.04); }
   </section>
 
   <section id="v-admin" hidden>
-    <div class="entete"><div><h1>Administration</h1><p class="sous-titre" id="ad-sous-titre">Joueurs et corporations du site.</p></div>
+    <div class="entete"><div><h1>Administration</h1><p class="sous-titre" id="adm-sous-titre">Joueurs et corporations du site.</p></div>
       <div class="outils"><button class="btn" type="button" data-admin="recharger">Actualiser</button></div></div>
-    <div id="ad"></div>
+    <div id="adm"></div>
   </section>
 
   <section id="v-nouvelle" hidden>
@@ -7162,7 +7162,7 @@ async function chargerAdmin() {
 }
 const dateCourte = (d) => d ? new Date(d).toLocaleDateString(LOCALE) : "—";
 function renderAdmin() {
-  const ad = $("ad");
+  const ad = $("adm");
   if (!compte) { ad.innerHTML = `<div class="carte"><p class="note">Connecte-toi pour accéder à l'administration.</p></div>`; return; }
   if (!compte.superAdmin) { ad.innerHTML = `<div class="carte"><p class="note">Page réservée aux administrateurs du site.</p></div>`; return; }
   if (!admin.joueurs && !admin.erreur) { ad.innerHTML = `<div class="carte"><p class="note">Chargement…</p></div>`; chargerAdmin(); return; }
@@ -7171,24 +7171,24 @@ function renderAdmin() {
   const joueurs = admin.joueurs.filter((j) => !q || (j.pseudo || "").toLowerCase().includes(q) || (j.corporations || "").toLowerCase().includes(q));
   const corpos = admin.corpos.filter((c) => !q || c.nom.toLowerCase().includes(q) || c.tag.toLowerCase().includes(q));
   const nbBj = admin.joueurs.filter((j) => j.banni).length, nbBc = admin.corpos.filter((c) => c.banni).length;
-  $("ad-sous-titre").innerHTML = `${NB(admin.joueurs.length)} joueurs (${nbBj} bannis), ${NB(admin.corpos.length)} corporations (${nbBc} bannies)`;
-  const statut = (b, motif) => b ? `<span class="ad-banni" title="${esc(motif || "")}">Banni</span>` : `<span class="ad-ok">Actif</span>`;
+  $("adm-sous-titre").innerHTML = `${NB(admin.joueurs.length)} joueurs (${nbBj} bannis), ${NB(admin.corpos.length)} corporations (${nbBc} bannies)`;
+  const statut = (b, motif) => b ? `<span class="adm-banni" title="${esc(motif || "")}">Banni</span>` : `<span class="adm-ok">Actif</span>`;
   const ligneMembres = (c) => {
     const m = admin.membres[c.id];
-    if (!m) return `<tr class="ad-membres"><td colspan="8"><p class="note">Chargement…</p></td></tr>`;
-    return `<tr class="ad-membres"><td colspan="8"><ul>${m.map((x) => `<li><span>${esc(x.pseudo || "Joueur")}</span><small><span>${x.role === "admin" ? "admin" : "membre"}</span> · ${dateCourte(x.rejoint_le)}</small>${x.banni ? `<span class="ad-banni">Banni</span>` : ""}<button class="btn petit" type="button" data-admin="exclure" data-corpo="${c.id}" data-user="${x.user_id}" data-nom="${esc(x.pseudo || "")}">Exclure</button></li>`).join("") || `<li class="note">Aucun membre</li>`}</ul></td></tr>`;
+    if (!m) return `<tr class="adm-membres"><td colspan="8"><p class="note">Chargement…</p></td></tr>`;
+    return `<tr class="adm-membres"><td colspan="8"><ul>${m.map((x) => `<li><span>${esc(x.pseudo || "Joueur")}</span><small><span>${x.role === "admin" ? "admin" : "membre"}</span> · ${dateCourte(x.rejoint_le)}</small>${x.banni ? `<span class="adm-banni">Banni</span>` : ""}<button class="btn petit" type="button" data-admin="exclure" data-corpo="${c.id}" data-user="${x.user_id}" data-nom="${esc(x.pseudo || "")}">Exclure</button></li>`).join("") || `<li class="note">Aucun membre</li>`}</ul></td></tr>`;
   };
   ad.innerHTML = `
-    <div class="ad-recherche"><input type="search" id="ad-q" placeholder="Rechercher un joueur, une corporation, un tag…" value="${esc(admin.recherche)}"></div>
+    <div class="adm-recherche"><input type="search" id="adm-q" placeholder="Rechercher un joueur, une corporation, un tag…" value="${esc(admin.recherche)}"></div>
     <div class="carte">
       <h2>Corporations</h2>
-      <div class="tableau-wrap"><table class="ad-table">
+      <div class="tableau-wrap"><table class="adm-table">
         <thead><tr><th>Tag</th><th>Nom</th><th>Créée par</th><th class="num">Membres</th><th class="num">Alliances</th><th>Créée le</th><th>Statut</th><th></th></tr></thead>
         <tbody>${corpos.map((c) => `<tr class="${c.banni ? "banni" : ""}">
           <td><b>[${esc(c.tag)}]</b></td><td>${esc(c.nom)}</td><td>${esc(c.createur || "—")}</td>
           <td class="num"><button class="lien" type="button" data-admin="membres" data-corpo="${c.id}" aria-expanded="${admin.ouverte === c.id}">${NB(Number(c.nb_membres))}</button></td>
           <td class="num">${Number(c.nb_allies)}</td><td>${dateCourte(c.cree_le)}</td><td>${statut(c.banni, c.banni_motif)}</td>
-          <td class="ad-actions">${c.banni
+          <td class="adm-actions">${c.banni
             ? `<button class="btn petit" type="button" data-admin="debannir-c" data-corpo="${c.id}" data-nom="${esc(c.nom)}">Débannir</button>`
             : `<button class="btn petit danger" type="button" data-admin="bannir-c" data-corpo="${c.id}" data-nom="${esc(c.nom)}">Bannir</button>`}
             <button class="btn petit danger" type="button" data-admin="suppr-c" data-corpo="${c.id}" data-nom="${esc(c.nom)}">Supprimer</button></td>
@@ -7197,13 +7197,13 @@ function renderAdmin() {
     </div>
     <div class="carte">
       <h2>Joueurs</h2>
-      <div class="tableau-wrap"><table class="ad-table">
+      <div class="tableau-wrap"><table class="adm-table">
         <thead><tr><th>Joueur</th><th>Corporations</th><th class="num">Caisses</th><th>Inscrit le</th><th>Dernière connexion</th><th>Statut</th><th></th></tr></thead>
         <tbody>${joueurs.map((j) => `<tr class="${j.banni ? "banni" : ""}">
-          <td><span class="ad-joueur">${j.avatar ? `<img src="${esc(j.avatar)}" alt="">` : ""}${esc(j.pseudo || "Joueur")}${j.super_admin ? ` <small class="ad-admin">admin du site</small>` : ""}${j.id === compte.id ? ` <small>(toi)</small>` : ""}</span></td>
+          <td><span class="adm-joueur">${j.avatar ? `<img src="${esc(j.avatar)}" alt="">` : ""}${esc(j.pseudo || "Joueur")}${j.super_admin ? ` <small class="adm-admin">admin du site</small>` : ""}${j.id === compte.id ? ` <small>(toi)</small>` : ""}</span></td>
           <td>${esc(j.corporations || "—")}</td><td class="num">${NB(Number(j.nb_caisses))}</td>
           <td>${dateCourte(j.cree_le)}</td><td>${dateCourte(j.derniere_connexion)}</td><td>${statut(j.banni, j.banni_motif)}</td>
-          <td class="ad-actions"><button class="btn petit" type="button" data-admin="copier-id" data-user="${j.id}" title="${esc(j.id)}">Copier l'identifiant</button>${j.super_admin || j.id === compte.id ? "" : j.banni
+          <td class="adm-actions"><button class="btn petit" type="button" data-admin="copier-id" data-user="${j.id}" title="${esc(j.id)}">Copier l'identifiant</button>${j.super_admin || j.id === compte.id ? "" : j.banni
             ? `<button class="btn petit" type="button" data-admin="debannir-j" data-user="${j.id}" data-nom="${esc(j.pseudo || "")}">Débannir</button>`
             : `<button class="btn petit danger" type="button" data-admin="bannir-j" data-user="${j.id}" data-nom="${esc(j.pseudo || "")}">Bannir</button>`}</td>
         </tr>`).join("") || `<tr><td colspan="7" class="note">Aucun joueur.</td></tr>`}</tbody>
@@ -7212,15 +7212,15 @@ function renderAdmin() {
     ${admin.qualites ? carteQualites(q) : ""}
     ${admin.journal ? `<div class="carte">
       <h2>Journal</h2>
-      <div class="tableau-wrap"><table class="ad-table">
+      <div class="tableau-wrap"><table class="adm-table">
         <thead><tr><th>Date</th><th>Par</th><th>Action</th><th>Cible</th><th>Détail</th></tr></thead>
         <tbody>${admin.journal.map((l) => `<tr><td>${new Date(l.ts).toLocaleString(LOCALE)}</td><td>${esc(l.admin_nom || "—")}</td>
-          <td><span>${esc(l.action)}</span></td><td>${esc(l.cible_nom || "—")}</td><td class="ad-detail">${esc(l.detail || "")}</td></tr>`).join("")
+          <td><span>${esc(l.action)}</span></td><td>${esc(l.cible_nom || "—")}</td><td class="adm-detail">${esc(l.detail || "")}</td></tr>`).join("")
           || `<tr><td colspan="5" class="note">Aucune action pour l'instant.</td></tr>`}</tbody>
       </table></div>
     </div>` : ""}`;
-  const champ = $("ad-q");
-  champ.addEventListener("input", () => { admin.recherche = champ.value; const p = champ.selectionStart; renderAdmin(); const c2 = $("ad-q"); c2.focus(); c2.setSelectionRange(p, p); });
+  const champ = $("adm-q");
+  champ.addEventListener("input", () => { admin.recherche = champ.value; const p = champ.selectionStart; renderAdmin(); const c2 = $("adm-q"); c2.focus(); c2.setSelectionRange(p, p); });
 }
 document.addEventListener("click", async (e) => {
   const b = e.target.closest?.("[data-admin]"); if (!b || !sb) return;
@@ -7320,20 +7320,20 @@ async function signalerQualites() {
 const SEUIL_QUALITES = 3;
 function carteQualites(q) {
   const l = admin.qualites.filter((x) => !q || x.nom.toLowerCase().includes(q) || String(x.qualite).includes(q));
-  const etat = (x) => x.statut === "valide" ? `<span class="ad-ok">Validée</span>` : x.statut === "rejete" ? `<span class="ad-banni">Rejetée</span>`
-    : Number(x.nb_joueurs) >= SEUIL_QUALITES ? `<span class="ad-ok">Adoptée</span>` : `<span class="note">En observation</span>`;
+  const etat = (x) => x.statut === "valide" ? `<span class="adm-ok">Validée</span>` : x.statut === "rejete" ? `<span class="adm-banni">Rejetée</span>`
+    : Number(x.nb_joueurs) >= SEUIL_QUALITES ? `<span class="adm-ok">Adoptée</span>` : `<span class="note">En observation</span>`;
   const nouvelles = admin.qualites.filter((x) => !valeursWiki(x.nom).includes(Number(x.qualite))).length;
   return `<div class="carte">
     <h2>Qualités observées</h2>
     <p class="note">Qualités vues sur les caisses enregistrées par les joueurs. Une qualité vue par ${SEUIL_QUALITES} joueurs ou plus est adoptée automatiquement, sauf si tu la rejettes. ${NB(nouvelles)} absentes du tableau d'origine (wiki 4.9).</p>
     <div><button class="btn petit" type="button" data-admin="export-qualites">Copier la liste à jour (JSON)</button></div>
-    <div class="tableau-wrap"><table class="ad-table">
+    <div class="tableau-wrap"><table class="adm-table">
       <thead><tr><th>Minerai</th><th class="num">Qualité</th><th>Tableau d'origine</th><th class="num">Joueurs</th><th>Dernière vue</th><th>Statut</th><th></th></tr></thead>
       <tbody>${l.map((x) => `<tr>
         <td>${esc(x.nom)}</td><td class="num"><span class="q">${Number(x.qualite)}</span></td>
-        <td>${valeursWiki(x.nom).includes(Number(x.qualite)) ? "oui" : `<b class="ad-admin">nouvelle</b>`}</td>
+        <td>${valeursWiki(x.nom).includes(Number(x.qualite)) ? "oui" : `<b class="adm-admin">nouvelle</b>`}</td>
         <td class="num">${NB(Number(x.nb_joueurs))}</td><td>${dateCourte(x.derniere)}</td><td>${etat(x)}</td>
-        <td class="ad-actions">
+        <td class="adm-actions">
           ${x.statut !== "valide" ? `<button class="btn petit" type="button" data-admin="q-statut" data-statut="valide" data-nom="${esc(x.nom)}" data-q="${Number(x.qualite)}">Valider</button>` : ""}
           ${x.statut !== "rejete" ? `<button class="btn petit danger" type="button" data-admin="q-statut" data-statut="rejete" data-nom="${esc(x.nom)}" data-q="${Number(x.qualite)}">Rejeter</button>` : ""}
           ${x.statut ? `<button class="btn petit" type="button" data-admin="q-statut" data-statut="" data-nom="${esc(x.nom)}" data-q="${Number(x.qualite)}">Auto</button>` : ""}</td>
