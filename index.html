@@ -8565,10 +8565,10 @@ function possederBlueprints(ids, oui) {
 }
 $("v-blueprints").addEventListener("click", (e) => {
   const pu = e.target.closest(".bp-puce");
-  if (pu) { const set = { "bp-types": bp.f.types, "bp-poss": bp.f.poss, "bp-stock": bp.f.stock }[pu.parentElement.id], k = pu.dataset.k; set.has(k) ? set.delete(k) : set.add(k); renderBlueprints(); return; }
+  if (pu) { const set = { "bp-types": bp.f.types, "bp-poss": bp.f.poss, "bp-stock": bp.f.stock }[pu.parentElement.id], k = pu.dataset.k; set.has(k) ? set.delete(k) : set.add(k); renderBlueprints(); renderMenuDetail(); return; }
   const o = e.target.closest("[data-bp-ouvrir]"); if (o) { ouvrirBlueprint(o.dataset.bpOuvrir); return; }
-  const tg = e.target.closest("[data-tag]"); if (tg) { const g = tg.dataset.tag; bp.f.tags.has(g) ? bp.f.tags.delete(g) : bp.f.tags.add(g); renderBlueprints(); return; }
-  const tr = e.target.closest("[data-tag-retirer]"); if (tr) { bp.f.tags.delete(tr.dataset.tagRetirer); renderBlueprints(); return; }
+  const tg = e.target.closest("[data-tag]"); if (tg) { const g = tg.dataset.tag; bp.f.tags.has(g) ? bp.f.tags.delete(g) : bp.f.tags.add(g); renderBlueprints(); renderMenuDetail(); return; }
+  const tr = e.target.closest("[data-tag-retirer]"); if (tr) { bp.f.tags.delete(tr.dataset.tagRetirer); renderBlueprints(); renderMenuDetail(); return; }
   if (e.target.closest("#bp-tout")) { if (bp.sel.size) bp.sel.clear(); else bpVisibles.forEach((id) => bp.sel.add(id)); renderBlueprints(); return; }
   const tb = e.target.closest("[data-bp-tri]");
   if (tb) { const T = bp.tri, c = tb.dataset.bpTri; if (T.col === c) T.dir = T.dir === "asc" ? "desc" : "asc"; else { T.col = c; T.dir = ["possede", "stock"].includes(c) ? "desc" : "asc"; } renderBlueprints(); return; }
@@ -8586,7 +8586,9 @@ $("bp-q").addEventListener("input", (e) => { bp.f.q = e.target.value; renderBlue
 /* Menu « + Détail » : tous les tags du catalogue (avec leur nombre), filtrables ; un clic ajoute le filtre */
 function renderMenuDetail() {
   const el = $("bp-detail-liste"); if (!el || $("bp-detail-pop").hidden) return;
-  const n = new Map(); for (const c of bp.catalogue || []) for (const g of tagsDe(c)) n.set(g, (n.get(g) || 0) + 1);
+  // v372 : seulement les caractéristiques des blueprints du (des) type(s) choisi(s) et des caractéristiques déjà actives
+  const f = bp.f, base0 = (bp.catalogue || []).filter((c) => (!f.types.size || f.types.has(c.type)) && [...f.tags].every((g) => tagsDe(c).includes(g)));
+  const n = new Map(); for (const c of base0) for (const g of tagsDe(c)) n.set(g, (n.get(g) || 0) + 1);
   const q = sansAccents($("bp-detail-q").value.trim());
   const l = [...n].filter(([g]) => !bp.f.tags.has(g) && (!q || sansAccents(g).includes(q))).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "fr")).slice(0, 200);
   el.innerHTML = l.length ? l.map(([g, k]) => `<button type="button" data-tag="${esc(g)}">${esc(g)}<small>${k}</small></button>`).join("") : `<p class="note">Aucune caractéristique.</p>`;
