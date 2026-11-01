@@ -1570,6 +1570,53 @@ tr.bp-choisissable:hover td { background: rgba(255,255,255,.04); }
   100% { opacity: 0; --fx: 50%; --fy: 0%; }
 }
 .fg-case.sel, .fg-case.edite, .fg-case.ici.sel, .fg-case.ici.edite { background: radial-gradient(170% 150% at 64% 0%, rgba(110,224,170,.34), rgba(80,200,150,.15) 55%, rgba(80,200,150,.05) 85%, #262b30 115%) !important; }
+/* v375 : overlay séparé « Mes blueprints » (grille) */
+.p-bps { display: flex; flex-direction: column; gap: 6px; padding: 10px; height: 100%; box-sizing: border-box; background: var(--rouille); color: var(--os); }
+.p-bps[hidden] { display: none; }
+.bp-corps { display: flex; gap: 12px; align-items: flex-start; }
+.bp-corps > .tableau-wrap { flex: 1; min-width: 0; }
+.bp-scan-place:empty, .bp-scan-place:has(> .p-bps[hidden]) { display: none; }
+.bp-scan-place { flex: 0 0 360px; position: sticky; top: 12px; height: calc(100vh / .9 - 40px); border: 1px solid var(--trait); border-radius: 6px; overflow: hidden; }
+.p-bps.flottant { position: fixed; right: 16px; bottom: 16px; width: 360px; height: 620px; z-index: 50; border: 1px solid var(--trait); border-radius: 6px; box-shadow: 0 8px 30px rgba(0,0,0,.5); }
+body.overlay-bps { margin: 0; height: 100vh; }
+.bps-tete { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.bps-compte { color: var(--os-doux); font-size: var(--fmin); }
+.bps-aide { margin: 0; color: var(--os-doux); font-size: var(--fmin); }
+.bps-lu { min-height: 1.3em; font-weight: 600; font-size: var(--fmin); }
+.bps-grille { flex: 1 1 auto; min-height: 0; overflow-y: auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; align-content: start; scrollbar-width: thin; scrollbar-gutter: stable; }
+.bps-type { grid-column: 1 / -1; margin-top: 6px; color: var(--orange); text-transform: uppercase; letter-spacing: .05em; font-size: var(--fmin); }
+.bps-type small { color: var(--os-doux); margin-left: 4px; }
+.bps-case { position: relative; aspect-ratio: 1 / 1; background: #2b3035; border: 1px solid transparent; border-radius: 3px; padding: 4px; display: flex; align-items: flex-end; font-size: var(--fmin); line-height: 1.2; overflow: hidden; color: var(--os-doux); }
+.bps-case span { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+.bps-case.nouveau { color: #f4f8fa; background: radial-gradient(170% 150% at 64% 0%, rgba(110,224,170,.3), rgba(80,200,150,.12) 55%, #262b30 110%); }
+.bps-ocr { display: block; max-width: 100%; max-height: 70px; margin: 4px 0; image-rendering: pixelated; border: 1px solid #444; background: #fff; }
+.bps-case.possede { color: #eafaf2; background: radial-gradient(170% 150% at 64% 0%, rgba(90,200,140,.22), rgba(60,160,110,.1) 55%, #262b30 110%); }
+.bps-case.vide { background: #3a3f44; opacity: .45; cursor: default; }
+.bps-type.bps-page { color: var(--os-doux); font-size: var(--fmin); }
+.bps-case.dernier { border-color: rgba(120,180,240,.85); }
+.bps-case.inconnu { color: var(--orange); }
+.bps-annuler { position: absolute; top: 2px; right: 2px; width: 18px; height: 18px; padding: 0; border: 0; background: none; color: var(--os-doux); cursor: pointer; }
+.bps-annuler svg { width: 13px; height: 13px; }
+.bps-pied { display: flex; } .bps-pied .btn { flex: 1; }
+.bp-btn-scan { background: #1d4f91 !important; border-color: transparent !important; color: #e8f1ff !important; }
+.bp-btn-scan:hover { background: #2660ad !important; }
+/* v377 : cases de « Mes blueprints » toujours carrées, texte coupé (plus de chevauchement) */
+.bps-case { min-width: 0; min-height: 0; height: auto; contain: size; align-self: start; }
+.bps-case span { -webkit-line-clamp: 3; overflow-wrap: anywhere; word-break: break-word; max-width: 100%; }
+.bps-grille { grid-auto-rows: max-content; }
+.bps-grille { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }   /* v377 : 4 colonnes, comme le kiosque */
+/* v380 : propositions à valider */
+.bps-propositions { display: flex; flex-direction: column; gap: 4px; max-height: 35%; overflow-y: auto; }
+.bps-propositions[hidden] { display: none; }
+.bps-prop { position: relative; display: flex; flex-direction: column; gap: 2px; padding: 4px 22px 4px 6px; background: #2b3035; border-radius: 3px; font-size: var(--fmin); }
+.bps-prop-lu { color: var(--os-doux); }
+.bps-prop label { display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--os); }
+.bps-prop-ignorer { position: absolute; top: 3px; right: 3px; width: 16px; height: 16px; padding: 0; border: 0; background: none; color: var(--os-doux); cursor: pointer; }
+.bps-prop-ignorer svg { width: 12px; height: 12px; }
+.bps-case { cursor: pointer; }
+.bps-case.sel { border-color: var(--orange) !important; box-shadow: inset 0 0 0 1px var(--orange); }
+.bps-pied { gap: 8px; } .bps-pied #bps-suppr { flex: 0 0 auto; padding: 0 12px; }
+.bps-prop label.possede { color: #8fe0a6; }   /* v385 : candidat déjà possédé */
 </style>
 </head>
 <body>
@@ -1702,7 +1749,7 @@ tr.bp-choisissable:hover td { background: rgba(255,255,255,.04); }
   </section>
 
   <section id="v-blueprints" hidden>
-    <div class="entete"><div><h1>Blueprints</h1><p class="sous-titre" id="bp-etat"></p></div></div>
+    <div class="entete"><div><h1>Blueprints</h1><p class="sous-titre" id="bp-etat"></p></div><div class="outils"><button class="btn bp-btn-scan" type="button" id="bp-scanner" title="Ouvre un overlay qui lit le kiosque de fabrication du jeu (filtre Owned)">Scanner mes blueprints</button></div></div>
     <div class="bp-filtres">
       <div class="bp-groupe"><span>Type</span><div class="bp-puces" id="bp-types"></div></div>
       <div class="bp-groupe"><span>Possession</span><div class="bp-puces" id="bp-poss"></div></div>
@@ -1728,7 +1775,7 @@ tr.bp-choisissable:hover td { background: rgba(255,255,255,.04); }
       <button class="btn" type="button" id="bp-oui" disabled>Je les possède</button>
       <button class="btn" type="button" id="bp-non" disabled>Je ne les possède pas</button>
     </div>
-    <div class="tableau-wrap"><table class="bp-table"><thead id="bp-tete"></thead><tbody id="bp-lignes"></tbody></table></div>
+    <div class="bp-corps"><div class="tableau-wrap"><table class="bp-table"><thead id="bp-tete"></thead><tbody id="bp-lignes"></tbody></table></div><div class="bp-scan-place" id="bp-scan-place"></div></div>
     <p class="vide" id="bp-vide" hidden></p>
   </section>
 
@@ -1875,6 +1922,15 @@ tr.bp-choisissable:hover td { background: rgba(255,255,255,.04); }
 
 </form>
 
+<div id="p-bps" class="p-bps" hidden>
+  <div class="bps-tete"><strong>Mes blueprints</strong><span class="bps-compte" id="bps-compte"></span></div>
+  <p class="bps-aide">Kiosque de fabrication, filtre <b>Owned</b> : survolez chaque blueprint.</p>
+  <div class="bps-lu" id="bps-lu"></div>
+  <canvas class="bps-ocr" id="bps-ocr" width="1" height="1" title="Image lue par l'OCR"></canvas>
+  <div class="bps-propositions" id="bps-propositions" hidden></div>
+  <div class="bps-grille" id="bps-grille"></div>
+  <div class="bps-pied"><button class="btn" type="button" id="bps-suppr" hidden>Supprimer</button><button class="btn danger" type="button" id="bps-fermer">Terminer</button></div>
+</div>
 <div id="p-raff" class="p-raff" hidden>
   <div class="pr-ecran"><canvas id="dr-apercu" class="pr-apercu" width="16" height="9"></canvas><p class="pr-aide" id="dr-aide">Dans le terminal de raffinerie, affichez l'ordre lancé (« Processing »).</p></div>
   <div class="pr-ordres" id="dr-ordres" hidden></div>
@@ -3348,7 +3404,7 @@ async function lireNom(nomImg, sig) {
     const w = await avecDelai(chargerTesseract(), 15000);
     // v344 : le moteur OCR est partagé : la lecture précédente (quantité, chiffres) a pu laisser une liste de caractères
     // réduite (« 0123456789.SCU ») → les noms sortaient en « Q » ou vides. On remet les lettres avant chaque lecture.
-    await avecDelai(w.setParameters({ tessedit_char_whitelist: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz()- ", tessedit_pageseg_mode: "7" }), 3000);
+    lireTexte.cle = null; await avecDelai(w.setParameters({ tessedit_char_whitelist: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz()- ", tessedit_pageseg_mode: "7" }), 3000);
     let brut = "";
     // 1er essai : gris inversé (texte foncé sur blanc) x4 ; 2e essai : image brute x3
     for (const [inv, f] of [[true, 4], [false, 3]]) {
@@ -3375,7 +3431,7 @@ async function relireQuantite(sImg) {
   if (!sImg) return ["", ""];
   try {
     const w = await avecDelai(chargerTesseract(), 15000);
-    await avecDelai(w.setParameters({ tessedit_char_whitelist: "0123456789.SCU " }), 3000);
+    lireTexte.cle = null; await avecDelai(w.setParameters({ tessedit_char_whitelist: "0123456789.SCU " }), 3000);
     const lire = async (inv, f) => {
       const c = document.createElement("canvas"); c.width = sImg.w * f + 40; c.height = sImg.h * f + 40;
       const x = c.getContext("2d"); x.fillStyle = inv ? "#fff" : "#000"; x.fillRect(0, 0, c.width, c.height);
@@ -4330,7 +4386,7 @@ function ecartPanneau(a, b) {
    le nombre est lu sur la case sélectionnée. */
 let GRILLE_COLONNES = 4, GRILLE_LIGNES = 6;   // cases visibles dans la zone « grille »
 
-async function lireTexte(img, liste, ms = 3000, echelle = 6) {
+async function lireTexte(img, liste, ms = 3000, echelle = 6, psm = "7") {
   try {
     const w = await avecDelai(chargerTesseract(), 15000);
     const f = echelle, c = document.createElement("canvas");
@@ -4341,9 +4397,9 @@ async function lireTexte(img, liste, ms = 3000, echelle = 6) {
     const t = document.createElement("canvas"); t.width = img.w; t.height = img.h;
     t.getContext("2d").putImageData(new ImageData(d, img.w, img.h), 0, 0);
     x.imageSmoothingQuality = "high"; x.drawImage(t, 20, 20, img.w * f, img.h * f);
-    await avecDelai(w.setParameters({ tessedit_char_whitelist: liste, tessedit_pageseg_mode: "7" }), 3000);
+    // v394 : réglages gardés d'une lecture à l'autre (remis seulement s'ils changent)
+    if (lireTexte.cle !== liste + psm) { lireTexte.cle = null; await avecDelai(w.setParameters({ tessedit_char_whitelist: liste, tessedit_pageseg_mode: psm }), 3000); lireTexte.cle = liste + psm; }
     const texte = (await avecDelai(w.recognize(c), ms)).data.text.trim();
-    await avecDelai(w.setParameters({ tessedit_char_whitelist: "" }), 3000);
     return texte;
   } catch { return ""; }
 }
@@ -6735,7 +6791,7 @@ function dureeSecondes(t) {
 let raff = null, pipRaff = null;
 const O = () => (raff && raff.ordres[raff.actif]) || { lignes: [], temps: "", stable: 0, sig: "", complet: false };
 const nouvelOrdre = () => ({ lignes: [], temps: "", stable: 0, sig: "", complet: false, rates: 0, tempsManuel: false });
-const R$ = (id) => document.getElementById(id) || (typeof pip !== "undefined" && pip?.document.getElementById(id)) || pipRaff?.document.getElementById(id);
+const R$ = (id) => document.getElementById(id) || (typeof pip !== "undefined" && pip?.document.getElementById(id)) || pipRaff?.document.getElementById(id) || window.pipBps?.document.getElementById(id);
 function cleLigne(l) { return `${l.nom}|${l.qualite}`; }
 function totauxOrdre(ord) {
   const ok = ord.lignes.filter((l) => l.connue || l.force);
@@ -7904,6 +7960,254 @@ function lireBulleHD(r, z) {
 
 /* ---------- Overlay unique : choix du type de scan (inventaire, monte-charge, raffinerie) */
 let modeOverlay = ["inventaire", "freight", "raff"].includes(base.modeOverlay) ? base.modeOverlay : "inventaire";
+/* ---------- v374 : scan des blueprints possédés — kiosque de fabrication, filtre « Owned ».
+   Au survol, le jeu affiche une bulle turquoise avec le nom du blueprint : on la repère (fond turquoise sombre + texte clair,
+   ~13 % × 3 % de l'écran), on lit le nom, on le rapproche du catalogue (strictement : beaucoup de noms voisins), et le
+   blueprint reconnu passe en « Possédé ». Le scan n'enlève jamais rien. */
+const bpScan = { vus: new Map(), inconnus: new Map(), ajoutes: new Set(), dernier: "", sig: null, enCours: false, etat: "" };
+/* v401 : bulle de nom du kiosque : zone turquoise ; une fois la largeur de bulle connue (toujours la même), seules les zones de cette largeur comptent
+   → titres, barre de filtres, etc. écartés sans lecture */
+function bulleBp(src) {
+  const [W0, H0] = tailleSource(src), k = W0 > 1400 ? 2 : 1, W = Math.round(W0 / k), H = Math.round(H0 / k);
+  const c = bulleBp.c || (bulleBp.c = document.createElement("canvas")); c.width = W; c.height = H; const x = c.getContext("2d", { willReadFrequently: true }); x.drawImage(src, 0, 0, W, H);
+  const d = x.getImageData(0, 0, W, H).data;
+  const ok = (X, Y) => { const i = (Y * W + X) * 4, r = d[i], g = d[i + 1], b = d[i + 2]; return (g - r > 28 && g > 44 && g < 85 && b > 38 && b < 80 && Math.abs(g - b) < 14) || (g > 90 && g - r > 20 && b > 70); };
+  const groupes = [];
+  for (let y = 0; y < H; y += 1) {
+    let X = 0;
+    while (X < W) {
+      if (!ok(X, y)) { X += 1; continue; }
+      const a = X; let t = 0; while (X < W && t < 6) { if (ok(X, y)) t = 0; else t++; X++; }
+      const b = X - t; if (b - a <= W * 0.035) continue;
+      // écran vu de biais (perspective) : on regroupe les lignes qui se recouvrent
+      const g = groupes.find((o) => y - o.y1 <= 4 && Math.min(o.b, b) - Math.max(o.a, a) > 0.6 * Math.min(o.b - o.a, b - a));
+      if (g) { g.y1 = y; g.a = Math.min(g.a, a); g.b = Math.max(g.b, b); } else groupes.push({ a, b, y0: y, y1: y });
+    }
+  }
+  const L = bpScan.largeur || 0;
+  const bx = groupes.filter((o) => o.y1 - o.y0 > H * 0.02 && o.y1 - o.y0 < H * 0.14 && o.b - o.a < W * 0.18 && (!L || Math.abs((o.b - o.a) * k - L) <= L * 0.15))
+    .sort((p, q) => (q.b - q.a) * (q.y1 - q.y0) - (p.b - p.a) * (p.y1 - p.y0))[0];
+  return bx ? { x: bx.a * k, y: bx.y0 * k, w: (bx.b - bx.a) * k, h: (bx.y1 - bx.y0) * k } : null;
+}
+const normBp = (t) => sansAccents(String(t || "")).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+function blueprintParNom(lu) {
+  const t = normBp(lu); if (t.replace(/\s/g, "").length < 2 || !bp.catalogue?.length) return null;
+  const exact = bp.catalogue.filter((c) => normBp(c.nom) === t); if (exact.length) return exact[0];
+  // v390 : noms courts : on compare aussi sans espaces/tirets et en confondant les caractères que l'OCR mélange (0/O, 1/I/L, 5/S, 8/B)
+  const cf = (u) => u.replace(/\s+/g, "").replace(/0/g, "o").replace(/[1l]/g, "i").replace(/5/g, "s").replace(/8/g, "b");
+  const tc = cf(t);
+  const sc = bp.catalogue.map((c) => { const m = normBp(c.nom), mc = cf(m);
+    if (mc === tc) return [1, c];
+    return [Math.max(1 - distance(t, m) / Math.max(t.length, m.length), 1 - distance(tc, mc) / Math.max(tc.length, mc.length)), c]; }).sort((a, b) => b[0] - a[0]);
+  // strict : au moins 90 % de ressemblance ET nette avance sur le 2e (« … Arms » / « … Legs » ne doivent jamais se confondre)
+  // v383 : enregistré directement à partir de 95 % de ressemblance (et pas d'ex aequo) ; en dessous → « À valider »
+  // v389 : plus tolérant : 85 % suffit si le 2e est nettement derrière (≥ 4 points) ; 95 % avec une petite avance comme avant
+  const ec = sc[0] ? sc[0][0] - (sc[1]?.[0] ?? 0) : 0;
+  // v390 : nom court (≤ 8 car.) : 1 seule lettre fausse suffit à passer sous 85 % → accepté si 1 erreur max et seul candidat à ce niveau
+  // v400 : tolérance en nombre d'erreurs : ≤ 8 car. → 1 erreur, ≤ 14 car. → 2 erreurs ; aucun autre nom aussi proche
+  const dist0 = sc[0] ? distance(tc, cf(normBp(sc[0][1].nom))) : 99, lg0 = sc[0] ? cf(normBp(sc[0][1].nom)).length : 0, tol = lg0 <= 8 ? 1 : lg0 <= 14 ? 2 : 0;
+  const court = sc[0] && tc.length >= 2 && tol && dist0 <= tol && !bp.catalogue.some((y) => y !== sc[0][1] && distance(tc, cf(normBp(y.nom))) <= dist0 + 1);
+  return sc[0] && ((sc[0][0] >= 0.95 && ec >= 0.02) || (sc[0][0] >= 0.85 && ec >= 0.04) || court) ? sc[0][1] : null;
+}
+/* v383 : numéro de page du kiosque (« 4/10 », sous la liste) : plusieurs lectures, vote ; gardé tant que le bas ne change pas */
+async function pageBp(src) {
+  const [W, H] = tailleSource(src), x0 = 0.08 * W, x1 = 0.42 * W, votes = new Map();
+  const c = document.createElement("canvas"), g = c.getContext("2d", { willReadFrequently: true });
+  for (const [y0, y1] of [[0.83, 0.95], [0.85, 0.93], [0.86, 0.92]]) {
+    c.width = (x1 - x0) * 3; c.height = (y1 - y0) * H * 3; g.drawImage(src, x0, y0 * H, x1 - x0, (y1 - y0) * H, 0, 0, c.width, c.height);
+    const brut = g.getImageData(0, 0, c.width, c.height).data;
+    if (y0 === 0.83) { let sg = 0; for (let i = 0; i < brut.length; i += 1600) sg = (sg * 31 + (brut[i] >> 4)) | 0; if (sg === bpScan.pageSig) return bpScan.page; bpScan.pageSig = sg; }
+    for (const se of [160, 140, 120, null]) {
+      const d = new Uint8ClampedArray(brut); if (se != null) for (let i = 0; i < d.length; i += 4) { const v = (d[i] + d[i + 1] + d[i + 2]) / 3 > se ? 0 : 255; d[i] = d[i + 1] = d[i + 2] = v; }
+      const m = (await lireTexte({ w: c.width, h: c.height, d }, "0123456789/ ", 3000, 1)).match(/(\d{1,2})\s*\/\s*(\d{1,2})/);
+      if (m && +m[1] >= 1 && +m[1] <= +m[2]) votes.set(+m[1], (votes.get(+m[1]) || 0) + 1);
+      const tri = [...votes].sort((a, b) => b[1] - a[1]); if (tri[0]?.[1] >= 2) { bpScan.page = tri[0][0]; return bpScan.page; }
+    }
+  }
+  const tri = [...votes].sort((a, b) => b[1] - a[1]);
+  if (tri[0] && (!tri[1] || tri[1][1] < tri[0][1])) bpScan.page = tri[0][0];
+  return bpScan.page ?? 0;
+}
+/* v401 : version simplifiée : bulle de la bonne largeur → 1 seuil automatique → 1 lecture (plusieurs lignes) → catalogue */
+async function scanBp() {
+  if (bpScan.enCours || !bpScan.actif) return;
+  bpScan.enCours = true;
+  try {
+    const src = await imageBrute(), [W, H] = tailleSource(src); if (!W) return;
+    // image identique à la précédente (souris immobile) → rien à refaire
+    { const mc = bpScan.mini || (bpScan.mini = Object.assign(document.createElement("canvas"), { width: 96, height: 54 })), mx = mc.getContext("2d", { willReadFrequently: true });
+      mx.drawImage(src, 0, 0, 96, 54); const md = mx.getImageData(0, 0, 96, 54).data; let h = 0; for (let i = 0; i < md.length; i += 4) h = (h * 31 + (md[i + 1] >> 3)) | 0;
+      if (h === bpScan.imgSig) return; bpScan.imgSig = h; }
+    const bx = bulleBp(src);
+    // numéro de page : relu quand aucune bulle ne cache le bas de l'écran (empreinte : immédiat si le bas n'a pas changé)
+    if (!bx || bx.y + bx.h < 0.82 * H) { const av = bpScan.page; await pageBp(src); if (bpScan.page !== av) renderBpScan(); }
+    if (!bx) { if (bpScan.etat !== "Survolez un blueprint.") { bpScan.etat = "Survolez un blueprint."; renderBpScan(); } return; }
+    // intérieur de la bulle, agrandi ×3
+    const m = Math.round(Math.min(bx.h, bx.w * 0.12) * 0.18), mv = 2, cw = bx.w - 2 * m, ch = Math.max(4, Math.min(bx.h - 2 * mv, H - bx.y - mv)), f = 3;
+    const c = document.createElement("canvas"); c.width = cw * f; c.height = ch * f; const x = c.getContext("2d", { willReadFrequently: true });
+    x.imageSmoothingQuality = "high"; x.drawImage(src, bx.x + m, bx.y + mv, cw, ch, 0, 0, cw * f, ch * f);
+    const CW = c.width, CH = c.height, d = x.getImageData(0, 0, CW, CH).data;
+    // seuil automatique (Otsu) sur la luminosité : texte clair / fond turquoise sombre
+    const hist = new Array(256).fill(0); for (let i = 0; i < d.length; i += 4) hist[(d[i] + d[i + 1] + d[i + 2]) / 3 | 0]++;
+    let tot = CW * CH, sumT = 0; for (let v = 0; v < 256; v++) sumT += v * hist[v];
+    let wB = 0, sumB = 0, best = 0, seuil = 128; for (let v = 0; v < 256; v++) { wB += hist[v]; if (!wB || wB === tot) continue; sumB += v * hist[v]; const mB = sumB / wB, mF = (sumT - sumB) / (tot - wB), e = wB * (tot - wB) * (mB - mF) ** 2; if (e > best) { best = e; seuil = v; } }
+    // binarisation : texte noir sur blanc (aperçu) ; bords de la bulle (lignes/colonnes presque pleines) effacés
+    const bin = new Uint8ClampedArray(d.length); let sig = 0;
+    for (let i = 0; i < d.length; i += 4) { const v = (d[i] + d[i + 1] + d[i + 2]) / 3 > seuil ? 0 : 255; bin[i] = bin[i + 1] = bin[i + 2] = v; bin[i + 3] = 255; }
+    const blanc = (i) => { bin[i] = bin[i + 1] = bin[i + 2] = 255; };
+    for (let yy = 0; yy < CH; yy++) { let n = 0; for (let xx = 0; xx < CW; xx++) if (!bin[(yy * CW + xx) * 4]) n++; if (n > CW * 0.6) for (let xx = 0; xx < CW; xx++) blanc((yy * CW + xx) * 4); }
+    for (let xx = 0; xx < CW; xx++) { let n = 0; for (let yy = 0; yy < CH; yy++) if (!bin[(yy * CW + xx) * 4]) n++; if (n > CH * 0.85) for (let yy = 0; yy < CH; yy++) blanc((yy * CW + xx) * 4); }
+    for (let i = 0; i < bin.length; i += 400) sig = (sig * 31 + bin[i]) | 0;
+    if (sig !== bpScan.apercuSig) { bpScan.apercuSig = sig; const cv = R$("bps-ocr"); if (cv) { cv.width = CW; cv.height = CH; cv.getContext("2d").putImageData(new ImageData(bin, CW, CH), 0, 0); } }
+    if (sig === bpScan.sig) return;   // même bulle que la dernière lecture
+    if (!bp.catalogue) { bpScan.etat = "Catalogue des blueprints en chargement…"; renderBpScan(); return; }
+    bpScan.sig = sig;
+    // mémoire : bulle déjà lue → pas de nouvelle lecture
+    const cle = sig + ":" + CW + "x" + CH, memo = (bpScan.cache ||= new Map()).get(cle);
+    let lu = memo?.lu ?? "";
+    if (!memo) {
+      const di = new Uint8ClampedArray(bin); for (let i = 0; i < di.length; i += 4) di[i] = di[i + 1] = di[i + 2] = 255 - di[i];   // lireTexte attend du texte clair sur fond sombre
+      lu = (await lireTexte({ w: CW, h: CH, d: di }, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 ()-.'/", 4000, 1, "6")).replace(/\s+/g, " ").trim();
+      if (!lu) { bpScan.sig = null; bpScan.imgSig = null; return; }   // OCR pas prêt / bulle en train d'apparaître → relue au tour suivant
+      bpScan.cache.set(cle, { lu });
+    }
+    // tant que la largeur de bulle n'est pas connue : texte en capitales = titre de section, ignoré
+    const lettres = lu.replace(/[^A-Za-z]/g, "");
+    if (!bpScan.largeur && lettres.length >= 4 && lettres.replace(/[^A-Z]/g, "").length >= lettres.length * 0.8) { bpScan.etat = `Titre ignoré : ${lu}`; renderBpScan(); return; }
+    const cb = blueprintParNom(lu);
+    if (bx.y + bx.h >= 0.82 * H) await pageBp(src);   // bulle sur le bas : page relue quand même (immédiat si le bas n'a pas changé)
+    const pos = { page: bpScan.page ?? 0, x: bx.x, y: bx.y + bx.h / 2, h: bx.h };
+    if (!cb) {   // pas sûr → jusqu'à 3 blueprints au nom proche, à valider (une seule proposition, remplacée par la suivante)
+      const t = normBp(lu); if (t.length < 2) return;
+      if (bpScan.propositions.has(t)) { bpScan.etat = `« ${lu} » : à valider`; renderBpScan(); return; }
+      const cands = bp.catalogue.map((c2) => { const m2 = normBp(c2.nom); return [1 - distance(t, m2) / Math.max(t.length, m2.length), c2]; })
+        .filter(([v]) => v >= 0.55).sort((a2, b2) => b2[0] - a2[0]).slice(0, 3).map(([, c2]) => c2.id);
+      if (!cands.length) { bpScan.etat = `« ${lu} » : aucun blueprint proche`; renderBpScan(); return; }
+      bpScan.etat = `« ${lu} » : à valider`; bpScan.propositions.clear(); bpScan.propositions.set(t, { lu, cands, pos }); renderBpScan();
+      return;
+    }
+    if (!bpScan.largeur) bpScan.largeur = bx.w;   // largeur de bulle apprise sur le 1er nom reconnu
+    const deja = new Set(mesBlueprints().map((y) => y.bp)).has(cb.id);
+    if (!deja) { possederBlueprints([cb.id], true); bpScan.ajoutes.add(cb.id); }
+    bpScan.vus.set(cb.id, { nom: cb.nom, nouveau: !deja, t: Date.now(), ...pos });
+    bpScan.dernier = cb.id; bpScan.etat = deja ? `${cb.nom} : déjà possédé` : `${cb.nom} : ajouté`;
+    renderBpScan();
+  } catch (e) { bpScan.etat = "Erreur : " + (e.message || e); renderBpScan(); }
+  finally { bpScan.enCours = false; }
+}
+/* v375 : grille des blueprints reconnus, regroupés par type ; vert = ajouté pendant le scan, gris = déjà possédé */
+function renderBpScan() {
+  const g = R$("bps-grille"); if (!g) return;
+  R$("bps-lu").textContent = bpScan.etat || "";
+  const l = [...bpScan.vus].sort((a, b) => a[1].nom.localeCompare(b[1].nom, "fr")), n = l.filter(([, v]) => v.nouveau).length;
+  R$("bps-compte").textContent = l.length ? `${l.length} vu${l.length > 1 ? "s" : ""} · ${n} ajouté${n > 1 ? "s" : ""}` : "";
+  // v387 : copie de la grille du kiosque : page → titre de section (type) → rangées de 4 emplacements, vides en gris
+  const cat = new Map((bp.catalogue || []).map((c) => [c.id, c]));
+  const labelDe = (id) => { const c = cat.get(id); return c ? (c.label || BP_TYPES[c.type] || "Autres") : "Autres"; };
+  const pages = new Map();
+  for (const [id, v] of l) { const t = v.page ? `Page ${v.page}` : "Page ?"; if (!pages.has(t)) pages.set(t, []); pages.get(t).push([id, v]); }
+  const xs = l.map(([, v]) => v.x).filter((x) => x != null), xmin = xs.length ? Math.min(...xs) : 0;
+  const hs = l.map(([, v]) => v.h).filter(Boolean).sort((a, b) => a - b), hMed = hs.length ? hs[hs.length >> 1] : 30;
+  const pas = Math.max(20, hMed * 3.5);
+  const caseHtml = ([id, v]) => `<div class="bps-case possede${v.nouveau ? " nouveau" : ""}${id === bpScan.dernier ? " dernier" : ""}${bpScan.sel?.has(id) ? " sel" : ""}" data-bps-case="${esc(id)}" title="${esc(v.nom)}"><span>${esc(v.nom)}</span>${v.nouveau ? `<button type="button" class="bps-annuler" data-bp-annuler="${esc(id)}" title="Annuler : pas possédé" aria-label="Annuler">${ICO_CROIX}</button>` : ""}</div>`;
+  const vide = `<div class="bps-case vide"></div>`;
+  let html = "";
+  for (const [t, cs] of [...pages].sort((a, b) => (parseInt(a[0].slice(5), 10) || 999) - (parseInt(b[0].slice(5), 10) || 999))) {
+    html += `<div class="bps-type bps-page">${esc(t)} <small>${cs.length}</small></div>`;
+    cs.sort((a, b) => (a[1].y || 0) - (b[1].y || 0) || (a[1].x || 0) - (b[1].x || 0));
+    // rangées : y proche
+    const rangs = [];
+    for (const e of cs) { const r = rangs[rangs.length - 1]; if (r && Math.abs((e[1].y || 0) - r.y) < pas * 0.6) r.l.push(e); else rangs.push({ y: e[1].y || 0, l: [e] }); }
+    let lab = null;
+    for (const r of rangs) {
+      // une rangée peut mélanger deux sections ? non dans le jeu : section = label majoritaire
+      const cnt = new Map(); for (const [id] of r.l) cnt.set(labelDe(id), (cnt.get(labelDe(id)) || 0) + 1);
+      const lr = [...cnt].sort((a, b) => b[1] - a[1])[0][0];
+      if (lr !== lab) { lab = lr; html += `<div class="bps-type">${esc(lr)}</div>`; }
+      const slots = [null, null, null, null];
+      for (const e of r.l.sort((a, b) => (a[1].x || 0) - (b[1].x || 0))) {
+        let c = Math.max(0, Math.min(3, Math.round(((e[1].x ?? xmin) - xmin) / pas)));
+        while (slots[c] && c < 3) c++; if (slots[c]) { c = slots.indexOf(null); if (c < 0) { slots.push(e); continue; } }
+        slots[c] = e;
+      }
+      html += slots.map((e) => e ? caseHtml(e) : vide).join("");
+    }
+  }
+  g.innerHTML = html || `<p class="note">Aucun blueprint lu pour l'instant.</p>`;
+  // v380 : lectures incertaines → noms proches, une case à cocher valide le blueprint
+  const pr = R$("bps-propositions");
+  if (pr) { const l2 = [...(bpScan.propositions || new Map())]; pr.hidden = !l2.length;
+    // v382 : redessiné seulement si la liste a changé (sinon chaque lecture effaçait la case qu'on était en train de cocher)
+    const cle2 = l2.map(([k, v]) => k + ":" + v.cands.map((id) => id + (mesBlueprints().some((y) => y.bp === id) ? "+" : "")).join(",")).join("|");
+    if (pr.dataset.cle !== cle2) pr.dataset.cle = cle2, pr.innerHTML = l2.length ? `<div class="bps-type">À valider <small>${l2.length}</small></div>` + l2.map(([k, v]) => `<div class="bps-prop"><span class="bps-prop-lu">« ${esc(v.lu)} »</span>${v.cands.map((id) => { const c = bp.catalogue?.find((x) => x.id === id); return c ? `<label${mesBlueprints().some((y) => y.bp === id) ? ' class="possede" title="Déjà possédé"' : ""}><input type="checkbox" data-bp-valider="${esc(id)}" data-prop="${esc(k)}"> ${esc(c.nom)}</label>` : ""; }).join("")}<button type="button" class="bps-prop-ignorer" data-prop-ignorer="${esc(k)}" title="Ignorer" aria-label="Ignorer">${ICO_CROIX}</button></div>`).join("") : ""; }
+  g.querySelector(".bps-case.dernier")?.scrollIntoView({ block: "nearest" });
+  { const bs = R$("bps-suppr"), n2 = bpScan.sel?.size || 0; if (bs) { bs.hidden = !n2; bs.textContent = `Supprimer (${n2})`; } }
+}
+document.getElementById("p-bps").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-bp-annuler]");
+  if (b) { const id = b.dataset.bpAnnuler; possederBlueprints([id], false); bpScan.vus.delete(id); bpScan.ajoutes.delete(id); renderBpScan(); return; }
+  if (e.target.closest("#bps-fermer")) fermerBpScan();
+  // v381 : clic sur une case = sélection ; « Supprimer » retire les blueprints choisis (plus possédés)
+  if (e.target.closest("#bps-suppr")) {
+    const ids = [...(bpScan.sel || [])]; if (!ids.length) return;
+    possederBlueprints(ids, false); for (const id of ids) { bpScan.vus.delete(id); bpScan.ajoutes.delete(id); }
+    bpScan.sel.clear(); renderBpScan(); return;
+  }
+  const ca = e.target.closest("[data-bps-case]");
+  if (ca && !e.target.closest("[data-bp-annuler]")) { bpScan.sel = bpScan.sel || new Set(); const id = ca.dataset.bpsCase; bpScan.sel.has(id) ? bpScan.sel.delete(id) : bpScan.sel.add(id); renderBpScan(); return; }
+  const ig = e.target.closest("[data-prop-ignorer]"); if (ig) { bpScan.propositions.delete(ig.dataset.propIgnorer); renderBpScan(); return; }
+  const ok = e.target.closest("[data-bp-valider]");
+  if (ok && ok.checked) {   // blueprint choisi : possédé, ajouté à la grille ; la proposition disparaît
+    const id = ok.dataset.bpValider, c = bp.catalogue?.find((x) => x.id === id); if (!c) return;
+    const deja = new Set(mesBlueprints().map((y) => y.bp)).has(id);
+    if (!deja) { possederBlueprints([id], true); bpScan.ajoutes.add(id); }
+    bpScan.vus.set(id, { nom: c.nom, nouveau: !deja, t: Date.now(), ...(bpScan.propositions.get(ok.dataset.prop)?.pos || {}) }); bpScan.dernier = id; bpScan.propositions.delete(ok.dataset.prop);
+    bpScan.etat = deja ? `${c.nom} : déjà possédé` : `${c.nom} : ajouté`; renderBpScan();
+  }
+});
+var pipBps = null;   // var : lu par R$() avant cette ligne
+async function ouvrirBpScan() {
+  if (bpScan.actif) return;
+  const propre = await obtenirFlux();
+  if (propre === null) return;
+  if (!bp.catalogue) chargerBlueprints().catch(() => {});
+  Object.assign(bpScan, { actif: true, propre, largeur: 0, vus: new Map(), inconnus: new Map(), propositions: new Map(), ajoutes: new Set(), dernier: "", sig: null, etat: "Survolez un blueprint." });
+  const panneau = document.getElementById("p-bps"); panneau.hidden = false;
+  if ("documentPictureInPicture" in window && !pipBps) {
+    try {
+      pipBps = await documentPictureInPicture.requestWindow({ width: 360, height: 620 }); window.i18nObserver?.(pipBps.document);
+      for (const n of document.querySelectorAll("style, link[rel=stylesheet]")) pipBps.document.head.append(n.cloneNode(true));
+      pipBps.document.title = tr("Mes blueprints");
+      pipBps.document.body.classList.add("overlay", "overlay-bps");
+      pipBps.document.body.append(panneau);
+      pipBps.addEventListener("pagehide", () => { pipBps = null; document.body.append(panneau); fermerBpScan(); });
+    } catch { pipBps = null; }
+  }
+  // v402 : sans fenêtre incrustée → panneau à droite de la liste des blueprints (plus de panneau flottant)
+  if (!pipBps) $("bp-scan-place").append(panneau);
+  panneau.classList.remove("flottant");
+  renderBpScan();
+  // v391 : démarrage immédiat : OCR préchargé, et cadence donnée par un worker (setTimeout est ralenti quand l'onglet est en arrière-plan, c.-à-d. pendant qu'on joue)
+  chargerTesseract().catch(() => {});
+  const tic = () => { if (!bpScan.actif) return;
+    if (bpScan.enCours && Date.now() - (bpScan.debut || 0) > 12000) bpScan.enCours = false;   // lecture bloquée : abandonnée
+    if (bpScan.enCours || Date.now() - (bpScan.fin || 0) < 60) return;
+    bpScan.debut = Date.now(); scanBp().finally(() => { bpScan.fin = Date.now(); }); };
+  try {
+    bpScan.worker = new Worker(URL.createObjectURL(new Blob(["setInterval(() => postMessage(0), 80);"], { type: "text/javascript" })));
+    bpScan.worker.onmessage = tic;
+  } catch { bpScan.minuterie = setInterval(tic, 150); }
+  tic();
+}
+function fermerBpScan() {
+  if (!bpScan.actif) return;
+  bpScan.actif = false; clearInterval(bpScan.minuterie); bpScan.worker?.terminate(); bpScan.worker = null; bpScan.enCours = false;
+  if (bpScan.propre && !session && !raff) { arreterLecteurFlux(); if (fluxTrack) fluxTrack.stop(); fluxTrack = null; $("flux-video").srcObject = null; }
+  const panneau = document.getElementById("p-bps");
+  if (pipBps) { const w = pipBps; pipBps = null; document.body.append(panneau); w.close(); }
+  panneau.hidden = true; renderBlueprints();
+}
+document.getElementById("bp-scanner").addEventListener("click", ouvrirBpScan);
 function majBoutonsMode() {
   for (const b of fiche.querySelectorAll("[data-mode-scan]")) b.setAttribute("aria-pressed", String(b.dataset.modeScan === modeOverlay));
   fiche.classList.toggle("mode-raff", modeOverlay === "raff");
