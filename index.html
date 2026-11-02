@@ -1574,7 +1574,8 @@ tr.bp-choisissable:hover td { background: rgba(255,255,255,.04); }
 .p-bps { display: flex; flex-direction: column; gap: 6px; padding: 10px; height: 100%; box-sizing: border-box; background: var(--rouille); color: var(--os); }
 .p-bps[hidden] { display: none; }
 .bp-corps { display: flex; gap: 12px; align-items: flex-start; }
-.bp-corps > .tableau-wrap { flex: 1; min-width: 0; }
+.bp-corps { margin-top: var(--e2); }   /* v403 : la marge du tableau passe au conteneur → tableau et panneau alignés en haut */
+body:not(.overlay) .bp-corps > .tableau-wrap { flex: 1; min-width: 0; margin-top: 0; }
 .bp-scan-place:empty, .bp-scan-place:has(> .p-bps[hidden]) { display: none; }
 .bp-scan-place { flex: 0 0 360px; position: sticky; top: 12px; height: calc(100vh / .9 - 40px); border: 1px solid var(--trait); border-radius: 6px; overflow: hidden; }
 .p-bps.flottant { position: fixed; right: 16px; bottom: 16px; width: 360px; height: 620px; z-index: 50; border: 1px solid var(--trait); border-radius: 6px; box-shadow: 0 8px 30px rgba(0,0,0,.5); }
@@ -8203,7 +8204,7 @@ function fermerBpScan() {
   if (!bpScan.actif) return;
   bpScan.actif = false; clearInterval(bpScan.minuterie); bpScan.worker?.terminate(); bpScan.worker = null; bpScan.enCours = false;
   if (bpScan.propre && !session && !raff) { arreterLecteurFlux(); if (fluxTrack) fluxTrack.stop(); fluxTrack = null; $("flux-video").srcObject = null; }
-  const panneau = document.getElementById("p-bps");
+  const panneau = R$("p-bps");   // v404 : dans la fenêtre incrustée, document.getElementById ne le trouvait pas → resté affiché en bas de la page
   if (pipBps) { const w = pipBps; pipBps = null; document.body.append(panneau); w.close(); }
   panneau.hidden = true; renderBlueprints();
 }
