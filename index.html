@@ -2813,6 +2813,11 @@ function texteFiltre() {
   if (filtre.qmin > 0 || filtre.qmax < 1000) p.push(`qualité ${filtre.qmin} à ${filtre.qmax}`);
   return p.length ? `Filtre : ${p.join(", ")}` : "";
 }
+const motCaisses = (nom, n) => GEMMES.has(nom) ? "u" : `caisse${n > 1 ? "s" : ""}`;   // v409/v410 : gemmes comptées en unités (« u »)
+/* v410 : « 3 caisses + 40 u » : les gemmes ne comptent pas comme des caisses */
+function compteCaisses(l) { const ng = l.filter((it) => GEMMES.has(it.nom)).length, nc = l.length - ng;
+  return (nc || !ng ? `${NB(nc)} caisse${nc > 1 ? "s" : ""}` : "") + (ng ? `${nc ? " + " : ""}${NB(ng)} u` : ""); }
+const GEMMES = new Set(["Aphorite", "Beradom", "Dolivine", "Feynmaline", "Glacosite", "Hadanite", "Janalite"]);   // v409 : minerais en pièces (gemmes)
 function grouper(lignes) {
   const m = new Map();
   for (const it of lignes) {
@@ -2885,7 +2890,7 @@ function ligneGroupe(g, { station, cocher, joueur, visibilite = false }) {
   const ids = g.items.map((it) => it.id), nbSel = ids.filter((id) => selection.has(id)).length, ouvert = ouverts.has(g.cle);
   return `<tr class="groupe ${nbSel ? "selectionne" : ""}">` +
     (cocher ? `<td class="coche"><input type="checkbox" data-groupe="${esc(g.cle)}" aria-label="Sélectionner les ${g.items.length} ${esc(g.nom)} ${g.qualite ?? ""}" ${nbSel === ids.length ? "checked" : ""}></td>` : "") +
-    `<td class="nom-cell"><button type="button" class="ouvrir" data-ouvrir="${esc(g.cle)}" aria-expanded="${ouvert}"><span class="chevron" aria-hidden="true">▸</span>${esc(g.nom)} <span class="compte">${g.items.length} caisses</span></button></td>` +
+    `<td class="nom-cell"><button type="button" class="ouvrir" data-ouvrir="${esc(g.cle)}" aria-expanded="${ouvert}"><span class="chevron" aria-hidden="true">▸</span>${esc(g.nom)} <span class="compte">${g.items.length} ${motCaisses(g.nom, g.items.length)}</span></button></td>` +
     `<td class="num"><span class="q">${g.qualite ?? "?"}</span></td>` +
     `<td class="num"><span class="scu">${fmtScu(g.quantite_scu)}</span> SCU${cocher ? `<span class="b-editer-scu vide"></span>` : ""}</td>` +
     (station ? `<td class="col-station">${g.stations.size === 1 ? `<a href="#/station/${encodeURIComponent(g.station)}">${esc(g.station)}</a>` : esc(g.station)}</td>` : "") +
@@ -2910,7 +2915,20 @@ function renderTable(table, lignes, { station, cocher, joueur = false, visibilit
       groupesRendus.set(g.cle, g.items.map((it) => it.id));
     }
     corps = groupes.map((g) => g.items.length > 1 ? ligneGroupe(g, { station, cocher, joueur, visibilite }) : ligneItem(g.items[0], { station, cocher, joueur, visibilite })).join("");
-  } else corps = lignes.map((it) => ligneItem(it, { station, cocher, joueur, visibilite })).join("");
+  } else {
+    // v409 : gemmes (minerais ramassés à la main, 0.001 SCU pièce) : toujours regroupées par minerai + qualité, même sans « regrouper »
+    const gemmes = new Map(grouper(lignes.filter((it) => GEMMES.has(it.nom))).map((g) => [g.cle, g])), faits = new Set();
+    for (const g of gemmes.values()) {
+      if (visibilite) { const vs = new Set(g.items.map((it) => it.visibilite || "corporation")); g.visibilite = vs.size === 1 ? [...vs][0] : "multiple"; }
+      groupesRendus.set(g.cle, g.items.map((it) => it.id));
+    }
+    corps = lignes.map((it) => {
+      if (!GEMMES.has(it.nom)) return ligneItem(it, { station, cocher, joueur, visibilite });
+      const g = gemmes.get(`${it.nom}|${it.qualite}`); if (faits.has(g.cle)) return "";
+      faits.add(g.cle);
+      return g.items.length > 1 ? ligneGroupe(g, { station, cocher, joueur, visibilite }) : ligneItem(it, { station, cocher, joueur, visibilite });
+    }).join("");
+  }
   table.innerHTML = `<thead><tr>` +
     (cocher ? `<th class="coche"><span class="sr">Sélection</span></th>` : "") +
     cols.map((c) => {
@@ -2941,7 +2959,7 @@ function render() {
     const lignes = trier(filtrer(caissesCorpo()), tri.corpo);
     renderTable($("t-corpo"), lignes, { station: true, cocher: false, joueur: true, t: tri.corpo });
     const joueurs = new Set(lignes.map((it) => it.joueur)).size;
-    $("c-compte").innerHTML = `${NB(lignes.length)} caisse${lignes.length > 1 ? "s" : ""} de ${joueurs} joueur${joueurs > 1 ? "s" : ""}, ` +
+    $("c-compte").innerHTML = `${compteCaisses(lignes)} de ${joueurs} joueur${joueurs > 1 ? "s" : ""}, ` +
       `${SC(fmtScu(lignes.reduce((s, it) => s + (Number(it.quantite_scu) || 0), 0)))} SCU` + (partage.maj ? `, mis à jour ${ilYa(partage.maj / 1000)}` : "");
     $("c-filtre-etat").textContent = texteFiltre();
     const gv = $("c-groupe").value || "";
@@ -2961,7 +2979,7 @@ function render() {
     for (const id of [...selection]) if (!items.some((it) => it.id === id)) selection.delete(id);
     renderTable($("t-accueil"), lignes, { station: true, cocher: true, joueur: true, visibilite: true, t: tri.accueil });
     majBarreGroupe("a", lignes);
-    $("a-compte").innerHTML = `${NB(lignes.length)} caisse${lignes.length > 1 ? "s" : ""}, ${SC(total(lignes))} SCU`;
+    $("a-compte").innerHTML = `${compteCaisses(lignes)}, ${SC(total(lignes))} SCU`;
     $("a-filtre-etat").textContent = ft;
     $("t-accueil").hidden = !lignes.length; $("a-vide").hidden = !!lignes.length;
     $("a-vide").textContent = items.length ? "Aucun minerai ne correspond au filtre." : "Aucun minerai enregistré. Choisis « + Nouvelle station » dans le menu pour commencer.";
@@ -2969,7 +2987,7 @@ function render() {
     const tous = items.filter((it) => it.station === stationCourante), lignes = trier(filtrer(tous), tri.station);
     for (const id of [...selection]) if (!tous.some((it) => it.id === id)) selection.delete(id);
     $("s-titre").textContent = stationCourante;
-    $("s-compte").innerHTML = `${esc(systemeDe(stationCourante))}, ${NB(tous.length)} caisse${tous.length > 1 ? "s" : ""}, ${SC(total(tous))} SCU`;
+    $("s-compte").innerHTML = `${esc(systemeDe(stationCourante))}, ${compteCaisses(tous)}, ${SC(total(tous))} SCU`;
     $("s-filtre-etat").textContent = ft;
     renderTable($("t-station"), lignes, { station: false, cocher: true, visibilite: true, t: tri.station });
     $("t-station").hidden = !lignes.length; $("s-vide").hidden = !!lignes.length;
@@ -4230,7 +4248,7 @@ function enregistrer(auto = false) {
   verifierChamps(); render();
   pictoSauve(nPile > 1 ? `Enregistré ×${nPile}` : "Enregistré", false, it);
   $("scan-etat").className = "";
-  $("scan-etat").textContent = nPile > 1 ? `${nPile} caisses enregistrées.` : "Enregistré.";
+  $("scan-etat").textContent = nPile > 1 ? (GEMMES.has(nom) ? `${nPile} u enregistrées.` : `${nPile} caisses enregistrées.`) : "Enregistré.";
 }
 fiche.addEventListener("submit", (e) => { e.preventDefault(); enregistrer(); });
 // Pile : nombre de caisses identiques créées à l'enregistrement (lu sur le badge X2, X3… ou saisi)
@@ -5561,7 +5579,7 @@ function renderHome() {
   $("act-cta").hidden = !sansCorpo;
   // totaux : caisses visibles par la corporation (les miennes hors « moi seul » + celles partagées) et mes ressources
   const somme = (l) => l.reduce((t, it) => t + (Number(it.quantite_scu) || 0), 0);
-  const stat = (l) => `${NB(l.length)} caisse${l.length > 1 ? "s" : ""}, ${SC(fmtScu(somme(l)))} SCU`;
+  const stat = (l) => `${compteCaisses(l)}, ${SC(fmtScu(somme(l)))} SCU`;
   const visiblesCorpo = sansCorpo ? [] : [...items.filter((it) => (it.visibilite || "corporation") !== "prive"), ...(partage.caisses || [])];
   $("act-stats").hidden = sansCorpo;
   $("act-stats").innerHTML = stat(visiblesCorpo);
@@ -8715,7 +8733,7 @@ function cartouchesAspect(i, q) {
   const pr = prelevement(i), l = pr.pris || [];
   if (!l.length) return `<span class="bp-cart bp-q">Q${q}</span>`;
   const n = l.length, scu = l.reduce((s2, p) => s2 + (Number(p.it.quantite_scu) || 0), 0);
-  return `<span class="bp-cart bp-cart-n">${n} caisse${n > 1 ? "s" : ""}</span>` +
+  return `<span class="bp-cart bp-cart-n">${n} ${motCaisses(l[0]?.it?.nom, n)}</span>` +
     (scu ? `<span class="bp-cart bp-cart-scu">${fmtScu(scu)} SCU</span>` : "") + `<span class="bp-cart bp-q">Q${pr.moy ?? q}</span>`;
 }
 /* v304 : craft en MÉLANGEANT les qualités (le jeu fait la moyenne pondérée par la quantité).
