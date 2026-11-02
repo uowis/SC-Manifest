@@ -1573,8 +1573,9 @@ tr.bp-choisissable:hover td { background: rgba(255,255,255,.04); }
 /* v375 : overlay séparé « Mes blueprints » (grille) */
 .p-bps { display: flex; flex-direction: column; gap: 6px; padding: 10px; height: 100%; box-sizing: border-box; background: var(--rouille); color: var(--os); }
 .p-bps[hidden] { display: none; }
-.bp-corps { display: flex; gap: 12px; align-items: flex-start; }
-.bp-corps > .tableau-wrap { flex: 1; min-width: 0; }
+.bp-liste-scan { display: flex; gap: 12px; align-items: flex-start; }   /* v407 : renommé (.bp-corps existait déjà pour la fiche blueprint, d'où le padding) */
+.bp-liste-scan { margin-top: var(--e2); }   /* v403 : la marge du tableau passe au conteneur → tableau et panneau alignés en haut */
+body:not(.overlay) .bp-liste-scan > .tableau-wrap { flex: 1; min-width: 0; margin-top: 0; }
 .bp-scan-place:empty, .bp-scan-place:has(> .p-bps[hidden]) { display: none; }
 .bp-scan-place { flex: 0 0 360px; position: sticky; top: 12px; height: calc(100vh / .9 - 40px); border: 1px solid var(--trait); border-radius: 6px; overflow: hidden; }
 .p-bps.flottant { position: fixed; right: 16px; bottom: 16px; width: 360px; height: 620px; z-index: 50; border: 1px solid var(--trait); border-radius: 6px; box-shadow: 0 8px 30px rgba(0,0,0,.5); }
@@ -1775,7 +1776,14 @@ body.overlay-bps { margin: 0; height: 100vh; }
       <button class="btn" type="button" id="bp-oui" disabled>Je les possède</button>
       <button class="btn" type="button" id="bp-non" disabled>Je ne les possède pas</button>
     </div>
-    <div class="bp-corps"><div class="tableau-wrap"><table class="bp-table"><thead id="bp-tete"></thead><tbody id="bp-lignes"></tbody></table></div><div class="bp-scan-place" id="bp-scan-place"></div></div>
+    <div class="bp-liste-scan"><div class="tableau-wrap"><table class="bp-table"><thead id="bp-tete"></thead><tbody id="bp-lignes"></tbody></table></div><div class="bp-scan-place" id="bp-scan-place"><div id="p-bps" class="p-bps" hidden>
+  <div class="bps-tete"><strong>Mes blueprints</strong><span class="bps-compte" id="bps-compte"></span></div>
+  <p class="bps-aide">Kiosque de fabrication, filtre <b>Owned</b> : survolez chaque blueprint.</p>
+  <div class="bps-lu" id="bps-lu"></div>
+  <canvas class="bps-ocr" id="bps-ocr" width="1" height="1" title="Image lue par l'OCR"></canvas>
+  <div class="bps-propositions" id="bps-propositions" hidden></div>
+  <div class="bps-grille" id="bps-grille"></div>
+  <div class="bps-pied"><button class="btn" type="button" id="bps-suppr" hidden>Supprimer</button><button class="btn danger" type="button" id="bps-fermer">Terminer</button></div></div></div>
     <p class="vide" id="bp-vide" hidden></p>
   </section>
 
@@ -1922,14 +1930,6 @@ body.overlay-bps { margin: 0; height: 100vh; }
 
 </form>
 
-<div id="p-bps" class="p-bps" hidden>
-  <div class="bps-tete"><strong>Mes blueprints</strong><span class="bps-compte" id="bps-compte"></span></div>
-  <p class="bps-aide">Kiosque de fabrication, filtre <b>Owned</b> : survolez chaque blueprint.</p>
-  <div class="bps-lu" id="bps-lu"></div>
-  <canvas class="bps-ocr" id="bps-ocr" width="1" height="1" title="Image lue par l'OCR"></canvas>
-  <div class="bps-propositions" id="bps-propositions" hidden></div>
-  <div class="bps-grille" id="bps-grille"></div>
-  <div class="bps-pied"><button class="btn" type="button" id="bps-suppr" hidden>Supprimer</button><button class="btn danger" type="button" id="bps-fermer">Terminer</button></div>
 </div>
 <div id="p-raff" class="p-raff" hidden>
   <div class="pr-ecran"><canvas id="dr-apercu" class="pr-apercu" width="16" height="9"></canvas><p class="pr-aide" id="dr-aide">Dans le terminal de raffinerie, affichez l'ordre lancé (« Processing »).</p></div>
@@ -8172,19 +8172,9 @@ async function ouvrirBpScan() {
   if (propre === null) return;
   if (!bp.catalogue) chargerBlueprints().catch(() => {});
   Object.assign(bpScan, { actif: true, propre, largeur: 0, vus: new Map(), inconnus: new Map(), propositions: new Map(), ajoutes: new Set(), dernier: "", sig: null, etat: "Survolez un blueprint." });
-  const panneau = document.getElementById("p-bps"); panneau.hidden = false;
-  if ("documentPictureInPicture" in window && !pipBps) {
-    try {
-      pipBps = await documentPictureInPicture.requestWindow({ width: 360, height: 620 }); window.i18nObserver?.(pipBps.document);
-      for (const n of document.querySelectorAll("style, link[rel=stylesheet]")) pipBps.document.head.append(n.cloneNode(true));
-      pipBps.document.title = tr("Mes blueprints");
-      pipBps.document.body.classList.add("overlay", "overlay-bps");
-      pipBps.document.body.append(panneau);
-      pipBps.addEventListener("pagehide", () => { pipBps = null; document.body.append(panneau); fermerBpScan(); });
-    } catch { pipBps = null; }
-  }
+  const panneau = R$("p-bps"), maison = $("bp-scan-place"); maison.append(panneau); panneau.hidden = false;   // v405 : le panneau vit dans #bp-scan-place et y revient toujours
+  // v406 : toujours à droite de la liste, jamais en fenêtre incrustée
   // v402 : sans fenêtre incrustée → panneau à droite de la liste des blueprints (plus de panneau flottant)
-  if (!pipBps) $("bp-scan-place").append(panneau);
   panneau.classList.remove("flottant");
   renderBpScan();
   // v391 : démarrage immédiat : OCR préchargé, et cadence donnée par un worker (setTimeout est ralenti quand l'onglet est en arrière-plan, c.-à-d. pendant qu'on joue)
@@ -8203,8 +8193,8 @@ function fermerBpScan() {
   if (!bpScan.actif) return;
   bpScan.actif = false; clearInterval(bpScan.minuterie); bpScan.worker?.terminate(); bpScan.worker = null; bpScan.enCours = false;
   if (bpScan.propre && !session && !raff) { arreterLecteurFlux(); if (fluxTrack) fluxTrack.stop(); fluxTrack = null; $("flux-video").srcObject = null; }
-  const panneau = document.getElementById("p-bps");
-  if (pipBps) { const w = pipBps; pipBps = null; document.body.append(panneau); w.close(); }
+  const panneau = R$("p-bps");   // v404 : dans la fenêtre incrustée, document.getElementById ne le trouvait pas → resté affiché en bas de la page
+  if (pipBps) { const w = pipBps; pipBps = null; $("bp-scan-place").append(panneau); w.close(); }
   panneau.hidden = true; renderBlueprints();
 }
 document.getElementById("bp-scanner").addEventListener("click", ouvrirBpScan);
