@@ -5,6 +5,11 @@ RewriteCond %{HTTPS} off
 RewriteCond %{HTTP:X-Forwarded-Proto} !https
 RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
 
+# 1 bis) Une seule adresse : www.star-manifest.com → star-manifest.com
+#        (la connexion Discord est gardée par adresse : www et sans www = deux sessions séparées → « déconnecté »)
+RewriteCond %{HTTP_HOST} ^www\.star-manifest\.com$ [NC]
+RewriteRule ^(.*)$ https://star-manifest.com/$1 [R=301,L]
+
 # 2) Pas de liste des fichiers du dossier
 Options -Indexes
 
