@@ -1573,6 +1573,9 @@ tr.bp-choisissable:hover td { background: rgba(255,255,255,.04); }
 /* v375 : overlay séparé « Mes blueprints » (grille) */
 .p-bps { display: flex; flex-direction: column; gap: 6px; padding: 10px; height: 100%; box-sizing: border-box; background: var(--rouille); color: var(--os); }
 .p-bps[hidden] { display: none; }
+.journal-auth { margin-top: 10px; font-size: var(--fmin); color: var(--os-doux); }
+.journal-auth ul { margin: 6px 0 0; padding-left: 16px; max-height: 220px; overflow: auto; }
+.journal-auth time { opacity: .75; }
 .bp-liste-scan { display: flex; gap: 12px; align-items: flex-start; }   /* v407 : renommé (.bp-corps existait déjà pour la fiche blueprint, d'où le padding) */
 .bp-liste-scan { margin-top: var(--e2); }   /* v403 : la marge du tableau passe au conteneur → tableau et panneau alignés en haut */
 body:not(.overlay) .bp-liste-scan > .tableau-wrap { flex: 1; min-width: 0; margin-top: 0; }
@@ -5083,14 +5086,38 @@ function chargerScript(src) {
   return new Promise((ok, ko) => { const s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = () => ko(new Error("Script injoignable : " + src)); document.head.append(s); });
 }
 
+/* v411 : journal de connexion (diagnostic des déconnexions) : 40 derniers événements, gardés dans ce navigateur */
+const CLE_JOURNAL_AUTH = "sm-journal-auth";
+function journalAuth(evt, detail = "") {
+  try { const l = JSON.parse(localStorage.getItem(CLE_JOURNAL_AUTH) || "[]"); l.push([Date.now(), evt, String(detail).slice(0, 200), location.host || location.protocol]);
+    localStorage.setItem(CLE_JOURNAL_AUTH, JSON.stringify(l.slice(-40))); } catch {}
+}
+function journalAuthHtml() {
+  let l = []; try { l = JSON.parse(localStorage.getItem(CLE_JOURNAL_AUTH) || "[]"); } catch {}
+  if (!l.length) return "";
+  return `<details class="journal-auth"><summary>Journal de connexion (${l.length})</summary><ul data-no-tr>${l.slice().reverse().map(([t, e, d, h]) =>
+    `<li><time>${esc(new Date(t).toLocaleString(LOCALE))}</time> <b>${esc(e)}</b>${d ? ` — ${esc(d)}` : ""} <small>${esc(h || "")}</small></li>`).join("")}</ul></details>`;
+}
+// renouvellement du jeton : statut et raison d'un refus (sans jamais noter le jeton lui-même)
+if (!window.__fetchJournal) { window.__fetchJournal = true; const f0 = window.fetch.bind(window);
+  window.fetch = async (...a) => {
+    const u = String(a[0]?.url || a[0] || ""), auth = /\/auth\/v1\/(token|logout|user)/.test(u);
+    try { const r = await f0(...a);
+      if (auth && !r.ok) { let raison = ""; try { const j = await r.clone().json(); raison = j.error_code || j.code || j.error || j.msg || ""; } catch {} journalAuth("Refus " + (u.match(/auth\/v1\/(\w+)/)?.[1] || "auth"), `HTTP ${r.status} ${raison}`); }
+      else if (auth && /grant_type=refresh_token/.test(u)) journalAuth("Jeton renouvelé");
+      return r;
+    } catch (e) { if (auth) journalAuth("Réseau injoignable (auth)", e.message || e); throw e; }
+  }; }
+window.addEventListener("offline", () => journalAuth("Hors ligne"));
+window.addEventListener("online", () => journalAuth("En ligne"));
 async function initCloud() {
   renderCompteBouton();
   if (!cloud.url || !cloud.cle) return;
   try {
     if (!window.supabase) await chargerScript("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js");
     sb = window.supabase.createClient(cloud.url, cloud.cle, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: "pkce" } });
-    sb.auth.onAuthStateChange((_evt, s) => setTimeout(() => surSession(s), 0));   // jamais d'appel Supabase dans le rappel lui-même
-    surSession((await sb.auth.getSession()).data.session);
+    sb.auth.onAuthStateChange((_evt, s) => { if (_evt !== "TOKEN_REFRESHED") journalAuth(_evt, s ? "session présente" : "aucune session"); setTimeout(() => surSession(s), 0); });   // jamais d'appel Supabase dans le rappel lui-même
+    { const r0 = await sb.auth.getSession(); journalAuth("Ouverture de la page", r0.error ? "erreur : " + r0.error.message : r0.data.session ? "session retrouvée" : "aucune session enregistrée"); surSession(r0.data.session); }
   } catch (e) {
     etat("Service en ligne injoignable", "erreur"); etatCloud = messageErreur(e);
   }
@@ -5377,7 +5404,7 @@ function renderCompte() {
       <p class="note">Connecte-toi avec ton compte Discord pour retrouver ton inventaire partout et le partager avec ta corporation.</p>
       ${fichier ? `<p class="note echec">La connexion Discord a besoin que la page soit ouverte depuis son adresse web (GitHub Pages, voir le guide), pas comme un fichier.</p>` : ""}
       <div><button class="btn principal" type="button" data-action="connexion" ${fichier || !sb ? "disabled" : ""}>Se connecter avec Discord</button></div>
-      ${etatCloud ? `<p class="note echec">${esc(etatCloud)}</p>` : ""}</div>`;
+      ${etatCloud ? `<p class="note echec">${esc(etatCloud)}</p>` : ""}${journalAuthHtml()}</div>`;
     return;
   }
   const attente = items.filter((it) => !it.sync).length + (base.suppressions || []).length;
@@ -5387,7 +5414,7 @@ function renderCompte() {
       <p class="id-compte" data-no-tr title="Identifiant du compte">ID ${esc(compte.id)}</p></div></div>
     ${etatCloud ? `<p class="note echec">${esc(etatCloud)}</p>` : ""}
     <div class="ligne"><button class="btn petit" type="button" data-action="sync">Synchroniser maintenant</button>
-      <button class="btn petit" type="button" data-action="deconnexion">Se déconnecter</button></div></div>`;
+      <button class="btn petit" type="button" data-action="deconnexion">Se déconnecter</button></div>${journalAuthHtml()}</div>`;
 
   for (const c of compte.corpos) {
     const admin = c.role === "admin";
@@ -5430,7 +5457,7 @@ function renderCompte() {
 async function action(nom, d, form) {
   try {
     if (nom === "connexion") { await seConnecter(); return; }
-    if (nom === "deconnexion") { await sb.auth.signOut(); surSession(null); return; }
+    if (nom === "deconnexion") { journalAuth("Déconnexion (bouton)"); await sb.auth.signOut(); surSession(null); return; }
     if (nom === "config") { localStorage.removeItem(CLE_CLOUD); cloud = { ...CLOUD_DEFAUT }; sb = null; render(); return; }
     if (nom === "sync") { await synchroniser(); await chargerPartage(); toast(etatCloud || "Synchronisé."); return; }
     if (nom === "copier") { await navigator.clipboard.writeText(d.texte).catch(() => {}); toast("Code copié."); return; }
