@@ -876,6 +876,31 @@ span.scu, td .scu, #dr-rend, .raff-liste .ro-l b, .nb-caisses, .actions-groupe s
 /* image de corporation : seulement à hauteur du bloc d'activité, collée à gauche, fondue vers la droite */
 #v-home::before, #v-home::after { display: none !important; }
 .home-haut { position: relative; }
+/* v418 : objectifs (blueprints à fabriquer) */
+.home-objectifs { grid-column: 1 / -1; order: 5; }
+.obj-liste { list-style: none; margin: 8px 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }   /* v420 : deux grands blocs par ligne */
+@media (max-width: 760px) { .obj-liste { grid-template-columns: minmax(0, 1fr); } }
+.obj { padding: 14px 16px; } .obj-tete b { font-size: 1.2em; } .obj-mats { font-size: var(--f, 14px); }
+.obj { border: 1px solid var(--trait); border-radius: 6px; padding: 10px 12px; background: rgba(255,255,255,.02); }
+.obj.propose { border-style: dashed; }
+.obj.termine { opacity: .65; }
+.obj-tete { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.obj-tete b { font-size: 1.05em; cursor: pointer; }
+.obj-badge { font-size: var(--fmin); padding: 1px 6px; border-radius: 3px; background: rgba(255,255,255,.08); }
+.obj-badge.corpo { background: color-mix(in srgb, var(--cta-2) 35%, transparent); }
+.obj-badge.attente { background: color-mix(in srgb, var(--orange) 40%, transparent); }
+.obj-avance { margin-left: auto; font-variant-numeric: tabular-nums; }
+.obj-mats { list-style: none; margin: 6px 0; padding: 0; font-size: var(--fmin); }
+.obj-mats li { padding: 3px 0; }
+.obj-mat-l { display: flex; justify-content: space-between; gap: 8px; }
+.obj-barre { height: 5px; margin-top: 3px; border-radius: 3px; background: rgba(255,255,255,.08); overflow: hidden; }
+.obj-barre span { display: block; height: 100%; background: #f08a6a; border-radius: 3px; transition: width .3s ease; }
+.obj-barre.ok span { background: #5fd38a; }
+.obj-mats .ok { color: #5fd38a; } .obj-mats .manque { color: #f08a6a; }
+.obj-actions { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.bp-objectif { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--trait); }
+.bp-objectif label { display: flex; align-items: center; gap: 4px; font-size: var(--fmin); }
+.bp-objectif input { width: 64px; }
 .home-haut::before { content: ""; position: absolute; z-index: -1; pointer-events: none; top: -24px; bottom: -16px; left: calc(50% - 50vw / .9); width: calc(50vw / .9);   /* v371 : la page est zoomée à 90 % : 1vw y vaut 0,9 vw réel */
   background: url("corpo.jpg") left 40% / cover no-repeat; opacity: .6;
   -webkit-mask-image: linear-gradient(to right, #000 25%, transparent 100%), linear-gradient(to bottom, #000 70%, transparent 100%);
@@ -1666,6 +1691,10 @@ body.overlay-bps { margin: 0; height: 100vh; }
         <h2>Ordres de raffinage</h2>
         <ul class="raff-liste grille" id="h-raff"></ul>
       </aside>
+      <div class="carte home-objectifs" id="h-obj" hidden>
+        <div class="act-tete"><h2>Objectifs</h2><span class="note">matériaux qui restent à réunir</span></div>
+        <ul class="obj-liste" id="h-obj-liste"></ul>
+      </div>
       <div class="carte home-activite home-mes">
         <div class="act-tete"><h2>Mes ressources</h2></div>
         <p class="act-stats" id="mes-stats"></p>
@@ -2013,6 +2042,13 @@ body.overlay-bps { margin: 0; height: 100vh; }
 
         </div>
         <p class="note bp-craft-info" id="dbp-craft-info"></p>
+        <div class="bp-objectif" id="dbp-objectif">
+          <label title="Qualité minimum de chaque matériau">Q min <input type="number" id="dbp-obj-q" min="0" max="1000" step="1" inputmode="numeric"></label>
+          <label title="Nombre d'objets à fabriquer">Nombre <input type="number" id="dbp-obj-n" min="1" max="999" value="1" inputmode="numeric"></label>
+          <select id="dbp-obj-corp" hidden aria-label="Corporation"></select>
+          <button type="button" class="btn petit" id="dbp-obj-perso">Objectif perso</button>
+          <button type="button" class="btn petit" id="dbp-obj-corpo">Objectif corpo</button>
+        </div>
       </div>
     </div>
     <div class="bp-corps">
@@ -5331,6 +5367,7 @@ async function synchroniser() {
   } finally {
     syncEnCours = false;
     await syncBlueprints().catch(() => {});
+    await chargerObjectifs().catch(() => {});   // v418
     if (vue !== "compte") render(); else renderCompte();
   }
 }
@@ -5658,7 +5695,93 @@ function renderEtatZones(ul) {
   ul.innerHTML = Object.entries(ZONES).map(([k, z]) =>
     `<li><span class="pastille" style="background:${z.couleur}"></span>${z.nom} : ${estDefaut(k) ? "par défaut" : "réglée"}</li>`).join("");
 }
+/* v418 : objectifs : blueprints à fabriquer (perso, ou corpo proposé par un membre puis validé par un admin de la corpo) */
+let objectifs = [];
+const objRecettes = new Set();
+async function chargerObjectifs() {
+  if (!sb || !compte) { objectifs = []; return; }
+  const { data, error } = await sb.from("objectifs").select("*").order("cree_le");
+  if (!error) objectifs = data || [];
+}
+const adminDe = (corpId) => (compte?.corpos || []).some((c) => c.id === corpId && c.role === "admin");
+/* matériaux encore nécessaires : recette par défaut × objets restants, comparée au stock (qualité ≥ Q min) */
+function resteObjectif(o) {
+  const d = bpDetails.get(o.blueprint_id);
+  if (!d) { if (!objRecettes.has(o.blueprint_id)) { objRecettes.add(o.blueprint_id); detailBlueprint(o.blueprint_id).then(() => renderObjectifs(), () => {}); } return null; }
+  const restant = Math.max(0, (o.quantite || 0) - (o.faits || 0)), besoins = new Map();
+  for (const a of d.aspects?.aspects || []) {
+    if (a.is_selected === false) continue;
+    const inp = a.input || {}, k = sansAccents(inp.name || ""); if (!k) continue;
+    const b = (inp.kind === "item" ? Number(inp.quantity) || 0 : Number(inp.quantity_scu) || 0) * restant; if (!b) continue;
+    const e = besoins.get(k) || { nom: inp.name, kind: inp.kind, besoin: 0 }; e.besoin += b; besoins.set(k, e);
+  }
+  const stock = o.corporation_id ? [...items, ...(partage.caisses || []).filter((c) => c.groupe !== "Allié")] : items;
+  return [...besoins.entries()].map(([k, e]) => {
+    const l = stock.filter((c) => sansAccents(c.nom || "") === k && (Number(c.qualite) || 0) >= (o.qualite_min || 0));
+    const dispo = e.kind === "item" ? l.length : l.reduce((s2, c) => s2 + (Number(c.quantite_scu) || 0), 0);
+    return { ...e, dispo };
+  });
+}
+function renderObjectifs() {
+  const box = $("h-obj"), ul = $("h-obj-liste"); if (!box || !ul) return;
+  const tag = (id) => (compte?.corpos || []).find((c) => c.id === id)?.tag || "corpo";
+  box.hidden = !compte || !objectifs.length;
+  ul.innerHTML = objectifs.map((o) => {
+    const corpo = !!o.corporation_id, admin = corpo && adminDe(o.corporation_id), moi = o.user_id === compte?.id;
+    const r = o.statut === "termine" ? [] : resteObjectif(o);
+    const unite = (e, v) => (e.kind === "item" ? `${Math.floor(v)}` : `${fmtScu(v)} SCU`);
+    // v421 : une barre d'avancement par matériau (stock réuni / besoin)
+    const mats = r == null ? `<li class="note">Recette en chargement…</li>` : r.map((e) => { const pc = e.besoin ? Math.min(100, Math.round(e.dispo / e.besoin * 100)) : 100, ok = e.dispo >= e.besoin - 1e-9;
+      return `<li><div class="obj-mat-l"><span>${esc(e.nom)} <small>Q≥${o.qualite_min}</small></span>` +
+      (ok ? `<span class="ok">✓ ${unite(e, e.besoin)}</span>` : `<span class="manque">manque ${unite(e, e.besoin - e.dispo)} <small>/ ${unite(e, e.besoin)}</small></span>`) +
+      `</div><div class="obj-barre${ok ? " ok" : ""}"><span style="width:${pc}%"></span></div></li>`; }).join("");
+    // v421 : non approuvé : l'admin voit « Approuver » (au lieu du statut), le créateur voit « à valider » ; supprimer : créateur ou admin
+    const actions = [
+      o.statut === "propose" ? (admin ? `<button type="button" class="btn petit principal" data-obj-valider="${o.id}">Approuver</button>` : `<span class="obj-badge attente">à valider</span>`) : "",
+      o.statut === "actif" ? `<button type="button" class="btn petit" data-obj-fait="${o.id}" title="Un objet fabriqué">+1 fabriqué</button>` : "",
+      moi || admin ? `<button type="button" class="btn petit danger" data-obj-suppr="${o.id}">Supprimer</button>` : "",
+    ].join("");
+    return `<li class="obj ${esc(o.statut)}"><div class="obj-tete"><b data-obj-bp="${esc(o.blueprint_id)}">${esc(o.blueprint_nom)}</b>` +
+      `<span class="obj-badge${corpo ? " corpo" : ""}">${corpo ? `[${esc(tag(o.corporation_id))}]` : "Perso"}</span>` +
+      (o.statut === "termine" ? `<span class="obj-badge">terminé</span>` : "") +
+      `<span class="obj-avance">${o.faits || 0} / ${o.quantite}</span></div>` +
+      (mats ? `<ul class="obj-mats">${mats}</ul>` : "") + (actions ? `<div class="obj-actions">${actions}</div>` : "") + `</li>`;
+  }).join("");
+}
+$("h-obj-liste").addEventListener("click", async (e) => {
+  const t = e.target.closest("[data-obj-fait], [data-obj-suppr], [data-obj-valider], [data-obj-bp]"); if (!t || !sb) return;
+  try {
+    if (t.dataset.objBp) { ouvrirBlueprint(t.dataset.objBp); return; }
+    if (t.dataset.objFait) verifier(await sb.rpc("objectif_fabrique", { p_id: t.dataset.objFait, p_n: 1 }));
+    else if (t.dataset.objValider) verifier(await sb.from("objectifs").update({ statut: "actif", valide_par: compte.id }).eq("id", t.dataset.objValider));
+    else if (t.dataset.objSuppr) { if (!confirm("Supprimer cet objectif ?")) return; verifier(await sb.from("objectifs").delete().eq("id", t.dataset.objSuppr)); }
+    await chargerObjectifs(); renderObjectifs();
+  } catch (err) { toast("Objectif : " + messageErreur(err)); }
+});
+async function creerObjectif(corpo) {
+  if (!bpPop?.c) return;
+  if (!sb || !compte) { toast("Connecte-toi pour créer un objectif."); return; }
+  const q = Math.max(0, Math.min(1000, parseInt($("dbp-obj-q").value, 10) || 0)), n = Math.max(1, Math.min(999, parseInt($("dbp-obj-n").value, 10) || 1));
+  const corpId = corpo ? ($("dbp-obj-corp").value || compte.corpos?.[0]?.id) : null;
+  if (corpo && !corpId) { toast("Tu ne fais partie d'aucune corporation."); return; }
+  try {
+    verifier(await sb.from("objectifs").insert({ user_id: compte.id, corporation_id: corpId, blueprint_id: bpPop.c.id, blueprint_nom: bpPop.c.nom, qualite_min: q, quantite: n, statut: corpo && !adminDe(corpId) ? "propose" : "actif" }));
+    await chargerObjectifs(); renderObjectifs();
+    toast(corpo ? (adminDe(corpId) ? "Objectif de corpo créé." : "Objectif de corpo proposé : un admin de la corpo doit le valider.") : "Objectif perso créé : il s'affiche sur l'accueil.");
+  } catch (err) { toast("Objectif : " + messageErreur(err)); }
+}
+$("dbp-obj-perso").addEventListener("click", () => creerObjectif(false));
+$("dbp-obj-corpo").addEventListener("click", () => creerObjectif(true));
+function majFormObjectif() {   // corpos du joueur ; Q min = qualité la plus basse réglée dans la recette
+  const cs = compte?.corpos || [], sel = $("dbp-obj-corp");
+  $("dbp-obj-corpo").hidden = !cs.length; sel.hidden = cs.length < 2;
+  sel.innerHTML = cs.map((c) => `<option value="${esc(c.id)}">[${esc(c.tag)}] ${esc(c.nom)}</option>`).join("");
+  const qs = (bpPop?.q || []).filter((v, i) => bpPop.sel?.[i] !== false && Number.isFinite(v));
+  if (qs.length) $("dbp-obj-q").value = String(Math.min(...qs));
+  $("dbp-obj-n").value = String(multCraft());
+}
 function renderHome() {
+  renderObjectifs();
   // activité
   const groupes = activites();
   $("act-titre").textContent = "Activité de la corporation et des alliés";
@@ -8788,7 +8911,7 @@ async function ouvrirBlueprint(id) {
         const l = items.filter((it) => sansAccents(it.nom || "") === sansAccents(inp.name || "") && it.qualite === v); return (inp.kind === "item" ? l.length : l.reduce((s, c) => s + (Number(c.quantite_scu) || 0), 0)) >= besoin - 1e-9 && l.length; });
       return ok.length ? ok[ok.length - 1] : borner(a, a.initial_quality ?? 500);
     });
-    renderPopBlueprint();
+    renderPopBlueprint(); majFormObjectif();
   } catch (e) { $("dbp-aspects").innerHTML = `<p class="note">Recette injoignable (api.star-citizen.wiki) : ${esc(e.message || e)}</p>`; }
 }
 $("d-blueprint").addEventListener("change", (e) => { if (bpPop && e.target.dataset.aspect != null) renderPopBlueprint(); });   // v309 : au relâcher, tout est recalculé (caisses prises)
