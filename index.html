@@ -1269,7 +1269,14 @@ body:not(.overlay) .actions-groupe { padding: var(--e1) var(--e2); gap: var(--e2
 :root { --fmin: .75rem; }
 body:not(.overlay) { --fmin: calc(.75rem / .9); }
 /* v221 : colonne Détail des blueprints plus large */
-#v-blueprints td.bp-tags { width: 35%; min-width: 0; }
+#v-blueprints td.bp-tags { width: 24%; min-width: 0; }   /* v423 : réduit pour laisser la colonne des objectifs */
+body:not(.overlay) #v-blueprints td.bp-tags .bp-tag { padding: 0 5px; margin: 1px 2px 1px 0; font-size: .8125rem !important; line-height: 1.5; }
+.bp-obj-col { flex: 0 0 290px; position: sticky; top: 12px; max-height: calc(100vh / .9 - 40px); overflow: auto; }
+.bp-obj-col h2 { margin: 0 0 6px; font-size: 1rem; }
+.obj-liste.compacte { grid-template-columns: minmax(0, 1fr); gap: 8px; margin: 0; }
+.obj-liste.compacte .obj { padding: 10px 12px; }
+.obj-liste.compacte .obj-tete b { font-size: 1em; }
+.obj-liste.compacte .obj-mats { font-size: var(--fmin); }
 /* v227 : pas de scroll horizontal sur la liste des blueprints */
 #v-blueprints table { width: 100%; }
 #v-blueprints :is(td.bp-tags, td.bp-ing, td.nom-cell) { white-space: normal; }
@@ -1811,7 +1818,7 @@ body.overlay-bps { margin: 0; height: 100vh; }
       <button class="btn" type="button" id="bp-oui" disabled>Je les possède</button>
       <button class="btn" type="button" id="bp-non" disabled>Je ne les possède pas</button>
     </div>
-    <div class="bp-liste-scan"><div class="tableau-wrap"><table class="bp-table"><thead id="bp-tete"></thead><tbody id="bp-lignes"></tbody></table></div><div class="bp-scan-place" id="bp-scan-place"><div id="p-bps" class="p-bps" hidden>
+    <div class="bp-liste-scan"><div class="tableau-wrap"><table class="bp-table"><thead id="bp-tete"></thead><tbody id="bp-lignes"></tbody></table></div><aside class="bp-obj-col" id="bp-obj-col" hidden><h2>Objectifs</h2><ul class="obj-liste compacte" id="bp-obj-liste"></ul></aside><div class="bp-scan-place" id="bp-scan-place"><div id="p-bps" class="p-bps" hidden>
   <div class="bps-tete"><strong>Mes blueprints</strong><span class="bps-compte" id="bps-compte"></span></div>
   <p class="bps-aide">Kiosque de fabrication, filtre <b>Owned</b> : survolez chaque blueprint.</p>
   <div class="bps-lu" id="bps-lu"></div>
@@ -2141,8 +2148,12 @@ const OCR = (() => {
   const VIOLET = [[125, 60, 70], [171, 255, 175]];
   /* v416 : balance des blancs par bande verticale (reflets, éclairage de la station) : APPRIS = [{ r, g, b, n }, …] = multiplicateurs
      appris sur les lettres blanches des étiquettes ; appliqués aux pixels avant la détection des couleurs */
-  const BANDES = 6; let APPRIS = null;   // v353 : teinte ≤ 171 et pas trop claire : les cristaux roses (Riccite…, teinte 170-179, très lumineux) ne passent plus pour l'étiquette violette
+  const BANDES = 16; let APPRIS = null;   // v426 : 16 bandes ≈ 2 par colonne de caisses (Elevator 4 + Warehouse 4), comme une balance par colonne   // v353 : teinte ≤ 171 et pas trop claire : les cristaux roses (Riccite…, teinte 170-179, très lumineux) ne passent plus pour l'étiquette violette
   const TURQ = [[45, 18, 70], [110, 255, 255]];
+  /* v425 : plages élargies, essayées seulement si les plages normales ne trouvent rien (reflet orangé de la 1re colonne de l'Elevator) :
+     violet tiré vers le rouge (teinte 172-176), turquoise devenu gris-olive (teinte 20-35, peu saturé) */
+  const VIOLET_L = [[125, 50, 60], [179, 255, 165]];
+  const TURQ_L = [[[45, 18, 70], [110, 255, 255]], [[16, 22, 70], [44, 80, 150]]];
   const JAUNE = [[18, 60, 70], [30, 255, 255]];
 
   function crop(img, x, y, w, h) {
@@ -2236,7 +2247,9 @@ const OCR = (() => {
 
   // Badges : petits rectangles horizontaux bien remplis de la couleur
   function colorBoxes(c, w, h, range, minH = 6) {
-    let m = inRange(c, w * h, range[0], range[1]);
+    let m;
+    if (Array.isArray(range[0][0])) { m = new Uint8Array(w * h); for (const r of range) { const m2 = inRange(c, w * h, r[0], r[1]); for (let i = 0; i < m.length; i++) m[i] |= m2[i]; } }   // v425 : plusieurs plages
+    else m = inRange(c, w * h, range[0], range[1]);
     m = close(open(m, w, h, 2), w, h, 3);
     return components(m, w, h).filter((b) => {
       if (!(b.h >= minH && b.h <= 60 && b.w > b.h && b.w <= b.h * 8 && b.w * b.h >= 40)) return false;
@@ -2320,10 +2333,13 @@ const OCR = (() => {
   }
 
   /* Badge violet (nom) + turquoise (qualité) alignés, jaune (quantité) à droite. */
-  function findBadges(img, ref) {
+  function findBadges(img, ref) {   // v425 : plages normales, puis élargies (reflet), puis contraste
+    return findBadgesAvec(img, ref, VIOLET, TURQ, false) || findBadgesAvec(img, ref, VIOLET_L, TURQ_L, true);
+  }
+  function findBadgesAvec(img, ref, VIO, TUR, dernier) {
     const c = hsv(img), w = img.w, h = img.h;
     ref = ref || [w / 2, h / 2];
-    const violets = colorBoxes(c, w, h, VIOLET), turqs = colorBoxes(c, w, h, TURQ), jaunes = colorBoxes(c, w, h, JAUNE, 4);
+    const violets = colorBoxes(c, w, h, VIO), turqs = colorBoxes(c, w, h, TUR), jaunes = colorBoxes(c, w, h, JAUNE, 4);
     const cands = [];
     for (const [tx, ty, tw, th] of turqs) {
       const tcy = ty + th / 2;
@@ -2338,7 +2354,7 @@ const OCR = (() => {
         cands.push([(vx + vw / 2 - ref[0]) ** 2 + (vcy - ref[1]) ** 2, [v, [tx, ty, tw, th], js[0] || null]]);
       }
     }
-    if (!cands.length) return badgesParContraste(img, c);
+    if (!cands.length) return dernier ? badgesParContraste(img, c) : null;
     cands.sort((a, b) => a[0] - b[0]);
     const best = cands[0][1];
     // Badge jaune : sa couleur varie avec l'éclairage et peut n'être reconnue que sur
@@ -2754,6 +2770,8 @@ let session = null, fluxTrack = null, pip = null, pending = null, dernierAjout =
 const fiche = $("fiche");
 
 function toast(t) {
+  // v424 : popup ouverte (couche du dessus) : le message va dans la popup, sinon il serait caché dessous
+  { const d = [...document.querySelectorAll("dialog[open]")].pop(), el = $("toast"); (d || document.body).append(el); }
   $("toast").textContent = t; $("toast").classList.add("visible");
   clearTimeout(toast.t); toast.t = setTimeout(() => $("toast").classList.remove("visible"), 2800);
 }
@@ -3747,7 +3765,7 @@ function renderCarteScan() {
   if (!liste.length) { el.innerHTML = ""; el.hidden = true; return; }
   const pg = grillePage != null && pages.has(grillePage) ? grillePage : (courante || liste[liste.length - 1]);
   // v367 : case concernée par les champs modifiables (caisse lue en attente, ou dernière caisse enregistrée → « Modifier »)
-  const cleChamps = grilleSel || grilleCible || pending?.emplacement?.freight?.cleGrille || (() => {
+  const cleChamps = grilleSel || pending?.emplacement?.freight?.cleGrille || (() => {
     if (!derniereSauvegarde?.ids?.length) return null;
     for (const [k, v] of suivi.registre) if (RE_CASE.test(k) && [].concat(v).some((id) => derniereSauvegarde.ids.includes(id))) return k;
     return null;
@@ -3766,8 +3784,8 @@ function renderCarteScan() {
       const edite = (cs && ligneEditee && cs.its.some((it) => it.id === ligneEditee)) || cleChamps === cle, sel = grilleSel === cle;
       const fl = cs && suivi.flashF?.k === cle ? Date.now() - suivi.flashF.t : null;   // v362 : animation d'enregistrement
       const cl = ["fg-case", fl != null && fl < 1300 ? "flash" : "", cs ? "pleine" : "", cs && cs.its.length > 1 ? "pile" : "", edite ? "edite" : "", ici ? (cs ? "ici deja" : "ici") : "", sel ? "sel" : ""].filter(Boolean).join(" ");
-      if (!cs) { h += estFreight() ? `<button type="button" class="${cl}${grilleCible === cle ? " cible" : ""}" data-l="${esc(pg)}:${l}" data-vide-case="${esc(cle)}" title="Cliquer : la prochaine caisse scannée (ou saisie) ira dans cette case"></button>` : `<div class="${cl}" data-l="${esc(pg)}:${l}"></div>`; continue; }
-      if (cs.prov != null) { const cf2 = seqF.conf?.has(cs.cle); h += `<button type="button" class="${cl.replace(" pleine", "")} prov${cf2 ? " confirme" : ""}${grilleCible === cs.cle ? " cible" : ""}" data-prov-case="${esc(cs.cle)}" title="Qualité lue sans survol${cf2 ? " (confirmée par plusieurs lectures)" : " (à confirmer)"} — cliquer pour saisir cette caisse à la main">${seqF.piles?.get(cs.cle) ? `<span class="fg-pile" title="Pile probable (badge X2 ou plus)">×2+</span>` : ""}<span class="fg-q">${cs.prov}</span></button>`; continue; }
+      if (!cs) { h += estFreight() ? `<button type="button" class="${cl}" data-l="${esc(pg)}:${l}" data-vide-case="${esc(cle)}" title="Cliquer : saisir une caisse à la main dans cette case"></button>` : `<div class="${cl}" data-l="${esc(pg)}:${l}"></div>`; continue; }
+      if (cs.prov != null) { const cf2 = seqF.conf?.has(cs.cle); h += `<button type="button" class="${cl.replace(" pleine", "")} prov${cf2 ? " confirme" : ""}" data-prov-case="${esc(cs.cle)}" title="Qualité lue sans survol${cf2 ? " (confirmée par plusieurs lectures)" : " (à confirmer)"} — cliquer pour saisir cette caisse à la main">${seqF.piles?.get(cs.cle) ? `<span class="fg-pile" title="Pile probable (badge X2 ou plus)">×2+</span>` : ""}<span class="fg-q">${cs.prov}</span></button>`; continue; }
       const it = cs.its[0], n = cs.its.length;
       h += `<button type="button" class="${cl}"${fl != null && fl < 1300 ? ` style="animation-delay:-${fl}ms"` : ""} data-case="${esc(cle)}" title="${esc(it.nom || "")} · Q${it.qualite ?? "?"} · ${it.quantite_scu != null ? fmtScu(it.quantite_scu) : "?"} SCU${n > 1 ? ` · pile ×${n}` : ""}">` +
         (cs.its.some((x) => suivi.pilesDouteuses?.has(x.id)) ? `<span class="fg-pile" title="Nombre de caisses illisible : vérifiez la pile">×?</span>` : n > 1 ? `<span class="fg-pile">×${n}</span>` : "") +
@@ -3845,21 +3863,21 @@ $("f-carte").addEventListener("click", (e) => {   // sur l'élément (il passe d
   }
   if (cs) chargerCase(cs.dataset.case);
 });
+/* v427 : clic sur une case vide (ou qualité seule) : saisie à la main dans cette case, scan en pause ; re-clic : annule */
 function definirCible(cle) {
-  if (grilleCible === cle) {   // re-clic : annule
-    grilleCible = null; if (pending?.emplacement?.freight?.cible) pending = null;
-    $("scan-etat").className = ""; $("scan-etat").textContent = "Case cible annulée."; renderCarteScan(); return;
+  if (grilleSel === cle && suivi.edition) {
+    suivi.edition = false; grilleSel = null; pending = null; viderChamps(); pictoSauve(null); modeAuto(suivi.autoAvant !== false);
+    $("scan-etat").className = ""; $("scan-etat").textContent = "Saisie annulée : le scan reprend."; renderCarteScan(); return;
   }
-  if (suivi.edition) { suivi.edition = false; grilleSel = null; derniereSauvegarde = null; modeAuto(suivi.autoAvant !== false); }
-  const m = RE_CASE.exec(cle);
-  grilleCible = cle; grilleSel = null; derniereSauvegarde = null;
-  pending = { manuel: true, pile: 1, emplacement: { freight: { panneau: m?.[1], cleGrille: cle, cible: true } } };
-  // v414 : pré-remplissage : minerai et quantité de la dernière caisse enregistrée (idée 4), qualité lue dans la séquence de la grille (idée 5), sinon la dernière
+  const m = RE_CASE.exec(cle), avant = suivi.edition ? suivi.autoAvant : $("c-auto").checked;
+  modeAuto(false);
+  derniereSauvegarde = null; grilleSel = cle; suivi.edition = true; suivi.autoAvant = avant;
+  pending = { manuel: true, pile: 1, emplacement: { freight: { panneau: m?.[1], cleGrille: cle } } };
+  // pré-remplissage : minerai et quantité de la dernière caisse enregistrée, qualité lue dans la grille (sinon la dernière)
   const der = session ? items.filter((it) => it.ts >= session.debut && it.station === stationCourante).sort((a, b) => b.ts - a.ts)[0] : null, qSeq = provF.get(cle);
   $("f-nom").value = der?.nom || ""; $("f-q-autre").value = ""; renderQualite(qSeq ?? der?.qualite ?? null); $("f-scu").value = der?.quantite_scu != null ? scu3(der.quantite_scu) : ""; $("f-pile").value = "x1";
   pictoSauve(null); $("scan-etat").className = "";
-  const pre = [der?.nom ? "minerai et quantité de la caisse précédente" : "", qSeq != null ? "qualité lue dans la grille" : der?.qualite != null ? "qualité précédente" : ""].filter(Boolean).join(", ");
-  $("scan-etat").textContent = (pre ? `Pré-rempli : ${pre}. ` : "") + ($("c-auto").checked ? "Case cible : survolez la caisse en jeu (ou saisissez-la ici)." : "Case cible : saisissez la caisse ou survolez-la en jeu.");
+  $("scan-etat").textContent = "Saisie à la main dans cette case (scan en pause) : vérifiez puis Enregistrer. Re-cliquez la case pour annuler.";
   verifierChamps(); renderCarteScan();
 }
 function rechargerGrille() {   // v351/v359 : on repart de zéro (positions, qualités lues) ; le stock n'est pas touché
@@ -4118,15 +4136,12 @@ async function scanner(auto = null) {
       const bb = r.boites || [];
       const bulle = bb.length ? { x: z.x + Math.min(...bb.map((b) => b[0])), y: z.y + Math.min(...bb.map((b) => b[1])), h: Math.max(...bb.map((b) => b[3])) } : null;
       await assurerSequenceFreight();
-      let cf = bulle ? caseParBulle(bulle, src) : null;
-      // v413 : case cible choisie dans la grille : la bulle lue va dans cette case, sans déduire la position
-      if (grilleCible) { const m = RE_CASE.exec(grilleCible); cf = { ...(cf || {}), panneau: m?.[1], cleGrille: grilleCible, cible: true }; }
+      const cf = bulle ? caseParBulle(bulle, src) : null;
       auto.cle = cf ? cf.cleGrille : null;
       if (cf) {
         // pile (X2, X3…) : badge en haut à droite de la case
         const pl = await lirePileFreight(cf.pile);
         auto.pile = pl.n || 1; auto.pileDouteuse = !pl.sur;
-        if (cf.cible && !cf.pile) { auto.pile = 1; auto.pileDouteuse = false; }   // v413 : case cible sans badge de pile repéré : 1 caisse
         auto.emplacement = { freight: cf };
         if (cf.cleGrille !== suivi.cleGF) { suivi.cleGF = cf.cleGrille; try { renderCarteScan(); } catch {} }   // case survolée dans la grille
         // relecture de contrôle d'une case déjà affichée : rien de neuf, on ne touche à rien (pas de répétition vocale)
@@ -4318,11 +4333,10 @@ function enregistrer(auto = false) {
   planifierSync();
   { const f = pending.emplacement?.freight;   // v324 : Elevator → case de la grille (panneau, ligne, colonne)
     if (pending.pileDouteuse) { suivi.pilesDouteuses = suivi.pilesDouteuses || new Set(); for (const c of crees) suivi.pilesDouteuses.add(c.id); }
-    if (modeScan === "freight" && f && f.cleGrille && f.cleGrille === grilleCible) grilleCible = null;   // v413 : cible remplie
     if (modeScan === "freight" && f) { const k = f.cleGrille; if (k) { suivi.registre.set(k, crees.map((c) => c.id));
       { const im = $("f-capture").getAttribute("src"); if (im && !pending.manuel) { suivi.captures = suivi.captures || new Map(); suivi.captures.set(k, im); } }   /* v417 : capture gardée pour la case */
       suivi.cleGF = k; suivi.flashF = { k, t: Date.now() }; setTimeout(() => { if (suivi.flashF?.k === k) { suivi.flashF = null; try { renderCarteScan(); } catch {} } }, 1350); } }
-    if (suivi.edition && !derniereSauvegarde) { suivi.edition = false; grilleSel = null; modeAuto(suivi.autoAvant !== false); } }   // v338 : saisie d'une case non scannée terminée
+    if (suivi.edition && !derniereSauvegarde) { suivi.edition = false; grilleSel = null; const av = suivi.autoAvant !== false; setTimeout(() => modeAuto(av), 0); } }   /* v427 : différé : le changement de mode vidait « pending » avant la fin de l'enregistrement */   // v338 : saisie d'une case non scannée terminée
   if (pending.cle) { suivi.registre.set(pending.cle, crees.map((c) => c.id)); suivi.captures = suivi.captures || new Map(); const im = $("f-capture").getAttribute("src"); if (im) suivi.captures.set(pending.cle, im); }   // recadrage gardé pour « Déjà enregistrée »
   suivi.dernier = contenuCaisse(nom, q, scuTxt); suivi.autreCase = false;
   if (modeScan === "freight") contenusFreight.add(suivi.dernier);
@@ -5723,8 +5737,9 @@ function resteObjectif(o) {
 }
 function renderObjectifs() {
   const box = $("h-obj"), ul = $("h-obj-liste"); if (!box || !ul) return;
+  const col = $("bp-obj-col"), ul2 = $("bp-obj-liste");   // v423 : même liste dans une colonne à droite des blueprints
   const tag = (id) => (compte?.corpos || []).find((c) => c.id === id)?.tag || "corpo";
-  box.hidden = !compte || !objectifs.length;
+  box.hidden = !compte || !objectifs.length; if (col) col.hidden = box.hidden;
   ul.innerHTML = objectifs.map((o) => {
     const corpo = !!o.corporation_id, admin = corpo && adminDe(o.corporation_id), moi = o.user_id === compte?.id;
     const r = o.statut === "termine" ? [] : resteObjectif(o);
@@ -5746,8 +5761,9 @@ function renderObjectifs() {
       `<span class="obj-avance">${o.faits || 0} / ${o.quantite}</span></div>` +
       (mats ? `<ul class="obj-mats">${mats}</ul>` : "") + (actions ? `<div class="obj-actions">${actions}</div>` : "") + `</li>`;
   }).join("");
+  if (ul2) ul2.innerHTML = ul.innerHTML;
 }
-$("h-obj-liste").addEventListener("click", async (e) => {
+for (const id of ["h-obj-liste", "bp-obj-liste"]) $(id).addEventListener("click", async (e) => {
   const t = e.target.closest("[data-obj-fait], [data-obj-suppr], [data-obj-valider], [data-obj-bp]"); if (!t || !sb) return;
   try {
     if (t.dataset.objBp) { ouvrirBlueprint(t.dataset.objBp); return; }
@@ -8032,7 +8048,6 @@ let seqF = {}, provF = new Map(), seqEnCours = false, seqSig = null;
 /* position sûre pour enregistrer : séquence raccordée, lue sur l'image actuelle, et qualité de la case cohérente */
 async function positionFreightSure(cf, q) {
   if (!cf) return false;
-  if (cf.cible) { seqF.raison = null; return true; }   // v413 : case choisie par l'utilisateur
   const aJour = async () => { const st = seqF[cf.panneau]; if (!st?.sur || !st.geo || !st.sig) return false; try { return ecartSig(signature(await imageBrute()), st.sig) < 1.5; } catch { return false; } };
   seqF.raisonT = Date.now(); seqF.raison = "grille en cours de lecture";
   if (!(await aJour())) { while (seqEnCours) await new Promise((r) => setTimeout(r, 50)); seqSig = null; await majSequenceFreight(true); if (!(await aJour())) return false; }   // séquence lue sur l'image actuelle
@@ -8665,6 +8680,7 @@ function proprietaires(id) {
 }
 let bpVisibles = [];
 function renderBlueprints() {
+  try { renderObjectifs(); } catch {}   // v423
   if (!$("bp-lignes")) return;
   const f = bp.f;
   puces($("bp-types"), BP_TYPES, f.types);
