@@ -898,9 +898,8 @@ span.scu, td .scu, #dr-rend, .raff-liste .ro-l b, .nb-caisses, .actions-groupe s
 .obj-barre.ok span { background: #5fd38a; }
 .obj-mats .ok { color: #5fd38a; } .obj-mats .manque { color: #f08a6a; }
 .obj-actions { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
-.bp-objectif { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--trait); }
-.bp-objectif label { display: flex; align-items: center; gap: 4px; font-size: var(--fmin); }
-.bp-objectif input { width: 64px; }
+.bp-objectif { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 12px; }
+.bp-objectif .btn { flex: 1; }
 .home-haut::before { content: ""; position: absolute; z-index: -1; pointer-events: none; top: -24px; bottom: -16px; left: calc(50% - 50vw / .9); width: calc(50vw / .9);   /* v371 : la page est zoomée à 90 % : 1vw y vaut 0,9 vw réel */
   background: url("corpo.jpg") left 40% / cover no-repeat; opacity: .6;
   -webkit-mask-image: linear-gradient(to right, #000 25%, transparent 100%), linear-gradient(to bottom, #000 70%, transparent 100%);
@@ -2042,19 +2041,17 @@ body.overlay-bps { margin: 0; height: 100vh; }
 
         </div>
         <p class="note bp-craft-info" id="dbp-craft-info"></p>
-        <div class="bp-objectif" id="dbp-objectif">
-          <label title="Qualité minimum de chaque matériau">Q min <input type="number" id="dbp-obj-q" min="0" max="1000" step="1" inputmode="numeric"></label>
-          <label title="Nombre d'objets à fabriquer">Nombre <input type="number" id="dbp-obj-n" min="1" max="999" value="1" inputmode="numeric"></label>
-          <select id="dbp-obj-corp" hidden aria-label="Corporation"></select>
-          <button type="button" class="btn petit" id="dbp-obj-perso">Objectif perso</button>
-          <button type="button" class="btn petit" id="dbp-obj-corpo">Objectif corpo</button>
-        </div>
       </div>
     </div>
     <div class="bp-corps">
       <div class="bp-cols">
         <div class="bp-col-recette">
           <div class="bp-aspects" id="dbp-aspects"></div>
+          <div class="bp-objectif" id="dbp-objectif">
+            <select id="dbp-obj-corp" hidden aria-label="Corporation"></select>
+            <button type="button" class="btn" id="dbp-obj-perso">Objectif perso</button>
+            <button type="button" class="btn" id="dbp-obj-corpo">Objectif corpo</button>
+          </div>
         </div>
         <div class="bp-col-stock">
           <h3>Stock des ressources</h3>
@@ -5709,15 +5706,17 @@ function resteObjectif(o) {
   const d = bpDetails.get(o.blueprint_id);
   if (!d) { if (!objRecettes.has(o.blueprint_id)) { objRecettes.add(o.blueprint_id); detailBlueprint(o.blueprint_id).then(() => renderObjectifs(), () => {}); } return null; }
   const restant = Math.max(0, (o.quantite || 0) - (o.faits || 0)), besoins = new Map();
-  for (const a of d.aspects?.aspects || []) {
-    if (a.is_selected === false) continue;
-    const inp = a.input || {}, k = sansAccents(inp.name || ""); if (!k) continue;
-    const b = (inp.kind === "item" ? Number(inp.quantity) || 0 : Number(inp.quantity_scu) || 0) * restant; if (!b) continue;
-    const e = besoins.get(k) || { nom: inp.name, kind: inp.kind, besoin: 0 }; e.besoin += b; besoins.set(k, e);
-  }
+  const qa = Array.isArray(o.qualites) ? o.qualites : null;   // v422 : qualité par matériau (glissières) ; null = matériau non utilisé
+  (d.aspects?.aspects || []).forEach((a, i) => {
+    if (qa ? qa[i] == null : a.is_selected === false) return;
+    const inp = a.input || {}, k = sansAccents(inp.name || ""); if (!k) return;
+    const b = (inp.kind === "item" ? Number(inp.quantity) || 0 : Number(inp.quantity_scu) || 0) * restant; if (!b) return;
+    const qm = qa ? qa[i] : o.qualite_min || 0, cle = k + "|" + qm;
+    const e = besoins.get(cle) || { nom: inp.name, kind: inp.kind, q: qm, besoin: 0 }; e.besoin += b; besoins.set(cle, e);
+  });
   const stock = o.corporation_id ? [...items, ...(partage.caisses || []).filter((c) => c.groupe !== "Allié")] : items;
-  return [...besoins.entries()].map(([k, e]) => {
-    const l = stock.filter((c) => sansAccents(c.nom || "") === k && (Number(c.qualite) || 0) >= (o.qualite_min || 0));
+  return [...besoins.values()].map((e) => {
+    const l = stock.filter((c) => sansAccents(c.nom || "") === sansAccents(e.nom || "") && (Number(c.qualite) || 0) >= e.q);
     const dispo = e.kind === "item" ? l.length : l.reduce((s2, c) => s2 + (Number(c.quantite_scu) || 0), 0);
     return { ...e, dispo };
   });
@@ -5732,7 +5731,7 @@ function renderObjectifs() {
     const unite = (e, v) => (e.kind === "item" ? `${Math.floor(v)}` : `${fmtScu(v)} SCU`);
     // v421 : une barre d'avancement par matériau (stock réuni / besoin)
     const mats = r == null ? `<li class="note">Recette en chargement…</li>` : r.map((e) => { const pc = e.besoin ? Math.min(100, Math.round(e.dispo / e.besoin * 100)) : 100, ok = e.dispo >= e.besoin - 1e-9;
-      return `<li><div class="obj-mat-l"><span>${esc(e.nom)} <small>Q≥${o.qualite_min}</small></span>` +
+      return `<li><div class="obj-mat-l"><span>${esc(e.nom)} <small>Q≥${e.q}</small></span>` +
       (ok ? `<span class="ok">✓ ${unite(e, e.besoin)}</span>` : `<span class="manque">manque ${unite(e, e.besoin - e.dispo)} <small>/ ${unite(e, e.besoin)}</small></span>`) +
       `</div><div class="obj-barre${ok ? " ok" : ""}"><span style="width:${pc}%"></span></div></li>`; }).join("");
     // v421 : non approuvé : l'admin voit « Approuver » (au lieu du statut), le créateur voit « à valider » ; supprimer : créateur ou admin
@@ -5761,11 +5760,14 @@ $("h-obj-liste").addEventListener("click", async (e) => {
 async function creerObjectif(corpo) {
   if (!bpPop?.c) return;
   if (!sb || !compte) { toast("Connecte-toi pour créer un objectif."); return; }
-  const q = Math.max(0, Math.min(1000, parseInt($("dbp-obj-q").value, 10) || 0)), n = Math.max(1, Math.min(999, parseInt($("dbp-obj-n").value, 10) || 1));
+  // v422 : qualité de chaque matériau = celle de sa glissière ; nombre = multiplicateur de craft
+  const as = bpPop.d?.aspects?.aspects || []; if (!as.length) { toast("Recette pas encore chargée."); return; }
+  const qualites = as.map((a, i) => (aspectActif(i) ? Math.round(bpPop.q[i] ?? 0) : null));
+  const qs = qualites.filter((v) => v != null), q = qs.length ? Math.min(...qs) : 0, n = multCraft();
   const corpId = corpo ? ($("dbp-obj-corp").value || compte.corpos?.[0]?.id) : null;
   if (corpo && !corpId) { toast("Tu ne fais partie d'aucune corporation."); return; }
   try {
-    verifier(await sb.from("objectifs").insert({ user_id: compte.id, corporation_id: corpId, blueprint_id: bpPop.c.id, blueprint_nom: bpPop.c.nom, qualite_min: q, quantite: n, statut: corpo && !adminDe(corpId) ? "propose" : "actif" }));
+    verifier(await sb.from("objectifs").insert({ user_id: compte.id, corporation_id: corpId, blueprint_id: bpPop.c.id, blueprint_nom: bpPop.c.nom, qualite_min: q, qualites, quantite: n, statut: corpo && !adminDe(corpId) ? "propose" : "actif" }));
     await chargerObjectifs(); renderObjectifs();
     toast(corpo ? (adminDe(corpId) ? "Objectif de corpo créé." : "Objectif de corpo proposé : un admin de la corpo doit le valider.") : "Objectif perso créé : il s'affiche sur l'accueil.");
   } catch (err) { toast("Objectif : " + messageErreur(err)); }
@@ -5776,9 +5778,6 @@ function majFormObjectif() {   // corpos du joueur ; Q min = qualité la plus ba
   const cs = compte?.corpos || [], sel = $("dbp-obj-corp");
   $("dbp-obj-corpo").hidden = !cs.length; sel.hidden = cs.length < 2;
   sel.innerHTML = cs.map((c) => `<option value="${esc(c.id)}">[${esc(c.tag)}] ${esc(c.nom)}</option>`).join("");
-  const qs = (bpPop?.q || []).filter((v, i) => bpPop.sel?.[i] !== false && Number.isFinite(v));
-  if (qs.length) $("dbp-obj-q").value = String(Math.min(...qs));
-  $("dbp-obj-n").value = String(multCraft());
 }
 function renderHome() {
   renderObjectifs();
