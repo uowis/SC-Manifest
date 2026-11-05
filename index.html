@@ -1430,6 +1430,10 @@ body.overlay .fiche > #f-fin { margin-top: auto; }
 .fg-suppr { position: absolute; z-index: 2; bottom: 3px; right: 3px; display: grid !important; place-items: center; width: 16px; height: 16px; border-radius: 50%; border: 0; background: #e5484d; color: #fff; padding: 0; line-height: 0; cursor: pointer; }
 .fg-suppr svg { width: 12px; height: 12px; }
 .fg-case.sel { border-color: var(--orange); box-shadow: inset 0 0 0 1px var(--orange); }
+.fg-case[data-vide-case] { cursor: pointer; }
+.fg-case[data-vide-case]:hover { border-color: rgba(255,255,255,.25); }
+.fg-case.cible { border: 1px dashed #5fd38a !important; background: radial-gradient(150% 120% at 64% 0%, rgba(95,211,138,.28), transparent 70%), #24282c !important; animation: cible-pulse 1.4s ease-in-out infinite; }
+@keyframes cible-pulse { 50% { box-shadow: 0 0 0 2px rgba(95,211,138,.35); } }
 .fg-case { scroll-margin-top: 32px; scroll-margin-bottom: 4px; }   /* l'en-tête de pagination collé en haut ne cache pas la case */
 /* v293 : coordonnées à côté de « SCAN », badge « Enregistré » à droite de la même ligne (au-dessus du bouton son) */
 .f-titre-scan { display: flex; align-items: center; gap: 6px; }
@@ -2101,7 +2105,10 @@ const OCR = (() => {
   let HMAX = 0;    // hauteur max d'un badge (0 = pas de limite) : écarte les badges plus gros que ceux du jeu (ex. l'overlay posé sur l'écran)
   let ECART = 30;   // distance max (en hauteurs de badge) entre la qualité et la quantité
   // Plages HSV au format OpenCV (teinte 0-180)
-  const VIOLET = [[125, 60, 70], [171, 255, 175]];   // v353 : teinte ≤ 171 et pas trop claire : les cristaux roses (Riccite…, teinte 170-179, très lumineux) ne passent plus pour l'étiquette violette
+  const VIOLET = [[125, 60, 70], [171, 255, 175]];
+  /* v416 : balance des blancs par bande verticale (reflets, éclairage de la station) : APPRIS = [{ r, g, b, n }, …] = multiplicateurs
+     appris sur les lettres blanches des étiquettes ; appliqués aux pixels avant la détection des couleurs */
+  const BANDES = 6; let APPRIS = null;   // v353 : teinte ≤ 171 et pas trop claire : les cristaux roses (Riccite…, teinte 170-179, très lumineux) ne passent plus pour l'étiquette violette
   const TURQ = [[45, 18, 70], [110, 255, 255]];
   const JAUNE = [[18, 60, 70], [30, 255, 255]];
 
@@ -2124,8 +2131,10 @@ const OCR = (() => {
 
   function hsv(img) {
     const n = img.w * img.h, H = new Uint8Array(n), S = new Uint8Array(n), V = new Uint8Array(n);
+    const gains = APPRIS ? APPRIS.map((b) => (b && b.n >= 3 ? b : null)) : null, cg = gains && gains.some(Boolean);
     for (let i = 0; i < n; i++) {
-      const r = img.d[i * 4], g = img.d[i * 4 + 1], b = img.d[i * 4 + 2];
+      let r = img.d[i * 4], g = img.d[i * 4 + 1], b = img.d[i * 4 + 2];
+      if (cg) { const k = gains[Math.min(BANDES - 1, Math.floor((i % img.w) * BANDES / img.w))]; if (k) { r = Math.min(255, r * k.r); g = Math.min(255, g * k.g); b = Math.min(255, b * k.b); } }
       const mx = Math.max(r, g, b), mn = Math.min(r, g, b), df = mx - mn;
       V[i] = mx;
       S[i] = mx ? Math.round(255 * df / mx) : 0;
@@ -2551,6 +2560,24 @@ const OCR = (() => {
     const [qy, qh] = th > vh * 1.25 ? [vy, vh] : [ty, th];
     const nomImg = crop(img, vx, vy, vw, vh);
     const qImg = crop(img, tx, qy, tw, qh);
+    // v416 : couleur des lettres blanches (nom et qualité) par bande : elles devraient être grises/blanches → écart = teinte du reflet
+    const echVio = (() => {
+      const acc = Array.from({ length: BANDES }, () => ({ r: 0, g: 0, b: 0, k: 0 }));
+      for (const [bx, by, bw, bh] of [[vx, vy, vw, vh], [tx, qy, tw, qh]]) {
+        let vmax = 0;
+        for (let y = Math.round(by); y < by + bh; y++) for (let x = Math.round(bx); x < bx + bw; x++) { if (x < 0 || y < 0 || x >= img.w || y >= img.h) continue; const i = (y * img.w + x) * 4; vmax = Math.max(vmax, img.d[i], img.d[i + 1], img.d[i + 2]); }
+        if (vmax < 150) continue;
+        for (let y = Math.round(by); y < by + bh; y++) for (let x = Math.round(bx); x < bx + bw; x++) {
+          if (x < 0 || y < 0 || x >= img.w || y >= img.h) continue;
+          const i = (y * img.w + x) * 4, r = img.d[i], g = img.d[i + 1], b = img.d[i + 2], mx = Math.max(r, g, b);
+          if (mx < vmax * 0.85 || mx >= 252) continue;   // cœur des lettres, sans les pixels saturés
+          const a = acc[Math.min(BANDES - 1, Math.floor(x * BANDES / img.w))]; a.r += r; a.g += g; a.b += b; a.k++;
+        }
+      }
+      return acc.map((a, bd) => { if (a.k < 8) return null; const r = a.r / a.k, g = a.g / a.k, b = a.b / a.k, L = (r + g + b) / 3;
+        const cl = (v) => Math.max(0.6, Math.min(1.6, v));
+        return { b: bd, r: cl(L / r), g: cl(L / g), bl: cl(L / b) }; }).filter(Boolean);
+    })();
     // badge de quantité : bord droit tel que détecté (fiable) ; bord gauche élargi au maximum, jusqu'à la largeur
     // d'un « 123.45 SCU » (7 hauteurs de badge), sans empiéter sur la qualité
     const jx1 = jaune ? jaune[0] + jaune[2] + 3 : 0, jx0 = jaune ? bordGaucheBadge(img, jaune, vy, vh, Math.max(tx + tw + 3, jx1 - vh * 7)) : 0;
@@ -2559,7 +2586,7 @@ const OCR = (() => {
       boites: [[vx, vy, vw, vh], [tx, qy, tw, qh], ...(jaune ? [[jx0, vy - 1, jx1 - jx0, vh + 2]] : [])],
       // cadres affichés : le badge jaune tel qu'il est (la lecture, elle, prend une marge pour ne pas couper le 1er chiffre)
       cadres: [[vx, vy, vw, vh], [tx, qy, tw, qh], ...(jaune ? [[jaune[0], jaune[1], jaune[2], jaune[3]]] : [])],
-      nomImg, qImg, sImg,
+      nomImg, qImg, sImg, echVio,
       qualite: readNumber(qImg, "q", model),
       quantite: sImg ? readNumber(sImg, "s", model) : { valeur: null, texte: "", confiance: 0, autres: [] },
       signature: signature(nomImg),
@@ -2639,7 +2666,15 @@ const OCR = (() => {
     }
     return findBadges(img);
   }
-  return { lireRapide, findBadgesRapide, reperageViolet, crop, splitChars, trouverSelection, empreinte, ecart, readNumber, fixScu, findBadges, signature, compareSignature, lire, regler, CELL_W, CELL_H };
+  function setAppris(m) { APPRIS = Array.isArray(m) && m.length === BANDES ? m : null; }
+  function apprendre(ech) {   // mise à jour locale : moyenne glissante (poids plafonné : la couleur peut encore glisser petit à petit)
+    APPRIS = APPRIS || Array.from({ length: BANDES }, () => null);
+    for (const e of ech || []) { const b = APPRIS[e.b], n = b ? b.n : 0, w = 1 / Math.min(n + 1, 200);   // poids réduit au fil des réussites
+      if (b && n >= 20 && (Math.abs(e.r - b.r) > 0.25 || Math.abs(e.g - b.g) > 0.25 || Math.abs(e.bl - b.b) > 0.25)) continue;   // mesure aberrante
+      APPRIS[e.b] = b ? { r: b.r + (e.r - b.r) * w, g: b.g + (e.g - b.g) * w, b: b.b + (e.bl - b.b) * w, n: Math.min(n + 1, 500) } : { r: e.r, g: e.g, b: e.bl, n: 1 }; }
+    return APPRIS;
+  }
+  return { setAppris, apprendre, BANDES, lireRapide, findBadgesRapide, reperageViolet, crop, splitChars, trouverSelection, empreinte, ecart, readNumber, fixScu, findBadges, signature, compareSignature, lire, regler, CELL_W, CELL_H };
 })();
 
 
@@ -3652,7 +3687,7 @@ function surlignerDerniers(ids) {
    Chaque case : minerai, qualité, quantité ; pile « ×N » en haut à droite. Un clic sur une case affiche
    ses caisses dessous (crayon / croix par caisse : une pile se corrige caisse par caisse).
    Couleurs : vide = pas scannée ; scannée ; orange = en modification ; contour = case survolée (bleue si déjà scannée). */
-let ligneEditee = null, grillePage = null, grilleSel = null;
+let ligneEditee = null, grillePage = null, grilleSel = null, grilleCible = null;   // v413 : grilleCible = case vide choisie : la prochaine caisse lue (ou saisie) y va
 const RE_CASE = /^p([^:]+):l(-?\d+):c(\d+)$/;
 function casesSession() {
   const pages = new Map();
@@ -3679,7 +3714,7 @@ function renderCarteScan() {
   if (!liste.length) { el.innerHTML = ""; el.hidden = true; return; }
   const pg = grillePage != null && pages.has(grillePage) ? grillePage : (courante || liste[liste.length - 1]);
   // v367 : case concernée par les champs modifiables (caisse lue en attente, ou dernière caisse enregistrée → « Modifier »)
-  const cleChamps = grilleSel || pending?.emplacement?.freight?.cleGrille || (() => {
+  const cleChamps = grilleSel || grilleCible || pending?.emplacement?.freight?.cleGrille || (() => {
     if (!derniereSauvegarde?.ids?.length) return null;
     for (const [k, v] of suivi.registre) if (RE_CASE.test(k) && [].concat(v).some((id) => derniereSauvegarde.ids.includes(id))) return k;
     return null;
@@ -3698,8 +3733,8 @@ function renderCarteScan() {
       const edite = (cs && ligneEditee && cs.its.some((it) => it.id === ligneEditee)) || cleChamps === cle, sel = grilleSel === cle;
       const fl = cs && suivi.flashF?.k === cle ? Date.now() - suivi.flashF.t : null;   // v362 : animation d'enregistrement
       const cl = ["fg-case", fl != null && fl < 1300 ? "flash" : "", cs ? "pleine" : "", cs && cs.its.length > 1 ? "pile" : "", edite ? "edite" : "", ici ? (cs ? "ici deja" : "ici") : "", sel ? "sel" : ""].filter(Boolean).join(" ");
-      if (!cs) { h += `<div class="${cl}" data-l="${esc(pg)}:${l}"></div>`; continue; }
-      if (cs.prov != null) { const cf2 = seqF.conf?.has(cs.cle); h += `<button type="button" class="${cl.replace(" pleine", "")} prov${cf2 ? " confirme" : ""}" data-prov-case="${esc(cs.cle)}" title="Qualité lue sans survol${cf2 ? " (confirmée par plusieurs lectures)" : " (à confirmer)"} — cliquer pour saisir cette caisse à la main">${seqF.piles?.get(cs.cle) ? `<span class="fg-pile" title="Pile probable (badge X2 ou plus)">×2+</span>` : ""}<span class="fg-q">${cs.prov}</span></button>`; continue; }
+      if (!cs) { h += estFreight() ? `<button type="button" class="${cl}${grilleCible === cle ? " cible" : ""}" data-l="${esc(pg)}:${l}" data-vide-case="${esc(cle)}" title="Cliquer : la prochaine caisse scannée (ou saisie) ira dans cette case"></button>` : `<div class="${cl}" data-l="${esc(pg)}:${l}"></div>`; continue; }
+      if (cs.prov != null) { const cf2 = seqF.conf?.has(cs.cle); h += `<button type="button" class="${cl.replace(" pleine", "")} prov${cf2 ? " confirme" : ""}${grilleCible === cs.cle ? " cible" : ""}" data-prov-case="${esc(cs.cle)}" title="Qualité lue sans survol${cf2 ? " (confirmée par plusieurs lectures)" : " (à confirmer)"} — cliquer pour saisir cette caisse à la main">${seqF.piles?.get(cs.cle) ? `<span class="fg-pile" title="Pile probable (badge X2 ou plus)">×2+</span>` : ""}<span class="fg-q">${cs.prov}</span></button>`; continue; }
       const it = cs.its[0], n = cs.its.length;
       h += `<button type="button" class="${cl}"${fl != null && fl < 1300 ? ` style="animation-delay:-${fl}ms"` : ""} data-case="${esc(cle)}" title="${esc(it.nom || "")} · Q${it.qualite ?? "?"} · ${it.quantite_scu != null ? fmtScu(it.quantite_scu) : "?"} SCU${n > 1 ? ` · pile ×${n}` : ""}">` +
         (cs.its.some((x) => suivi.pilesDouteuses?.has(x.id)) ? `<span class="fg-pile" title="Nombre de caisses illisible : vérifiez la pile">×?</span>` : n > 1 ? `<span class="fg-pile">×${n}</span>` : "") +
@@ -3756,7 +3791,10 @@ $("f-carte").addEventListener("click", (e) => {   // sur l'élément (il passe d
     $("scan-etat").className = ""; $("scan-etat").textContent = "Grille rechargée : faites défiler depuis le haut de la liste.";
     renderCarteScan(); majSequenceFreight(true).catch(() => {}); return;
   }
-  const pc = e.target.closest?.("[data-prov-case]");
+  // v413 : case vide (ou qualité seule) → « case cible » : le scan auto continue, la prochaine bulle lue y est rangée ; saisie à la main possible aussi
+  const cv = e.target.closest?.("[data-vide-case], [data-prov-case]");
+  if (cv) { definirCible(cv.dataset.videCase || cv.dataset.provCase); return; }
+  const pc = null;
   if (pc) {   // v338 : case pas encore scannée → saisie à la main à cet emplacement (re-clic : annuler)
     if (pc.dataset.provCase === grilleSel && suivi.edition) { suivi.edition = false; grilleSel = null; pending = null; viderChamps(); pictoSauve(null); modeAuto(suivi.autoAvant !== false); $("scan-etat").textContent = "Saisie annulée : le scan reprend."; renderCarteScan(); return; }
     const cle = pc.dataset.provCase, m = RE_CASE.exec(cle), avant = suivi.edition ? suivi.autoAvant : $("c-auto").checked;
@@ -3774,6 +3812,23 @@ $("f-carte").addEventListener("click", (e) => {   // sur l'élément (il passe d
   }
   if (cs) chargerCase(cs.dataset.case);
 });
+function definirCible(cle) {
+  if (grilleCible === cle) {   // re-clic : annule
+    grilleCible = null; if (pending?.emplacement?.freight?.cible) pending = null;
+    $("scan-etat").className = ""; $("scan-etat").textContent = "Case cible annulée."; renderCarteScan(); return;
+  }
+  if (suivi.edition) { suivi.edition = false; grilleSel = null; derniereSauvegarde = null; modeAuto(suivi.autoAvant !== false); }
+  const m = RE_CASE.exec(cle);
+  grilleCible = cle; grilleSel = null; derniereSauvegarde = null;
+  pending = { manuel: true, pile: 1, emplacement: { freight: { panneau: m?.[1], cleGrille: cle, cible: true } } };
+  // v414 : pré-remplissage : minerai et quantité de la dernière caisse enregistrée (idée 4), qualité lue dans la séquence de la grille (idée 5), sinon la dernière
+  const der = session ? items.filter((it) => it.ts >= session.debut && it.station === stationCourante).sort((a, b) => b.ts - a.ts)[0] : null, qSeq = provF.get(cle);
+  $("f-nom").value = der?.nom || ""; $("f-q-autre").value = ""; renderQualite(qSeq ?? der?.qualite ?? null); $("f-scu").value = der?.quantite_scu != null ? scu3(der.quantite_scu) : ""; $("f-pile").value = "x1";
+  pictoSauve(null); $("scan-etat").className = "";
+  const pre = [der?.nom ? "minerai et quantité de la caisse précédente" : "", qSeq != null ? "qualité lue dans la grille" : der?.qualite != null ? "qualité précédente" : ""].filter(Boolean).join(", ");
+  $("scan-etat").textContent = (pre ? `Pré-rempli : ${pre}. ` : "") + ($("c-auto").checked ? "Case cible : survolez la caisse en jeu (ou saisissez-la ici)." : "Case cible : saisissez la caisse ou survolez-la en jeu.");
+  verifierChamps(); renderCarteScan();
+}
 function rechargerGrille() {   // v351/v359 : on repart de zéro (positions, qualités lues) ; le stock n'est pas touché
   seqF = { session }; provF = new Map(); seqSig = null; grilleSel = null; suivi.cleGF = null; suivi.edition = false;
   for (const k of [...suivi.registre.keys()]) { const m = RE_CASE.exec(k); if (m && m[1] in PANNEAUX_F) suivi.registre.delete(k); }
@@ -3792,6 +3847,7 @@ function chargerCase(cle) {
   $("f-nom").value = it.nom || ""; $("f-q-autre").value = ""; renderQualite(it.qualite);
   $("f-scu").value = scu3(it.quantite_scu ?? ""); $("f-pile").value = "x" + liste.length;
   pictoSauve(liste.length > 1 ? `Pile ×${liste.length}` : "Caisse choisie", true, it);
+  { const im = suivi.captures?.get(cle); if (im) $("f-capture").src = im; }   // v417 : la capture lue pour cette case revient
   $("scan-etat").className = ""; $("scan-etat").textContent = "Case choisie : scan en pause. Corrigez puis « Modifier » (re-cliquez la case pour annuler).";
   verifierChamps(); renderCarteScan();
 }
@@ -4029,12 +4085,15 @@ async function scanner(auto = null) {
       const bb = r.boites || [];
       const bulle = bb.length ? { x: z.x + Math.min(...bb.map((b) => b[0])), y: z.y + Math.min(...bb.map((b) => b[1])), h: Math.max(...bb.map((b) => b[3])) } : null;
       await assurerSequenceFreight();
-      const cf = bulle ? caseParBulle(bulle, src) : null;
+      let cf = bulle ? caseParBulle(bulle, src) : null;
+      // v413 : case cible choisie dans la grille : la bulle lue va dans cette case, sans déduire la position
+      if (grilleCible) { const m = RE_CASE.exec(grilleCible); cf = { ...(cf || {}), panneau: m?.[1], cleGrille: grilleCible, cible: true }; }
       auto.cle = cf ? cf.cleGrille : null;
       if (cf) {
         // pile (X2, X3…) : badge en haut à droite de la case
         const pl = await lirePileFreight(cf.pile);
         auto.pile = pl.n || 1; auto.pileDouteuse = !pl.sur;
+        if (cf.cible && !cf.pile) { auto.pile = 1; auto.pileDouteuse = false; }   // v413 : case cible sans badge de pile repéré : 1 caisse
         auto.emplacement = { freight: cf };
         if (cf.cleGrille !== suivi.cleGF) { suivi.cleGF = cf.cleGrille; try { renderCarteScan(); } catch {} }   // case survolée dans la grille
         // relecture de contrôle d'une case déjà affichée : rien de neuf, on ne touche à rien (pas de répétition vocale)
@@ -4149,6 +4208,7 @@ async function scanner(auto = null) {
         $("scan-etat").className = "";
         $("scan-etat").textContent = "Lu (mode manuel) : vérifiez, puis Enregistrer.";
       } else if (pret) {
+        if (modeScan === "freight") apprendreCouleursStation(r?.echVio);   // v415 : lecture réussie → on apprend les couleurs de l'étiquette
         enregistrer(true);
       } else {
         $("scan-etat").className = "echec";
@@ -4225,7 +4285,10 @@ function enregistrer(auto = false) {
   planifierSync();
   { const f = pending.emplacement?.freight;   // v324 : Elevator → case de la grille (panneau, ligne, colonne)
     if (pending.pileDouteuse) { suivi.pilesDouteuses = suivi.pilesDouteuses || new Set(); for (const c of crees) suivi.pilesDouteuses.add(c.id); }
-    if (modeScan === "freight" && f) { const k = f.cleGrille; if (k) { suivi.registre.set(k, crees.map((c) => c.id)); suivi.cleGF = k; suivi.flashF = { k, t: Date.now() }; setTimeout(() => { if (suivi.flashF?.k === k) { suivi.flashF = null; try { renderCarteScan(); } catch {} } }, 1350); } }
+    if (modeScan === "freight" && f && f.cleGrille && f.cleGrille === grilleCible) grilleCible = null;   // v413 : cible remplie
+    if (modeScan === "freight" && f) { const k = f.cleGrille; if (k) { suivi.registre.set(k, crees.map((c) => c.id));
+      { const im = $("f-capture").getAttribute("src"); if (im && !pending.manuel) { suivi.captures = suivi.captures || new Map(); suivi.captures.set(k, im); } }   /* v417 : capture gardée pour la case */
+      suivi.cleGF = k; suivi.flashF = { k, t: Date.now() }; setTimeout(() => { if (suivi.flashF?.k === k) { suivi.flashF = null; try { renderCarteScan(); } catch {} } }, 1350); } }
     if (suivi.edition && !derniereSauvegarde) { suivi.edition = false; grilleSel = null; modeAuto(suivi.autoAvant !== false); } }   // v338 : saisie d'une case non scannée terminée
   if (pending.cle) { suivi.registre.set(pending.cle, crees.map((c) => c.id)); suivi.captures = suivi.captures || new Map(); const im = $("f-capture").getAttribute("src"); if (im) suivi.captures.set(pending.cle, im); }   // recadrage gardé pour « Déjà enregistrée »
   suivi.dernier = contenuCaisse(nom, q, scuTxt); suivi.autreCase = false;
@@ -4956,6 +5019,7 @@ async function demarrerSession() {
   fluxTrack.addEventListener("ended", arreterSession);
   demarrerLecteurFlux();
   session = { station: stationCourante, debut: Date.now() / 1000 };
+  chargerCouleursStation().catch(() => {});   // v415
   // nouvelle session : on oublie les caisses et emplacements mémorisés de la précédente (doublons, cases vues, pages)
   suivi.registre = new Map(); suivi.pages = []; suivi.cachePage = null; suivi.pageLue = null;
   suivi.ascFreight = null; suivi.ascSur = null; suivi.cleBulle = null; suivi.cleMontree = null; suivi.panneauLu = null; contenusFreight = new Set();
@@ -5060,6 +5124,22 @@ let cloud = (() => {
   if (!c.url) c = { ...CLOUD_DEFAUT };   // configuration enregistrée vide : on reprend celle de la page
   return { url: urlProjet(c.url), cle: String(c.cle || "").trim() };
 })();
+/* v417 : balance des blancs apprise par station, propre à ce navigateur (écran, réglages, position du joueur) : gardée en local, pas partagée */
+const CLE_BALANCE = "sm-balance";
+const couleursStation = { station: null, minuterie: null };
+async function chargerCouleursStation() {
+  const st = modeScan === "freight" ? stationCourante : null;
+  if (st === couleursStation.station && st) return;
+  couleursStation.station = st; OCR.setAppris(null);
+  if (!st) return;
+  try { const t = JSON.parse(localStorage.getItem(CLE_BALANCE) || "{}"); if (t[st]) OCR.setAppris(t[st]); } catch {}
+}
+function apprendreCouleursStation(ech) {
+  if (!ech?.length || modeScan !== "freight") return;
+  const m = OCR.apprendre(ech), st = couleursStation.station; if (!st) return;
+  clearTimeout(couleursStation.minuterie);   // enregistrement groupé (au plus toutes les 2 s)
+  couleursStation.minuterie = setTimeout(() => { try { const t = JSON.parse(localStorage.getItem(CLE_BALANCE) || "{}"); t[st] = m; localStorage.setItem(CLE_BALANCE, JSON.stringify(t)); } catch {} }, 2000);
+}
 let sb = null, compte = null, sessionId = null, syncEnCours = false, minuterieSync = null, etatCloud = "";
 let partage = { caisses: [], maj: 0 };
 let apprisPartages = { chiffres: [], signatures: [], qualites: {} };
@@ -7571,6 +7651,7 @@ function activerModeScan(m) {
   base.zone = z.zone || null; base.grille = z.grille || null; base.ascenseur = z.ascenseur || null; base.pagination = z.pagination || null;
   if (m === "freight") { base.grille = base.ascenseur = base.pagination = null; }   // la case est repérée par la position de la bulle
   modeScan = m; base.modeScan = m;
+  chargerCouleursStation().catch(() => {});   // v415 : couleurs apprises seulement pour l'Elevator
   GRILLE_LIGNES = m === "freight" ? 3 : 6;
   // v343 : Elevator = un seul mode (lecture continue, enregistrement auto si la position est sûre, le reste à valider dans la grille)
   try { const fa = $("f-auto"); if (fa) fa.hidden = m === "freight"; if (m === "freight") modeAuto(true); const br = $("b-recharger"); if (br) br.hidden = m !== "freight"; } catch {}
@@ -7829,6 +7910,7 @@ let seqF = {}, provF = new Map(), seqEnCours = false, seqSig = null;
 /* position sûre pour enregistrer : séquence raccordée, lue sur l'image actuelle, et qualité de la case cohérente */
 async function positionFreightSure(cf, q) {
   if (!cf) return false;
+  if (cf.cible) { seqF.raison = null; return true; }   // v413 : case choisie par l'utilisateur
   const aJour = async () => { const st = seqF[cf.panneau]; if (!st?.sur || !st.geo || !st.sig) return false; try { return ecartSig(signature(await imageBrute()), st.sig) < 1.5; } catch { return false; } };
   seqF.raisonT = Date.now(); seqF.raison = "grille en cours de lecture";
   if (!(await aJour())) { while (seqEnCours) await new Promise((r) => setTimeout(r, 50)); seqSig = null; await majSequenceFreight(true); if (!(await aJour())) return false; }   // séquence lue sur l'image actuelle
