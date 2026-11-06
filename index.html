@@ -1631,6 +1631,7 @@ body.overlay-bps { margin: 0; height: 100vh; }
 .bps-case.nouveau { color: #f4f8fa; background: radial-gradient(170% 150% at 64% 0%, rgba(110,224,170,.3), rgba(80,200,150,.12) 55%, #262b30 110%); }
 .bps-ocr { display: block; max-width: 100%; max-height: 70px; margin: 4px 0; image-rendering: pixelated; border: 1px solid #444; background: #fff; }
 .bps-case.possede { color: #eafaf2; background: radial-gradient(170% 150% at 64% 0%, rgba(90,200,140,.22), rgba(60,160,110,.1) 55%, #262b30 110%); }
+.bps-grille > .note { grid-column: 1 / -1; }   /* v429 : message « aucun blueprint » sur toute la largeur */
 .bps-case.vide { background: #3a3f44; opacity: .45; cursor: default; }
 .bps-type.bps-page { color: var(--os-doux); font-size: var(--fmin); }
 .bps-case.dernier { border-color: rgba(120,180,240,.85); }
@@ -8236,7 +8237,7 @@ function bulleBp(src) {
   const [W0, H0] = tailleSource(src), k = W0 > 1400 ? 2 : 1, W = Math.round(W0 / k), H = Math.round(H0 / k);
   const c = bulleBp.c || (bulleBp.c = document.createElement("canvas")); c.width = W; c.height = H; const x = c.getContext("2d", { willReadFrequently: true }); x.drawImage(src, 0, 0, W, H);
   const d = x.getImageData(0, 0, W, H).data;
-  const ok = (X, Y) => { const i = (Y * W + X) * 4, r = d[i], g = d[i + 1], b = d[i + 2]; return (g - r > 28 && g > 44 && g < 85 && b > 38 && b < 80 && Math.abs(g - b) < 14) || (g > 90 && g - r > 20 && b > 70); };
+  const ok = (X, Y) => { const i = (Y * W + X) * 4, r = d[i], g = d[i + 1], b = d[i + 2]; return (r <= 10 && g - r > 28 && g > 44 && g < 85 && b > 38 && b < 80 && Math.abs(g - b) < 14) || (r <= 10 && g > 90 && g - r > 20 && b > 70); };   /* v429 : bulle = turquoise presque sans rouge (r ≤ 10) ; le fond du kiosque (28,64,69) passait aussi → une seule zone géante, aucune bulle */
   const groupes = [];
   for (let y = 0; y < H; y += 1) {
     let X = 0;
@@ -8250,7 +8251,7 @@ function bulleBp(src) {
     }
   }
   const L = bpScan.largeur || 0;
-  const bx = groupes.filter((o) => o.y1 - o.y0 > H * 0.02 && o.y1 - o.y0 < H * 0.14 && o.b - o.a < W * 0.18 && (!L || Math.abs((o.b - o.a) * k - L) <= L * 0.15))
+  const bx = groupes.filter((o) => o.y1 - o.y0 > H * 0.02 && o.y1 - o.y0 < H * 0.075 && o.b - o.a < W * 0.18 && o.b - o.a > (o.y1 - o.y0) * 3 && (!L || Math.abs((o.b - o.a) * k - L) <= L * 0.15))
     .sort((p, q) => (q.b - q.a) * (q.y1 - q.y0) - (p.b - p.a) * (p.y1 - p.y0))[0];
   return bx ? { x: bx.a * k, y: bx.y0 * k, w: (bx.b - bx.a) * k, h: (bx.y1 - bx.y0) * k } : null;
 }
