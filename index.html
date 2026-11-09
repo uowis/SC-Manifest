@@ -2378,6 +2378,17 @@ html, body { overflow-x: clip; }
 .h-filet { margin-left: calc(50% - 50vw / .9 + var(--rail) / 2 + 8px) !important; margin-right: calc(50% - 50vw / .9 + var(--rail) / 2 + 8px) !important; }
 /* v473 : avancement de l'objectif en étiquette à droite des boutons */
 .obj-avance-label { margin-right: auto; padding: 2px 8px; border: 1px solid var(--bord); border-radius: 3px; font-size: max(var(--fmin), .75rem); color: var(--os); white-space: nowrap; }
+/* v476 : barres de défilement discrètes */
+* { scrollbar-width: thin; scrollbar-color: rgba(135,154,160,.28) transparent; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(135,154,160,.28); border-radius: 8px; border: 2px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover { background-color: rgba(135,154,160,.5); }
+::-webkit-scrollbar-corner { background: transparent; }
+/* v477 : objectifs opaques dans la colonne des Blueprints */
+#bp-obj-liste > li.obj { background: var(--panneau) !important; border: 1px solid var(--trait); border-radius: 4px; -webkit-backdrop-filter: none; backdrop-filter: none; }
+/* v479 : bornes de qualité au-dessus du curseur */
+.bp-bornes { margin-top: 0 !important; margin-bottom: -2px; }
 </style>
 </head>
 <body>
@@ -4684,7 +4695,7 @@ function verifierChamps() {
   $("f-nom").closest(".champ").classList.toggle("sans-valeur", !nom.trim());
   $("f-q").closest(".champ").classList.toggle("sans-valeur", !String(qualiteCourante()).trim());
   $("f-scu").closest(".champ").classList.toggle("sans-valeur", !$("f-scu").value.trim());
-  const douteux = !!pending?.quantiteDouteuse && $("f-scu").value.trim() === pending.quantite_txt;
+  const douteux = false;   // v478 : plus de « Quantité à vérifier » (la quantité se corrige facilement après coup)
   $("f-scu").closest(".champ").classList.toggle("douteux", douteux);
   $("f-scu").closest(".champ").querySelector("span").textContent = douteux ? "Quantité à vérifier" : "Qté (SCU)";
   $("f-q").closest(".champ").classList.toggle("douteux", nouvelle);
@@ -5271,13 +5282,12 @@ async function scanner(auto = null) {
     });
     const notes = [];
     if (qte.relue && qte.texte !== r.quantite.texte) notes.push(`quantité relue ${r.quantite.texte || "?"} → ${qte.texte}`);
-    if (qte.doute) notes.push("quantité douteuse");
     if (nom.source === "ocr" && nom.brut && nom.brut !== nom.nom) notes.push(`nom lu « ${nom.brut} »`);
     if (q !== r.qualite.valeur && r.qualite.valeur != null) notes.push(`qualité ${r.qualite.valeur} → ${q}`);
     if (statut === "nouvelle") notes.push("qualité nouvelle");
     $("scan-etat").textContent = "Lu." + (notes.length ? ` ${notes.join(" · ")}.` : "");
     if (auto) {
-      const pret = !$("b-enregistrer").disabled && !pending.quantiteDouteuse && statut !== "nouvelle";
+      const pret = !$("b-enregistrer").disabled && statut !== "nouvelle";   // v478 : une quantité douteuse n'empêche plus l'enregistrement auto
       pending.cle = auto.cle;
       // v352 : Elevator — pile ≠ 1 (lue ou illisible) : 1 caisse enregistrée sans demander, marquée « ×? » à corriger dans la grille
       const pileF = modeScan === "freight" && ((auto.pile || 1) > 1 || auto.pileDouteuse);
@@ -9942,8 +9952,8 @@ function renderPopBlueprint(partiel = false) {
     // v305 : couleur selon le mélange possible (moyenne atteinte = vert), plus selon la seule qualité exacte
     const pv = aspectActif(i) ? prelevement(i) : { ok: true }, etat = pv.ok ? "s-ok" : caissesPerso(a).length ? "s-partiel" : "s-absent";
     return `<div class="bp-aspect ${etat}${aspectActif(i) ? "" : " bp-off"}"><div class="bp-aspect-tete">${choix}<button type="button" class="bp-max${bpPop.enMax?.[i] ? " actif" : ""}" data-max="${i}" title="Qualité maximale avec mon stock (qualités mélangées si nécessaire)">Max</button><b>${esc(a.name)}</b> · ${esc(inp.name || "")} <small class="bp-besoin">${inp.kind === "item" ? `× ${(Number(inp.quantity) || 0) * multCraft()}` : `${fmtScu((Number(inp.quantity_scu) || 0) * multCraft())} SCU`}</small></div>
-      <input type="range" min="${qmin}" max="${qmax}" value="${q}" data-aspect="${i}" style="--p:${((q - qmin) / ((qmax - qmin) || 1)) * 100}%" aria-label="Qualité ${esc(inp.name || "")}">
       <div class="bp-bornes"><span>${qmin}</span><span>${a.initial_quality ?? 500}</span><span>${qmax}</span></div>
+      <input type="range" min="${qmin}" max="${qmax}" value="${q}" data-aspect="${i}" style="--p:${((q - qmin) / ((qmax - qmin) || 1)) * 100}%" aria-label="Qualité ${esc(inp.name || "")}">
       ${paliersAspect(a).length ? `<div class="bp-paliers">${paliersAspect(a).map((v) => { const d = dispoPalier(a, v); return `<i class="${d.ok ? "dispo" : d.q > 0 ? "partiel" : "absent"}${v === q ? " courant" : ""}" style="left:${((v - qmin) / ((qmax - qmin) || 1)) * 100}%" title="Q${v} : ${d.q > 0 ? (d.kind === "item" ? `${d.q} en stock` : `${fmtScu(d.q)} SCU en stock`) : "pas en stock"}" data-palier="${i}:${v}"></i>`; }).join("")}</div>` : ""}
       <div class="bp-preleve-l"><div class="bp-preleve">${prelevement(i).texte}</div><span class="bp-cartouches">${cartouchesAspect(i, q)}</span></div>
       <div class="bp-mods">${mods || `<span>aucun effet</span>`}</div></div>`;
