@@ -3896,12 +3896,30 @@ function allerEtape(n) {
   $("guide-titre").textContent = e.titre; $("guide-titre").hidden = !e.titre;
   $("guide-texte").textContent = e.texte;
   $("guide-compte").textContent = `${n + 1} / ${GUIDE.length}`;
-  $("guide-suivant").textContent = n === GUIDE.length - 1 ? "Terminer" : "Suivant";
+  $("guide-suivant").textContent = "Terminer"; $("guide-suivant").hidden = n !== GUIDE.length - 1;   // v471 : pas de « Suivant », on avance en faisant l'action
   for (const id of ["guide-voile", "guide-trou", "guide-boite"]) $(id).hidden = false;
   placerGuide();
 }
+function guidePip(montrer) {   // v472 : étape 4 dans la fenêtre PiP, sous les boutons de mode
+  const fiche = document.getElementById("fiche") || R$("fiche"), modes = fiche?.querySelector(".f-modes");
+  const d = fiche?.ownerDocument;
+  const ex = d?.getElementById("guide-pip");
+  if (!montrer || !modes || d === document) { ex?.remove(); return false; }
+  if (!ex) {
+    const el = d.createElement("div"); el.id = "guide-pip";
+    el.style.cssText = "margin:8px 0;padding:10px 12px;border:2px solid #7f9a34;border-radius:6px;background:rgba(5,7,9,.92);color:#eef2f3;font-size:14px;line-height:1.35;text-align:center;display:flex;flex-direction:column;gap:8px;align-items:center";
+    el.innerHTML = `<span style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#e2632b;font-weight:600">Étape 4</span><span>${esc(GUIDE[3].texte)}</span><button type="button" class="btn petit principal">Terminer le guide</button>`;
+    el.querySelector("button").addEventListener("click", fermerGuide);
+    modes.after(el);
+  }
+  return true;
+}
 function placerGuide() {
   if (guideEtape < 0) return;
+  const dansPip = guideEtape === 3 && guidePip(true);
+  if (guideEtape !== 3) guidePip(false);
+  for (const id of ["guide-voile", "guide-trou", "guide-boite"]) $(id).hidden = dansPip;
+  if (dansPip) return;
   const e = GUIDE[guideEtape], c = e.cible?.(), trou = $("guide-trou"), boite = $("guide-boite"), voile = $("guide-voile");
   const r = c && c.getClientRects().length ? c.getBoundingClientRect() : null;
   const z = getComputedStyle(document.body).zoom || 1;   // la page est zoomée à 90 %
@@ -3914,7 +3932,7 @@ function placerGuide() {
   if (e.fait?.() && guideEtape < GUIDE.length - 1) allerEtape(guideEtape + 1);
 }
 function ouvrirGuide() { allerEtape(0); clearInterval(guideMinuterie); guideMinuterie = setInterval(placerGuide, 250); }
-function fermerGuide() { guideEtape = -1; clearInterval(guideMinuterie); for (const id of ["guide-voile", "guide-trou", "guide-boite"]) if ($(id)) $(id).hidden = true; }
+function fermerGuide() { guidePip(false); guideEtape = -1; clearInterval(guideMinuterie); for (const id of ["guide-voile", "guide-trou", "guide-boite"]) if ($(id)) $(id).hidden = true; }
 $("b-guide").addEventListener("click", ouvrirGuide); $("b-guide-2").addEventListener("click", ouvrirGuide);
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && guideEtape >= 0) fermerGuide(); });
 $("h-pres-fermer").addEventListener("click", () => { $("h-pres").hidden = true; try { localStorage.setItem("sm-pres-fermee", "1"); } catch {} });
