@@ -48,7 +48,11 @@
     display:flex;align-items:center;gap:18px;flex-wrap:wrap;
     padding:22px 28px;
     border-bottom:1px solid var(--border);
-    background:linear-gradient(180deg, rgba(232,115,44,0.05), transparent);
+    /* Image de fond (capture Star Citizen), assombrie pour garder le texte lisible */
+    background:
+      linear-gradient(90deg, rgba(8,10,12,0.85) 0%, rgba(8,10,12,0.6) 50%, rgba(8,10,12,0.75) 100%),
+      linear-gradient(180deg, rgba(232,115,44,0.06), transparent),
+      url(data:image/jpeg;base64,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MscrjZ4suqufJnyZe7kzyzv3yu6y9HS9Jn1fJMcPm68zYPOPp+reh9T6TrLl1lhlrWWPeTc35fMUAEFEUAABUAUdOfp+XpebLh5+O8fJjreGXmbm3MAAAABUamVmNk1389gZAAAAAAX+OyKCdtCgIoALJbLZNyd7+EBAUBFABUUUBbbbu+aACgKigAAKADd49cOPJ9TjtytnsmX7p+bPswAOnHhw5cPLlnzezkxk+nh7Lfqd+838a/LmAgCAACAAIACKgoigM6SxpkGbEarN7oJ8/dK1llcru3d/hlVSstJQZFQERURURUBBUANCgKigqwixUWNRIoKqKAbQUXZtAGtnjv8AdnZtUa2srMXYNxvH8uUrcqo6x0xvdyxbx8rEdpXXCuON264qxXo4+708fb5culx4crn9bly49cduHtw93uy+JftPy68TTFevixte/h4Nzw8/R8fvzk/L976T+nsMukmeWO8rP9C2SbXm6/XV/PM2vyc4dTx3axw0+56h6RnwY8vNhcfp8dky3e/ft2j5kwx9vaX3b/rTUyuUt/rEwn/0vsn5d8cPH5W8dymXbtJu1TXDquLgwvH9Hly5N4S57x17cvmfn+Rrmwwy9ntuPHjce9yy33nn+Ng1r+NgPG+woALGpWFgOkrUrnKsojptWJWoI0rMVRQAFBUAAFQBUUAgACo1rUl+/wCREVCAqpGhEVcccsspjjLllbqSTva1y8XJwcufDy8efHyceVxzwzxsyxs8yy+KowLpQQUEAFBQEAABQEAAABBSZaxuOp318d/6BAAAAQAE0TUvebn8gKgFBFluN3jbL+EBXbPq+p5OGcOfPnlx737beziCAACoKAAAAC23K7ttt829xFEABQAAAAAAAHTg4M+o5seHjm88rqR29Q9P5/TOqvTdTj7c5NvPhnlx5TLDK45TxY31HVc/V5+/qOXLly++V3QclRQBccbl2k3qbQAFEAAF1q68/wAIKAoAEX4AF32s1O/4RBf2+z592/60IoCooCooAAAAAAqCoAioAAghbv7T+IACAACClRUBKzWkoM1lqpRWUrTNBEWoBJLMr7pNfF83+GVSopb2k1/f3ZqoAigAAKqLAWNRFioslvx48tRJbjvVs32ur5WAoAIioAbNWy37eUUXZtAFi7ZWeFRuVqVzlaijtjezeLljbPh0isu+Fdsa8+N+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) center 40% / cover no-repeat;
   }
   header.topbar::before{
     content:'';position:absolute;top:0;left:0;right:0;height:3px;
@@ -171,6 +175,66 @@
     width:100%;height:100%;
     object-fit:contain;
   }
+  /* Assistant (popin arrondie) par-dessus le flux, à 2em du bord du bas */
+  .wizard{
+    position:absolute;left:50%;bottom:2em;transform:translateX(-50%);
+    width:min(92%,440px);z-index:5;
+    background:rgba(10,12,14,.86);backdrop-filter:blur(6px);
+    border:1px solid var(--accent);border-radius:16px;
+    padding:8px 12px 10px;
+    pointer-events:none;
+    transition:opacity .25s;
+  }
+  .wizard.hidden{ opacity:0; visibility:hidden; }
+  .wiz-dots{ display:flex;justify-content:center;gap:6px;margin-bottom:6px; }
+  .wiz-dots span{ width:7px;height:7px;border-radius:50%;background:#3a3f45; }
+  .wiz-dots span.on{ background:var(--accent); }
+  .wiz-dots span.done{ background:var(--green); }
+  .wiz-step{ display:none;align-items:center;gap:10px; }
+  .wiz-step.on{ display:flex; }
+  .wiz-step svg{ width:92px;height:auto;flex:none;border-radius:6px; }
+  .wiz-body{ flex:1;min-width:0; }
+  .wiz-title{ font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted); }
+  .wiz-title b{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:16px;height:16px;border-radius:50%;margin-right:5px;
+    background:var(--accent);color:#0c0c0d;font-size:.7rem;
+  }
+  .wiz-text{ font-size:.86rem;line-height:1.3;color:var(--text);margin-top:3px; }
+  .wiz-hint{ font-size:.7rem;color:var(--muted);margin-top:3px;font-style:italic; }
+  .wiz-btn{
+    pointer-events:auto;flex:none;cursor:pointer;width:92px;text-align:center;white-space:nowrap;
+    font-family:'Share Tech Mono',monospace;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;
+    background:var(--accent);color:#0c0c0d;border:0;border-radius:999px;padding:8px 0;
+  }
+  .wiz-btn.stop{ background:var(--danger);color:#fff; }
+  .wiz-btn.ghost{ background:transparent;color:var(--accent);border:1px solid var(--accent); padding:7px 0; }
+  .wiz-btns{ display:flex;flex-direction:column;gap:6px;flex:none; }
+  /* Carte Star Manifest — charte du site (panneaux bleu-nuit, orange, stries rouges, CTA vert olive) */
+  .manifest-card{
+    --sm-panneau:#16202a; --sm-trait:#2c3a43; --sm-os-doux:#7b939b;
+    --sm-orange:#e08a4c; --sm-strie:#9a3328; --sm-cta:#66742a; --sm-cta-2:#76852f; --sm-cta-texte:#e9ece1;
+    display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+    margin-top:10px;padding:14px 16px;
+    background:linear-gradient(180deg,#18222c,#131c25);
+    border:1px solid var(--sm-trait);border-radius:6px;
+  }
+  .manifest-title{
+    display:flex;align-items:center;gap:10px;
+    color:var(--sm-orange);font-weight:700;font-size:13px;letter-spacing:.06em;text-transform:uppercase;
+  }
+  .manifest-title::before{
+    content:"";flex:none;width:34px;height:9px;
+    background:repeating-linear-gradient(135deg,var(--sm-strie) 0 2px,transparent 2px 5px);
+  }
+  .manifest-sub{ font-size:.86rem;color:var(--sm-os-doux);margin-top:6px; }
+  .manifest-btn{
+    text-decoration:none;display:inline-block;white-space:nowrap;
+    background:var(--sm-cta);border:1px solid var(--sm-cta);color:var(--sm-cta-texte);
+    font-weight:700;letter-spacing:.02em;border-radius:4px;padding:9px 18px;
+  }
+  .manifest-btn:hover{ background:var(--sm-cta-2);border-color:var(--sm-cta-2); }
+  .manifest-btn.disabled{ opacity:.45;pointer-events:none; }
   .video-wrap canvas.select-canvas{
     position:absolute;inset:0;
     width:100%;height:100%;
@@ -248,10 +312,27 @@
   .hint code{ color:var(--accent); font-family:'Share Tech Mono', monospace; }
 
   /* ===== Signature panel (dans le header) ===== */
+  .overlay-group{
+    margin-left:auto;flex:none;
+    display:flex;align-items:stretch;gap:10px;max-width:100%;
+  }
+  /* Bouton PiP : grand, fond coloré (orange = inactif, vert = overlay ouvert) */
+  .pip-big{
+    flex:none;width:92px;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;
+    background:var(--accent);color:#0c0c0d;
+    border:1px solid var(--accent);border-radius:6px;
+    font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.85rem;
+    letter-spacing:.12em;text-transform:uppercase;
+    box-shadow:0 4px 14px rgba(232,115,44,0.25);
+    transition:background .15s,box-shadow .15s,transform .1s;
+  }
+  .pip-big:hover{ background:#f0873f;box-shadow:0 4px 18px rgba(232,115,44,0.4); }
+  .pip-big:active{ transform:translateY(1px); }
+  .pip-big.active{ background:var(--green);border-color:var(--green);box-shadow:0 4px 14px rgba(110,231,160,0.25); }
   .overlay-panel{
-    margin-left:auto;
     flex:none;
-    width:240px;
+    width:380px;
     background:rgba(12,12,13,0.92);
     border:1px solid var(--accent-dim);
     border-radius:3px;
@@ -313,7 +394,7 @@
     margin-top:6px;font-family:'Share Tech Mono', monospace;
     font-size:.68rem;color:var(--muted);
     border-top:1px solid var(--border);padding-top:6px;
-    max-height:50px;overflow:auto;white-space:pre-wrap;word-break:break-word;
+    max-height:50px;overflow:hidden;white-space:pre-wrap;word-break:break-word;
   }
   .overlay-panel.opaque{ background:rgba(12,12,13,1); }
   .overlay-panel.transparent{
@@ -339,6 +420,24 @@
     background:rgba(0,0,0,0.35);
   }
 
+  .crop-example{
+    display:flex;flex-wrap:wrap;align-items:center;gap:16px;
+    margin-top:10px;padding:12px 14px;
+    border:1px dashed var(--border);border-radius:3px;
+    background:rgba(255,255,255,0.02);
+  }
+  .crop-example svg{ flex:none;width:220px;max-width:100%;height:auto; }
+  .crop-example-text{ flex:1;min-width:220px;font-size:.88rem;color:var(--text); }
+  .crop-example-text b:first-child{
+    display:block;margin-bottom:4px;
+    font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);
+  }
+  .crop-example-text ul{ margin:4px 0 8px;padding:0;list-style:none; }
+  .crop-example-text li{ margin:3px 0; }
+  .crop-example-text small{ color:var(--muted); }
+  .crop-example .ok{ color:var(--green);font-weight:700; }
+  .crop-example .bad{ color:var(--danger);font-weight:700; }
+
   input[type=file]{ display:none; }
 </style>
 </head>
@@ -352,13 +451,12 @@
   </div>
 
   <!-- ============ SIGNATURE PANEL ============ -->
+  <div class="overlay-group">
   <div class="overlay-panel" id="overlayPanel">
     <div class="overlay-head" id="overlayHead">
       <span>Signatures détectées</span>
       <div class="controls">
-        <button id="btnPip" title="Afficher en Picture-in-Picture (au-dessus de toutes les fenêtres)" style="width:auto;padding:0 8px;font-family:'Share Tech Mono',monospace;font-size:.65rem;letter-spacing:.08em;text-transform:uppercase;">Overlay</button>
         <button id="btnOpaque" title="Fond verre dépoli (clic = fond transparent)">◐</button>
-        <button id="btnMin" title="Réduire / agrandir">_</button>
       </div>
     </div>
     <div class="overlay-body">
@@ -366,6 +464,11 @@
       <div class="badges" id="badges"><span class="badges-empty">Aucune correspondance pour l'instant</span></div>
       <div class="overlay-raw" id="overlayRaw"></div>
     </div>
+  </div>
+  <button id="btnPip" class="pip-big" type="button" title="Afficher en Picture-in-Picture (au-dessus de toutes les fenêtres)">
+    <svg width="30" height="23" viewBox="0 0 14 11" aria-hidden="true"><rect x="0.75" y="0.75" width="12.5" height="9.5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.2"/><rect x="6.5" y="5" width="5.5" height="4" rx="0.8" fill="currentColor"/></svg>
+    <span>Overlay</span>
+  </button>
   </div>
 </header>
 
@@ -376,9 +479,10 @@
     <h2>Source &amp; Zone de scan</h2>
 
     <div class="row">
-      <button class="btn" id="btnShare">▶ Partager l'écran / fenêtre</button>
-      <button class="btn danger" id="btnStop" disabled>■ Arrêter</button>
-      <button class="btn ghost" id="btnResetCrop">Réinitialiser le cadrage</button>
+      <!-- Partager / Arrêter : désormais dans la popin de l'assistant (boutons gardés cachés pour la logique) -->
+      <button class="btn" id="btnShare" hidden>▶ Partager l'écran / fenêtre</button>
+      <button class="btn danger" id="btnStop" hidden disabled>■ Arrêter</button>
+      <button class="btn ghost" id="btnResetCrop" hidden>Réinitialiser le cadrage</button>
     </div>
 
     <div class="status-line" id="status">En attente d'une source…</div>
@@ -388,9 +492,82 @@
       <img id="testImg" alt="">
       <canvas id="zoomCanvas" style="display:none;"></canvas>
       <canvas class="select-canvas" id="selectCanvas"></canvas>
+      <div class="wizard" id="wizard">
+        <div class="wiz-dots"><span data-s="1"></span><span data-s="2"></span><span data-s="3"></span></div>
+        <div class="wiz-step" data-step="1">
+          <button class="wiz-btn" id="wizScan" type="button">▶ Scanner</button>
+          <div class="wiz-body">
+            <div class="wiz-title"><b>1</b> Partage d'écran</div>
+            <div class="wiz-text">Choisis la fenêtre Star Citizen</div>
+          </div>
+        </div>
+        <div class="wiz-step" data-step="2">
+          <svg viewBox="0 0 150 56" aria-hidden="true"><rect width="150" height="56" fill="#0e1418"/><rect x="22" y="12" width="106" height="32" rx="5" fill="#7a5a30"/><path d="M42 38 C37 32 35 29 35 26 A7 7 0 1 1 49 26 C49 29 47 32 42 38 Z" fill="#f1f2f3"/><circle cx="42" cy="26" r="2.5" fill="#7a5a30"/><text x="58" y="34" font-family="'Share Tech Mono', monospace" font-weight="700" font-size="17" fill="#f1f2f3">11,841</text><rect x="14" y="5" width="122" height="46" rx="3" fill="rgba(91,227,255,0.10)" stroke="#5be3ff" stroke-width="2" stroke-dasharray="5 3"/></svg>
+          <div class="wiz-body">
+            <div class="wiz-title"><b>2</b> Recadrage</div>
+            <div class="wiz-text">Recadre à peu près la signature</div>
+            <div class="wiz-hint">Garde le focus sur la fenêtre radar</div>
+          </div>
+        </div>
+        <div class="wiz-step" data-step="3">
+          <svg viewBox="0 0 150 56" aria-hidden="true"><rect width="150" height="56" fill="#0e1418"/><rect x="22" y="12" width="106" height="32" rx="5" fill="#7a5a30"/><path d="M42 38 C37 32 35 29 35 26 A7 7 0 1 1 49 26 C49 29 47 32 42 38 Z" fill="#f1f2f3"/><circle cx="42" cy="26" r="2.5" fill="#7a5a30"/><text x="58" y="34" font-family="'Share Tech Mono', monospace" font-weight="700" font-size="17" fill="#f1f2f3">11,841</text><rect x="31" y="9" width="24" height="38" rx="3" fill="none" stroke="#ff5f6d" stroke-width="1.5" stroke-dasharray="3 3" opacity="0.85"/><rect x="56" y="15" width="70" height="24" rx="2" fill="rgba(255,180,84,0.12)" stroke="#ffb454" stroke-width="2" stroke-dasharray="5 3"/></svg>
+          <div class="wiz-body">
+            <div class="wiz-title"><b>3</b> Nombre seul</div>
+            <div class="wiz-text">Recadre le nombre de la signature, sans le pictogramme</div>
+            <div class="wiz-hint">Change le focus dans le jeu</div>
+          </div>
+        </div>
+        <div class="wiz-step" data-step="4">
+          <div class="wiz-btns">
+            <button class="wiz-btn stop" id="wizStop" type="button">■ Arrêter</button>
+            <button class="wiz-btn ghost" id="wizRecrop" type="button">Recadrer</button>
+          </div>
+          <div class="wiz-body">
+            <div class="wiz-title"><b>✓</b> Scan en cours</div>
+            <div class="wiz-text">Le cadrage est prêt, les signatures sont lues</div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="crop-info" id="cropInfo">Aucune zone définie — dessine un rectangle sur la source ci-dessus pour délimiter la zone des signatures radar.</div>
+
+    <!-- Lien Star Manifest -->
+    <div class="manifest-card">
+      <div class="manifest-text">
+        <div class="manifest-title">Star Manifest</div>
+        <div class="manifest-sub">Scan your inventory, manage your craft and share it.</div>
+      </div>
+      <a class="btn manifest-btn" id="manifestBtn" href="#" target="_blank" rel="noopener noreferrer">Let go</a>
+    </div>
+
+    <!-- Exemple de cadrage : visible tant qu'aucune zone n'est définie -->
+    <div class="crop-example" id="cropExample">
+      <svg viewBox="0 0 220 84" role="img" aria-label="Exemple : cadrer large, puis resserrer sur les chiffres sans le picto">
+        <!-- badge -->
+        <rect x="4" y="14" width="212" height="56" rx="6" fill="#7a5a30"/>
+        <!-- picto (épingle) -->
+        <path d="M30 60 C22 50 19 45 19 40 A11 11 0 1 1 41 40 C41 45 38 50 30 60 Z" fill="#f1f2f3"/>
+        <circle cx="30" cy="40" r="4" fill="#7a5a30"/>
+        <!-- chiffres -->
+        <text x="58" y="50" font-family="'Share Tech Mono', monospace" font-weight="700" font-size="26" fill="#f1f2f3">11,841</text>
+        <!-- picto : retiré automatiquement -->
+        <rect x="13" y="26" width="34" height="38" rx="3" fill="none" stroke="#ff5f6d" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.8"/>
+        <!-- zone à cadrer : chiffres seulement -->
+        <rect x="55" y="25" width="104" height="31" rx="2" fill="rgba(110,231,160,0.10)" stroke="#6ee7a0" stroke-width="2" stroke-dasharray="5 3"/>
+        <!-- élargissement automatique à droite -->
+        <rect x="159" y="25" width="31" height="31" fill="none" stroke="#6ee7a0" stroke-width="1.5" stroke-dasharray="2 3" opacity="0.55"/>
+      </svg>
+      <div class="crop-example-text">
+        <b>Exemple de cadrage (2 étapes)</b>
+        <ul>
+          <li><b>1.</b> Dessine un rectangle large autour du badge : la vue zoomée s'ouvre.</li>
+          <li><b>2.</b> Dans la vue zoomée, resserre sur <b>les chiffres uniquement</b> (rectangle vert) : bord gauche juste après le picto, bord droit juste après le dernier chiffre.</li>
+          <li><span class="bad">✗</span> N'inclus pas le picto (rouge) : il serait lu comme un chiffre parasite.</li>
+          <li>Les pointillés clairs à droite : élargissement automatique (+30 %).</li>
+        </ul>
+      </div>
+    </div>
 
     <div class="row" style="margin-top:14px;">
       <label class="field">
@@ -404,29 +581,77 @@
     </div>
     <div class="row">
       <label class="field">
+        Élargir la zone à droite : <span class="val" id="padRightVal">+30%</span>
+        <input type="range" id="padRightSlider" min="0" max="150" step="5" value="30">
+      </label>
+      <label class="field">
+        Élargir la zone à gauche : <span class="val" id="padLeftVal">+0%</span>
+        <input type="range" id="padLeftSlider" min="0" max="150" step="5" value="0">
+      </label>
+    </div>
+    <div class="row" style="align-items:center;">
+      <label class="field" style="flex-direction:row;align-items:center;gap:8px;">
+        <input type="checkbox" id="pictoChk" checked style="width:auto;accent-color:var(--accent);">
+        Détecter le picto automatiquement (cadre le badge entier)
+      </label>
+      <label class="field" style="flex-direction:row;align-items:center;gap:8px;">
+        <input type="checkbox" id="autoCropChk" checked style="width:auto;accent-color:var(--accent);">
+        Recadrer automatiquement sur les succès de scan
+      </label>
+      <label class="field" style="flex-direction:row;align-items:center;gap:8px;">
+        <input type="checkbox" id="wideRetryChk" checked style="width:auto;accent-color:var(--accent);">
+        Cadrage plus large en cas d'échec
+      </label>
+      <button class="btn ghost" id="btnLearnPicto" title="Entoure le picto dans la vue zoomée pour que l'appli le reconnaisse par sa forme">Apprendre le picto</button>
+      <span class="val" id="pictoStatus" style="font-family:'Share Tech Mono',monospace;font-size:.8rem;">Picto : en attente d'un scan</span>
+    </div>
+    <div class="row">
+      <label class="field" style="flex-direction:row;align-items:center;gap:8px;">
+        <input type="checkbox" id="autoThreshChk" checked style="width:auto;accent-color:var(--accent);">
+        Seuil automatique (blanc du texte − écart)
+      </label>
+      <label class="field">
+        Écart sous le blanc : <span class="val" id="autoOffsetVal">−50</span>
+        <input type="range" id="autoOffsetSlider" min="5" max="120" step="5" value="50">
+      </label>
+      <label class="field">
         Seuil binarisation : <span class="val" id="threshVal">205</span>
         <input type="range" id="threshSlider" min="0" max="255" step="5" value="205">
+      </label>
+    </div>
+    <div class="row">
+      <label class="field">
+        Images par scan : <span class="val" id="scanCountVal">3</span>
+        <input type="range" id="scanCountSlider" min="1" max="7" step="1" value="3">
+      </label>
+      <label class="field">
+        Écart de seuil entre images : <span class="val" id="scanGapVal">10</span>
+        <input type="range" id="scanGapSlider" min="1" max="40" step="1" value="10">
+      </label>
+      <label class="field">
+        Poids de l'orange : <span class="val" id="orangeVal">×1.0</span>
+        <input type="range" id="orangeSlider" min="0" max="3" step="0.1" value="1">
+      </label>
+      <label class="field">
+        Filtre de contraste : <span class="val" id="contrastVal">×1.0</span>
+        <input type="range" id="contrastSlider" min="0.5" max="3" step="0.1" value="1">
       </label>
       <label class="field" style="flex-direction:row;align-items:center;gap:8px;">
         <input type="checkbox" id="invertChk" checked style="width:auto;accent-color:var(--accent);">
         Texte clair sur fond sombre
       </label>
-      <label class="field" style="flex-direction:row;align-items:center;gap:8px;">
-        <input type="checkbox" id="multiThreshChk" style="width:auto;accent-color:var(--accent);">
-        Lecture multi-seuils (3 passes, plus fiable mais plus lent)
-      </label>
-      <label class="field">
-        Écart multi-seuils : <span class="val" id="spreadVal">±30</span>
-        <input type="range" id="spreadSlider" min="5" max="60" step="5" value="30">
-      </label>
+    </div>
+    <div class="row" style="align-items:center;">
+      <button class="btn ghost" id="btnResetSettings">Réinitialiser les réglages</button>
     </div>
     <p class="hint" style="margin-top:8px;">
       La police du HUD est petite et condensée — un agrandissement ×3 à ×5 combiné à la binarisation
-      aide beaucoup l'OCR. Augmente le seuil si l'image prétraitée ci-dessous est trop "chargée" de bruit,
-      baisse-le si les chiffres disparaissent. La case <code>lecture multi-seuils</code> relance l'OCR avec
-      trois seuils (seuil − écart, seuil, seuil + écart) et garde le résultat majoritaire — utile si la lecture
-      est instable d'une frame à l'autre, au prix d'environ trois fois plus de calcul par cycle. Le curseur
-      <code>écart multi-seuils</code> règle cet écart (±x autour du seuil principal).
+      aide beaucoup l'OCR. Avec le <code>seuil automatique</code>, l'appli mesure le blanc du texte (la couleur la
+      plus claire de la zone) et place le seuil <code>écart sous le blanc</code> plus bas ; désactive-le pour
+      régler le seuil à la main. <code>Images par scan</code> binarise la même capture N fois, avec des seuils
+      espacés de <code>écart de seuil</code> autour du seuil central, et lance l'OCR image par image en partant du
+      seuil central : dès qu'une lecture correspond à un minéral, le scan s'arrête (les images non testées
+      s'affichent « · »). Si rien ne correspond, les N images sont toutes essayées.
     </p>
     <canvas id="ocrPreview" style="width:100%;max-height:120px;object-fit:contain;background:#04080c;border:1px solid var(--border);border-radius:3px;image-rendering:pixelated;display:block;"></canvas>
     <div class="raw-text" id="rawText">—</div>
@@ -503,7 +728,7 @@ const DEFAULT_RULES = [
   { enabled:true, type:'signature', base:4285, maxN:6,  mineral:'Aluminium',      color:'#8899aa' },
   { enabled:true, type:'signature', base:4300, maxN:6,  mineral:'Ice',            color:'#8899aa' },
   { enabled:true, type:'signature', base:4000, maxN:7,  mineral:'ROC Mineables',  color:'#66ddaa' },
-  { enabled:true, type:'signature', base:3000, maxN:10, mineral:'FPS Mineables',  color:'#77bbdd' },
+  { enabled:true, type:'signature', base:3000, maxN:30, mineral:'FPS Mineables',  color:'#77bbdd' },
   { enabled:true, type:'signature', base:2000, maxN:10, mineral:'Salvage',        color:'#aa9977' }
 ];
 
@@ -516,19 +741,37 @@ let settings = loadSettings();
 function loadRules(){
   try{
     const raw = localStorage.getItem(STORAGE_KEY);
-    if(raw) return JSON.parse(raw);
+    if(raw){
+      const saved = JSON.parse(raw);
+      // FPS Mineables : les gros amas vont jusqu'à 60 000 (3 000 × 20)
+      for(const r of saved){
+        if(r && r.type === 'signature' && r.mineral === 'FPS Mineables' && (r.maxN || 10) < 30) r.maxN = 30;
+      }
+      return saved;
+    }
   }catch(e){}
   return JSON.parse(JSON.stringify(DEFAULT_RULES));
 }
 function saveRules(){
   try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(rules)); }catch(e){}
 }
+function defaultSettings(){
+  return { interval:1.5, scale:3, threshold:205, invert:true, contrast:1, orange:1,
+           autoThreshold:true, autoOffset:50, scanCount:3, scanGap:10,
+           padRight:30, padLeft:0, pictoDetect:false, autoCrop:false, wideRetry:true, manualCrop2:true };
+}
 function loadSettings(){
   try{
     const raw = localStorage.getItem(SETTINGS_KEY);
-    if(raw) return JSON.parse(raw);
+    if(raw){
+      const s = JSON.parse(raw);
+      // Retour au cadrage manuel en 2 étapes : détection auto du picto et
+      // recadrage auto désactivés une fois pour les réglages déjà enregistrés.
+      if(!s.manualCrop2){ s.pictoDetect = false; s.autoCrop = false; s.manualCrop2 = true; }
+      return s;
+    }
   }catch(e){}
-  return { interval:1.5, scale:3, threshold:205, invert:true, multiThreshold:false, thresholdSpread:30 };
+  return defaultSettings();
 }
 function saveSettings(){
   try{ localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); }catch(e){}
@@ -554,9 +797,27 @@ const scaleVal = document.getElementById('scaleVal');
 const threshSlider = document.getElementById('threshSlider');
 const threshVal = document.getElementById('threshVal');
 const invertChk = document.getElementById('invertChk');
-const multiThreshChk = document.getElementById('multiThreshChk');
-const spreadSlider = document.getElementById('spreadSlider');
-const spreadVal = document.getElementById('spreadVal');
+const pictoChk = document.getElementById('pictoChk');
+const pictoStatusEl = document.getElementById('pictoStatus');
+const btnLearnPicto = document.getElementById('btnLearnPicto');
+const autoCropChk = document.getElementById('autoCropChk');
+const wideRetryChk = document.getElementById('wideRetryChk');
+const btnResetSettings = document.getElementById('btnResetSettings');
+const padRightSlider = document.getElementById('padRightSlider');
+const padRightVal = document.getElementById('padRightVal');
+const padLeftSlider = document.getElementById('padLeftSlider');
+const padLeftVal = document.getElementById('padLeftVal');
+const autoThreshChk = document.getElementById('autoThreshChk');
+const autoOffsetSlider = document.getElementById('autoOffsetSlider');
+const autoOffsetVal = document.getElementById('autoOffsetVal');
+const scanCountSlider = document.getElementById('scanCountSlider');
+const scanCountVal = document.getElementById('scanCountVal');
+const scanGapSlider = document.getElementById('scanGapSlider');
+const scanGapVal = document.getElementById('scanGapVal');
+const contrastSlider = document.getElementById('contrastSlider');
+const contrastVal = document.getElementById('contrastVal');
+const orangeSlider = document.getElementById('orangeSlider');
+const orangeVal = document.getElementById('orangeVal');
 const ocrPreview = document.getElementById('ocrPreview');
 const rulesListEl = document.getElementById('rulesList');
 const btnShare = document.getElementById('btnShare');
@@ -569,21 +830,41 @@ const overlayHead = document.getElementById('overlayHead');
 const badgesEl = document.getElementById('badges');
 const overlayRawEl = document.getElementById('overlayRaw');
 const overlaySignatureEl = document.getElementById('overlaySignature');
-const btnMin = document.getElementById('btnMin');
 const btnOpaque = document.getElementById('btnOpaque');
 const btnPip = document.getElementById('btnPip');
 const pipVideo = document.getElementById('pipVideo');
 
-intervalSlider.value = settings.interval;
-scaleSlider.value = settings.scale;
-threshSlider.value = settings.threshold ?? 205;
-invertChk.checked = settings.invert !== false;
-multiThreshChk.checked = settings.multiThreshold === true;
-spreadSlider.value = settings.thresholdSpread ?? 30;
-spreadVal.textContent = '±' + (settings.thresholdSpread ?? 30);
-intervalVal.textContent = settings.interval + ' s';
-scaleVal.textContent = '×' + settings.scale;
-threshVal.textContent = settings.threshold ?? 205;
+// Reporte les réglages courants sur tous les curseurs / cases à cocher.
+// Appelée au chargement et après une réinitialisation.
+function applySettingsToUI(){
+  intervalSlider.value = settings.interval;
+  scaleSlider.value = settings.scale;
+  threshSlider.value = settings.threshold ?? 205;
+  invertChk.checked = settings.invert !== false;
+  autoCropChk.checked = settings.autoCrop !== false;
+  wideRetryChk.checked = settings.wideRetry !== false;
+  pictoChk.checked = settings.pictoDetect !== false;
+  padRightSlider.value = settings.padRight ?? 30;
+  padRightVal.textContent = '+' + (settings.padRight ?? 30) + '%';
+  padLeftSlider.value = settings.padLeft ?? 0;
+  padLeftVal.textContent = '+' + (settings.padLeft ?? 0) + '%';
+  autoThreshChk.checked = settings.autoThreshold !== false;
+  threshSlider.disabled = autoThreshChk.checked;
+  autoOffsetSlider.value = settings.autoOffset ?? 50;
+  autoOffsetVal.textContent = '−' + (settings.autoOffset ?? 50);
+  scanCountSlider.value = settings.scanCount ?? 3;
+  scanCountVal.textContent = settings.scanCount ?? 3;
+  scanGapSlider.value = settings.scanGap ?? 10;
+  scanGapVal.textContent = settings.scanGap ?? 10;
+  contrastSlider.value = settings.contrast ?? 1;
+  contrastVal.textContent = '×' + (settings.contrast ?? 1).toFixed(1);
+  orangeSlider.value = settings.orange ?? 1;
+  orangeVal.textContent = '×' + (settings.orange ?? 1).toFixed(1);
+  intervalVal.textContent = settings.interval + ' s';
+  scaleVal.textContent = '×' + settings.scale;
+  threshVal.textContent = settings.threshold ?? 205;
+}
+applySettingsToUI();
 
 // ---------------------------------------------------------------------
 // Status helper
@@ -662,6 +943,7 @@ btnShare.addEventListener('click', async () => {
     activeSource = 'video';
     videoWrap.classList.remove('empty');
     btnStop.disabled = false;
+    updateWizard();
     setStatus('Capture active — sélectionne la zone des signatures radar.', 'ok');
 
     // 3. Si l'utilisateur arrête le partage depuis la barre du navigateur
@@ -675,6 +957,9 @@ btnShare.addEventListener('click', async () => {
   }
 });
 
+document.getElementById('wizScan').addEventListener('click', () => btnShare.click());
+document.getElementById('wizStop').addEventListener('click', () => stopCapture());
+document.getElementById('wizRecrop').addEventListener('click', () => btnResetCrop.click());
 btnStop.addEventListener('click', stopCapture);
 function stopCapture(){
   if(zoomedMode) exitZoomedMode();
@@ -688,6 +973,7 @@ function stopCapture(){
     videoWrap.classList.add('empty');
   }
   btnStop.disabled = true;
+  updateWizard();
   setStatus('Capture arrêtée.', '');
 }
 
@@ -724,16 +1010,32 @@ window.addEventListener('mousemove', (e) => {
   const rect = selectCanvas.getBoundingClientRect();
   const cur = { x: e.clientX - rect.left, y: e.clientY - rect.top };
   const r = normalizeRect(dragStart, cur);
-  if(zoomedMode) innerRect = r; else outerRect = r;
+  if(zoomedMode){ if(pictoLearnMode) pictoSel = r; else innerRect = r; } else outerRect = r;
   redrawSelection();
 });
 window.addEventListener('mouseup', () => {
   if(dragging){
     dragging = false;
-    if(!zoomedMode){
-      if(outerRect && outerRect.w >= 10 && outerRect.h >= 10){
-        enterZoomedMode();
+    // Cadrage en 2 étapes manuelles : 1) rectangle large, 2) vue zoomée
+    // où l'on resserre sur les chiffres.
+    if(zoomedMode && pictoLearnMode && pictoSel && pictoSel.w >= 4 && pictoSel.h >= 4 && zoomSource && zoomCanvas.width > 0){
+      const r = {
+        sx: zoomSource.sx + pictoSel.x / zoomCanvas.width * zoomSource.sw,
+        sy: zoomSource.sy + pictoSel.y / zoomCanvas.height * zoomSource.sh,
+        sw: pictoSel.w / zoomCanvas.width * zoomSource.sw,
+        sh: pictoSel.h / zoomCanvas.height * zoomSource.sh
+      };
+      pictoLearnMode = false; pictoSel = null;
+      if(learnPictoFromRect(r)){
+        settings.pictoDetect = true; pictoChk.checked = true; saveSettings();
+        lastScanSignature = '';
+        setPictoStatus('picto appris — il sera reconnu par sa forme');
+      } else {
+        setPictoStatus('picto non appris — entoure-le plus précisément');
       }
+      redrawSelection();
+    } else if(!zoomedMode && outerRect && outerRect.w >= 10 && outerRect.h >= 10){
+      enterZoomedMode();
     }
     updateCropInfo();
   }
@@ -750,9 +1052,10 @@ function normalizeRect(a, b){
 
 function redrawSelection(){
   selectCtx.clearRect(0,0,selectCanvas.width, selectCanvas.height);
-  const r = zoomedMode ? innerRect : outerRect;
+  const learning = zoomedMode && pictoLearnMode;
+  const r = learning ? pictoSel : (zoomedMode ? innerRect : outerRect);
   if(!r) return;
-  const color = zoomedMode ? '#ffb454' : '#5be3ff';
+  const color = learning ? '#ff5f6d' : (zoomedMode ? '#ffb454' : '#5be3ff');
   selectCtx.strokeStyle = color;
   selectCtx.lineWidth = 2;
   selectCtx.setLineDash([6,4]);
@@ -769,7 +1072,31 @@ function redrawSelection(){
   });
 }
 
+// L'exemple de cadrage n'est affiché que tant qu'aucune zone n'est définie.
+function updateCropExample(){
+  const el = document.getElementById('cropExample');
+  if(el) el.style.display = 'none';   // remplacé par l'assistant sur le flux
+  updateWizard();
+}
+
+// Assistant en 3 étapes : 1 partage, 2 recadrage large, 3 nombre seul.
+function updateWizard(){
+  const wiz = document.getElementById('wizard');
+  if(!wiz) return;
+  const hasOuter = outerRect && outerRect.w >= 5 && outerRect.h >= 5;
+  const hasInner = innerRect && innerRect.w >= 5 && innerRect.h >= 5;
+  const step = !activeSource ? 1 : (!hasOuter ? 2 : (!hasInner ? 3 : 4));
+  wiz.querySelectorAll('.wiz-step').forEach(s => s.classList.toggle('on', +s.dataset.step === step));
+  wiz.querySelectorAll('.wiz-dots span').forEach(d => {
+    const n = +d.dataset.s;
+    d.classList.toggle('on', n === step);
+    d.classList.toggle('done', n < step);
+  });
+  wiz.classList.remove('hidden');   // reste affiché : à l'étape 4 il porte le bouton Arrêter
+}
+
 function updateCropInfo(){
+  updateCropExample();
   if(!outerRect || outerRect.w < 5 || outerRect.h < 5){
     cropInfoEl.innerHTML = 'Zone trop petite ou non définie — redessine un rectangle sur la source.';
     return;
@@ -779,7 +1106,11 @@ function updateCropInfo(){
     cropInfoEl.innerHTML = 'En attente de la source vidéo…';
     return;
   }
-  let txt = `Zone OCR : <b>${Math.round(final.sw)}×${Math.round(final.sh)}</b> px (résolution source)`;
+  const ocr = getOcrSourceRect() || final;
+  let txt = `Zone OCR : <b>${Math.round(ocr.sw)}×${Math.round(ocr.sh)}</b> px (résolution source)`;
+  if(Math.round(ocr.sw) !== Math.round(final.sw)){
+    txt += ` — élargie depuis ${Math.round(final.sw)} px`;
+  }
   if(innerRect && innerRect.w >= 5 && innerRect.h >= 5){
     txt += ' — affinée';
   } else if(zoomedMode){
@@ -823,6 +1154,26 @@ function getFinalSourceRect(){
   }
 
   return { sx, sy, sw, sh };
+}
+
+// Zone réellement envoyée à l'OCR : le cadrage de l'utilisateur, élargi à
+// gauche / à droite d'un pourcentage de sa largeur (l'étiquette dépasse
+// parfois 100 % de la zone cadrée quand le nombre est plus long), puis
+// limité aux bords de l'image source.
+// `trimmedBase` : zone déjà rognée après le picto (sinon le cadrage brut).
+// `noLeftPad` : quand le picto a été retiré, on n'élargit pas à gauche —
+// ça le ferait réapparaître dans la zone.
+function getOcrSourceRect(trimmedBase, noLeftPad){
+  const base = trimmedBase || getFinalSourceRect();
+  const size = getSourceSize();
+  if(!base || !size || !size.w || !size.h) return base;
+
+  const left = noLeftPad ? 0 : base.sw * (settings.padLeft ?? 0) / 100;
+  const right = base.sw * (settings.padRight ?? 0) / 100;
+
+  const sx = Math.max(0, base.sx - left);
+  const ex = Math.min(size.w, base.sx + base.sw + right);
+  return { sx, sy: base.sy, sw: Math.max(1, ex - sx), sh: base.sh };
 }
 
 // ---------------------------------------------------------------------
@@ -892,6 +1243,7 @@ btnResetCrop.addEventListener('click', () => {
   if(zoomedMode) exitZoomedMode();
   redrawSelection();
   cropInfoEl.innerHTML = 'Aucune zone définie — dessine un rectangle sur la source ci-dessus pour délimiter la zone des signatures radar.';
+  updateCropExample();
 });
 
 // ---------------------------------------------------------------------
@@ -916,13 +1268,83 @@ invertChk.addEventListener('change', () => {
   settings.invert = invertChk.checked;
   saveSettings();
 });
-multiThreshChk.addEventListener('change', () => {
-  settings.multiThreshold = multiThreshChk.checked;
+wideRetryChk.addEventListener('change', () => {
+  settings.wideRetry = wideRetryChk.checked;
   saveSettings();
 });
-spreadSlider.addEventListener('input', () => {
-  settings.thresholdSpread = parseFloat(spreadSlider.value);
-  spreadVal.textContent = '±' + settings.thresholdSpread;
+autoCropChk.addEventListener('change', () => {
+  settings.autoCrop = autoCropChk.checked;
+  autoZone = null; autoHits = []; autoMiss = 0; lastScanSignature = '';
+  saveSettings();
+});
+btnLearnPicto.addEventListener('click', () => {
+  if(!zoomedMode){
+    setPictoStatus('dessine d\'abord le rectangle large du badge, puis clique de nouveau');
+    return;
+  }
+  pictoLearnMode = true; pictoSel = null;
+  setPictoStatus('entoure UNIQUEMENT le picto dans la vue zoomée (rectangle rouge)');
+  redrawSelection();
+});
+pictoChk.addEventListener('change', () => {
+  settings.pictoDetect = pictoChk.checked;
+  saveSettings();
+});
+// Remet tous les réglages d'OCR à leurs valeurs par défaut (intervalle,
+// agrandissement, seuils, contraste, élargissement…).
+// Ne touche ni à la table des minéraux, ni au cadrage.
+btnResetSettings.addEventListener('click', () => {
+  if(!confirm('Remettre tous les réglages par défaut ?\n(la table des minéraux, les chiffres appris et le cadrage sont conservés)')) return;
+  settings = defaultSettings();
+  saveSettings();
+  applySettingsToUI();
+  setStatus('Réglages réinitialisés.', 'ok');
+});
+padRightSlider.addEventListener('input', () => {
+  settings.padRight = parseFloat(padRightSlider.value);
+  padRightVal.textContent = '+' + settings.padRight + '%';
+  saveSettings();
+  updateCropInfo();
+});
+padLeftSlider.addEventListener('input', () => {
+  settings.padLeft = parseFloat(padLeftSlider.value);
+  padLeftVal.textContent = '+' + settings.padLeft + '%';
+  saveSettings();
+  updateCropInfo();
+});
+autoThreshChk.addEventListener('change', () => {
+  settings.autoThreshold = autoThreshChk.checked;
+  threshSlider.disabled = autoThreshChk.checked;
+  if(!autoThreshChk.checked){
+    // retour au réglage manuel : on réaffiche la valeur manuelle mémorisée
+    threshSlider.value = settings.threshold ?? 205;
+    threshVal.textContent = settings.threshold ?? 205;
+  }
+  saveSettings();
+});
+autoOffsetSlider.addEventListener('input', () => {
+  settings.autoOffset = parseFloat(autoOffsetSlider.value);
+  autoOffsetVal.textContent = '−' + settings.autoOffset;
+  saveSettings();
+});
+scanCountSlider.addEventListener('input', () => {
+  settings.scanCount = parseInt(scanCountSlider.value, 10);
+  scanCountVal.textContent = settings.scanCount;
+  saveSettings();
+});
+scanGapSlider.addEventListener('input', () => {
+  settings.scanGap = parseFloat(scanGapSlider.value);
+  scanGapVal.textContent = settings.scanGap;
+  saveSettings();
+});
+orangeSlider.addEventListener('input', () => {
+  settings.orange = parseFloat(orangeSlider.value);
+  orangeVal.textContent = '×' + settings.orange.toFixed(1);
+  saveSettings();
+});
+contrastSlider.addEventListener('input', () => {
+  settings.contrast = parseFloat(contrastSlider.value);
+  contrastVal.textContent = '×' + settings.contrast.toFixed(1);
   saveSettings();
 });
 
@@ -975,12 +1397,12 @@ function renderRules(){
       base.addEventListener('input', () => { rule.base = parseFloat(base.value); saveRules(); });
 
       const maxN = document.createElement('input');
-      maxN.type = 'number'; maxN.min = '1'; maxN.max = '10'; maxN.style.maxWidth = '54px';
+      maxN.type = 'number'; maxN.min = '1'; maxN.max = '50'; maxN.style.maxWidth = '54px';
       maxN.placeholder = 'max';
       maxN.title = 'Nombre maximum de roches/objets pour ce minéral (limite le ×N testé)';
       maxN.value = rule.maxN ?? 10;
       maxN.addEventListener('input', () => {
-        rule.maxN = Math.max(1, Math.min(10, parseInt(maxN.value, 10) || 10));
+        rule.maxN = Math.max(1, Math.min(50, parseInt(maxN.value, 10) || 10));
         saveRules();
       });
 
@@ -1124,7 +1546,24 @@ async function getWorker(){
 }
 
 const ocrCanvas = document.createElement('canvas');
-const ocrCtx = ocrCanvas.getContext('2d');
+// willReadFrequently : garde le canvas en mémoire CPU, ce qui accélère
+// nettement les getImageData/putImageData répétés à chaque scan.
+const ocrCtx = ocrCanvas.getContext('2d', { willReadFrequently:true });
+
+// Hauteur maximale de l'image envoyée à l'OCR (px). Au-delà, Tesseract ne
+// gagne rien sur une ligne de chiffres mais le temps de calcul explose.
+const OCR_MAX_HEIGHT = 96;
+
+// Miniature servant à détecter si la zone a changé depuis le dernier scan
+// (comparaison sur une très petite image, quasi gratuite).
+const thumbCanvas = document.createElement('canvas');
+thumbCanvas.width = 48; thumbCanvas.height = 16;
+const thumbCtx = thumbCanvas.getContext('2d', { willReadFrequently:true });
+let lastThumb = null, lastScanSignature = '';
+
+// Tampons réutilisés d'un scan à l'autre (évite de réallouer des millions
+// d'octets à chaque cycle et de solliciter le ramasse-miettes).
+let bufGray = null, bufDil = null, bufImg = null;
 
 function getDisplayRect(){
   const size = getSourceSize();
@@ -1137,17 +1576,154 @@ function getDisplayRect(){
 }
 
 let cropDilGray = null, cropW = 0, cropH = 0;
+// Niveau du "blanc du texte" après étirement + contraste (0..255), mesuré à
+// chaque capture — sert de référence au seuil automatique.
+let cropWhiteLevel = 255;
+
+// ---------------------------------------------------------------------
+// Recadrage automatique sur les succès : l'utilisateur cadre UNE fois
+// (le badge entier). À chaque lecture exacte, on mesure où se trouvent
+// réellement les chiffres dans l'image (boîte englobante des colonnes de
+// texte). Après quelques succès cohérents, le cadrage est resserré
+// (gauche / haut / bas) sur cette boîte + une marge, en prenant la médiane
+// des dernières mesures. Le bord droit reste celui du cadrage utilisateur.
+// Trop d'échecs d'affilée → on revient au cadrage de départ.
+// Tout est remis à zéro dès que l'utilisateur redessine / réinitialise.
+// ---------------------------------------------------------------------
+let autoZone = null, autoZoneKey = '', autoHits = [], autoMiss = 0;
+let lastOcrRect = null, lastUserBase = null;
+// Tentatives de cadrage plus large quand la lecture échoue (étiquette décalée) :
+// niveau 0 = cadrage normal, 1 = élargi, 2 = encore plus large.
+let wideLevel = 0;
+// Cadre TEMPORAIRE serré autour des chiffres localisés (relecture de
+// confirmation après un succès en cadrage large). Jamais mémorisé : le
+// cadrage manuel de l'utilisateur n'est pas modifié.
+let tightRect = null;
+// Boîte (coordonnées source) des chiffres lus par Tesseract (mots avec
+// bbox), agrandie d'une marge. Renvoie null si l'info manque.
+function tightFromWords(words, rect, cw, ch){
+  const size = getSourceSize();
+  if(!words || !words.length || !rect || !cw || !ch || !size) return null;
+  const ws = words.filter(w => w && w.bbox && /\d/.test(w.text || ''));
+  if(!ws.length) return null;
+  const x0 = Math.min(...ws.map(w => w.bbox.x0)), x1 = Math.max(...ws.map(w => w.bbox.x1));
+  const y0 = Math.min(...ws.map(w => w.bbox.y0)), y1 = Math.max(...ws.map(w => w.bbox.y1));
+  const kx = rect.sw / cw, ky = rect.sh / ch;
+  const bh = (y1 - y0) * ky;
+  const mv = 0.35 * bh, mh = 0.3 * bh;
+  const sx = Math.max(0, rect.sx + x0 * kx - mh), sy = Math.max(0, rect.sy + y0 * ky - mv);
+  const ex = Math.min(size.w, rect.sx + x1 * kx + mh), ey = Math.min(size.h, rect.sy + y1 * ky + mv);
+  if(ex - sx < 8 || ey - sy < 6) return null;
+  return { sx, sy, sw: ex - sx, sh: ey - sy };
+}
+function widenRect(r, level){
+  const size = getSourceSize();
+  if(!r || !size || !size.w || !size.h) return r;
+  const mx = r.sw * 0.35 * level, my = r.sh * 0.4 * level;
+  const sx = Math.max(0, r.sx - mx), sy = Math.max(0, r.sy - my);
+  const ex = Math.min(size.w, r.sx + r.sw + mx), ey = Math.min(size.h, r.sy + r.sh + my);
+  return { sx, sy, sw: Math.max(1, ex - sx), sh: Math.max(1, ey - sy) };
+}
+const AUTO_MIN_HITS = 3, AUTO_KEEP = 7, AUTO_MAX_MISS = 12;
+
+function noteZoneSuccess(mask, label){
+  if(settings.autoCrop === false || !lastOcrRect || !lastUserBase || !cropW || !cropH) return;
+  let runs = findRuns(mask, cropW, cropH);
+  runs = runs.filter(r => !((r.x1 - r.x0) <= Math.max(2, 0.06 * cropH) && (r.y1 - r.y0) >= 0.92 * cropH));
+  // écarte la virgule / le point (forme basse et petite) : ce n'est pas un chiffre
+  const maxRunH = runs.reduce((m, r) => Math.max(m, r.y1 - r.y0), 0);
+  runs = runs.filter(r => (r.y1 - r.y0) >= 0.5 * maxRunH);
+  if(runs.length < label.length) return;
+  runs = runs.slice(-label.length);   // les chiffres sont les dernières formes
+  const kx = lastOcrRect.sw / cropW, ky = lastOcrRect.sh / cropH;
+  const x0 = Math.min(...runs.map(r => r.x0)), y0 = Math.min(...runs.map(r => r.y0));
+  const y1 = Math.max(...runs.map(r => r.y1));
+  const bh = (y1 - y0) * ky;
+  const m = Math.max(3, 0.5 * bh);
+  const u = lastUserBase;
+  const sx = Math.max(u.sx, lastOcrRect.sx + x0 * kx - m);
+  const sy = Math.max(u.sy, lastOcrRect.sy + y0 * ky - m);
+  const ey = Math.min(u.sy + u.sh, lastOcrRect.sy + y1 * ky + m);
+  const ex = u.sx + u.sw;
+  if(ex - sx < 8 || ey - sy < 6) return;
+  autoHits.push({ sx, sy, ex, ey });
+  if(autoHits.length > AUTO_KEEP) autoHits.shift();
+  autoMiss = 0;
+  if(autoHits.length >= AUTO_MIN_HITS){
+    const z = { sx: Math.min(...autoHits.map(h => h.sx)), sy: Math.min(...autoHits.map(h => h.sy)) };
+    z.sw = Math.max(8, ex - z.sx); z.sh = Math.max(6, Math.max(...autoHits.map(h => h.ey)) - z.sy);
+    autoZone = z;
+  }
+}
+function noteZoneMiss(){
+  if(!autoZone) return;
+  if(++autoMiss >= AUTO_MAX_MISS){
+    autoZone = null; autoHits = []; autoMiss = 0;
+    lastScanSignature = '';
+    setPictoStatus('cadrage auto abandonné (trop d\'échecs) — retour au cadrage initial');
+  }
+}
 
 function drawCropToCanvas(){
-  const final = getFinalSourceRect();
+  const userBase = getFinalSourceRect();   // cadrage dessiné (badge entier)
   const el = getSourceEl();
-  if(!final || !el) return false;
+  if(!userBase || !el) return false;
+  const ukey = [userBase.sx, userBase.sy, userBase.sw, userBase.sh].map(v => Math.round(v)).join(',');
+  if(ukey !== autoZoneKey){ autoZoneKey = ukey; autoZone = null; autoHits = []; autoMiss = 0; }
+  lastUserBase = userBase;
+  const base0 = tightRect ? tightRect : ((autoZone && settings.autoCrop !== false) ? autoZone : userBase);
+  const base = wideLevel > 0 ? widenRect(base0, wideLevel) : base0;
 
+  // Détection de changement : on dessine le cadrage sur une miniature et on
+  // la compare à celle du scan précédent. Si rien n'a bougé (et que les
+  // réglages sont identiques), le résultat serait strictement le même :
+  // on saute tout le prétraitement et l'OCR.
+  thumbCtx.drawImage(el, base.sx, base.sy, base.sw, base.sh, 0, 0, thumbCanvas.width, thumbCanvas.height);
+  const thumb = thumbCtx.getImageData(0, 0, thumbCanvas.width, thumbCanvas.height).data;
+  const signature = JSON.stringify([
+    settings.scale, settings.threshold, settings.autoThreshold, settings.autoOffset,
+    settings.scanCount, settings.scanGap, settings.contrast, settings.orange, settings.invert,
+    settings.padLeft, settings.padRight, settings.pictoDetect,
+    Math.round(base.sx), Math.round(base.sy), Math.round(base.sw), Math.round(base.sh), wideLevel
+  ]);
+  if(!wideLevel && !tightRect && lastThumb && signature === lastScanSignature){
+    let diff = 0;
+    for(let i = 0; i < thumb.length; i += 4){
+      diff += Math.abs(thumb[i] - lastThumb[i]) + Math.abs(thumb[i+1] - lastThumb[i+1]) + Math.abs(thumb[i+2] - lastThumb[i+2]);
+    }
+    const meanDiff = diff / (thumb.length / 4 * 3);
+    if(meanDiff < 1.5) return false; // image identique → rien à refaire
+  }
+  lastThumb = new Uint8ClampedArray(thumb);
+  lastScanSignature = signature;
+
+  // 0. Détection du picto AVANT tout filtre : on cherche le picto à gauche
+  // du nombre et on rogne le cadrage juste après lui. Les filtres (étirement
+  // de contraste, seuil, OCR) ne voient ensuite que les chiffres.
+  let rect = base, pictoCut = false;
+  if(tightRect || base === autoZone){
+    pictoCut = true;   // la zone apprise commence déjà après le picto
+    setPictoStatus('cadrage affiné automatiquement sur les succès de scan');
+  } else if(settings.pictoDetect !== false){
+    const cut = detectPictoCut(base);
+    if(cut){
+      rect = { sx: cut.sx, sy: base.sy, sw: base.sx + base.sw - cut.sx, sh: base.sh };
+      pictoCut = true;
+      setPictoStatus(pictoTpl ? `forme reconnue (${Math.round((cut.sim || 0) * 100)} %) et retirée` : `détecté et retiré (${Math.round(cut.sx - base.sx)} px à gauche)`);
+    } else {
+      setPictoStatus(pictoTpl ? 'forme non retrouvée — rien coupé' : 'non détecté — cadrage utilisé tel quel');
+    }
+  } else {
+    setPictoStatus('détection désactivée');
+  }
+  const final = getOcrSourceRect(rect, pictoCut);
+  lastOcrRect = final;
   const { sx, sy, sw, sh } = final;
 
   // 1. Agrandissement — la police du HUD est petite et condensée,
-  // un upscale ×3 à ×5 aide énormément Tesseract.
-  const upscale = settings.scale || 1;
+  // un upscale ×3 à ×5 aide énormément Tesseract. Plafonné en hauteur
+  // (OCR_MAX_HEIGHT) : au-delà, on ne gagne rien mais on perd du temps.
+  const upscale = Math.min(settings.scale || 1, OCR_MAX_HEIGHT / Math.max(1, sh));
   ocrCanvas.width = Math.max(1, Math.round(sw * upscale));
   ocrCanvas.height = Math.max(1, Math.round(sh * upscale));
   ocrCtx.imageSmoothingEnabled = true;
@@ -1163,6 +1739,20 @@ function drawCropToCanvas(){
 // fois par image source. La binarisation finale (qui dépend du seuil)
 // est appliquée séparément par applyThreshold(), pour pouvoir tester
 // plusieurs seuils sur la même capture sans tout recalculer.
+// Valeur d'un pixel pour l'OCR : luminance + bonus « orange ». Un pixel est
+// d'autant plus orange que R ≥ G ≥ B avec un grand écart R − B ; ce bonus,
+// multiplié par le réglage « Poids de l'orange », éclaircit les chiffres
+// orange par rapport au fond et aux autres couleurs. Blanc / gris : aucun
+// bonus. Utilisé aussi par la détection du picto.
+function pixelValue(r, g, b){
+  const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+  const k = settings.orange ?? 1;
+  if(!k) return lum;
+  const o = (r >= g && g >= b) ? (r - b) : 0;
+  const v = lum + k * 0.5 * o;
+  return v > 255 ? 255 : v;
+}
+
 function computeDilatedGray(){
   const w = ocrCanvas.width, h = ocrCanvas.height;
   cropW = w; cropH = h;
@@ -1171,25 +1761,48 @@ function computeDilatedGray(){
   const imgData = ocrCtx.getImageData(0, 0, w, h);
   const d = imgData.data;
   const n = w * h;
-  const gray = new Float32Array(n);
+  if(!bufGray || bufGray.length < n){
+    bufGray = new Float32Array(n);
+    bufDil = new Float32Array(n);
+  }
+  const gray = bufGray;
 
-  let min = 255, max = 0;
+  // Histogramme de luminance pour trouver le "blanc du texte" : le
+  // percentile 99,5 % plutôt que le maximum absolu, pour qu'un pixel
+  // isolé (reflet, bruit) ne fausse pas la référence.
+  const hist = new Uint32Array(256);
+  let min = 255;
   for(let i = 0; i < n; i++){
     const o = i * 4;
-    const lum = 0.299*d[o] + 0.587*d[o+1] + 0.114*d[o+2];
+    const lum = pixelValue(d[o], d[o+1], d[o+2]);
     gray[i] = lum;
     if(lum < min) min = lum;
-    if(lum > max) max = lum;
+    hist[Math.min(255, Math.round(lum))]++;
+  }
+  const target = n * 0.995;
+  let acc = 0, white = 255;
+  for(let v = 0; v < 256; v++){
+    acc += hist[v];
+    if(acc >= target){ white = v; break; }
   }
 
-  // étirement de contraste [min..max] -> [0..255]
-  const range = Math.max(1, max - min);
+  // étirement de contraste [noir..blanc du texte] -> [0..255], puis filtre
+  // de contraste réglable (autour du gris moyen 128) : >1 durcit le
+  // contraste, <1 l'adoucit.
+  const range = Math.max(1, white - min);
+  const contrast = settings.contrast ?? 1;
   for(let i = 0; i < n; i++){
-    gray[i] = (gray[i] - min) * 255 / range;
+    let v = (gray[i] - min) * 255 / range;
+    v = (v - 128) * contrast + 128;
+    gray[i] = v < 0 ? 0 : (v > 255 ? 255 : v);
   }
+  // Le blanc du texte vaut 255 après étirement ; le filtre de contraste le
+  // déplace s'il est < 1 — on mémorise sa valeur finale.
+  const wv = (255 - 128) * contrast + 128;
+  cropWhiteLevel = wv < 0 ? 0 : (wv > 255 ? 255 : wv);
 
   // dilatation horizontale ±1px (max des voisins) — épaissit les traits fins
-  const dil = new Float32Array(n);
+  const dil = bufDil;
   for(let y = 0; y < h; y++){
     const row = y * w;
     for(let x = 0; x < w; x++){
@@ -1212,12 +1825,15 @@ function applyThreshold(threshold, updatePreview){
   const n = w * h;
   const invert = settings.invert !== false;
 
-  const imgData = ocrCtx.createImageData(w, h);
+  // ImageData réutilisé tant que la taille ne change pas.
+  if(!bufImg || bufImg.width !== w || bufImg.height !== h){
+    bufImg = ocrCtx.createImageData(w, h);
+  }
+  const imgData = bufImg;
   const d = imgData.data;
-  for(let i = 0; i < n; i++){
-    const isText = cropDilGray[i] >= threshold;
-    const out = invert ? (isText ? 0 : 255) : (isText ? 255 : 0);
-    const o = i * 4;
+  const onVal = invert ? 0 : 255, offVal = invert ? 255 : 0;
+  for(let i = 0, o = 0; i < n; i++, o += 4){
+    const out = cropDilGray[i] >= threshold ? onVal : offVal;
     d[o] = d[o+1] = d[o+2] = out;
     d[o+3] = 255;
   }
@@ -1230,6 +1846,351 @@ function applyThreshold(threshold, updatePreview){
   }
 }
 
+let bufMask = null;
+
+// Masque du texte (1 = pixel de texte) pour un seuil donné.
+function buildMask(threshold){
+  const n = cropW * cropH;
+  if(!bufMask || bufMask.length < n) bufMask = new Uint8Array(n);
+  for(let i = 0; i < n; i++) bufMask[i] = cropDilGray[i] >= threshold ? 1 : 0;
+  return bufMask;
+}
+
+// ---------------------------------------------------------------------
+// Détection automatique du picto
+// Le cadrage dessiné englobe tout le badge (picto + chiffres). Avant les
+// filtres, on binarise provisoirement la zone, on la découpe en colonnes
+// de pixels clairs (comme pour les chiffres) et on regarde si la première
+// forme à gauche est un picto plutôt qu'un chiffre :
+//   - forme / volume : plus large ou plus haute que les chiffres, plus
+//     « pleine » (taux de remplissage), plus massive (aire), décalée en
+//     hauteur ;
+//   - espace : l'écart avec le premier chiffre est nettement plus grand
+//     que l'écart habituel entre deux chiffres ;
+//   - garde-fous : un « 1 » (étroit) n'est jamais pris pour un picto.
+// ---------------------------------------------------------------------
+const pictoCanvas = document.createElement('canvas');
+const pictoCtx = pictoCanvas.getContext('2d', { willReadFrequently:true });
+let pictoStatusLast = '';
+
+function setPictoStatus(txt){
+  if(txt === pictoStatusLast) return;
+  pictoStatusLast = txt;
+  if(pictoStatusEl) pictoStatusEl.textContent = 'Picto : ' + txt;
+}
+
+function median(a){
+  if(!a.length) return 0;
+  const s = [...a].sort((x, y) => x - y), n = s.length;
+  return n % 2 ? s[(n - 1) / 2] : (s[n / 2 - 1] + s[n / 2]) / 2;
+}
+
+// Découpe en colonnes de texte (runs) avec aire de chaque forme. Les runs
+// séparés par un trou d'une seule colonne sont fusionnés.
+function findRuns(mask, w, h){
+  const cols = new Uint16Array(w);
+  for(let y = 0; y < h; y++){
+    const row = y * w;
+    for(let x = 0; x < w; x++) if(mask[row + x]) cols[x]++;
+  }
+  const raw = [];
+  let x = 0;
+  while(x < w){
+    if(!cols[x]){ x++; continue; }
+    const x0 = x;
+    while(x < w && cols[x]) x++;
+    raw.push({ x0, x1: x });
+  }
+  const merged = [];
+  for(const r of raw){
+    const last = merged[merged.length - 1];
+    if(last && r.x0 - last.x1 <= 1) last.x1 = r.x1;
+    else merged.push({ x0: r.x0, x1: r.x1 });
+  }
+  for(const r of merged){
+    let y0 = h, y1 = -1, area = 0;
+    for(let y = 0; y < h; y++){
+      const row = y * w;
+      let any = false;
+      for(let xx = r.x0; xx < r.x1; xx++){ if(mask[row + xx]){ area++; any = true; } }
+      if(any){ if(y < y0) y0 = y; if(y > y1) y1 = y; }
+    }
+    r.y0 = y0; r.y1 = y1 + 1; r.area = area;
+  }
+  return merged.filter(r => r.y1 > r.y0);
+}
+
+// Cherche le picto dans un masque (1 = pixel clair). Renvoie { cutX } (en
+// colonnes du masque, au milieu de l'espace picto/chiffres) ou null.
+function detectPictoInMask(mask, w, h){
+  let runs = findRuns(mask, w, h);
+  // écarte les filets de bordure (colonnes très fines sur toute la hauteur)
+  runs = runs.filter(r => !((r.x1 - r.x0) <= Math.max(2, 0.06 * h) && (r.y1 - r.y0) >= 0.92 * h));
+  const maxH = runs.reduce((m, r) => Math.max(m, r.y1 - r.y0), 0);
+  runs = runs.filter(r => (r.x1 - r.x0) >= 2 && (r.y1 - r.y0) >= Math.max(6, maxH * 0.35));
+  // il faut un picto + au moins deux chiffres pour pouvoir comparer
+  if(runs.length < 3) return null;
+
+  const first = runs[0], rest = runs.slice(1);
+  const wf = first.x1 - first.x0, hf = first.y1 - first.y0;
+
+  // heuristique forme / volume / espace
+  let isPicto = false;
+  if(!isPicto && wf / hf >= 0.45){      // un « 1 » (étroit) n'est jamais un picto
+    const fill = r => r.area / ((r.x1 - r.x0) * (r.y1 - r.y0));
+    const dH = median(rest.map(r => r.y1 - r.y0));
+    const dW = median(rest.map(r => r.x1 - r.x0));
+    const dFill = median(rest.map(fill));
+    const dArea = median(rest.map(r => r.area));
+    const dCy = median(rest.map(r => (r.y0 + r.y1) / 2));
+    const inter = [];
+    for(let i = 0; i < rest.length - 1; i++) inter.push(rest[i + 1].x0 - rest[i].x1);
+    const dGap = median(inter);
+    const gap = rest[0].x0 - first.x1;
+
+    const gapOk = gap >= Math.max(1.5 * dGap, 0.18 * dH);
+    const bigGap = gap >= 0.35 * dH && gap >= 2 * dGap;   // grand espace : suffit seul
+    let score = 0;
+    if(Math.abs(hf - dH) >= 0.2 * dH) score++;                          // hauteur différente
+    if(wf >= 1.3 * dW) score++;                                          // plus large
+    if(fill(first) >= dFill + 0.12) score++;                             // plus « plein »
+    if(first.area >= 1.6 * dArea) score++;                               // plus massif
+    if(Math.abs((first.y0 + first.y1) / 2 - dCy) >= 0.12 * dH) score++;  // décalé en hauteur
+
+    if((gapOk && score >= 1) || bigGap) isPicto = true;
+  }
+  if(!isPicto) return null;
+
+  const gap = rest[0].x0 - first.x1;
+  return { cutX: first.x1 + Math.floor(gap * 0.25) };
+}
+
+
+// ---------------------------------------------------------------------
+// Reconnaissance du picto par sa FORME (indépendante de la couleur)
+// Bouton « Apprendre le picto » : on entoure une fois le picto dans la vue
+// zoomée. On mémorise sa silhouette (masque 16×16 normalisé sur sa boîte).
+// Ensuite, à chaque scan, le premier groupe de formes à gauche est comparé
+// à cette silhouette ; le masque est fait par écart avec la couleur du
+// FOND (donc picto clair, sombre, orange, blanc… peu importe). Pas assez
+// ressemblant → on ne coupe rien (aucun risque de manger un chiffre).
+// ---------------------------------------------------------------------
+const PICTO_TPL_KEY = 'sc-radar-ocr-picto-tpl-v1';
+const TPL_N = 16;
+const TPL_MIN_SIM = 0.62;
+let pictoTpl = loadPictoTpl();
+let pictoLearnMode = false, pictoSel = null;
+
+function loadPictoTpl(){
+  try{
+    const raw = localStorage.getItem(PICTO_TPL_KEY);
+    if(raw){
+      const o = JSON.parse(raw);
+      if(o && typeof o.g === 'string' && o.g.length === TPL_N * TPL_N && o.aspect > 0){
+        return { g: Float32Array.from(o.g, ch => ch === '1' ? 1 : 0), aspect: o.aspect };
+      }
+    }
+  }catch(e){}
+  return null;
+}
+function savePictoTpl(){
+  try{
+    if(!pictoTpl){ localStorage.removeItem(PICTO_TPL_KEY); return; }
+    localStorage.setItem(PICTO_TPL_KEY, JSON.stringify({
+      g: Array.from(pictoTpl.g, v => v >= 0.5 ? '1' : '0').join(''),
+      aspect: pictoTpl.aspect
+    }));
+  }catch(e){}
+}
+
+// Masque « différent du fond » : couleur du fond = médiane des pixels du
+// pourtour ; un pixel est de la forme si sa distance de couleur au fond
+// dépasse 40 % de la distance maximale observée (percentile 99).
+function bgDiffMask(d, w, h){
+  const n = w * h;
+  // Couleur du fond = couleur dominante de l'image (quantifiée en 16 niveaux
+  // par canal), plus robuste qu'un échantillon du pourtour (cadre du badge).
+  const cnt = new Uint32Array(4096), sr = new Float64Array(4096), sg = new Float64Array(4096), sb = new Float64Array(4096);
+  for(let i = 0, o = 0; i < n; i++, o += 4){
+    const k = ((d[o] >> 4) << 8) | ((d[o + 1] >> 4) << 4) | (d[o + 2] >> 4);
+    cnt[k]++; sr[k] += d[o]; sg[k] += d[o + 1]; sb[k] += d[o + 2];
+  }
+  let kb = 0;
+  for(let k = 1; k < 4096; k++) if(cnt[k] > cnt[kb]) kb = k;
+  const br = sr[kb] / cnt[kb], bg = sg[kb] / cnt[kb], bb = sb[kb] / cnt[kb];
+  const dist = new Float32Array(n), hist = new Uint32Array(444);
+  for(let i = 0, o = 0; i < n; i++, o += 4){
+    const dr = d[o] - br, dg = d[o + 1] - bg, db = d[o + 2] - bb;
+    const v = Math.sqrt(dr * dr + dg * dg + db * db);
+    dist[i] = v; hist[Math.min(443, Math.round(v))]++;
+  }
+  let acc = 0, p99 = 0;
+  for(let v = 0; v < 444; v++){ acc += hist[v]; if(acc >= n * 0.99){ p99 = v; break; } }
+  const thr = Math.max(25, 0.4 * p99);
+  const mask = new Uint8Array(n);
+  for(let i = 0; i < n; i++) mask[i] = dist[i] >= thr ? 1 : 0;
+  // Filets de cadre : lignes / colonnes presque entièrement remplies → effacées
+  // (sinon un cadre relie toutes les colonnes et fusionne picto + chiffres).
+  for(let y = 0; y < h; y++){
+    let s = 0; for(let x = 0; x < w; x++) s += mask[y * w + x];
+    if(s >= 0.8 * w) for(let x = 0; x < w; x++) mask[y * w + x] = 0;
+  }
+  for(let x = 0; x < w; x++){
+    let s = 0; for(let y = 0; y < h; y++) s += mask[y * w + x];
+    if(s >= 0.9 * h) for(let y = 0; y < h; y++) mask[y * w + x] = 0;
+  }
+  return mask;
+}
+
+// Masque « le plus clair » : pixels proches du blanc du texte (percentile
+// 99,5 %). Sert quand le fond dominant de l'image n'est pas celui du badge
+// (badge clair translucide sur décor) : picto et chiffres restent les plus clairs.
+function brightMask(d, w, h){
+  const n = w * h, lum = new Float32Array(n), hist = new Uint32Array(256);
+  let mn = 255;
+  for(let i = 0, o = 0; i < n; i++, o += 4){
+    const v = 0.299 * d[o] + 0.587 * d[o + 1] + 0.114 * d[o + 2];
+    lum[i] = v; hist[Math.min(255, Math.round(v))]++; if(v < mn) mn = v;
+  }
+  let acc = 0, white = 255;
+  for(let v = 0; v < 256; v++){ acc += hist[v]; if(acc >= n * 0.995){ white = v; break; } }
+  const thr = mn + 0.78 * Math.max(1, white - mn);
+  const mask = new Uint8Array(n);
+  for(let i = 0; i < n; i++) mask[i] = lum[i] >= thr ? 1 : 0;
+  return mask;
+}
+// Essaie les deux masques et garde le meilleur résultat.
+function findPictoMulti(d, w, h, tpl){
+  let best = null;
+  for(const mk of [bgDiffMask, brightMask]){
+    const r = findPictoByTemplate(mk(d, w, h), w, h, tpl);
+    if(r && (!best || r.sim > best.sim)) best = r;
+  }
+  return best;
+}
+
+// Silhouette 16×16 (fraction de pixels de forme par case) d'une boîte.
+function shapeGrid(mask, w, box){
+  const g = new Float32Array(TPL_N * TPL_N);
+  const bw = box.x1 - box.x0, bh = box.y1 - box.y0;
+  if(bw < 1 || bh < 1) return g;
+  for(let j = 0; j < TPL_N; j++){
+    const ya = Math.floor(box.y0 + j * bh / TPL_N);
+    const yb = Math.min(box.y1, Math.max(ya + 1, Math.ceil(box.y0 + (j + 1) * bh / TPL_N)));
+    for(let i = 0; i < TPL_N; i++){
+      const xa = Math.floor(box.x0 + i * bw / TPL_N);
+      const xb = Math.min(box.x1, Math.max(xa + 1, Math.ceil(box.x0 + (i + 1) * bw / TPL_N)));
+      let s = 0, cnt = 0;
+      for(let y = ya; y < yb; y++) for(let x = xa; x < xb; x++){ s += mask[y * w + x]; cnt++; }
+      g[j * TPL_N + i] = cnt ? s / cnt : 0;
+    }
+  }
+  return g;
+}
+// Ressemblance (0..1) : intersection / union des deux silhouettes.
+function shapeSim(a, b){
+  let mn = 0, mx = 0;
+  for(let i = 0; i < a.length; i++){ mn += Math.min(a[i], b[i]); mx += Math.max(a[i], b[i]); }
+  return mx ? mn / mx : 0;
+}
+function boxOfRuns(runs){
+  return { x0: Math.min(...runs.map(r => r.x0)), x1: Math.max(...runs.map(r => r.x1)),
+           y0: Math.min(...runs.map(r => r.y0)), y1: Math.max(...runs.map(r => r.y1)) };
+}
+// Cherche le picto appris dans un masque : tente le 1er groupe de formes,
+// puis les 2 premiers (picto en deux morceaux). Renvoie { cutX, sim } ou null.
+function findPictoByTemplate(mask, w, h, tpl){
+  let runs = findRuns(mask, w, h);
+  runs = runs.filter(r => !((r.x1 - r.x0) <= Math.max(2, 0.06 * h) && (r.y1 - r.y0) >= 0.92 * h));
+  runs = runs.filter(r => (r.x1 - r.x0) >= 2 && (r.y1 - r.y0) >= 3);
+  if(runs.length < 2) return null;     // il faut au moins un picto + un chiffre
+  let best = null;
+  for(let k = 1; k <= 2 && k < runs.length; k++){
+    const box = boxOfRuns(runs.slice(0, k));
+    const bw = box.x1 - box.x0, bh = box.y1 - box.y0;
+    if(bw < 2 || bh < 3) continue;
+    if(Math.abs(Math.log((bw / bh) / tpl.aspect)) > 0.45) continue;   // proportions trop différentes
+    const sim = shapeSim(shapeGrid(mask, w, box), tpl.g);
+    if(!best || sim > best.sim) best = { sim, box, next: runs[k] };
+  }
+  if(!best || best.sim < TPL_MIN_SIM) return null;
+  const gap = Math.max(0, best.next.x0 - best.box.x1);
+  return { sim: best.sim, cutX: best.box.x1 + Math.floor(gap * 0.4) };
+}
+
+// Apprend le picto depuis un rectangle source {sx,sy,sw,sh}.
+function learnPictoFromRect(r){
+  const el = getSourceEl();
+  if(!el || r.sw < 3 || r.sh < 3) return false;
+  const sc = Math.min(8, 64 / Math.max(1, r.sh));
+  const w = Math.max(8, Math.round(r.sw * sc)), h = Math.max(8, Math.round(r.sh * sc));
+  pictoCanvas.width = w; pictoCanvas.height = h;
+  pictoCtx.drawImage(el, r.sx, r.sy, r.sw, r.sh, 0, 0, w, h);
+  const d = pictoCtx.getImageData(0, 0, w, h).data;
+  const mask = bgDiffMask(d, w, h);
+  const runs = findRuns(mask, w, h);
+  if(!runs.length) return false;
+  const box = boxOfRuns(runs);
+  const bw = box.x1 - box.x0, bh = box.y1 - box.y0;
+  if(bw < 3 || bh < 3) return false;
+  pictoTpl = { g: shapeGrid(mask, w, box), aspect: bw / bh };
+  savePictoTpl();
+  return true;
+}
+
+// Version « image » : redessine le cadrage à petite échelle, le binarise
+// provisoirement (blanc du texte − écart, comme le seuil automatique) et
+// renvoie la position source où commencent les chiffres, ou null.
+function detectPictoCut(base){
+  const el = getSourceEl();
+  if(!el) return null;
+  const sc = Math.min(4, 64 / Math.max(1, base.sh));
+  const w = Math.max(8, Math.round(base.sw * sc));
+  const h = Math.max(8, Math.round(base.sh * sc));
+  pictoCanvas.width = w; pictoCanvas.height = h;
+  pictoCtx.imageSmoothingEnabled = true;
+  pictoCtx.drawImage(el, base.sx, base.sy, base.sw, base.sh, 0, 0, w, h);
+  const d = pictoCtx.getImageData(0, 0, w, h).data;
+
+  // Picto appris : reconnaissance par la forme (couleur indifférente).
+  if(pictoTpl){
+    const m = findPictoMulti(d, w, h, pictoTpl);
+    if(!m) return null;
+    const cutSrc = base.sx + m.cutX * (base.sw / w);
+    if(base.sx + base.sw - cutSrc < base.sw * 0.3) return null;
+    return { sx: cutSrc, sim: m.sim };
+  }
+
+  const n = w * h;
+  const lum = new Float32Array(n);
+  const hist = new Uint32Array(256);
+  let min = 255;
+  for(let i = 0, o = 0; i < n; i++, o += 4){
+    const v = pixelValue(d[o], d[o + 1], d[o + 2]);
+    lum[i] = v;
+    if(v < min) min = v;
+    hist[Math.min(255, Math.round(v))]++;
+  }
+  let acc = 0, white = 255;
+  const target = n * 0.995;
+  for(let v = 0; v < 256; v++){ acc += hist[v]; if(acc >= target){ white = v; break; } }
+  const range = Math.max(1, white - min);
+  const stretched = settings.autoThreshold !== false
+    ? 255 - (settings.autoOffset ?? 50)
+    : (settings.threshold ?? 205);
+  const thr = min + stretched / 255 * range;
+
+  const mask = new Uint8Array(n);
+  for(let i = 0; i < n; i++) mask[i] = lum[i] >= thr ? 1 : 0;
+
+  const res = detectPictoInMask(mask, w, h);
+  if(!res) return null;
+  const cutSrc = base.sx + res.cutX * (base.sw / w);
+  // sécurité : il doit rester au moins 30 % de la largeur du cadrage
+  if(base.sx + base.sw - cutSrc < base.sw * 0.3) return null;
+  return { sx: cutSrc };
+}
+
 async function ocrLoop(timestamp){
   requestAnimationFrame(ocrLoop);
   if(busy) return;
@@ -1240,46 +2201,119 @@ async function ocrLoop(timestamp){
   busy = true;
   try{
     const w = await getWorker();
-    if(!drawCropToCanvas()){ busy = false; return; }
+    const maxWide = settings.wideRetry === false ? 0 : 2;
+    let text = '', matches = [], rawDisplay = '';
+    let zoneIdx = -1, firstTry = null, usedWide = 0;
+    let tightNext = null, wideResult = null, confirmed = false;
+    let matchWords = null, matchRect = null, matchCW = 0, matchCH = 0;
+    for(let attempt = 0; attempt <= maxWide + 1; attempt++){
+    const isConfirm = !!tightNext;
+    wideLevel = isConfirm ? 0 : attempt;
+    tightRect = isConfirm ? tightNext : null;
+    tightNext = null;
+    matchWords = null;
+    if(!drawCropToCanvas()){
+      if(attempt === 0){ wideLevel = 0; busy = false; return; }
+      break;
+    }
 
-    const baseThreshold = settings.threshold ?? 205;
-    let text, matches;
-    let rawDisplay;
+    // Seuil central : automatique (blanc du texte − écart, un peu plus
+    // foncé que le blanc pour garder les contours anti-crénelés) ou manuel.
+    let baseThreshold;
+    if(settings.autoThreshold !== false){
+      baseThreshold = Math.max(0, Math.min(255, Math.round(cropWhiteLevel - (settings.autoOffset ?? 50))));
+      threshSlider.value = baseThreshold;
+      threshVal.textContent = baseThreshold + ' (auto)';
+    } else {
+      baseThreshold = settings.threshold ?? 205;
+    }
 
-    if(settings.multiThreshold){
-      // Trois passes OCR avec des seuils de binarisation différents
-      // (seuil - écart, seuil, seuil + écart). Chacune des trois lectures
-      // est testée séparément contre la table des minéraux (matchText),
-      // puis on combine par vote majoritaire sur le minéral/multiplicateur
-      // trouvé — plus robuste qu'un simple vote sur les chiffres bruts.
-      // Plus fiable mais ~3x plus lent.
-      const spread = settings.thresholdSpread ?? 30;
-      const thresholds = [
-        Math.max(0, baseThreshold - spread),
-        baseThreshold,
-        Math.min(255, baseThreshold + spread)
-      ];
-      const results = [];
-      const matchesPerResult = [];
-      for(let i = 0; i < thresholds.length; i++){
-        applyThreshold(thresholds[i], i === 1 /* aperçu = seuil principal */);
+    // N images par scan : la même capture est binarisée avec des seuils
+    // espacés de "scanGap" autour du seuil central, et chaque image passe
+    // dans l'OCR. Mode rapide : on teste les seuils du plus proche au plus
+    // éloigné du centre et on S'ARRÊTE dès qu'une lecture correspond à un
+    // minéral — le plus souvent le seuil central suffit, donc ~1 passe OCR
+    // au lieu de N. Les passes non exécutées s'affichent « · ».
+    const count = Math.max(1, Math.min(7, settings.scanCount ?? 3));
+    const gap = settings.scanGap ?? 10;
+    const offsets = [];
+    for(let i = 0; i < count; i++) offsets.push((i - (count - 1) / 2) * gap);
+    const thresholds = offsets.map(o => Math.max(0, Math.min(255, Math.round(baseThreshold + o))));
+    // image de référence : celle dont le seuil est le plus proche du centre
+    let preferredIndex = 0;
+    offsets.forEach((o, i) => { if(Math.abs(o) < Math.abs(offsets[preferredIndex])) preferredIndex = i; });
+
+    // ordre d'essai : du seuil central vers les seuils les plus éloignés
+    const order = thresholds.map((_, i) => i)
+      .sort((a, b) => Math.abs(offsets[a]) - Math.abs(offsets[b]));
+
+    // OCR Tesseract image par image (arrêt dès un match).
+    {
+      const results = thresholds.map(() => null);          // null = passe non exécutée
+      const matchesPerResult = thresholds.map(() => []);
+      let matchedIdx = -1;
+      for(const i of order){
+        applyThreshold(thresholds[i], i === preferredIndex /* aperçu = seuil central */);
         const { data } = await w.recognize(ocrCanvas);
         const t = (data.text || '').trim();
-        results.push(t);
-        matchesPerResult.push(matchText(t));
+        results[i] = t;
+        matchesPerResult[i] = matchText(t);
+        if(matchesPerResult[i].some(m => m.n)){
+          matchedIdx = i; matchWords = data.words || null;
+          matchRect = lastOcrRect; matchCW = ocrCanvas.width; matchCH = ocrCanvas.height;
+          break;                                                          // match → on arrête
+        }
       }
-      const picked = pickBestOcrResult(results, matchesPerResult, 1);
+      zoneIdx = matchedIdx;
+      const resultsForPick = results.map(r => r ?? '');
+      const picked = pickBestOcrResult(resultsForPick, matchesPerResult, preferredIndex);
       text = picked.text;
       matches = picked.matches;
-      // Affiche les trois lectures (une par seuil testé), séparées par "/",
-      // pour voir d'un coup d'œil si elles concordent ou divergent.
-      rawDisplay = results.map(r => r || '—').join(' / ');
-    } else {
-      applyThreshold(baseThreshold, true);
-      const { data } = await w.recognize(ocrCanvas);
-      text = (data.text || '').trim();
-      matches = matchText(text);
-      rawDisplay = text;
+      // Affiche les lectures (une par image/seuil), séparées par "/".
+      rawDisplay = count > 1
+        ? results.map(r => r === null ? '·' : (r || '—')).join(' / ')
+        : text;
+
+    }
+
+    // Recadrage auto : on retient la position des chiffres sur chaque
+    // lecture exacte (valeur = base × N, écart nul, rien d'autre dans l'OCR).
+    {
+      const ex = matches.find(m => m.n && m.diff === 0);
+      const digitsOnly = (text || '').replace(/\D/g, '');
+      if(ex && zoneIdx >= 0 && digitsOnly === String(Math.round(ex.value))){
+        noteZoneSuccess(buildMask(thresholds[Math.max(0, zoneIdx)]), digitsOnly);
+      } else if(!matches.some(m => m.n)){
+        noteZoneMiss();
+      }
+    }
+
+    if(isConfirm){
+      // Relecture serrée : confirme le nombre ; sinon on garde la lecture large.
+      if(matches.some(m => m.n)) confirmed = true;
+      else if(wideResult) ({ text, matches, rawDisplay } = wideResult);
+      break;
+    }
+    if(attempt === 0) firstTry = { text, matches, rawDisplay };
+    if(matches.some(m => m.n)){
+      usedWide = attempt;
+      if(attempt > 0){
+        // Trouvé en cadrage large : on localise les chiffres lus et on relit
+        // serré autour d'eux (cadre temporaire, cadrage manuel intact).
+        const t = tightFromWords(matchWords, matchRect, matchCW, matchCH);
+        if(t){ wideResult = { text, matches, rawDisplay }; tightNext = t; continue; }
+      }
+      break;   // trouvé
+    }
+    // Pas de correspondance : on retente avec un cadrage plus large, mais
+    // seulement si l'OCR a lu au moins un chiffre (sinon rien à l'écran).
+    if(!/\d/.test(text || '')) break;
+    }   // fin des tentatives
+    wideLevel = 0; tightRect = null;
+    if(!matches.some(m => m.n) && firstTry){
+      ({ text, matches, rawDisplay } = firstTry);   // échec partout : on garde la lecture normale
+    } else if(usedWide > 0){
+      rawDisplay = (confirmed ? '⌖ ' : '↔ ') + rawDisplay;   // ⌖ = confirmé par relecture serrée, ↔ = cadrage élargi seul
     }
 
     // Si rien n'est lu cette fois, on garde le dernier résultat affiché
@@ -1293,33 +2327,46 @@ async function ocrLoop(timestamp){
       syncDocPip();
     }
   }catch(e){
+    lastThumb = null; // en cas d'erreur, on forcera un nouveau scan complet
     setStatus('Erreur OCR : ' + e.message, 'err');
   }finally{
+    wideLevel = 0; tightRect = null;   // jamais de cadre temporaire qui traîne
     busy = false;
   }
 }
 requestAnimationFrame(ocrLoop);
+updateWizard();
 
-// Combine les 3 lectures OCR (une par seuil testé) : dès qu'une des
+// Lien Star Manifest : renseigner l'adresse ici.
+const STAR_MANIFEST_URL = 'https://www.star-manifest.com';
+(function(){
+  const b = document.getElementById('manifestBtn');
+  if(!b) return;
+  if(STAR_MANIFEST_URL){ b.href = STAR_MANIFEST_URL; }
+  else { b.classList.add('disabled'); b.removeAttribute('href'); b.title = 'Adresse de Star Manifest à renseigner'; }
+})();
+
+// Combine les N lectures OCR (une par seuil testé) : dès qu'une des
 // lectures donne une correspondance dans la table des minéraux
 // (matchText), elle est retenue — en priorité celle du seuil central
-// (preferredIndex). À défaut de toute correspondance, on retombe sur un
-// vote sur les chiffres bruts, puis sur la lecture du seuil principal,
-// puis sur la première lecture non vide.
+// (preferredIndex), puis les plus proches du centre. À défaut de toute
+// correspondance, on retombe sur un vote sur les chiffres bruts, puis sur
+// la lecture du seuil central, puis sur la première lecture non vide.
 function pickBestOcrResult(results, matchesPerResult, preferredIndex){
   const hasMatch = ms => ms.some(m => m.n);
 
-  // 1) Le seuil central a une correspondance → on le retient directement.
-  if(hasMatch(matchesPerResult[preferredIndex])){
-    return { text: results[preferredIndex], matches: matchesPerResult[preferredIndex] };
-  }
-  // 2) Sinon, la première autre lecture qui a une correspondance.
-  const firstMatchIdx = matchesPerResult.findIndex(ms => hasMatch(ms));
-  if(firstMatchIdx !== -1){
-    return { text: results[firstMatchIdx], matches: matchesPerResult[firstMatchIdx] };
+  // Indices triés du plus proche au plus éloigné du seuil central.
+  const order = results.map((_, i) => i)
+    .sort((a, b) => Math.abs(a - preferredIndex) - Math.abs(b - preferredIndex));
+
+  // 1) La lecture la plus proche du centre qui a une correspondance gagne.
+  for(const i of order){
+    if(hasMatch(matchesPerResult[i])){
+      return { text: results[i], matches: matchesPerResult[i] };
+    }
   }
 
-  // Aucune correspondance dans aucune des 3 lectures : on retombe sur un
+  // Aucune correspondance dans aucune des lectures : on retombe sur un
   // vote sur les chiffres bruts reconnus.
   const digits = results.map(t => (t.match(/\d+/g) || []).join(''));
   const digitCounts = new Map();
@@ -1401,11 +2448,8 @@ function renderBadges(matches){
 }
 
 // ---------------------------------------------------------------------
-// Signature panel: réduire / opacité
+// Signature panel: opacité
 // ---------------------------------------------------------------------
-btnMin.addEventListener('click', () => {
-  overlayPanel.classList.toggle('minimized');
-});
 btnOpaque.addEventListener('click', () => {
   if(overlayPanel.classList.contains('transparent')){
     overlayPanel.classList.remove('transparent');
@@ -1439,12 +2483,12 @@ function buildDocPipDocument(pipWindow){
   style.textContent = `
     :root{ color-scheme: dark; }
     *{ box-sizing:border-box; }
-    html,body{ margin:0; padding:0; }
+    html,body{ margin:0; padding:0; overflow:hidden; }
     body{
       background:#0c0c0d; color:#f1f2f3;
       font-family:'Share Tech Mono', monospace;
       padding:6px 8px;
-      overflow:auto;
+      overflow:hidden;
     }
     #pip-sig{
       font-weight:700; font-size:16px;
