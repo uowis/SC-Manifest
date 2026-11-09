@@ -2373,6 +2373,9 @@ body:has(#d-nav[open]) .rail-item:not(#b-menu)[aria-current="page"] .rail-label 
 .bp-puce[aria-pressed="true"] { background-color: var(--accent) !important; }
 /* v469 : pied « Terminer » de la fiche sans bandeau foncé quand elle est dans la colonne de la page */
 #c-scan #f-fin { position: static; background: none; padding: 8px 0 0; }
+/* v470 : pas de défilement horizontal (le filet pleine largeur utilisait 100vw, qui inclut la barre de défilement) */
+html, body { overflow-x: clip; }
+.h-filet { margin-left: calc(50% - 50vw / .9 + var(--rail) / 2 + 8px) !important; margin-right: calc(50% - 50vw / .9 + var(--rail) / 2 + 8px) !important; }
 </style>
 </head>
 <body>
