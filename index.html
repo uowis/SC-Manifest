@@ -2376,6 +2376,8 @@ body:has(#d-nav[open]) .rail-item:not(#b-menu)[aria-current="page"] .rail-label 
 /* v470 : pas de défilement horizontal (le filet pleine largeur utilisait 100vw, qui inclut la barre de défilement) */
 html, body { overflow-x: clip; }
 .h-filet { margin-left: calc(50% - 50vw / .9 + var(--rail) / 2 + 8px) !important; margin-right: calc(50% - 50vw / .9 + var(--rail) / 2 + 8px) !important; }
+/* v473 : avancement de l'objectif en étiquette à droite des boutons */
+.obj-avance-label { margin-right: auto; padding: 2px 8px; border: 1px solid var(--bord); border-radius: 3px; font-size: max(var(--fmin), .75rem); color: var(--os); white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -6739,7 +6741,7 @@ document.addEventListener("click", (e) => {
 /* Zones lues à l'écran : couleur, rôle et position par défaut, en % de la largeur / hauteur de l'écran */
 const ZONES = {
   zone:       { nom: "Tool-tip",   couleur: "#b56cff", aide: "Le panneau d'information de l'objet sélectionné (nom, qualité, quantité).",
-                defaut: { x: 56.51, y: 23.61, w: 14.58, h: 12.96 } },
+                defaut: { x: 50, y: 20, w: 24, h: 24 } },   // v475 : agrandie (la bulle mesure ~18 % × 16 % en 1920×1080 et se déplace selon l'objet survolé)
   grille:     { nom: "Grille",     couleur: "#2fc7d6", aide: "La grille des caisses, du bord haut-gauche de la première case jusqu'à la dernière case visible (4 colonnes, 6 lignes).",
                 defaut: { x: 73.18, y: 22.69, w: 23.8, h: 61.11 } },
   ascenseur:  { nom: "Ascenseur",  couleur: "#f2b134", aide: "L'ascenseur à droite de la grille, piste entière, avec une petite marge au-dessus et au-dessous.",
@@ -6751,6 +6753,8 @@ const zoneDefaut = (k) => { const d = ZONES[k].defaut; return { x: d.x / 100, y:
 const estDefaut = (k) => { const a = base[k], b = zoneDefaut(k); return !!a && ["x", "y", "w", "h"].every((c) => Math.abs(a[c] - b[c]) < 1e-4); };
 // paramétrage existant d'office : toute zone non réglée prend sa valeur par défaut
 for (const k of Object.keys(ZONES)) if (!base[k]) base[k] = zoneDefaut(k);
+{ const z = base.zone, v = { x: .5651, y: .2361, w: .1458, h: .1296 };   // v475 : l'ancienne zone tool-tip par défaut passe à la nouvelle
+  if (z && ["x", "y", "w", "h"].every((c) => Math.abs(z[c] - v[c]) < 1e-4)) base.zone = zoneDefaut("zone"); }
 
 /* ---------- activité : 5 dernières mises à jour (joueur + station, ajouts rapprochés regroupés) */
 function activites() {
@@ -6822,8 +6826,8 @@ function renderObjectifs() {
     return `<li class="obj ${esc(o.statut)}"><div class="obj-tete"><b data-obj-bp="${esc(o.blueprint_id)}">${esc(o.blueprint_nom)}</b>` +
       `<span class="obj-badge${corpo ? " corpo" : ""}">${corpo ? `[${esc(tag(o.corporation_id))}]` : "Perso"}</span>` +
       (o.statut === "termine" ? `<span class="obj-badge">terminé</span>` : "") +
-      `<span class="obj-avance">${o.faits || 0} / ${o.quantite}</span></div>` +
-      (mats ? `<ul class="obj-mats">${mats}</ul>` : "") + (actions ? `<div class="obj-actions">${actions}</div>` : "") + `</li>`;
+      `</div>` +
+      (mats ? `<ul class="obj-mats">${mats}</ul>` : "") + `<div class="obj-actions"><span class="obj-avance obj-avance-label" title="Fabriqués / objectif">${o.faits || 0} / ${o.quantite}</span>${actions}</div>` + `</li>`;
   });
   // v452 : objectifs perso sous « Mes ressources », objectifs corpo sous « Corporation et alliés »
   // v458 : encadré « Aucun objectif » quand la liste est vide
