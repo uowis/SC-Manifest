@@ -2437,6 +2437,85 @@ html, body { overflow-x: clip; }
 #v-home .mes-stations { display: grid; gap: 0.375rem; }
 #v-home .h-tuile { padding: 0.75rem 1rem !important; }
 #v-home .h-mes-tuiles { gap: 0.75rem !important; }
+/* v496 : Aide en bas du rail */
+.rail-bas #r-aide { margin: 0; }
+/* v500 : choix de station dans la popin blueprint */
+#dbp-portee + .bp-station { margin-left: auto; max-width: 16rem; height: 2rem; padding: 0 0.625rem; background: #1b1e22; color: #eef2f3; border: 1px solid var(--trait); border-radius: 4px; font: inherit; font-size: .8125rem; }
+/* v501 : colonne des sliders sobre (variante A, tuiles colorées conservées) */
+.bp-aspect { padding: 0.625rem 0.875rem !important; background: transparent !important; border: 0 !important; border-bottom: 1px solid #2c3135 !important; border-radius: 0 !important; margin: 0 !important; }
+.bp-aspect-tete .bp-amelio { font-weight: 400; color: #879aa0; }
+.bp-aspect-tete .bp-minerai { font-weight: 700; color: #eef2f3; }
+.bp-aspect .bp-bornes { display: none !important; }
+.bp-aspect input[type=range] { height: 3px !important; margin: 0.625rem 0 0.375rem !important; }
+.bp-aspect input[type=range]::-webkit-slider-thumb { width: 12px !important; height: 12px !important; }
+.bp-aspect input[type=range]::-moz-range-thumb { width: 12px !important; height: 12px !important; }
+.bp-paliers { height: 6px !important; }
+.bp-paliers::before { content: ""; position: absolute; left: 49.95%; bottom: 0; width: 1px; height: 1.375rem; background: #5f6d72; pointer-events: none; }
+.bp-paliers i { width: 4px !important; height: 4px !important; border-radius: 50% !important; top: 1px !important; background: #4a5458 !important; opacity: 1 !important; }
+.bp-paliers i.partiel { background: #c9a93a !important; } .bp-paliers i.dispo { background: #7f9a34 !important; }
+.bp-paliers i.courant { outline: 0 !important; width: 6px !important; height: 6px !important; top: 0 !important; background: #eef2f3 !important; }
+.bp-aspect .bp-preleve-l, .bp-aspect .bp-mods { font-size: .75rem; }
+.bp-aspect .bp-mods { margin-top: 0.125rem !important; }
+.bp-max { transform: scale(.85); transform-origin: right center; }
+/* v502 : trait 500 centré sur le rail, bonus à gauche du bouton Max */
+.bp-paliers::before { bottom: 0.3438rem !important; height: 1rem !important; }
+.bp-aspect { position: relative; }
+.bp-aspect .bp-mods { position: absolute; top: 0.625rem; right: 3.875rem; height: 1.375rem; display: flex; align-items: center; margin: 0 !important; }
+.bp-aspect-tete { padding-right: 7.25rem; }
+.bp-aspect .bp-aspect-tete .bp-max { position: absolute; top: 0.625rem; right: 0.875rem; margin: 0 !important; transform: none; height: 1.375rem; }
+/* v503 : ligne stock (besoin + prélèvement) / ligne qualité + bonus */
+.bp-aspect .bp-mods { position: static !important; height: auto !important; }
+.bp-aspect-tete { padding-right: 3.5rem !important; }
+.bp-l-stock { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.bp-l-stock .bp-besoin { color: #eef2f3; font-size: .75rem; font-weight: 600; }
+.bp-l-stock .bp-preleve { margin: 0 !important; }
+.bp-l-stock .bp-cartouches { margin-left: auto; }
+.bp-l-stock .bp-cartouches:empty { display: none; }
+.bp-l-qual { display: flex; align-items: center; gap: 0.625rem; margin-top: 0.375rem; font-size: .75rem; }
+.bp-l-qual .bp-mods { margin: 0 !important; }
+.bp-qcart .bp-q { margin: 0; color: #6fd0c4; }
+/* v504 : nom / stock / slider / bonus · qualité · Max */
+.bp-aspect { display: flex !important; flex-direction: column; }
+.bp-aspect > .bp-aspect-tete { order: 1; padding-right: 0 !important; }
+.bp-aspect > .bp-l-stock { order: 2; margin-top: 0.375rem; }
+.bp-aspect > input[type=range] { order: 3; }
+.bp-aspect > .bp-paliers { order: 4; }
+.bp-aspect > .bp-l-qual { order: 5; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
+.bp-l-qual .bp-mods { justify-self: start; }
+.bp-l-qual .bp-qcart { justify-self: center; }
+.bp-aspect .bp-l-qual .bp-max { position: static !important; justify-self: end; transform: none; }
+/* v505 : paliers au-dessus du slider, repère 500 centré, lignes resserrées */
+.bp-aspect > .bp-paliers { order: 3; margin-top: 0.375rem !important; }
+.bp-aspect > input[type=range] { order: 4; margin: 0.25rem 0 0.25rem !important; }
+.bp-aspect > .bp-l-qual { order: 5; margin-top: 0.125rem !important; }
+.bp-aspect > .bp-l-stock { margin-top: 0.25rem !important; }
+.bp-paliers::before { top: 0.6875rem !important; bottom: auto !important; height: 1rem !important; }
+.bp-aspect { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
+/* v506 : quantité nécessaire à droite du nom, lignes resserrées, air en bas */
+.bp-aspect > .bp-aspect-tete { display: flex; align-items: baseline; gap: 0.3125rem; }
+.bp-aspect-tete .bp-besoin { margin-left: auto; color: #eef2f3; font-size: .75rem; font-weight: 600; }
+.bp-aspect > .bp-l-stock { margin-top: 0.125rem !important; min-height: 0; }
+.bp-aspect > .bp-l-stock:not(:has(.bp-cart)) { min-height: 1.125rem; }
+.bp-aspect > .bp-paliers { margin-top: 0.125rem !important; }
+.bp-aspect { padding-bottom: 0.875rem !important; }
+/* v507 : tuile désactivée ; en-tête de la popin blueprint en flex centré */
+.bp-cart.bp-cart-off { color: #6b777b !important; background: #24282b !important; font-weight: 600; }
+.bp-tete { align-items: center !important; }
+.bp-tete > :not(:first-child) { padding-block: 0; margin-block: 0; align-self: center; }
+.bp-aspect > .bp-l-stock { margin-top: -0.125rem !important; }
+.bp-aspect > .bp-aspect-tete { line-height: 1.2; }
+/* v508 : stats d'en-tête sur 3 colonnes, Close dans le coin, Q collée au bouton Max */
+.bp-stats-tete { grid-template-columns: repeat(3, max-content max-content max-content) !important; column-gap: 0.625rem !important; }
+.bp-stats-tete li:nth-child(3n+2) span, .bp-stats-tete li:nth-child(3n+3) span { margin-left: 1rem; }
+.bp-tete .bp-actions-tete > .bp-fermer { position: absolute !important; top: var(--e1); right: var(--e1); margin: 0 !important; }
+.bp-aspect > .bp-l-qual { grid-template-columns: 1fr auto auto !important; column-gap: 0.375rem; align-items: start !important; }
+.bp-l-qual .bp-qcart { justify-self: end !important; }
+.bp-l-qual .bp-mods > * { white-space: nowrap; }
+.bp-l-qual .bp-mods { gap: 0.125rem 0.75rem !important; }
+.bp-tete { flex-wrap: nowrap !important; gap: var(--e3) !important; }
+.bp-tete-titre { flex: 1 1 12rem !important; min-width: 10rem; }
+.bp-stats-tete li:nth-child(3n+2) span, .bp-stats-tete li:nth-child(3n+3) span { margin-left: 0.5rem !important; }
+@media (max-width: 1100px) { .bp-tete { flex-wrap: wrap !important; } .bp-stats-tete { grid-template-columns: repeat(2, max-content max-content max-content) !important; } }
 </style>
 </head>
 <body>
@@ -2451,6 +2530,7 @@ html, body { overflow-x: clip; }
   </nav>
   <div class="rail-bas">
     <span class="etat" id="etat" hidden></span>
+    <a class="rail-item" id="r-aide" href="#/" title="Aide" aria-label="Aide"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.4L21.6 12 12 21.6 2.4 12z"/><path d="M10.2 10.1a1.85 1.85 0 1 1 2.55 1.7c-.45.2-.75.6-.75 1.1v.4M12 15.4v.1"/></svg><span class="rail-label" aria-hidden="true">Aide</span></a>
     <button type="button" class="btn-langue" id="b-langue" data-no-tr title="Français / English"></button>
     <a class="rail-compte cta-connexion" id="b-connexion" href="#/compte" title="Se connecter" aria-label="Se connecter"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h4.5A1.5 1.5 0 0 1 20 5.5v13a1.5 1.5 0 0 1-1.5 1.5H14M10 16l4-4-4-4M14 12H4"/></svg><span class="rail-label" aria-hidden="true">Starmap</span></a>
     <a class="compte-btn rail-compte" id="b-compte" href="#/compte"><img id="b-compte-avatar" alt="" hidden><svg class="compte-ico" id="b-compte-ico" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span id="b-compte-txt" class="rail-sr">Compte</span></a>
@@ -3106,7 +3186,7 @@ html, body { overflow-x: clip; }
         </div>
         <div class="bp-col-stock">
           <h3>Stock des ressources</h3>
-          <div class="bp-puces" id="dbp-portee"></div>
+          <div class="bp-puces" id="dbp-portee"></div><select class="bp-station" id="dbp-station" aria-label="Station"></select>
           <div class="bp-stock" id="dbp-stock"></div>
         </div>
       </div>
@@ -3910,7 +3990,7 @@ function route() {
   else if (h === "/minerais") { vue = "accueil"; stationCourante = null; }
   else if (h === "/admin") { vue = "admin"; stationCourante = null; }
   else if (h === "/radar") { vue = "radar"; stationCourante = null; }
-  else if (h === "/blueprints") { vue = "blueprints"; stationCourante = null; setTimeout(chargerBlueprints, 0); }
+  else if (h === "/blueprints" || h.startsWith("/blueprints/") || h.startsWith("/blueprints?")) { vue = "blueprints"; stationCourante = null; const u = h; setTimeout(() => urlBlueprints(u), 0); }   // v499 : #/blueprints/<id>?q=…  et  #/blueprints?type=…&recherche=…
   else { vue = "home"; stationCourante = null; }
   if (session && session.station !== stationCourante) arreterSession();
   if (ancienne !== stationCourante || vueAvant !== vue) selection.clear();
@@ -4000,6 +4080,7 @@ function ouvrirGuide() { allerEtape(0); clearInterval(guideMinuterie); guideMinu
 function fermerGuide() { guidePip(false); guideEtape = -1; clearInterval(guideMinuterie); for (const id of ["guide-voile", "guide-trou", "guide-boite"]) if ($(id)) $(id).hidden = true; }
 $("b-guide").addEventListener("click", ouvrirGuide); $("b-guide-2").addEventListener("click", ouvrirGuide);
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && guideEtape >= 0) fermerGuide(); });
+$("r-aide").addEventListener("click", () => { try { localStorage.removeItem("sm-pres-fermee"); } catch {} $("h-pres").hidden = false; setTimeout(() => { $("h-pres").hidden = false; window.scrollTo({ top: 0, behavior: "smooth" }); }, 0); });   // v495 : réaffiche la présentation
 $("h-pres-fermer").addEventListener("click", () => { $("h-pres").hidden = true; try { localStorage.setItem("sm-pres-fermee", "1"); } catch {} });
 $("h-pres-connexion").addEventListener("click", (e) => { if (!compte && cloud.url) { e.preventDefault(); action("connexion", {}); } }); setTimeout(marquerRail, 0);
 $("f-nouvelle").addEventListener("submit", (e) => {
@@ -6886,7 +6967,7 @@ function renderObjectifs() {
       o.statut === "actif" ? `<button type="button" class="btn petit" data-obj-fait="${o.id}" title="Un objet fabriqué">+1 fabriqué</button>` : "",
       moi || admin ? `<button type="button" class="btn petit danger" data-obj-suppr="${o.id}">Supprimer</button>` : "",
     ].join("");
-    return `<li class="obj ${esc(o.statut)}"><div class="obj-tete"><b data-obj-bp="${esc(o.blueprint_id)}">${esc(o.blueprint_nom)}</b>` +
+    return `<li class="obj ${esc(o.statut)}"><div class="obj-tete"><b data-obj-bp="${esc(o.blueprint_id)}" data-obj-lien="${esc(lienBlueprint(o.blueprint_id, o.qualites))}" title="Ouvrir le blueprint">${esc(o.blueprint_nom)}</b>` +
       `<span class="obj-badge${corpo ? " corpo" : ""}">${corpo ? `[${esc(tag(o.corporation_id))}]` : "Perso"}</span>` +
       (o.statut === "termine" ? `<span class="obj-badge">terminé</span>` : "") +
       `</div>` +
@@ -6903,7 +6984,7 @@ function renderObjectifs() {
 for (const id of ["h-obj-liste", "h-obj-corpo", "bp-obj-liste"]) $(id).addEventListener("click", async (e) => {
   const t = e.target.closest("[data-obj-fait], [data-obj-suppr], [data-obj-valider], [data-obj-bp]"); if (!t || !sb) return;
   try {
-    if (t.dataset.objBp) { ouvrirBlueprint(t.dataset.objBp); return; }
+    if (t.dataset.objBp) { location.hash = t.dataset.objLien || "#/blueprints/" + encodeURIComponent(t.dataset.objBp); return; }
     if (t.dataset.objFait) verifier(await sb.rpc("objectif_fabrique", { p_id: t.dataset.objFait, p_n: 1 }));
     else if (t.dataset.objValider) verifier(await sb.from("objectifs").update({ statut: "actif", valide_par: compte.id }).eq("id", t.dataset.objValider));
     else if (t.dataset.objSuppr) { if (!confirm("Supprimer cet objectif ?")) return; verifier(await sb.from("objectifs").delete().eq("id", t.dataset.objSuppr)); }
@@ -9989,7 +10070,7 @@ function stockRessource(nom) {
   const k = sansAccents(nom || ""), P = bpPop.portee;
   const moi = items.map((it) => ({ ...it, joueur: moiPseudo(), portee: "moi" }));
   const autres = (partage.caisses || []).map((c) => ({ ...c, portee: c.groupe === "Allié" ? "alliance" : "corpo" }));
-  return [...moi, ...autres].filter((c) => sansAccents(c.nom || "") === k && P.has(c.portee)).sort((a, b) => (b.qualite || 0) - (a.qualite || 0));
+  return [...moi, ...autres].filter((c) => sansAccents(c.nom || "") === k && P.has(c.portee) && (!bpPop.station || c.station === bpPop.station)).sort((a, b) => (b.qualite || 0) - (a.qualite || 0));
 }
 function renderPopBlueprint(partiel = false) {
   const { d } = bpPop, as = d?.aspects?.aspects || [];
@@ -10003,12 +10084,12 @@ function renderPopBlueprint(partiel = false) {
     const choix = a.selection_group ? `<label class="bp-choix" title="Matériau au choix : ${a.selection_group.required_count} sur ${a.selection_group.option_count}"><input type="checkbox" data-choix="${i}" ${aspectActif(i) ? "checked" : ""}></label>` : "";
     // v305 : couleur selon le mélange possible (moyenne atteinte = vert), plus selon la seule qualité exacte
     const pv = aspectActif(i) ? prelevement(i) : { ok: true }, etat = pv.ok ? "s-ok" : caissesPerso(a).length ? "s-partiel" : "s-absent";
-    return `<div class="bp-aspect ${etat}${aspectActif(i) ? "" : " bp-off"}"><div class="bp-aspect-tete">${choix}<button type="button" class="bp-max${bpPop.enMax?.[i] ? " actif" : ""}" data-max="${i}" title="Qualité maximale avec mon stock (qualités mélangées si nécessaire)">Max</button><b>${esc(a.name)}</b> · ${esc(inp.name || "")} <small class="bp-besoin">${inp.kind === "item" ? `× ${(Number(inp.quantity) || 0) * multCraft()}` : `${fmtScu((Number(inp.quantity_scu) || 0) * multCraft())} SCU`}</small></div>
+    return `<div class="bp-aspect ${etat}${aspectActif(i) ? "" : " bp-off"}"><div class="bp-aspect-tete">${choix}<span class="bp-amelio">${esc(a.name)}</span> · <b class="bp-minerai">${esc(inp.name || "")}</b><small class="bp-besoin" title="Quantité nécessaire">${inp.kind === "item" ? `× ${(Number(inp.quantity) || 0) * multCraft()}` : `${fmtScu((Number(inp.quantity_scu) || 0) * multCraft())} SCU`}</small></div>
       <div class="bp-bornes"><span>${qmin}</span><span>${a.initial_quality ?? 500}</span><span>${qmax}</span></div>
       <input type="range" min="${qmin}" max="${qmax}" value="${q}" data-aspect="${i}" style="--p:${((q - qmin) / ((qmax - qmin) || 1)) * 100}%" aria-label="Qualité ${esc(inp.name || "")}">
       ${paliersAspect(a).length ? `<div class="bp-paliers">${paliersAspect(a).map((v) => { const d = dispoPalier(a, v); return `<i class="${d.ok ? "dispo" : d.q > 0 ? "partiel" : "absent"}${v === q ? " courant" : ""}" style="left:${((v - qmin) / ((qmax - qmin) || 1)) * 100}%" title="Q${v} : ${d.q > 0 ? (d.kind === "item" ? `${d.q} en stock` : `${fmtScu(d.q)} SCU en stock`) : "pas en stock"}" data-palier="${i}:${v}"></i>`; }).join("")}</div>` : ""}
-      <div class="bp-preleve-l"><div class="bp-preleve">${prelevement(i).texte}</div><span class="bp-cartouches">${cartouchesAspect(i, q)}</span></div>
-      <div class="bp-mods">${mods || `<span>aucun effet</span>`}</div></div>`;
+      <div class="bp-preleve-l bp-l-stock"><div class="bp-preleve">${prelevement(i).texte}</div><span class="bp-cartouches">${cartouchesAspect(i, q)}</span></div>
+      <div class="bp-l-qual"><div class="bp-mods">${mods || `<span>aucun effet</span>`}</div><span class="bp-qcart">${cartouchesAspect(i, q, true)}</span><button type="button" class="bp-max${bpPop.enMax?.[i] ? " actif" : ""}" data-max="${i}" title="Qualité maximale avec mon stock (qualités mélangées si nécessaire)">Max</button></div></div>`;   // v503 : une ligne stock, une ligne qualité + bonus
   }).join("") : `<p class="note">Pas de détail de recette pour ce blueprint.</p>`;
   // total par statistique : produit des modificateurs de chaque aspect, comparé à la qualité de base
   const tot = new Map();
@@ -10024,6 +10105,16 @@ function renderPopBlueprint(partiel = false) {
     return `<li><span>${esc(e.label)}</span>${val}<b class="${classeEcart(x, e.better)}">${fmtEcart(x)}</b></li>`; }).join("") : `<li class="note">Aucune statistique modifiée par la qualité.</li>`;
   majCraft();
   $("dbp-portee").innerHTML = Object.entries({ moi: "Perso", corpo: "Corporation", alliance: "Alliance" }).map(([k, v]) => `<button type="button" class="bp-puce" data-portee="${k}" aria-pressed="${bpPop.portee.has(k)}">${v}</button>`).join("");
+  { // v500 : choix de la station (stations où se trouvent les matériaux de la recette, dans les portées cochées)
+    const sel = $("dbp-station"), noms0 = new Set(as.map((a) => sansAccents(a.input?.name || "")).filter(Boolean)), P = bpPop.portee;
+    const sts = new Map();
+    for (const c of [...items.map((it) => ({ ...it, portee: "moi" })), ...(partage.caisses || []).map((c) => ({ ...c, portee: c.groupe === "Allié" ? "alliance" : "corpo" }))])
+      if (c.station && P.has(c.portee) && noms0.has(sansAccents(c.nom || ""))) sts.set(c.station, (sts.get(c.station) || 0) + 1);
+    if (bpPop.station && !sts.has(bpPop.station)) sts.set(bpPop.station, 0);
+    const html = `<option value="">${esc(tr("Toutes les stations"))}</option>` + [...sts.keys()].sort((x, y) => x.localeCompare(y, "fr")).map((st) => `<option value="${esc(st)}">${esc(st)}</option>`).join("");
+    if (sel.dataset.cle !== html) { sel.dataset.cle = html; sel.innerHTML = html; }
+    sel.value = bpPop.station || "";
+  }
   // caisses perso qui seront prélevées au craft : quantité retirée par caisse
   const prise = new Map(); as.forEach((_, i) => { for (const p of prelevement(i).pris) prise.set(p.it.id, (prise.get(p.it.id) || 0) + p.n); });
   const noms = [...new Set(as.map((a) => a.input?.name).filter(Boolean))];
@@ -10095,13 +10186,54 @@ function formatStat(k) {
 /* hauteur de la barre du haut → décalage de la colonne collante des glissières */
 function majHauteurTete() { const d = $("d-blueprint"), h = d?.querySelector(".bp-tete")?.offsetHeight || 0; if (d) d.style.setProperty("--bp-tete-h", h + "px"); }
 if (window.ResizeObserver) new ResizeObserver(majHauteurTete).observe(document.querySelector("#d-blueprint .bp-tete"));
-async function ouvrirBlueprint(id) {
+/* v499 : adresses des blueprints
+   #/blueprints/<nom-lisible ou id>?q=650,500  → popin ouverte, qualités préremplies
+   #/blueprints?type=arme&recherche=rifle       → liste filtrée */
+function slugBp(t) { return sansAccents(t || "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); }
+function cleBlueprint(c) {
+  const sl = slugBp(c.nom);
+  return sl && (bp.catalogue || []).filter((x) => slugBp(x.nom) === sl).length === 1 ? sl : c.id;   // nom en double → identifiant de l'API
+}
+function lienBlueprint(id, qualites) {
+  const c = (bp.catalogue || []).find((x) => x.id === id), q = Array.isArray(qualites) ? qualites.filter((x) => Number.isFinite(+x)) : [];
+  return "#/blueprints/" + encodeURIComponent(c ? cleBlueprint(c) : id) + (q.length ? "?q=" + q.join(",") : "");
+}
+function trouverBlueprint(cle) {
+  const l = bp.catalogue || [];
+  return l.find((x) => x.id === cle) || l.find((x) => slugBp(x.nom) === slugBp(cle)) || null;
+}
+let bpUrlPousse = false;   // la popin a ajouté une entrée d'historique (le bouton retour la referme)
+function bpUrlPousser(c) {
+  const voulu = "#/blueprints/" + encodeURIComponent(cleBlueprint(c));
+  if (decodeURIComponent(location.hash.split("?")[0]) === decodeURIComponent(voulu)) return;
+  if (location.hash.startsWith("#/blueprints/")) history.replaceState(null, "", voulu);
+  else { history.pushState(null, "", voulu); bpUrlPousse = true; }
+}
+async function urlBlueprints(h) {
+  const [chemin, requete = ""] = h.split("?"), p = new URLSearchParams(requete), cle = chemin.slice("/blueprints/".length);
+  if (p.has("type")) { bp.f.types = new Set(p.get("type").split(",").filter((t) => BP_TYPES[t])); }
+  if (p.has("recherche")) { bp.f.q = p.get("recherche"); if ($("bp-q")) $("bp-q").value = bp.f.q; }
+  await chargerBlueprints();
+  if (!chemin.startsWith("/blueprints/")) { if ($("d-blueprint").open) { bpUrlPousse = false; $("d-blueprint").close(); } renderBlueprints(); return; }
+  for (let i = 0; i < 80 && !bp.catalogue?.length; i++) await new Promise((r) => setTimeout(r, 250));   // catalogue en cours de chargement
+  const c = trouverBlueprint(cle);
+  if (!c) { toast("Blueprint introuvable : " + cle); return; }
+  if ($("d-blueprint").open && bpPop?.c === c && !p.has("q")) return;
+  ouvrirBlueprint(c.id, p.has("q") ? p.get("q").split(",").map(Number) : null);
+}
+$("d-blueprint").addEventListener("close", () => {
+  if (!location.hash.startsWith("#/blueprints/")) return;
+  if (bpUrlPousse) { bpUrlPousse = false; history.back(); }
+  else history.replaceState(null, "", "#/blueprints");
+});
+async function ouvrirBlueprint(id, qUrl) {
   const c = (bp.catalogue || []).find((x) => x.id === id); if (!c) return;
+  bpUrlPousser(c);
   $("dbp-titre").textContent = c.nom;
   $("dbp-type").textContent = [BP_TYPES[c.type], c.label, c.defaut ? "disponible par défaut" : ""].filter(Boolean).join(" · ");
   const pr = proprietaires(id);
   $("dbp-joueurs").innerHTML = pr.length ? pr.map((p) => `<li><b>${esc(p.joueur)}</b> <small>${esc(p.groupe)}</small></li>`).join("") : `<li class="note">Personne pour l'instant.</li>`;
-  bpPop = { c, d: null, q: [], portee: bpPop?.portee || new Set(["moi"]), fermes: bpPop?.fermes || new Set() };
+  bpPop = { c, d: null, q: [], portee: bpPop?.portee || new Set(["moi"]), fermes: bpPop?.fermes || new Set(), station: bpPop?.station || "" };
   $("dbp-aspects").innerHTML = `<p class="note">Chargement de la recette…</p>`; $("dbp-stats").innerHTML = ""; $("dbp-stock").innerHTML = ""; $("dbp-portee").innerHTML = "";
   $("d-blueprint").showModal(); majHauteurTete();
   try {
@@ -10116,10 +10248,12 @@ async function ouvrirBlueprint(id) {
         const l = items.filter((it) => sansAccents(it.nom || "") === sansAccents(inp.name || "") && it.qualite === v); return (inp.kind === "item" ? l.length : l.reduce((s, c) => s + (Number(c.quantite_scu) || 0), 0)) >= besoin - 1e-9 && l.length; });
       return ok.length ? ok[ok.length - 1] : borner(a, a.initial_quality ?? 500);
     });
+    if (qUrl?.length) bpPop.q = bpPop.q.map((v, i) => { const x = qUrl[i]; if (!Number.isFinite(x)) return v; if (bpPop.enMax) bpPop.enMax[i] = false; const [lo, hi] = bornesAspect(d.aspects.aspects[i]); return Math.max(lo, Math.min(hi, Math.round(x))); });
     renderPopBlueprint(); majFormObjectif();
   } catch (e) { $("dbp-aspects").innerHTML = `<p class="note">Recette injoignable (api.star-citizen.wiki) : ${esc(e.message || e)}</p>`; }
 }
-$("d-blueprint").addEventListener("change", (e) => { if (bpPop && e.target.dataset.aspect != null) renderPopBlueprint(); });   // v309 : au relâcher, tout est recalculé (caisses prises)
+$("d-blueprint").addEventListener("change", (e) => { if (bpPop && e.target.dataset.aspect != null) renderPopBlueprint(); });
+$("dbp-station").addEventListener("change", (e) => { if (!bpPop?.d) return; bpPop.station = e.target.value; bpPop.force = null; renderPopBlueprint(); majFormObjectif(); });   // v500   // v309 : au relâcher, tout est recalculé (caisses prises)
 $("d-blueprint").addEventListener("input", (e) => {
   if (!bpPop || e.target.dataset.aspect == null) return;
   const ia = +e.target.dataset.aspect, [lo, hi] = bornesAspect(bpPop.d.aspects.aspects[ia]), qa = Math.max(lo, Math.min(hi, Math.round(+e.target.value)));
@@ -10127,7 +10261,7 @@ $("d-blueprint").addEventListener("input", (e) => {
   // glissière en cours de déplacement : on ne remplace que les textes (reconstruire la couperait)
   const html = renderPopBlueprint(true);
   const ancien = $("dbp-aspects").querySelectorAll(".bp-aspect"), neuf = html.querySelectorAll(".bp-aspect");
-  ancien.forEach((el, i) => { el.className = neuf[i].className; { const b = el.querySelector(".bp-besoin"), bn = neuf[i].querySelector(".bp-besoin"); if (b && bn) b.textContent = bn.textContent; } { const r = el.querySelector("input[type=range]"), rn = neuf[i].querySelector("input[type=range]"); if (r && rn) r.style.cssText = rn.style.cssText; } el.querySelector(".bp-cartouches").innerHTML = neuf[i].querySelector(".bp-cartouches").innerHTML; el.querySelector(".bp-mods").innerHTML = neuf[i].querySelector(".bp-mods").innerHTML;
+  ancien.forEach((el, i) => { el.className = neuf[i].className; { const b = el.querySelector(".bp-besoin"), bn = neuf[i].querySelector(".bp-besoin"); if (b && bn) b.textContent = bn.textContent; } { const r = el.querySelector("input[type=range]"), rn = neuf[i].querySelector("input[type=range]"); if (r && rn) r.style.cssText = rn.style.cssText; } el.querySelector(".bp-cartouches").innerHTML = neuf[i].querySelector(".bp-cartouches").innerHTML; el.querySelector(".bp-mods").innerHTML = neuf[i].querySelector(".bp-mods").innerHTML; { const a = el.querySelector(".bp-qcart"), b = neuf[i].querySelector(".bp-qcart"); if (a && b) a.innerHTML = b.innerHTML; }
     for (const k of [".bp-paliers", ".bp-preleve"]) { const a = el.querySelector(k), b = neuf[i].querySelector(k); if (a && b) a.innerHTML = b.innerHTML; } });
 });
 /* v245 : toutes les popups se ferment par un clic à l'extérieur (même chemin que la touche Échap) */
@@ -10165,13 +10299,18 @@ $("d-blueprint").addEventListener("click", (e) => {
 /* Prélèvement dans MON stock pour un aspect : caisses de la qualité la plus proche de la glissière d'abord.
    Qualité obtenue = moyenne pondérée par la quantité (le jeu fait une moyenne quand on mélange des qualités). */
 /* Cartouches sous le slider : quantité (orange), SCU (vert), qualité (turquoise) — couleurs de l'appli */
-function cartouchesAspect(i, q) {
+function cartouchesAspect(i, q, qualite) {
   // v310 : uniquement les caisses UTILISÉES pour le craft : leur nombre, leur contenu total (SCU en stock) et la qualité moyenne obtenue
   const pr = prelevement(i), l = pr.pris || [];
-  if (!l.length) return `<span class="bp-cart bp-q">Q${q}</span>`;
-  const n = l.length, scu = l.reduce((s2, p) => s2 + (Number(p.it.quantite_scu) || 0), 0);
-  return `<span class="bp-cart bp-cart-n">${n} ${motCaisses(l[0]?.it?.nom, n)}</span>` +
-    (scu ? `<span class="bp-cart bp-cart-scu">${fmtScu(scu)} SCU</span>` : "") + `<span class="bp-cart bp-q">Q${pr.moy ?? q}</span>`;
+  if (qualite) return `<span class="bp-cart bp-q">Q${(l.length && pr.moy) || q}</span>`;   // v503 : qualité seule (ligne qualité)
+  // v507 : plus de nombre de caisses ; stock insuffisant → ce que j'ai quand même, dans une tuile désactivée
+  const a = bpPop.d.aspects.aspects[i], item = a.input?.kind === "item";
+  if (!pr.ok || !l.length) {
+    const dispo = caissesPerso(a), v = item ? dispo.length : dispo.reduce((s2, c) => s2 + (Number(c.quantite_scu) || 0), 0);
+    return `<span class="bp-cart bp-cart-scu bp-cart-off" title="En stock (insuffisant)">${item ? `${v} u` : `${fmtScu(v)} SCU`}</span>`;
+  }
+  const scu = l.reduce((s2, p) => s2 + (Number(p.it.quantite_scu) || 0), 0);
+  return item ? `<span class="bp-cart bp-cart-scu">${l.length} u</span>` : `<span class="bp-cart bp-cart-scu">${fmtScu(scu)} SCU</span>`;
 }
 /* v304 : craft en MÉLANGEANT les qualités (le jeu fait la moyenne pondérée par la quantité).
    choisirCaisses : caisses à prendre pour atteindre `besoin` avec une qualité moyenne ≥ q, sans gaspiller de haute qualité :
@@ -10195,7 +10334,7 @@ function choisirCaisses(liste, besoin, kind, q) {
   return { pris, ok: moy() >= q - 0.5, moy: Math.round(moy()), max: Math.floor(max + 1e-9) };
 }
 const besoinAspect = (a, mult = multCraft()) => { const inp = a.input || {}; return (inp.kind === "item" ? Number(inp.quantity) || 0 : Number(inp.quantity_scu) || 0) * mult; };
-const caissesPerso = (a) => items.filter((it) => sansAccents(it.nom || "") === sansAccents(a.input?.name || "") && Number.isFinite(it.qualite));
+const caissesPerso = (a) => items.filter((it) => sansAccents(it.nom || "") === sansAccents(a.input?.name || "") && Number.isFinite(it.qualite) && (!bpPop?.station || it.station === bpPop.station));   // v500 : limité à la station choisie
 /* qualité moyenne maximale atteignable avec mon stock (meilleures caisses d'abord) */
 function appliquerMax(i) {   // qualité moyenne max pour le multiplicateur actuel
   const a = bpPop.d.aspects.aspects[i], [lo, hi] = bornesAspect(a), ch = choisirCaisses(caissesPerso(a), besoinAspect(a), a.input?.kind, 0);
@@ -10228,7 +10367,7 @@ function prelevement(i) {
   const enStock = stockRessource(inp.name).length > 0;
   const texte = !besoin ? "" : !enStock ? `<span class="mauvais">Rien en ${lab.toLowerCase()}</span>`
     : ch.manuel ? (ok ? `Choix :` : `<span class="mauvais">Choix : il manque ${inp.kind === "item" ? Math.ceil(ch.manque) : `${fmtScu(ch.manque)} SCU`}</span>`)
-    : ok ? `${lab} :` : `<span class="mauvais">${ch.manque ? "Quantité insuffisante" : `Max Q${ch.max}`}</span>`;
+    : ok ? `${lab} :` : `<span class="mauvais">${ch.manque ? "Stock insuffisant" : `Max Q${ch.max}`}</span>`;
   return { pris: ok || ch.manuel ? pris : [], ok, moy, texte };   // v313 : en choix manuel, les caisses cochées restent affichées même si ça ne suffit pas
 }
 const multCraft = () => Math.min(99, Math.max(1, parseInt($("dbp-mult")?.value, 10) || 1));
