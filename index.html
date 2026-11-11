@@ -10197,12 +10197,12 @@ function cleBlueprint(c) {
   return sl && (bp.catalogue || []).filter((x) => slugBp(x.nom) === sl).length === 1 ? sl : c.id;   // nom en double → identifiant de l'API
 }
 function lienBlueprint(id, qualites) {
-  const c = (bp.catalogue || []).find((x) => x.id === id), q = Array.isArray(qualites) ? qualites.filter((x) => Number.isFinite(+x)) : [];
+  const c = (bp.catalogue || []).find((x) => String(x.id) === String(id)), q = Array.isArray(qualites) ? qualites.filter((x) => Number.isFinite(+x)) : [];
   return "#/blueprints/" + encodeURIComponent(c ? cleBlueprint(c) : id) + (q.length ? "?q=" + q.join(",") : "");
 }
 function trouverBlueprint(cle) {
   const l = bp.catalogue || [];
-  return l.find((x) => x.id === cle) || l.find((x) => slugBp(x.nom) === slugBp(cle)) || null;
+  return l.find((x) => String(x.id) === String(cle)) || l.find((x) => slugBp(x.nom) === slugBp(cle)) || null;
 }
 let bpUrlPousse = false;   // la popin a ajouté une entrée d'historique (le bouton retour la referme)
 function bpUrlPousser(c) {
@@ -10217,9 +10217,12 @@ async function urlBlueprints(h) {
   if (p.has("recherche")) { bp.f.q = p.get("recherche"); if ($("bp-q")) $("bp-q").value = bp.f.q; }
   await chargerBlueprints();
   if (!chemin.startsWith("/blueprints/")) { if ($("d-blueprint").open) { bpUrlPousse = false; $("d-blueprint").close(); } renderBlueprints(); return; }
-  for (let i = 0; i < 80 && !bp.catalogue?.length; i++) await new Promise((r) => setTimeout(r, 250));   // catalogue en cours de chargement
+  // catalogue pas encore chargé (première visite : plusieurs pages d'API) : on attend la fin du chargement, tant qu'on est toujours sur cette adresse
+  const ici = location.hash;
+  for (let i = 0; i < 1200 && !bp.catalogue?.length && (bp.charge || i < 8); i++) { await new Promise((r) => setTimeout(r, 250)); if (location.hash !== ici) return; }
+  if (!bp.catalogue?.length) { toast(tr("Catalogue des blueprints indisponible pour l'instant.")); return; }
   const c = trouverBlueprint(cle);
-  if (!c) { toast("Blueprint introuvable : " + cle); return; }
+  if (!c) { toast(tr("Blueprint introuvable : ") + cle); return; }
   if ($("d-blueprint").open && bpPop?.c === c && !p.has("q")) return;
   ouvrirBlueprint(c.id, p.has("q") ? p.get("q").split(",").map(Number) : null);
 }

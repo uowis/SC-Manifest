@@ -101,6 +101,7 @@ window.TRAD_EN = {
       "Comment scanner un inventaire ou une raffinerie": "How to scan an inventory or a refinery",
       "Pour profiter des fonctionnalités de partage :": "To use the sharing features:",
       "Aide": "Help",
+      "Catalogue des blueprints indisponible pour l'instant.": "Blueprint catalogue unavailable for now.",
       "En stock (insuffisant)": "In stock (not enough)",
       "Quantité nécessaire": "Required quantity",
       "Stock insuffisant": "Not enough stock",
