@@ -2518,6 +2518,17 @@ html, body { overflow-x: clip; }
 @media (max-width: 1100px) { .bp-tete { flex-wrap: wrap !important; } .bp-stats-tete { grid-template-columns: repeat(2, max-content max-content max-content) !important; } }
 /* v510 : nom de station sur une ligne dans le stock de la popin */
 #dbp-stock td.bp-st { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 11rem; }
+/* v513 : bonus de l'en-tête de la popin blueprint sur une seule colonne */
+.bp-stats-tete { grid-template-columns: max-content max-content max-content !important; }
+.bp-stats-tete li:nth-child(n) span { margin-left: 0 !important; }
+@media (max-width: 1100px) { .bp-stats-tete { grid-template-columns: max-content max-content max-content !important; } }
+/* v514 : select station à droite, sur la ligne des filtres de portée */
+.bp-col-stock { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: 0.75rem; align-content: start; }
+.bp-col-stock > :not(#dbp-portee):not(#dbp-station) { grid-column: 1 / -1; }
+.bp-col-stock > #dbp-station { margin: 0 !important; justify-self: end; }
+/* v515 : select station au style des puces, aligné verticalement */
+.bp-col-stock > #dbp-portee { margin: 0 !important; align-self: center; }
+.bp-col-stock > #dbp-station { align-self: center; height: 1.9716rem !important; padding: 0.3125rem 2rem 0.3125rem 0.75rem !important; border: 1px solid var(--trait) !important; border-radius: 999px !important; background-color: transparent !important; color: inherit !important; font: inherit !important; font-size: max(var(--fmin), 0.8125rem) !important; line-height: normal; }
 </style>
 </head>
 <body>
@@ -10129,6 +10140,8 @@ function renderPopBlueprint(partiel = false) {
         return `<tr data-ligne="${esc(c.id)}" class="${pr != null ? "bp-pris" : ""}${perso ? " bp-choisissable" : ""}"${perso ? ` data-choisir="${idx.join(",")}" data-it="${esc(ids.join(","))}"` : ""}><td class="bp-coche">${perso ? `<span class="bp-case${coche ? " on" : ""}" aria-hidden="true"></span>` : ""}</td><td class="num">Q${c.qualite ?? "?"}</td><td class="num">${GEMMES.has(n) ? `${ids.length} u${pr != null ? ` <span class="bp-apres" title="Après le craft">→ ${ids.length - pr > 0 ? `${ids.length - pr} u` : "vide"}</span>` : ""}` : `${c._ids ? `${c._ids.length} u · ` : ""}${fmtScu(c.quantite_scu ?? 0)} SCU${pr != null ? ` <span class="bp-apres" title="Après le craft">→ ${apres > 0 ? `${fmtScu(apres)} SCU` : "vide"}</span>` : ""}`}</td><td class="bp-st" title="${esc(c.station || "")}">${esc(c.station || "")}</td><td>${esc(c.joueur || "")}</td></tr>`; }).join("")}</tbody></table>` : "") + `</div>`;
   }).join("") || `<p class="note">Aucune ressource.</p>`;
   if (partiel) return cible;
+  // v515 : l'adresse suit les qualités choisies (#/blueprints/<nom>?q=…), sans ajouter d'entrée d'historique
+  if ($("d-blueprint").open && location.hash.startsWith("#/blueprints/") && bpPop.q?.length) { const u = lienBlueprint(bpPop.c.id, bpPop.q); if (location.hash !== u) history.replaceState(null, "", u); }
 }
 /* v432 : gemmes (0.001 SCU pièce) regroupées en une ligne par qualité + station + joueur + portée */
 function grouperGemmesStock(l) {
