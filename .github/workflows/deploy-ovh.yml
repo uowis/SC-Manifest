@@ -3,6 +3,7 @@
 #   OVH_FTP_SERVER    ftp.cluster129.hosting.ovh.net
 #   OVH_FTP_USER      identifiant FTP principal (espace client OVH → Hébergement → FTP-SSH)
 #   OVH_FTP_PASSWORD  mot de passe FTP
+# v3 : plus d'apt-get (les miroirs Ubuntu des runners GitHub sont injoignables) ; envoi en Python (paramiko, via pip).
 name: Déploiement OVH
 
 on:
@@ -12,39 +13,50 @@ on:
 
 concurrency:
   group: deploy-ovh
-  cancel-in-progress: false
+  cancel-in-progress: true  # un nouveau push annule le déploiement en cours
 
 jobs:
   deploy:
-    runs-on: ubuntu-24.04     # version figée : évite la bascule d'ubuntu-latest vers Ubuntu 26
-    timeout-minutes: 15
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
     steps:
       - name: Récupérer le dépôt
-        uses: actions/checkout@v5   # v5 : tourne sous Node 24
+        uses: actions/checkout@v5
 
-      - name: Installer lftp
-        # apt peut échouer ponctuellement (miroir Ubuntu indisponible → code 100) : 3 essais, sans mettre à jour
-        # tout l'index si lftp s'installe directement.
-        run: |
-          if command -v lftp >/dev/null; then exit 0; fi
-          for i in 1 2 3; do
-            sudo apt-get install -y -qq --no-install-recommends lftp && exit 0
-            sudo apt-get update -qq -o Acquire::Retries=3 || true
-            sleep 10
-          done
-          echo "Impossible d'installer lftp" >&2; exit 1
+      - name: Installer paramiko
+        run: python3 -m pip install --quiet --disable-pip-version-check paramiko
 
       - name: Envoyer les fichiers sur OVH (SFTP, port 22)
         env:
           SERVEUR: ${{ secrets.OVH_FTP_SERVER }}
           UTILISATEUR: ${{ secrets.OVH_FTP_USER }}
           MOTDEPASSE: ${{ secrets.OVH_FTP_PASSWORD }}
+        shell: python3 {0}
         run: |
-          # mirror -R : envoie le dépôt vers le dossier www (seulement les fichiers nouveaux ou modifiés).
-          # Fichiers du dépôt qui ne doivent PAS être en ligne : admins.txt, CODEOWNERS, workflows.
+          # Envoie le dépôt vers le dossier www (fichiers nouveaux ou de taille différente, + tous les .html/.js/.css/.htaccess).
           # Pas de suppression côté serveur : un fichier retiré du dépôt reste chez OVH (à effacer à la main si besoin).
-          lftp -u "$UTILISATEUR,$MOTDEPASSE" -p 22 "sftp://$SERVEUR" -e "
-            set sftp:auto-confirm yes;
-            set net:max-retries 2;
-            mirror -R --verbose --exclude-glob .git* --exclude-glob .github/ --exclude-glob github/ --exclude-glob workflows/ --exclude-glob README.md --exclude-glob CODEOWNERS --exclude-glob admins.txt ./ www/;
-            quit"
+          import os, fnmatch, stat, paramiko
+          EXCLURE = [".git*", ".github", "github", "workflows", "README.md", "CODEOWNERS", "admins.txt", "deploy-ovh.yml"]
+          TOUJOURS = (".html", ".js", ".css", ".htaccess", ".json", ".txt")
+          exclu = lambda n: any(fnmatch.fnmatch(n, m) for m in EXCLURE)
+          t = paramiko.Transport((os.environ["SERVEUR"], 22)); t.banner_timeout = 60
+          t.connect(username=os.environ["UTILISATEUR"], password=os.environ["MOTDEPASSE"])
+          sftp = paramiko.SFTPClient.from_transport(t)
+          envoyes = 0
+          def dossier(d):
+              try: sftp.stat(d)
+              except IOError: sftp.mkdir(d)
+          for racine, dossiers, fichiers in os.walk("."):
+              dossiers[:] = [d for d in dossiers if not exclu(d)]
+              rel = os.path.relpath(racine, ".")
+              distant = "www" if rel == "." else "www/" + rel.replace(os.sep, "/")
+              dossier(distant)
+              for f in fichiers:
+                  if exclu(f): continue
+                  loc, dist = os.path.join(racine, f), distant + "/" + f
+                  try: identique = sftp.stat(dist).st_size == os.path.getsize(loc) and not f.endswith(TOUJOURS)
+                  except IOError: identique = False
+                  if identique: continue
+                  sftp.put(loc, dist); envoyes += 1; print("envoyé", dist)
+          sftp.close(); t.close()
+          print(f"{envoyes} fichier(s) envoyé(s)")
