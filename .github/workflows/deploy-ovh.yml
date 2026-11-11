@@ -16,13 +16,23 @@ concurrency:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04     # version figée : évite la bascule d'ubuntu-latest vers Ubuntu 26
+    timeout-minutes: 15
     steps:
       - name: Récupérer le dépôt
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5   # v5 : tourne sous Node 24
 
       - name: Installer lftp
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+        # apt peut échouer ponctuellement (miroir Ubuntu indisponible → code 100) : 3 essais, sans mettre à jour
+        # tout l'index si lftp s'installe directement.
+        run: |
+          if command -v lftp >/dev/null; then exit 0; fi
+          for i in 1 2 3; do
+            sudo apt-get install -y -qq --no-install-recommends lftp && exit 0
+            sudo apt-get update -qq -o Acquire::Retries=3 || true
+            sleep 10
+          done
+          echo "Impossible d'installer lftp" >&2; exit 1
 
       - name: Envoyer les fichiers sur OVH (SFTP, port 22)
         env:
