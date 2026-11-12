@@ -2529,6 +2529,94 @@ html, body { overflow-x: clip; }
 /* v515 : select station au style des puces, aligné verticalement */
 .bp-col-stock > #dbp-portee { margin: 0 !important; align-self: center; }
 .bp-col-stock > #dbp-station { align-self: center; height: 1.9716rem !important; padding: 0.3125rem 2rem 0.3125rem 0.75rem !important; border: 1px solid var(--trait) !important; border-radius: 999px !important; background-color: transparent !important; color: inherit !important; font: inherit !important; font-size: max(var(--fmin), 0.8125rem) !important; line-height: normal; }
+/* v517 : types à droite de la recherche */
+.bp-rech-ligne .bp-types-rech { display: flex; flex-wrap: wrap; gap: 0.375rem; align-items: center; margin: 0; }
+/* v518 : menu Filtres */
+.bp-filtre-menu { position: relative; }
+.bp-btn-filtres { display: inline-flex; align-items: center; gap: 0.375rem; }
+.bp-nb-filtres { min-width: 1.25rem; height: 1.25rem; padding: 0 0.3125rem; border-radius: 999px; background: #7f9a34; color: #101317; font-size: .75rem; display: inline-grid; place-items: center; }
+.bp-nb-filtres[hidden] { display: none; }
+.bp-filtre-pop { position: absolute; z-index: 30; top: calc(100% + 0.375rem); left: 0; width: min(52rem, 80vw); display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: 1rem 1.5rem; padding: 1rem 1.25rem; background: #1b1e22; border: 1px solid var(--trait); border-radius: 6px; box-shadow: 0 12px 32px rgba(0,0,0,.5); }
+.bp-filtre-pop[hidden] { display: none; }
+.bp-filtre-pop h4 { margin: 0 0 0.5rem; font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; color: #e2632b; font-weight: 600; }
+.bp-filtre-pop .bp-fp-aide { margin: 0.5rem 0 0.25rem; font-size: .75rem; color: #879aa0; }
+.bp-filtre-pop .bp-fp-aide:first-of-type { margin-top: 0; }
+.bp-filtre-pop .bp-puces { display: flex; flex-wrap: wrap; gap: 0.375rem; }
+.bp-filtre-pop .bp-multi summary { display: none; }
+.bp-filtre-pop .bp-multi > div { position: static; min-width: 0; max-height: 14rem; background: none; border: 0; padding: 0; box-shadow: none; }
+.bp-filtre-pop footer { grid-column: 1 / -1; display: flex; justify-content: flex-end; border-top: 1px solid var(--trait); padding-top: 0.625rem; }
+.bp-gauche > .bp-rech-ligne { grid-row: 1 !important; }
+.bp-gauche > .bp-actions { grid-row: 2 !important; }
+.bp-gauche > .tableau-wrap { grid-row: 3 !important; grid-column: 1; }
+.bp-gauche > #bp-vide { grid-row: 4 !important; grid-column: 1; }
+.bp-liste-scan > aside { grid-row: 3 / span 10 !important; }
+.bp-filtre-pop { width: min(62rem, 82vw); grid-template-columns: repeat(5, minmax(0, 1fr)); }
+@media (max-width: 1100px) { .bp-filtre-pop { grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); } }
+/* v519 : méga-menu des filtres de blueprints */
+.bp-gauche > .bp-mega { position: sticky; top: 0; z-index: 25; background: #101317; padding-top: 0.5rem; margin-bottom: 0.875rem !important; display: block; }
+.bp-mega-barre { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+.bp-mega-barre .bp-rech { flex: 0 1 18rem; }
+.bp-onglets { display: flex; gap: 0.25rem; flex-wrap: wrap; }
+.bp-onglet { display: inline-flex; align-items: center; gap: 0.375rem; height: 2.25rem; padding: 0 0.875rem; background: none; color: #bcd6db; border: 1px solid transparent; border-radius: 4px 4px 0 0; font: inherit; font-weight: 600; cursor: pointer; }
+.bp-onglet:hover { color: #eef2f3; background: #1b1e22; }
+.bp-onglet[aria-expanded="true"] { background: #1b1e22; color: #eef2f3; border-color: var(--trait); border-bottom-color: #1b1e22; }
+.bp-onglet::after { content: ""; width: 0.375rem; height: 0.375rem; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg) translateY(-2px); opacity: .6; }
+.bp-onglet[aria-expanded="true"]::after { transform: rotate(-135deg) translateY(-1px); }
+.bp-onglet b { min-width: 1.125rem; height: 1.125rem; padding: 0 0.25rem; border-radius: 999px; background: #7f9a34; color: #101317; font-size: .6875rem; display: none; place-items: center; }
+.bp-onglet.a-filtre b { display: inline-grid; }
+.bp-raz { margin-left: auto; font-size: .8125rem; }
+.bp-mega-pan { position: absolute; left: 0; right: 0; top: 100%; margin-top: -1px; z-index: 26; background: #1b1e22; border: 1px solid var(--trait); border-radius: 0 0 6px 6px; padding: 1rem 1.25rem; box-shadow: 0 16px 32px rgba(0,0,0,.5); max-height: 70vh; overflow: auto; }
+.bp-mega-pan[hidden] { display: none; }
+.bp-mega-pan .bp-fp-aide { margin: 0 0 0.5rem; font-size: .75rem; color: #879aa0; }
+.bp-mega-pan .bp-puces { display: flex; flex-wrap: wrap; gap: 0.375rem; margin-bottom: 0.875rem; }
+.bp-mega-pan .bp-multi summary { display: none; }
+.bp-mega-pan .bp-multi > div { position: static; min-width: 0; max-height: none; background: none; border: 0; padding: 0; box-shadow: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr)); }
+.bp-type-grille { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+.bp-tg-titre { background: none; border: 0; padding: 0 0 0.5rem; color: #e2632b; font: inherit; font-size: .75rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; cursor: pointer; }
+.bp-tg-titre[aria-pressed="true"] { color: #eef2f3; }
+.bp-tg-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; border-top: 1px solid var(--trait); padding-top: 0.625rem; }
+.bp-tc-titre { display: flex; align-items: baseline; gap: 0.375rem; width: 100%; background: #25292d; border: 1px solid var(--trait); border-radius: 4px; padding: 0.375rem 0.625rem; color: #eef2f3; font: inherit; font-weight: 600; cursor: pointer; margin-bottom: 0.5rem; }
+.bp-tc-titre small { color: #879aa0; font-weight: 400; }
+.bp-tc-titre[aria-pressed="true"] { background: #7f9a34; border-color: #7f9a34; color: #101317; } .bp-tc-titre[aria-pressed="true"] small { color: #101317; }
+.bp-tc-tags { display: flex; flex-wrap: wrap; gap: 0.25rem; max-height: 16rem; overflow: auto; }
+.bp-tc-tags .bp-tag small { margin-left: 0.3125rem; color: #879aa0; }
+.bp-mendeleiev { display: flex; gap: 0.5rem; align-items: flex-start; overflow-x: auto; }
+.bp-mdl-col { display: grid; gap: 0.25rem; }
+.bp-mdl-col h5 { margin: 0 0 0.125rem; font-size: .6875rem; letter-spacing: .1em; text-transform: uppercase; color: #879aa0; font-weight: 600; }
+.bp-mdl { position: relative; width: 4.5rem; height: 4.5rem; display: grid; grid-template-rows: 1fr auto; justify-items: center; align-items: center; padding: 0.25rem; background: #25292d; border: 1px solid var(--trait); border-top: 3px solid var(--rc, #879aa0); border-radius: 3px; color: #eef2f3; font: inherit; cursor: pointer; }
+.bp-mdl b { font-size: 1.375rem; line-height: 1; }
+.bp-mdl span { font-size: .625rem; color: #bcd6db; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bp-mdl small { position: absolute; top: 0.1875rem; right: 0.3125rem; font-size: .625rem; color: #879aa0; }
+.bp-mdl:hover:not(:disabled) { border-color: var(--rc, #879aa0); }
+.bp-mdl.actif { background: var(--rc, #7f9a34); color: #101317; } .bp-mdl.actif span, .bp-mdl.actif small { color: #101317; }
+.bp-mdl:disabled { opacity: .3; cursor: default; }
+.bp-mdl-col.r0 { --rc: #9aa5a8; } .bp-mdl-col.r1 { --rc: #7f9a34; } .bp-mdl-col.r2 { --rc: #5b8fd0; } .bp-mdl-col.r3 { --rc: #a66fd0; } .bp-mdl-col.r4 { --rc: #e2632b; } .bp-mdl-col.r5 { --rc: #6fd0c4; } .bp-mdl-col.r6 { --rc: #879aa0; }
+.bp-gauche > .bp-mega { padding-bottom: 0.5rem; border-bottom: 1px solid var(--trait); }
+.bp-mdl { width: 4.25rem; height: 4rem; }
+.bp-mega-pan { top: calc(100% - 0.5rem); }
+/* v520 : onglets en boutons répartis sur la largeur, séparateurs, tuiles des filtres choisis */
+.bp-gauche > .bp-mega { border-bottom: 0 !important; }
+.bp-mega-barre { align-items: flex-start !important; flex-wrap: nowrap !important; }
+.bp-mega-barre .bp-rech { flex: 0 0 11rem !important; width: 11rem; }
+.bp-onglets { flex: 1 1 auto; display: flex !important; flex-wrap: nowrap !important; gap: 0 !important; min-width: 0; }
+.bp-ong-col { flex: 1 1 0; min-width: 0; padding: 0 0.625rem; border-left: 1px solid var(--trait); display: flex; flex-direction: column; gap: 0.3125rem; }
+.bp-ong-col:first-child { border-left: 0; padding-left: 0; }
+.bp-onglet { width: 100%; justify-content: center; height: 2.25rem !important; border: 1px solid var(--trait) !important; border-radius: 4px !important; background: #1b1e22 !important; }
+.bp-onglet:hover { border-color: #5f6d72 !important; }
+.bp-onglet[aria-expanded="true"] { background: #25292d !important; border-color: #879aa0 !important; }
+.bp-ong-chips { display: flex; flex-wrap: wrap; gap: 0.25rem; }
+.bp-ong-chips:empty { display: none; }
+.bp-chip { display: inline-flex; align-items: center; gap: 0.25rem; max-width: 100%; padding: 0.0625rem 0.125rem 0.0625rem 0.375rem; background: #1b1e22; border: 1px solid var(--trait); border-radius: 3px; font-size: .6875rem; color: #879aa0; line-height: 1.4; }
+.bp-chip button { background: none; border: 0; padding: 0 0.1875rem; color: #879aa0; font: inherit; font-size: .8125rem; line-height: 1; cursor: pointer; }
+.bp-chip button:hover { color: #eef2f3; }
+.bp-raz { flex: none; align-self: center; margin-left: 0.25rem !important; }
+.bp-mega-pan { top: calc(100% + 0.25rem) !important; border-radius: 6px !important; }
+.bp-rech-col { flex: 0 0 11rem; display: flex; flex-direction: column; align-items: flex-start; gap: 0.3125rem; }
+.bp-rech-col .bp-rech { width: 100%; flex: none !important; }
+.bp-rech-col .bp-raz { font-size: .6875rem; color: #879aa0; margin: 0 !important; }
+/* v521 : plus de pastille chiffrée sur les onglets (les tuiles suffisent) */
+.bp-onglet.a-filtre b { display: none !important; }
+.bp-onglet.a-filtre { color: #eef2f3 !important; border-color: #7f9a34 !important; }
 </style>
 </head>
 <body>
@@ -2683,24 +2771,23 @@ html, body { overflow-x: clip; }
   <section id="v-blueprints" hidden>
     <div class="entete"><div><h1>Blueprints</h1><p class="sous-titre" id="bp-etat"></p></div></div>
     <div class="bp-liste-scan"><div class="bp-gauche">
-    <div class="bp-filtres">
-      <div class="bp-groupe"><span>Type</span><div class="bp-puces" id="bp-types"></div></div>
-      <div class="bp-groupe"><span>Possession</span><div class="bp-puces" id="bp-poss"></div></div>
-      <div class="bp-groupe"><span>Réalisable avec le stock de</span><div class="bp-puces" id="bp-stock"></div></div>
-      <div class="bp-groupe"><span>Stations</span><details class="bp-multi" id="bp-stations"><summary>Toutes</summary><div></div></details></div>
-      <div class="bp-groupe"><span>Joueurs</span><details class="bp-multi" id="bp-joueurs"><summary>Tous</summary><div></div></details></div>
-
-    </div>
-    <div class="bp-rech-ligne">
-      <label class="bp-rech"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg><input id="bp-q" type="search" placeholder="Rechercher un blueprint" autocomplete="off" aria-label="Rechercher un blueprint"></label>
-      <div class="bp-detail-menu">
-        <button type="button" class="bp-btn-detail" id="bp-btn-detail" aria-expanded="false">+ Caractéristique</button>
-        <div class="bp-detail-pop" id="bp-detail-pop" hidden>
-          <input type="search" id="bp-detail-q" placeholder="Filtrer les caractéristiques" autocomplete="off">
-          <div class="bp-detail-liste" id="bp-detail-liste"></div>
+    <div class="bp-rech-ligne bp-mega" id="bp-mega">
+      <div class="bp-mega-barre">
+        <div class="bp-rech-col"><label class="bp-rech"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg><input id="bp-q" type="search" placeholder="Rechercher un blueprint" autocomplete="off" aria-label="Rechercher un blueprint"></label><button type="button" class="lien bp-raz" id="bp-filtres-raz" hidden>Réinitialiser</button></div>
+        <div class="bp-onglets">
+          <div class="bp-ong-col"><button type="button" class="bp-onglet" data-onglet="type" aria-expanded="false">Type<b></b></button><div class="bp-ong-chips" data-chips="type"></div></div>
+          <div class="bp-ong-col"><button type="button" class="bp-onglet" data-onglet="possede" aria-expanded="false">Possédé<b></b></button><div class="bp-ong-chips" data-chips="possede"></div></div>
+          <div class="bp-ong-col"><button type="button" class="bp-onglet" data-onglet="stock" aria-expanded="false">Stock<b></b></button><div class="bp-ong-chips" data-chips="stock"></div></div>
+          <div class="bp-ong-col"><button type="button" class="bp-onglet" data-onglet="station" aria-expanded="false">Station<b></b></button><div class="bp-ong-chips" data-chips="station"></div></div>
+          <div class="bp-ong-col"><button type="button" class="bp-onglet" data-onglet="minerais" aria-expanded="false">Minerais<b></b></button><div class="bp-ong-chips" data-chips="minerais"></div></div>
         </div>
       </div>
-      <div class="bp-tags-actifs" id="bp-tags-actifs"></div>
+      <div class="bp-mega-pan" data-pan="type" hidden><div class="bp-type-grille" id="bp-type-grille"></div></div>
+      <div class="bp-mega-pan" data-pan="possede" hidden><p class="bp-fp-aide">Blueprints possédés par</p><div class="bp-puces" id="bp-poss"></div></div>
+      <div class="bp-mega-pan" data-pan="stock" hidden><p class="bp-fp-aide">Fabricable avec le stock de</p><div class="bp-puces" id="bp-stock"></div><p class="bp-fp-aide">Joueurs</p><details class="bp-multi" id="bp-joueurs" open><summary>Tous</summary><div></div></details></div>
+      <div class="bp-mega-pan" data-pan="station" hidden><p class="bp-fp-aide">Stations où il y a du stock</p><details class="bp-multi" id="bp-stations" open><summary>Toutes</summary><div></div></details></div>
+      <div class="bp-mega-pan" data-pan="minerais" hidden><p class="bp-fp-aide">Blueprints qui utilisent tous les minerais choisis · classés par rareté</p><div class="bp-mendeleiev" id="bp-mendeleiev"></div><details class="bp-multi" id="bp-minerais" hidden><summary></summary><div></div></details></div>
+      <div class="bp-tags-actifs" id="bp-tags-actifs" hidden></div>
     </div>
     <div class="actions-groupe bp-actions">
       <button class="btn btn-tout" type="button" id="bp-tout" role="checkbox" aria-checked="false" disabled><span class="case" aria-hidden="true"></span><span class="txt">Tout sélectionner</span></button>
@@ -9815,7 +9902,7 @@ majBoutonsMode();
    ===================================================================== */
 var BP_TYPES = { armure: "Armure", arme: "Arme", composant: "Composant", vaisseau: "Arme vaisseau" };
 var bp = { catalogue: null, charge: false, erreur: "", partages: [], tableOk: true, sel: new Set(),
-  tri: { col: "nom", dir: "asc" }, f: { tags: new Set(), types: new Set(), poss: new Set(), stock: new Set(), stations: new Set(), joueurs: new Set(), q: "" } };
+  tri: { col: "nom", dir: "asc" }, f: { tags: new Set(), types: new Set(), poss: new Set(), stock: new Set(), stations: new Set(), joueurs: new Set(), minerais: new Set(), tagsT: { composant: new Set(), vaisseau: new Set(), arme: new Set(), armure: new Set() }, q: "" } };
 function typeBlueprint(o) {
   const s = `${o?.type || ""} ${o?.type_label || ""} ${o?.sub_type || o?.subtype || ""}`.toLowerCase();
   if (/armor|armour|undersuit|helmet|backpack|char_/.test(s)) return "armure";
@@ -9957,13 +10044,16 @@ function renderBlueprints() {
   try { renderObjectifs(); } catch {}   // v423
   if (!$("bp-lignes")) return;
   const f = bp.f;
-  puces($("bp-types"), BP_TYPES, f.types);
-  puces($("bp-poss"), { oui: "Je possède", non: "Je ne possède pas" }, f.poss);
+  renderTypeGrille(); renderMendeleiev();
+  { const o = { moi: "Moi", corpo: "Corporation" }; for (const j of [...new Set(bp.partages.map((x) => x.joueur).filter((j) => j && j !== moiPseudo()))].sort((a, b) => a.localeCompare(b, "fr"))) o["j:" + j] = j; puces($("bp-poss"), o, f.poss); }
   puces($("bp-stock"), { moi: "Moi", corpo: "Corporation", alliance: "Alliance" }, f.stock);
   const tout = [...items.map((it) => ({ ...it, joueur: moiPseudo() })), ...(partage.caisses || [])];
   multi($("bp-stations"), [...new Set(tout.map((c) => c.station).filter(Boolean))].sort(), f.stations, "Toutes");
   multi($("bp-joueurs"), [...new Set(tout.map((c) => c.joueur))].sort(), f.joueurs, "Tous");
+  // v516 : minerais présents dans les recettes du catalogue ; un blueprint passe s'il utilise TOUS les minerais cochés
+  multi($("bp-minerais"), [...new Set((bp.catalogue || []).flatMap((c) => (c.ing || []).map((x) => x.n)).filter(Boolean))].sort((a, b) => a.localeCompare(b, "fr")), f.minerais, "Tous");
   const filtreStock = f.stock.size || f.stations.size || f.joueurs.size;
+  majCompteFiltres();
   const parNom = new Map();
   // stock de la colonne « Stock » : celui des filtres, sinon le stock perso
   const parNomPct = new Map();
@@ -9971,13 +10061,13 @@ function renderBlueprints() {
   if (filtreStock) for (const c of stockFiltre()) { const k = sansAccents(c.nom || ""), e = parNom.get(k) || { scu: 0, n: 0 }; e.scu += Number(c.quantite_scu) || 0; e.n++; parNom.set(k, e); }
   const aMoi = new Set(mesBlueprints().map((x) => x.bp)), q = sansAccents(f.q.trim());
   const cat = bp.catalogue || [];
-  const lignes = cat.filter((c) => (!f.types.size || f.types.has(c.type)) && [...f.tags].every((g) => tagsDe(c).includes(g)) && (!q || sansAccents(c.nom).includes(q))
-    && (!f.poss.size || (f.poss.has("oui") && aMoi.has(c.id)) || (f.poss.has("non") && !aMoi.has(c.id)))
+  const lignes = cat.filter((c) => passeType(c) && (!f.minerais.size || [...f.minerais].every((m) => (c.ing || []).some((x) => x.n === m))) && (!q || sansAccents(c.nom).includes(q))
+    && (!f.poss.size || [...f.poss].some((k) => k === "moi" ? aMoi.has(c.id) : k === "corpo" ? bp.partages.some((x) => x.bp === c.id && x.groupe !== "Allié" && x.joueur !== moiPseudo()) : proprietaires(c.id).some((o) => o.joueur === k.slice(2))))
     && (!filtreStock || realisable(c, parNom)));
   { const T = bp.tri, s = T.dir === "asc" ? 1 : -1, cle = (c) => T.col === "type" ? (BP_TYPES[c.type] || "") : T.col === "possede" ? (aMoi.has(c.id) ? 2 : 0) + (proprietaires(c.id).length ? 1 : 0) : T.col === "stock" ? (pctStock(c, parNomPct) ?? -1) : c.nom;
     lignes.sort((a, b) => { const x = cle(a), y = cle(b); return (typeof x === "number" ? x - y : String(x).localeCompare(String(y), "fr")) * s || a.nom.localeCompare(b.nom, "fr"); }); }
   // v304 : chargement progressif (100 de plus à chaque fois qu'on atteint le bas de la liste)
-  const sig = JSON.stringify([[...f.types], [...f.tags], f.q, [...f.poss], filtreStock, bp.tri]);
+  const sig = JSON.stringify([[...f.types], Object.values(f.tagsT).map((x) => [...x]), [...f.minerais], f.q, [...f.poss], filtreStock, bp.tri]);
   if (sig !== bp.sigListe) { bp.sigListe = sig; bp.limite = 100; }
   const lim = bp.limite || 100;
   bpVisibles = lignes.slice(0, lim).map((c) => c.id);
@@ -9986,7 +10076,7 @@ function renderBlueprints() {
   $("bp-lignes").innerHTML = lignes.slice(0, lim).map((c) => {
     const n = proprietaires(c.id).length;
     return `<tr class="${bp.sel.has(c.id) ? "selectionne" : ""}${aMoi.has(c.id) ? " bp-possede" : ""}"><td class="coche"><input type="checkbox" data-bp-sel="${esc(c.id)}" ${bp.sel.has(c.id) ? "checked" : ""} aria-label="Sélectionner ${esc(c.nom)}"></td>` +
-      `<td class="nom-cell"><button type="button" class="lien bp-nom" data-bp-ouvrir="${esc(c.id)}">${esc(c.nom)}</button>${c.defaut ? ` <small class="bp-defaut">par défaut</small>` : ""}</td><td>${esc(BP_TYPES[c.type] || "")}</td><td class="bp-tags">${tagsDe(c).map((g) => `<button type="button" class="bp-tag${f.tags.has(g) ? " actif" : ""}" data-tag="${esc(g)}">${esc(g)}</button>`).join("")}</td>` +
+      `<td class="nom-cell"><button type="button" class="lien bp-nom" data-bp-ouvrir="${esc(c.id)}">${esc(c.nom)}</button>${c.defaut ? ` <small class="bp-defaut">par défaut</small>` : ""}</td><td>${esc(BP_TYPES[c.type] || "")}</td><td class="bp-tags">${tagsDe(c).map((g) => `<button type="button" class="bp-tag${f.tagsT[c.type]?.has(g) ? " actif" : ""}" data-ttag="${esc(c.type + "|" + g)}">${esc(g)}</button>`).join("")}</td>` +
       (() => { const p = pctStock(c, parNomPct); return `<td class="bp-pct ${p == null ? "" : p >= 100 ? "pct-plein" : p > 0 ? "pct-partiel" : "pct-vide"}" title="Ingrédients disponibles">${p == null ? "—" : p + " %"}</td>`; })() +
       `<td class="bp-ing">${(c.ing || []).map((x) => { const e = parNomPct.get(sansAccents(x.n)), d = e ? (x.k === "item" ? e.n : e.scu) : 0, cl = d >= x.q - 1e-9 && d > 0 ? "ing-ok" : d > 0 ? "ing-partiel" : "ing-non";
         return `<span class="${cl}" title="${x.k === "item" ? `${d} / ${x.q}` : `${fmtScu(d)} / ${fmtScu(x.q)} SCU`}">${esc(x.n)}</span>`; }).join(", ")}</td></tr>`;
@@ -10003,7 +10093,7 @@ function renderBlueprints() {
   }
   $("bp-vide").hidden = !!lignes.length || bp.charge; $("bp-vide").textContent = filtreStock ? "Aucune recette réalisable avec ce stock." : "Aucun blueprint pour ces filtres.";
   renderMenuDetail();
-  $("bp-tags-actifs").innerHTML = [...f.tags].map((g) => `<span class="bp-tag actif">${esc(g)}<button type="button" data-tag-retirer="${esc(g)}" aria-label="Retirer le filtre ${esc(g)}">×</button></span>`).join("");
+  if (false) $("bp-tags-actifs").innerHTML = [...f.tags].map((g) => `<span class="bp-tag actif">${esc(g)}<button type="button" data-tag-retirer="${esc(g)}" aria-label="Retirer le filtre ${esc(g)}">×</button></span>`).join("");
   const ns = bp.sel.size;
   $("bp-sel").textContent = ns ? `${ns} blueprint${ns > 1 ? "s" : ""} sélectionné${ns > 1 ? "s" : ""}` : "Aucun blueprint sélectionné";
   $("bp-oui").disabled = $("bp-non").disabled = !ns;
@@ -10227,6 +10317,7 @@ function bpUrlPousser(c) {
 async function urlBlueprints(h) {
   const [chemin, requete = ""] = h.split("?"), p = new URLSearchParams(requete), cle = chemin.slice("/blueprints/".length);
   if (p.has("type")) { bp.f.types = new Set(p.get("type").split(",").filter((t) => BP_TYPES[t])); }
+  if (p.has("minerai")) bp.f.minerais = new Set(p.get("minerai").split(",").filter(Boolean));   // v516 : #/blueprints?minerai=Tungsten,Gold
   if (p.has("recherche")) { bp.f.q = p.get("recherche"); if ($("bp-q")) $("bp-q").value = bp.f.q; }
   await chargerBlueprints();
   if (!chemin.startsWith("/blueprints/")) { if ($("d-blueprint").open) { bpUrlPousse = false; $("d-blueprint").close(); } renderBlueprints(); return; }
@@ -10482,8 +10573,12 @@ function possederBlueprints(ids, oui) {
 }
 $("v-blueprints").addEventListener("click", (e) => {
   const pu = e.target.closest(".bp-puce");
-  if (pu) { const set = { "bp-types": bp.f.types, "bp-poss": bp.f.poss, "bp-stock": bp.f.stock }[pu.parentElement.id], k = pu.dataset.k; set.has(k) ? set.delete(k) : set.add(k); renderBlueprints(); renderMenuDetail(); return; }
+  if (pu && pu.parentElement.id) { const set = { "bp-types": bp.f.types, "bp-poss": bp.f.poss, "bp-stock": bp.f.stock }[pu.parentElement.id], k = pu.dataset.k; if (!set) return; set.has(k) ? set.delete(k) : set.add(k); renderBlueprints(); renderMenuDetail(); return; }
   const o = e.target.closest("[data-bp-ouvrir]"); if (o) { ouvrirBlueprint(o.dataset.bpOuvrir); return; }
+  const tt = e.target.closest("[data-ttag]"); if (tt) { const [t, g] = tt.dataset.ttag.split(/\|(.*)/s), S = bp.f.tagsT[t]; if (S) { S.has(g) ? S.delete(g) : S.add(g); renderBlueprints(); } return; }
+  const tc = e.target.closest("[data-type-col]"); if (tc) { const t = tc.dataset.typeCol, f = bp.f; if (f.types.has(t) || f.tagsT[t].size) { f.types.delete(t); f.tagsT[t].clear(); } else f.types.add(t); renderBlueprints(); return; }
+  const tgp = e.target.closest("[data-type-grp]"); if (tgp) { const ts = tgp.dataset.typeGrp.split(","), f = bp.f, actif = ts.every((t) => f.types.has(t) || f.tagsT[t].size); for (const t of ts) { if (actif) { f.types.delete(t); f.tagsT[t].clear(); } else f.types.add(t); } renderBlueprints(); return; }
+  const mn = e.target.closest("[data-minerai]"); if (mn) { const m = mn.dataset.minerai, S = bp.f.minerais; S.has(m) ? S.delete(m) : S.add(m); renderBlueprints(); return; }
   const tg = e.target.closest("[data-tag]"); if (tg) { const g = tg.dataset.tag; bp.f.tags.has(g) ? bp.f.tags.delete(g) : bp.f.tags.add(g); renderBlueprints(); renderMenuDetail(); return; }
   const tr = e.target.closest("[data-tag-retirer]"); if (tr) { bp.f.tags.delete(tr.dataset.tagRetirer); renderBlueprints(); renderMenuDetail(); return; }
   if (e.target.closest("#bp-tout")) { if (bp.sel.size) bp.sel.clear(); else bpVisibles.forEach((id) => bp.sel.add(id)); renderBlueprints(); return; }
@@ -10496,10 +10591,85 @@ $("v-blueprints").addEventListener("change", (e) => {
 
   if (e.target.dataset.bpSel) { e.target.checked ? bp.sel.add(e.target.dataset.bpSel) : bp.sel.delete(e.target.dataset.bpSel); renderBlueprints(); return; }
   const det = e.target.closest(".bp-multi"); if (!det) return;
-  const set = det.id === "bp-stations" ? bp.f.stations : bp.f.joueurs; e.target.checked ? set.add(e.target.value) : set.delete(e.target.value); renderBlueprints();
+  const set = det.id === "bp-stations" ? bp.f.stations : det.id === "bp-minerais" ? bp.f.minerais : bp.f.joueurs; e.target.checked ? set.add(e.target.value) : set.delete(e.target.value); renderBlueprints();
   det.open = true;
 });
 $("bp-q").addEventListener("input", (e) => { bp.f.q = e.target.value; renderBlueprints(); });
+/* v519 : méga-menu des filtres (Type / Possédé / Stock / Station / Minerais), barre collante, sous-menus pleine largeur */
+const TYPE_GROUPES = [["Vaisseau", [["composant", "Composant"], ["vaisseau", "Canon"]]], ["Personnage", [["arme", "Arme"], ["armure", "Armure"]]]];
+// Type : une colonne active = son type, avec TOUTES ses caractéristiques cochées (ET) ; entre colonnes : OU
+function passeType(c) {
+  const f = bp.f, cols = Object.keys(f.tagsT).filter((t) => f.types.has(t) || f.tagsT[t].size);
+  if (!cols.length) return true;
+  return cols.some((t) => c.type === t && [...f.tagsT[t]].every((g) => tagsDe(c).includes(g)));
+}
+function renderTypeGrille() {
+  const el = $("bp-type-grille"); if (!el) return;
+  const f = bp.f, cat = bp.catalogue || [];
+  el.innerHTML = TYPE_GROUPES.map(([gn, cols]) => {
+    const ts = cols.map(([t]) => t), grpActif = ts.every((t) => f.types.has(t) || f.tagsT[t].size);
+    return `<section class="bp-tg"><button type="button" class="bp-tg-titre" data-type-grp="${ts.join(",")}" aria-pressed="${grpActif}">${esc(tr(gn))}</button><div class="bp-tg-cols">` + cols.map(([t, lib]) => {
+      const S = f.tagsT[t], base0 = cat.filter((c) => c.type === t && [...S].every((g) => tagsDe(c).includes(g)));
+      const n = new Map(); for (const c of base0) for (const g of tagsDe(c)) n.set(g, (n.get(g) || 0) + 1);
+      for (const g of S) if (!n.has(g)) n.set(g, 0);
+      const l = [...n].sort((a, b) => (S.has(b[0]) - S.has(a[0])) || b[1] - a[1] || a[0].localeCompare(b[0], "fr"));
+      const actif = f.types.has(t) || S.size;
+      return `<div class="bp-tc"><button type="button" class="bp-tc-titre" data-type-col="${t}" aria-pressed="${!!actif}">${esc(tr(lib))} <small>${cat.filter((c) => c.type === t).length}</small></button>
+        <div class="bp-tc-tags">${l.length ? l.map(([g, k]) => `<button type="button" class="bp-tag${S.has(g) ? " actif" : ""}" data-ttag="${esc(t + "|" + g)}">${esc(g)}<small>${k}</small></button>`).join("") : `<small class="note">—</small>`}</div></div>`;
+    }).join("") + `</div></section>`;
+  }).join("");
+}
+// Minerais : tableau « périodique », une colonne par rareté (à ajuster si besoin)
+const RARETE_MINERAIS = [
+  ["Commun", ["Iron", "Copper", "Aluminum", "Tin", "Quartz", "Silicon", "Corundum", "Pressurized Ice"]],
+  ["Peu commun", ["Titanium", "Tungsten", "Torite", "Beryl", "Hephaestanite"]],
+  ["Rare", ["Laranite", "Agricium", "Aslarite", "Borase", "Carinite", "Ouratite"]],
+  ["Épique", ["Gold", "Bexalite", "Taranite", "Saldynium", "Sadaryx"]],
+  ["Légendaire", ["Quantainium", "Stileron", "Riccite", "Savrilium", "Lindinium"]],
+  ["Gemmes", ["Hadanite", "Dolivine", "Aphorite", "Janalite", "Beradom", "Glacosite", "Feynmaline"]],
+];
+const symboleMinerai = (m) => { const l = m.replace(/[^A-Za-z]/g, ""); const c2 = (l.slice(1).match(/[bcdfghjklmnpqrstvwxz]/i) || [l[1]])[0]; return l[0].toUpperCase() + (c2 || "").toLowerCase(); };
+function renderMendeleiev() {
+  const el = $("bp-mendeleiev"); if (!el) return;
+  const f = bp.f, usage = new Map();
+  for (const c of bp.catalogue || []) for (const x of c.ing || []) if (x.n) usage.set(x.n, (usage.get(x.n) || 0) + 1);
+  const connus = new Set(RARETE_MINERAIS.flatMap(([, l]) => l)), autres = [...usage.keys()].filter((m) => !connus.has(m)).sort();
+  const cols = autres.length ? [...RARETE_MINERAIS, ["Autres", autres]] : RARETE_MINERAIS;
+  el.innerHTML = cols.map(([nom, l], i) => `<div class="bp-mdl-col r${i}"><h5>${esc(tr(nom))}</h5>` + l.map((m) => {
+    const k = usage.get(m) || 0;
+    return `<button type="button" class="bp-mdl${f.minerais.has(m) ? " actif" : ""}" data-minerai="${esc(m)}" ${k ? "" : "disabled"} title="${esc(m)} : ${k} blueprint${k > 1 ? "s" : ""}"><b>${esc(symboleMinerai(m))}</b><span>${esc(m)}</span><small>${k}</small></button>`;
+  }).join("") + `</div>`).join("");
+}
+function majCompteFiltres() {
+  const f = bp.f, nb = { type: f.types.size + Object.values(f.tagsT).reduce((s2, x) => s2 + x.size, 0), possede: f.poss.size, stock: f.stock.size + f.joueurs.size, station: f.stations.size, minerais: f.minerais.size };
+  document.querySelectorAll(".bp-onglet").forEach((b) => { const n = nb[b.dataset.onglet] || 0; b.querySelector("b").textContent = n || ""; b.classList.toggle("a-filtre", !!n); });
+  const raz = $("bp-filtres-raz"); if (raz) raz.hidden = !Object.values(nb).some(Boolean);
+  // v520 : filtres choisis en petites tuiles sous chaque onglet (× pour retirer)
+  const lib = { moi: "Moi", corpo: "Corporation", alliance: "Alliance" }, typeLib = { composant: "Composant", vaisseau: "Canon", arme: "Arme", armure: "Armure" };
+  const tu = (txt, cle) => `<span class="bp-chip">${esc(txt)}<button type="button" data-retire="${esc(cle)}" aria-label="${esc(tr("Retirer") + " " + txt)}">×</button></span>`;
+  const chips = {
+    type: [...[...f.types].filter((t) => !f.tagsT[t]?.size).map((t) => tu(tr(typeLib[t] || t), "types|" + t)), ...Object.entries(f.tagsT).flatMap(([t, S]) => [...S].map((g) => tu(`${tr(typeLib[t] || t)} : ${g}`, "tag|" + t + "|" + g)))],
+    possede: [...f.poss].map((k) => tu(k.startsWith("j:") ? k.slice(2) : tr(lib[k] || k), "poss|" + k)),
+    stock: [...[...f.stock].map((k) => tu(tr(lib[k] || k), "stock|" + k)), ...[...f.joueurs].map((j) => tu(j, "joueurs|" + j))],
+    station: [...f.stations].map((st) => tu(st, "stations|" + st)),
+    minerais: [...f.minerais].map((m) => tu(m, "minerais|" + m)),
+  };
+  document.querySelectorAll("[data-chips]").forEach((el) => { el.innerHTML = (chips[el.dataset.chips] || []).join(""); });
+}
+function ouvrirOnglet(o) {
+  document.querySelectorAll(".bp-onglet").forEach((b) => b.setAttribute("aria-expanded", String(b.dataset.onglet === o)));
+  document.querySelectorAll(".bp-mega-pan").forEach((p) => { p.hidden = p.dataset.pan !== o; });
+}
+$("bp-mega").addEventListener("click", (e) => {
+  const rt = e.target.closest("[data-retire]");
+  if (rt) { const f = bp.f;
+    const [cle, ...reste] = rt.dataset.retire.split("|");
+    if (cle === "tag") { const [t, ...g] = reste; f.tagsT[t]?.delete(g.join("|")); } else f[cle]?.delete(reste.join("|"));
+    renderBlueprints(); return; }
+  const b = e.target.closest(".bp-onglet"); if (b) ouvrirOnglet(b.getAttribute("aria-expanded") === "true" ? null : b.dataset.onglet); });
+$("bp-filtres-raz").addEventListener("click", () => { const f = bp.f; for (const k of ["types", "poss", "stock", "joueurs", "stations", "minerais"]) f[k].clear(); Object.values(f.tagsT).forEach((x) => x.clear()); renderBlueprints(); });
+document.addEventListener("click", (e) => { if (e.target.isConnected && !e.target.closest("#bp-mega") && document.querySelector(".bp-mega-pan:not([hidden])")) ouvrirOnglet(null); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && document.querySelector(".bp-mega-pan:not([hidden])")) ouvrirOnglet(null); });
 /* Menu « + Détail » : tous les tags du catalogue (avec leur nombre), filtrables ; un clic ajoute le filtre */
 function renderMenuDetail() {
   const el = $("bp-detail-liste"); if (!el || $("bp-detail-pop").hidden) return;
@@ -10510,8 +10680,8 @@ function renderMenuDetail() {
   const l = [...n].filter(([g]) => !bp.f.tags.has(g) && (!q || sansAccents(g).includes(q))).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "fr")).slice(0, 200);
   el.innerHTML = l.length ? l.map(([g, k]) => `<button type="button" data-tag="${esc(g)}">${esc(g)}<small>${k}</small></button>`).join("") : `<p class="note">Aucune caractéristique.</p>`;
 }
-$("bp-btn-detail").addEventListener("click", () => { const p = $("bp-detail-pop"); p.hidden = !p.hidden; $("bp-btn-detail").setAttribute("aria-expanded", String(!p.hidden)); if (!p.hidden) { $("bp-detail-q").value = ""; renderMenuDetail(); $("bp-detail-q").focus(); } });
-$("bp-detail-q").addEventListener("input", renderMenuDetail);
+$("bp-btn-detail")?.addEventListener("click", () => { const p = $("bp-detail-pop"); p.hidden = !p.hidden; $("bp-btn-detail").setAttribute("aria-expanded", String(!p.hidden)); if (!p.hidden) { $("bp-detail-q").value = ""; renderMenuDetail(); $("bp-detail-q").focus(); } });
+$("bp-detail-q")?.addEventListener("input", renderMenuDetail);
 document.addEventListener("click", (e) => { const p = $("bp-detail-pop"); if (p && !p.hidden && !e.target.closest(".bp-detail-menu")) { p.hidden = true; $("bp-btn-detail").setAttribute("aria-expanded", "false"); } });
 
 /* v284 : téléchargement des paramètres de scan (position des zones, par mode) en JSON */
