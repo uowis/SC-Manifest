@@ -101,6 +101,7 @@ window.TRAD_EN = {
       "Comment scanner un inventaire ou une raffinerie": "How to scan an inventory or a refinery",
       "Pour profiter des fonctionnalités de partage :": "To use the sharing features:",
       "Aide": "Help",
+      "Pas de stock": "No stock",
       "Retirer": "Remove",
       "Vaisseau": "Ship",
       "Personnage": "Character",

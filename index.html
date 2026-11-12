@@ -2617,6 +2617,20 @@ html, body { overflow-x: clip; }
 /* v521 : plus de pastille chiffrée sur les onglets (les tuiles suffisent) */
 .bp-onglet.a-filtre b { display: none !important; }
 .bp-onglet.a-filtre { color: #eef2f3 !important; border-color: #7f9a34 !important; }
+/* v522 : quantité nécessaire sous le minerai ; stock dispo à droite avec « Stock » au-dessus */
+.bp-aspect > .bp-aspect-tete { display: flex !important; align-items: flex-start !important; justify-content: space-between; gap: 0.5rem; }
+.bp-tete-g { min-width: 0; }
+.bp-tete-g .bp-besoin { display: block; margin: 0.125rem 0 0 !important; color: #eef2f3; font-size: .75rem; font-weight: 600; }
+.bp-tete-d { display: flex; flex-direction: column; align-items: flex-end; gap: 0.125rem; flex: none; }
+.bp-tete-d > small { font-size: .625rem; letter-spacing: .08em; text-transform: uppercase; color: #879aa0; }
+.bp-tete-d .bp-cartouches { margin: 0 !important; display: flex; gap: 0.25rem; }
+/* v523 : liste ouverte du select station lisible (fond sombre) */
+#dbp-station { color-scheme: dark; }
+#dbp-station option { background: #1b1e22; color: #eef2f3; }
+/* v524 : minerai en premier, plus de ligne « Perso : », tuile stock rouge (vide) / jaune (insuffisant) */
+.bp-aspect > .bp-l-stock { display: none !important; }
+.bp-cart.bp-cart-off.bp-cart-vide { color: #e2632b !important; background: rgba(226, 99, 43, .14) !important; }
+.bp-cart.bp-cart-off.bp-cart-manque { color: #c9a93a !important; background: rgba(201, 169, 58, .14) !important; }
 </style>
 </head>
 <body>
@@ -10187,11 +10201,11 @@ function renderPopBlueprint(partiel = false) {
     const choix = a.selection_group ? `<label class="bp-choix" title="Matériau au choix : ${a.selection_group.required_count} sur ${a.selection_group.option_count}"><input type="checkbox" data-choix="${i}" ${aspectActif(i) ? "checked" : ""}></label>` : "";
     // v305 : couleur selon le mélange possible (moyenne atteinte = vert), plus selon la seule qualité exacte
     const pv = aspectActif(i) ? prelevement(i) : { ok: true }, etat = pv.ok ? "s-ok" : caissesPerso(a).length ? "s-partiel" : "s-absent";
-    return `<div class="bp-aspect ${etat}${aspectActif(i) ? "" : " bp-off"}"><div class="bp-aspect-tete">${choix}<span class="bp-amelio">${esc(a.name)}</span> · <b class="bp-minerai">${esc(inp.name || "")}</b><small class="bp-besoin" title="Quantité nécessaire">${inp.kind === "item" ? `× ${(Number(inp.quantity) || 0) * multCraft()}` : `${fmtScu((Number(inp.quantity_scu) || 0) * multCraft())} SCU`}</small></div>
+    return `<div class="bp-aspect ${etat}${aspectActif(i) ? "" : " bp-off"}"><div class="bp-aspect-tete"><div class="bp-tete-g">${choix}<b class="bp-minerai">${esc(inp.name || "")}</b> · <span class="bp-amelio">${esc(a.name)}</span><small class="bp-besoin" title="Quantité nécessaire">${inp.kind === "item" ? `× ${(Number(inp.quantity) || 0) * multCraft()}` : `${fmtScu((Number(inp.quantity_scu) || 0) * multCraft())} SCU`}</small></div><div class="bp-tete-d"><small>${tr("Stock")}</small><span class="bp-cartouches">${cartouchesAspect(i, q)}</span></div></div>
       <div class="bp-bornes"><span>${qmin}</span><span>${a.initial_quality ?? 500}</span><span>${qmax}</span></div>
       <input type="range" min="${qmin}" max="${qmax}" value="${q}" data-aspect="${i}" style="--p:${((q - qmin) / ((qmax - qmin) || 1)) * 100}%" aria-label="Qualité ${esc(inp.name || "")}">
       ${paliersAspect(a).length ? `<div class="bp-paliers">${paliersAspect(a).map((v) => { const d = dispoPalier(a, v); return `<i class="${d.ok ? "dispo" : d.q > 0 ? "partiel" : "absent"}${v === q ? " courant" : ""}" style="left:${((v - qmin) / ((qmax - qmin) || 1)) * 100}%" title="Q${v} : ${d.q > 0 ? (d.kind === "item" ? `${d.q} en stock` : `${fmtScu(d.q)} SCU en stock`) : "pas en stock"}" data-palier="${i}:${v}"></i>`; }).join("")}</div>` : ""}
-      <div class="bp-preleve-l bp-l-stock"><div class="bp-preleve">${prelevement(i).texte}</div><span class="bp-cartouches">${cartouchesAspect(i, q)}</span></div>
+      <div class="bp-preleve-l bp-l-stock"><div class="bp-preleve">${prelevement(i).texte}</div></div>
       <div class="bp-l-qual"><div class="bp-mods">${mods || `<span>aucun effet</span>`}</div><span class="bp-qcart">${cartouchesAspect(i, q, true)}</span><button type="button" class="bp-max${bpPop.enMax?.[i] ? " actif" : ""}" data-max="${i}" title="Qualité maximale avec mon stock (qualités mélangées si nécessaire)">Max</button></div></div>`;   // v503 : une ligne stock, une ligne qualité + bonus
   }).join("") : `<p class="note">Pas de détail de recette pour ce blueprint.</p>`;
   // total par statistique : produit des modificateurs de chaque aspect, comparé à la qualité de base
@@ -10416,7 +10430,7 @@ function cartouchesAspect(i, q, qualite) {
   const a = bpPop.d.aspects.aspects[i], item = a.input?.kind === "item";
   if (!pr.ok || !l.length) {
     const dispo = caissesPerso(a), v = item ? dispo.length : dispo.reduce((s2, c) => s2 + (Number(c.quantite_scu) || 0), 0);
-    return `<span class="bp-cart bp-cart-scu bp-cart-off" title="En stock (insuffisant)">${item ? `${v} u` : `${fmtScu(v)} SCU`}</span>`;
+    return `<span class="bp-cart bp-cart-scu bp-cart-off ${v > 0 ? "bp-cart-manque" : "bp-cart-vide"}" title="${v > 0 ? "En stock (insuffisant)" : "Pas de stock"}">${item ? `${v} u` : `${fmtScu(v)} SCU`}</span>`;
   }
   const scu = l.reduce((s2, p) => s2 + (Number(p.it.quantite_scu) || 0), 0);
   return item ? `<span class="bp-cart bp-cart-scu">${l.length} u</span>` : `<span class="bp-cart bp-cart-scu">${fmtScu(scu)} SCU</span>`;
